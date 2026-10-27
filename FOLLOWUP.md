@@ -7,8 +7,9 @@ Never load the whole codebase: open the module you're changing and two or three 
 ## Rules
 
 1. **Move code with the tools, never by retyping.** `tools/split.js` splits a module, `tools/move.js` moves
-   declarations between modules; both refuse unsafe moves. Don't reformat, rename or "improve" code while
-   moving it.
+   declarations between modules; both refuse unsafe moves. Don't rename or "improve" code while moving it.
+   Formatting is Prettier's job (`npx prettier@3 --write js tools`, config in `.prettierrc.json`); the
+   hand-aligned tables in `js/data/` are left out of it.
 2. **Check after every task:** `python3 tools/check.py --full`. A refactor must keep the determinism check
    green. If a change is *meant* to alter behaviour, it will go red: play the game, then record a new
    baseline with `python3 tools/regress.py --save tools/regress-baseline.json` and say so.

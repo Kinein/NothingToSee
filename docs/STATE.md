@@ -21,7 +21,10 @@ All live state sits in a handful of shared globals (every module can reach them)
 | --- | --- | --- | --- |
 | `t` | `start` | game/loop | world/paths, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, town/npc-update, … |
 | `speed` | `1` | town/arrest, them/true-form, combat/hits, combat/timing-bar, play/verbs, play/confront, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
-| `inv` | `{ trap: 0, flashlight: false, flashOn: false,…` | — | gfx/portraits, sim/pose, player/needs, combat/timing-bar, town/talk, play/stashes, play/traps, play/raids, … |
+| `inv` | `{
+      trap: 0,
+      flashlight: false,
+   …` | — | gfx/portraits, sim/pose, player/needs, combat/timing-bar, town/talk, play/stashes, play/traps, play/raids, … |
 | `slain` | `[]` | — | town/suspicion, them/true-form, play/confront, ui/hud, ui/case-board, game/state |
 | `stashes` | `[]` | them/true-form, play/stashes, play/confront | ui/menus, game/state |
 | `stashId` | `0` | play/stashes | — |

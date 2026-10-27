@@ -23,13 +23,40 @@ const SECRET = {
 };
 const RITUAL_STAKE = [27, 18];
 // the slots in a day when each kind of person can slip away: between arriving and lunch, after lunch, before home
-const HABIT_SLOTS = { office: [[565, 655], [795, 890], [925, 975]], clerk: [[450, 600], [690, 840], [900, 1050], [1110, 1290]], courier: [[530, 660], [800, 900], [930, 990]], agnes: [[440, 560], [660, 820], [1010, 1260]] };
-const habitSlots = (def) => (def.plan === 'office' || def.plan === 'boss' ? HABIT_SLOTS.office : HABIT_SLOTS[def.plan] || HABIT_SLOTS.agnes);
+const HABIT_SLOTS = {
+  office: [
+    [565, 655],
+    [795, 890],
+    [925, 975],
+  ],
+  clerk: [
+    [450, 600],
+    [690, 840],
+    [900, 1050],
+    [1110, 1290],
+  ],
+  courier: [
+    [530, 660],
+    [800, 900],
+    [930, 990],
+  ],
+  agnes: [
+    [440, 560],
+    [660, 820],
+    [1010, 1260],
+  ],
+};
+const habitSlots = (def) =>
+  def.plan === 'office' || def.plan === 'boss' ? HABIT_SLOTS.office : HABIT_SLOTS[def.plan] || HABIT_SLOTS.agnes;
 function habitTimes(def, used = []) {
   return habitSlots(def).map(([a, b]) => {
     let m = a;
-    for (let tries = 0; tries < 14; tries++) { m = Math.round(rand(a, b) / 5) * 5; if (!used.some((u) => Math.abs(u - m) < 25)) break; }
-    used.push(m); return m;
+    for (let tries = 0; tries < 14; tries++) {
+      m = Math.round(rand(a, b) / 5) * 5;
+      if (!used.some((u) => Math.abs(u - m) < 25)) break;
+    }
+    used.push(m);
+    return m;
   });
 }
 function makeHabits() {
@@ -38,37 +65,74 @@ function makeHabits() {
   for (const d of CAST) {
     if (d.never) continue;
     const k = d.plan;
-    const spots = k === 'boss' ? ['boss', 'closet', 'wc'] : k === 'office' ? ['closet', 'wc', 'breakroom', 'alley'] : k === 'clerk' ? ['stock', 'alley'] : k === 'courier' ? ['alley', 'stock', 'closet', 'wc'] : ['agnes'];
+    const spots =
+      k === 'boss'
+        ? ['boss', 'closet', 'wc']
+        : k === 'office'
+          ? ['closet', 'wc', 'breakroom', 'alley']
+          : k === 'clerk'
+            ? ['stock', 'alley']
+            : k === 'courier'
+              ? ['alley', 'stock', 'closet', 'wc']
+              : ['agnes'];
     const ms = habitTimes(d, used);
     G.habits[d.id] = { m: ms[0], ms, spot: pick(spots) };
   }
 }
 const isOfficePlan = (n) => n.def.plan === 'office' || n.def.plan === 'boss';
-function habitDay(n) { return isOfficePlan(n) || n.def.plan === 'courier' ? isWorkday() : true; }
+function habitDay(n) {
+  return isOfficePlan(n) || n.def.plan === 'courier' ? isWorkday() : true;
+}
 function habitReady(n) {
   const hb = G.habits && G.habits[n.id];
-  if (!hb || !n.onMap || n.exposed || n.tell || n.engaged || n.fleeing || n.hideUntil || n.odd || !habitDay(n)) return false;
-  const m = tod(), d = dayNo(), i = (hb.ms || [hb.m]).findIndex((t, k) => m >= t && m <= t + 45 && G.habitDone[n.id + '#' + k] !== d);
+  if (!hb || !n.onMap || n.exposed || n.tell || n.engaged || n.fleeing || n.hideUntil || n.odd || !habitDay(n))
+    return false;
+  const m = tod(),
+    d = dayNo(),
+    i = (hb.ms || [hb.m]).findIndex((t, k) => m >= t && m <= t + 45 && G.habitDone[n.id + '#' + k] !== d);
   if (i < 0) return false;
   n.habitI = i;
-  const a = curBlock(n).a, k = n.def.plan;
-  return isOfficePlan(n) ? a === 'work' : k === 'clerk' ? a === 'clerk' : k === 'courier' ? a === 'courier' : k === 'agnes' ? a === 'home' : false;
+  const a = curBlock(n).a,
+    k = n.def.plan;
+  return isOfficePlan(n)
+    ? a === 'work'
+    : k === 'clerk'
+      ? a === 'clerk'
+      : k === 'courier'
+        ? a === 'courier'
+        : k === 'agnes'
+          ? a === 'home'
+          : false;
 }
 function habitNextAt(s) {
-  const hb = G.habits && G.habits[s.id]; if (!hb) return null;
-  const ms = hb.ms || [hb.m], m = tod(), d = dayNo();
-  if (habitDay(s)) for (let k = 0; k < ms.length; k++) if (ms[k] + 30 >= m && G.habitDone[s.id + '#' + k] !== d) return { dt: Math.max(0, ms[k] - m), at: ms[k], tmr: false };
+  const hb = G.habits && G.habits[s.id];
+  if (!hb) return null;
+  const ms = hb.ms || [hb.m],
+    m = tod(),
+    d = dayNo();
+  if (habitDay(s))
+    for (let k = 0; k < ms.length; k++)
+      if (ms[k] + 30 >= m && G.habitDone[s.id + '#' + k] !== d)
+        return { dt: Math.max(0, ms[k] - m), at: ms[k], tmr: false };
   if ((isOfficePlan(s) || s.def.plan === 'courier') && !isWorkday(d + 1)) return null;
   return { dt: 1440 - m + ms[0], at: ms[0], tmr: true };
 }
 // a few people keep their own secrets in the same places
-const SECRET_BY = { ray: { stock: { anim: 'read', note: 'reading other people’s post' }, closet: { anim: 'eat', note: 'eating the office biscuits' }, alley: { anim: 'phone', note: 'calling a bookie' } } };
+const SECRET_BY = {
+  ray: {
+    stock: { anim: 'read', note: 'reading other people’s post' },
+    closet: { anim: 'eat', note: 'eating the office biscuits' },
+    alley: { anim: 'phone', note: 'calling a bookie' },
+  },
+};
 const secretFor = (n, spot) => (SECRET_BY[n.id] && SECRET_BY[n.id][spot]) || SECRET[spot];
 function habitSpot(n, hb) {
-  const S = HABIT_SPOTS[hb.spot], F = G.faction;
+  const S = HABIT_SPOTS[hb.spot],
+    F = G.faction;
   if (S.obj) return { obj: OBJ_BY_ID[S.obj] };
   if (n.isThem) {
-    if (hb.spot === 'breakroom' && F === 'lizards') return { obj: objOfType('radiator', (o) => o.x === 22), type: 'bask' };
+    if (hb.spot === 'breakroom' && F === 'lizards')
+      return { obj: objOfType('radiator', (o) => o.x === 22), type: 'bask' };
     if (hb.spot === 'breakroom' && F === 'zombies') return { obj: objOfType('fridge_office'), type: 'feed' };
     if (hb.spot === 'boss' && F === 'lizards') return { obj: objOfType('radiator', (o) => o.x === 2), type: 'bask' };
     if (hb.spot === 'agnes' && F === 'lizards') return { obj: OBJ_BY_ID.agnesRad, type: 'bask' };
@@ -78,12 +142,19 @@ function habitSpot(n, hb) {
 }
 // on arrival they glance around once: close by, in the light or in the same room, they notice you
 function lookAround(n) {
-  const P = PLAYER; if (!P.onMap) return false;
+  const P = PLAYER;
+  if (!P.onMap) return false;
   const d = Math.hypot(P.x - n.x, P.z - n.z);
   if (d > 11) return false;
-  const rn = roomAt(n.x, n.z), rp = roomAt(P.x, P.z);
+  const rn = roomAt(n.x, n.z),
+    rp = roomAt(P.x, P.z);
   if (rn && rn === rp) return true;
-  if (d <= 3.6 && losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z)) && (lumAt(P.x, P.z) >= 0.12 || d < 2.6)) return true;
+  if (
+    d <= 3.6 &&
+    losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z)) &&
+    (lumAt(P.x, P.z) >= 0.12 || d < 2.6)
+  )
+    return true;
   return npcSeesPlayer(n, 6);
 }
 function doHabit(n) {
@@ -93,34 +164,81 @@ function doHabit(n) {
   if (G.started && youSee(n)) {
     ui.bubble(n, 'dots', 'thought', 2.2);
     G.slipSeen = G.slipSeen || {};
-    if (G.slipSeen[n.id] !== dayNo()) { G.slipSeen[n.id] = dayNo(); ui.note('walk', n.short + ' slipped away', ''); }
+    if (G.slipSeen[n.id] !== dayNo()) {
+      G.slipSeen[n.id] = dayNo();
+      ui.note('walk', n.short + ' slipped away', '');
+    }
   }
-  const S = habitSpot(n, hb), wc = S.obj && S.obj.type === 'toilet', sp = HABIT_SPOTS[hb.spot];
-  const turn = (c) => { if (!S.obj) { c.dir = c.tdir = Math.atan2(S.at[0] - sp.stake[0], S.at[1] - sp.stake[1]); } };
+  const S = habitSpot(n, hb),
+    wc = S.obj && S.obj.type === 'toilet',
+    sp = HABIT_SPOTS[hb.spot];
+  const turn = (c) => {
+    if (!S.obj) {
+      c.dir = c.tdir = Math.atan2(S.at[0] - sp.stake[0], S.at[1] - sp.stake[1]);
+    }
+  };
   const o = { label: '…', habit: true, dur: rand(18, 28), maxWait: 8 };
   if (n.isThem) {
-    Object.assign(o, { anim: 'stare',
-      onStart: (c, a) => { if (lookAround(c)) { a.dur = 1; ui.bubble(c, 'dots', 'speech', 2); addDanger(c, 5); c.rel -= 2; return; } turn(c); beginTell(c, a, S.type); },
-      onEnd: (c, a, ok) => { if (c.tell) endTell(c, ok); if (wc && ok) c.bladder = 100; } });
+    Object.assign(o, {
+      anim: 'stare',
+      onStart: (c, a) => {
+        if (lookAround(c)) {
+          a.dur = 1;
+          ui.bubble(c, 'dots', 'speech', 2);
+          addDanger(c, 5);
+          c.rel -= 2;
+          return;
+        }
+        turn(c);
+        beginTell(c, a, S.type);
+      },
+      onEnd: (c, a, ok) => {
+        if (c.tell) endTell(c, ok);
+        if (wc && ok) c.bladder = 100;
+      },
+    });
   } else {
     const A = secretFor(n, hb.spot);
-    Object.assign(o, { anim: A.anim, prop: A.prop || null,
+    Object.assign(o, {
+      anim: A.anim,
+      prop: A.prop || null,
       onStart: (c, a) => {
-        if (lookAround(c)) { a.dur = 1; ui.bubble(c, 'dots', 'speech', 2); return; }
-        turn(c); c.secret = { t: 0, w: 0, spot: hb.spot };
+        if (lookAround(c)) {
+          a.dur = 1;
+          ui.bubble(c, 'dots', 'speech', 2);
+          return;
+        }
+        turn(c);
+        c.secret = { t: 0, w: 0, spot: hb.spot };
         // a secret makes noise too: from close by, out of sight, it sounds just like one of THEM
-        if (G.started && visAt(c.x, c.z) < 0.4) { const rp = roomAt(PLAYER.x, PLAYER.z), rn = roomAt(c.x, c.z); if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', c.x, c.z)) notifyPing(c.x, c.z); }
+        if (G.started && visAt(c.x, c.z) < 0.4) {
+          const rp = roomAt(PLAYER.x, PLAYER.z),
+            rn = roomAt(c.x, c.z);
+          if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', c.x, c.z)) notifyPing(c.x, c.z);
+        }
       },
-      onEnd: (c, a, ok) => { c.secret = null; if (wc && ok) c.bladder = 100; } });
+      onEnd: (c, a, ok) => {
+        c.secret = null;
+        if (wc && ok) c.bladder = 100;
+      },
+    });
   }
   if (S.obj) enqueue(n, useAct(n, S.obj, o));
   else enqueue(n, [goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
 }
 // an innocent's secret: what you see is yours to judge. Only a photo of it clears them.
 function secretTick(n, dt) {
-  const s = n.secret; s.t += dt;
+  const s = n.secret;
+  s.t += dt;
   if (!G.started || s.done) return;
-  if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) { s.caught = true; n.rel -= 6; addSus(n, 6); ui.bubble(n, 'exclaim', 'speech', 2.5); ui.say(n, pick(['You didn’t see this.', 'Don’t tell anyone.', '…Hi.']), 2.6); audio.sting('awkward'); }
+  if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) {
+    s.caught = true;
+    n.rel -= 6;
+    addSus(n, 6);
+    ui.bubble(n, 'exclaim', 'speech', 2.5);
+    ui.say(n, pick(['You didn’t see this.', 'Don’t tell anyone.', '…Hi.']), 2.6);
+    audio.sting('awkward');
+  }
 }
 function clearSuspect(n, spot, img) {
   if (G.cleared[n.id]) return;
@@ -132,5 +250,14 @@ function clearSuspect(n, spot, img) {
   ui.note('camera', n.short + ': just ' + A.note, 'good');
   audio.sting('clear');
   const left = suspects().filter((x) => !x.exposed && !G.cleared[x.id]);
-  if (left.length && left.every((x) => x.isThem)) setTimeout(() => ui.note(G.factionKnown ? FACTIONS[G.faction].icon : 'question', 'It’s ' + left.map((x) => x.short).join(', '), 'onto'), 2600);
+  if (left.length && left.every((x) => x.isThem))
+    setTimeout(
+      () =>
+        ui.note(
+          G.factionKnown ? FACTIONS[G.faction].icon : 'question',
+          'It’s ' + left.map((x) => x.short).join(', '),
+          'onto',
+        ),
+      2600,
+    );
 }

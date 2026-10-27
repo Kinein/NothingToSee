@@ -147,66 +147,151 @@ void main(){
 }`;
 
 function compileProgram(vs, fs) {
-  const mk = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
-  const p = gl.createProgram(); gl.attachShader(p, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+  const mk = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  };
+  const p = gl.createProgram();
+  gl.attachShader(p, mk(gl.VERTEX_SHADER, vs));
+  gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(p);
   if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-  const U = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-  for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); U[info.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, info.name); }
+  const U = {};
+  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) {
+    const info = gl.getActiveUniform(p, i);
+    U[info.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, info.name);
+  }
   return { p, U };
 }
 function uploadGeo(g) {
-  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
-  const buf = (loc, arr, size) => { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0); return b; };
-  buf(0, g.p, 3); buf(1, g.n, 3); buf(2, g.c, 3); buf(3, g.e, 4);
-  const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(g.i), gl.STATIC_DRAW);
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const buf = (loc, arr, size) => {
+    const b = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    return b;
+  };
+  buf(0, g.p, 3);
+  buf(1, g.n, 3);
+  buf(2, g.c, 3);
+  buf(3, g.e, 4);
+  const ib = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(g.i), gl.STATIC_DRAW);
   gl.bindVertexArray(null);
   // a bounding sphere in the mesh's own space, so the renderer can skip meshes that are off screen
-  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
-  for (let k = 0; k < g.p.length; k += 3) { const x = g.p[k], y = g.p[k + 1], z = g.p[k + 2]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z; }
-  const bound = g.p.length ? [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, Math.hypot(x1 - x0, y1 - y0, z1 - z0) / 2] : null;
+  let x0 = Infinity,
+    y0 = Infinity,
+    z0 = Infinity,
+    x1 = -Infinity,
+    y1 = -Infinity,
+    z1 = -Infinity;
+  for (let k = 0; k < g.p.length; k += 3) {
+    const x = g.p[k],
+      y = g.p[k + 1],
+      z = g.p[k + 2];
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+    if (z < z0) z0 = z;
+    if (z > z1) z1 = z;
+  }
+  const bound = g.p.length
+    ? [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, Math.hypot(x1 - x0, y1 - y0, z1 - z0) / 2]
+    : null;
   return { vao, count: g.i.length, bound };
 }
 function makeMesh(g, o) {
-  return Object.assign(uploadGeo(g), { model: M4.ident(), tint: [1, 1, 1], emit: [0, 0, 0], emitMul: 1, hi: 0, dyn: 0, cut: 0, center: [0, 0, 0], show: true }, o || {});
+  return Object.assign(
+    uploadGeo(g),
+    {
+      model: M4.ident(),
+      tint: [1, 1, 1],
+      emit: [0, 0, 0],
+      emitMul: 1,
+      hi: 0,
+      dyn: 0,
+      cut: 0,
+      center: [0, 0, 0],
+      show: true,
+    },
+    o || {},
+  );
 }
 function makeTex(w, h) {
-  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   return t;
 }
 function makeColorTex(w, h, hdr) {
-  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
   if (hdr) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
   else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   return t;
 }
 function makeTarget(w, h, hdr) {
-  const tex = makeColorTex(w, h, hdr), fb = gl.createFramebuffer();
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  const tex = makeColorTex(w, h, hdr),
+    fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
   return { fb, tex, w, h };
 }
-function freeTarget(t) { if (!t) return; gl.deleteFramebuffer(t.fb); gl.deleteTexture(t.tex); }
+function freeTarget(t) {
+  if (!t) return;
+  gl.deleteFramebuffer(t.fb);
+  gl.deleteTexture(t.tex);
+}
 
 const PRIM = {};
 function initPrims() {
   const W1 = [1, 1, 1];
-  let g = new Geo(); g.box(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, W1); PRIM.box = uploadGeo(g);
-  g = new Geo(); g.cyl(0, -0.5, 0, 0.5, 0.5, 1, 10, W1); PRIM.cyl = uploadGeo(g);
-  g = new Geo(); g.cyl(0, -0.5, 0, 0.5, 0.42, 1, 10, W1); PRIM.limb = uploadGeo(g);
-  g = new Geo(); g.sphere(0, 0, 0, 0.5, 0.5, 0.5, 16, 12, W1); PRIM.sph = uploadGeo(g);
-  g = new Geo(); g.frustum(0, -0.5, 0, 0.8, 0.86, 1, 1, 1, W1); PRIM.chest = uploadGeo(g);
-  g = new Geo(); g.frustum(0, -0.5, 0, 1, 1, 0.84, 0.9, 1, W1); PRIM.skirt = uploadGeo(g);
-  g = new Geo(); g.quad([-1, 0, -1], [-1, 0, 1], [1, 0, 1], [1, 0, -1], [0, 1, 0], W1); PRIM.quad = uploadGeo(g);
+  let g = new Geo();
+  g.box(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, W1);
+  PRIM.box = uploadGeo(g);
+  g = new Geo();
+  g.cyl(0, -0.5, 0, 0.5, 0.5, 1, 10, W1);
+  PRIM.cyl = uploadGeo(g);
+  g = new Geo();
+  g.cyl(0, -0.5, 0, 0.5, 0.42, 1, 10, W1);
+  PRIM.limb = uploadGeo(g);
+  g = new Geo();
+  g.sphere(0, 0, 0, 0.5, 0.5, 0.5, 16, 12, W1);
+  PRIM.sph = uploadGeo(g);
+  g = new Geo();
+  g.frustum(0, -0.5, 0, 0.8, 0.86, 1, 1, 1, W1);
+  PRIM.chest = uploadGeo(g);
+  g = new Geo();
+  g.frustum(0, -0.5, 0, 1, 1, 0.84, 0.9, 1, W1);
+  PRIM.skirt = uploadGeo(g);
+  g = new Geo();
+  g.quad([-1, 0, -1], [-1, 0, 1], [1, 0, 1], [1, 0, -1], [0, 1, 0], W1);
+  PRIM.quad = uploadGeo(g);
   // open cone, apex at origin, base radius 1 at y = -1
   g = new Geo();
   const seg = 22;
   for (let s = 0; s < seg; s++) {
-    const a0 = (s / seg) * TAU, a1 = ((s + 1) / seg) * TAU;
-    const n0 = [Math.cos(a0) / Math.SQRT2, 1 / Math.SQRT2, Math.sin(a0) / Math.SQRT2], n1 = [Math.cos(a1) / Math.SQRT2, 1 / Math.SQRT2, Math.sin(a1) / Math.SQRT2];
+    const a0 = (s / seg) * TAU,
+      a1 = ((s + 1) / seg) * TAU;
+    const n0 = [Math.cos(a0) / Math.SQRT2, 1 / Math.SQRT2, Math.sin(a0) / Math.SQRT2],
+      n1 = [Math.cos(a1) / Math.SQRT2, 1 / Math.SQRT2, Math.sin(a1) / Math.SQRT2];
     const k = g.vc;
     g.vert(0, 0, 0, (n0[0] + n1[0]) / 2, n0[1], (n0[2] + n1[2]) / 2, W1);
     g.vert(Math.cos(a0), -1, Math.sin(a0), n0[0], n0[1], n0[2], W1);

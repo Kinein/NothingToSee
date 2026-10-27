@@ -1,0 +1,8 @@
+# Generated or not ours to format
+dist/
+*.md
+*.tsv
+*.json
+shell/
+# Hand-aligned data tables: one row per record, comments in a column
+js/data/

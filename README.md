@@ -8,7 +8,10 @@ pinned down while you change it.
 python3 build.py                 # → dist/nothing-to-see-here.html (the game; open it or publish it)
 python3 tools/check.py           # after any change: map, headers, state doc, both builds, syntax
 python3 tools/check.py --full    # …plus a headless boot test and the determinism check (needs playwright)
+npx prettier@3 --write js tools  # code formatting (.prettierrc.json); js/data/ is hand-aligned and ignored
 ```
+
+`CLAUDE.md` is the short guide for AI assistants: the rules above plus where to go to change what.
 
 ## Layout
 
@@ -26,6 +29,7 @@ docs/STATE.md          every field of the game state G: start value, who writes 
 docs/PERFORMANCE.md    what makes frames slow, what was done about it, how to measure
 tools/                 check.py, map.js, state.js, split.js, move.js, smoke.py, regress.py, profile.py, playtest.py, allocs.py
 FOLLOWUP.md            what's left to do, and the rules for doing it
+CLAUDE.md              short guide for AI assistants: rules and where to change what
 ```
 
 **One scope, no imports.** All modules are concatenated into a single function (the IIFE in

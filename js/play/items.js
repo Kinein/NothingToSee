@@ -9,5 +9,7 @@ function addItem(it) {
   G.items.push(it);
   if (R.ready) R.itemMeshes.set(it.id, buildItemMesh(it));
 }
-function removeItem(it) { G.items = G.items.filter((x) => x !== it); R.itemMeshes.delete(it.id); }
-
+function removeItem(it) {
+  G.items = G.items.filter((x) => x !== it);
+  R.itemMeshes.delete(it.id);
+}
