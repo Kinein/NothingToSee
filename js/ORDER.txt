@@ -1,0 +1,113 @@
+# Build order. Every module runs in one shared scope, top to bottom, in exactly this order.
+# Function declarations are hoisted across all of them; top-level const/let and code that
+# runs at load time are not, so a module may only USE AT LOAD TIME what an earlier one defines.
+# Add a new file here or it is left out of the build. Lines after # are comments.
+
+core/util.js                     # Math helpers, colours, random, mat4 (column-major)
+data/tuning.js                   # Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
+data/lines.js                    # What people say and read: gossip, Lenny, rumours, news, endings. Change the words here
+world/grid.js                    # Town tile grid, houses, THEIR lairs under the town, buildings and rooms
+world/objects.js                 # Object placement on the grid, doors, edges, ritual and watch spots
+gfx/gl.js                        # WebGL2 helpers: buffers, programs, textures, framebuffers
+gfx/shaders.js                   # The main world shader (vertex + fragment): surfaces, lamps, fog of war, the horror layer
+gfx/shaders-fx.js                # Effect shaders: floor decals and blood, halos, light shafts, beams, rain, dust
+gfx/post.js                      # Post-processing: bloom chain and composite; primitive meshes
+gfx/body-parts.js                # Sculpted parts for people and what they wear
+gfx/world-geometry.js            # Walls, floors, materials and windows built from the grid
+gfx/wall-dressing.js             # What hangs on the walls: art, signs, neon
+gfx/models.js                    # Furniture and object models (front = +z)
+gfx/lair-models.js               # Models for things inside THEIR lairs
+gfx/lair-dressing.js             # Lair lights: halos, shafts, wall pieces
+gfx/props.js                     # Evidence props, dynamic bits and cars
+world/light-map.js               # Line of sight helpers and the per-cell light map
+world/vision.js                  # What the player can see: field of view and explored cells
+world/paths.js                   # A* pathfinding, 8-way, no corner cutting
+gfx/renderer.js                  # Renderer state, camera, frame setup
+gfx/people.js                    # Drawing a person: body, face, hair, clothes and the small details
+gfx/creatures.js                 # True forms on their own rig: tongues, cracks, sloughed skin, creature poses
+gfx/draw-helpers.js              # Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and tints
+gfx/frame.js                     # renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
+gfx/portraits.js                 # Portraits and evidence snapshots rendered offscreen
+sim/core.js                      # Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
+sim/characters.js                # Character records
+sim/body-motion.js               # The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses
+sim/seat-moves.js                # Sitting down, getting up, lying down: the steps and the lowering
+sim/pose.js                      # Each frame's pose: targets, gestures, door reach, blending, turning, animate
+sim/movement.js                  # Following paths and moving characters
+sim/actions.js                   # The action queue shared by player and NPCs
+player/needs.js                  # The player body: needs, Psychic, accidents, passing out, panic
+player/work.js                   # The work bar, shifts, getting fired
+town/cast.js                     # The people of Wexley and the three factions
+town/daily-plans.js              # Daily plans per role
+town/routines.js                 # Habits and secrets: everyone sneaks off once a day
+town/quirks.js                   # Quirks: repeated odd behaviour, THEIRS from what THEY are
+them/plan.js                     # THEIR five-day plan: phases, stages, how it moves on each midnight
+town/spawning.js                 # Placing people on the map
+town/npc-update.js               # Per-frame NPC update
+them/tells.js                    # Tells: the small signs THEY give
+them/proofs.js                   # Proofs: photos and THEIR things in your hands
+them/awareness.js                # THEIR awareness of you, settled at 06:00
+them/moves.js                    # THEIR morning moves: the Bought, Scatter, Destroy, Protect
+town/arrest.js                   # Being arrested, shown on the map
+town/cell.js                     # Held in a cell
+town/suspicion.js                # Suspicion and danger per person
+town/fleeing.js                  # Fleeing to hideouts
+them/true-form.js                # True form: the change, then hunt or flee
+combat/bolts.js                  # Projectiles THEY shoot
+combat/hits.js                   # Taking hits, knockouts, hospital, limbo
+combat/timing-bar.js             # THEIR attack: the timing bar
+town/doors.js                    # Broken restroom lock, doors left ajar
+town/talk.js                     # Talk: what people say, and the talking action itself
+town/echoes.js                   # Echoes: what happened, where, who saw
+them/night-attacks.js            # Night attacks
+horror/director.js               # Horror director: daily events by THEIR phase
+them/office-night.js             # The office after dark
+play/items.js                    # Items left behind
+play/stashes.js                  # Stashes and rummaging
+play/traps.js                    # Traps
+play/raids.js                    # Raids: kicking in a door
+horror/visions.js                # Visions
+play/verbs.js                    # What you can do: snooping, eating, Lenny, chat
+play/confront.js                 # Confronting with proof
+play/photos.js                   # Photos: reading what is in frame
+ui/menus.js                      # Interaction menus for objects, people, items
+play/advice.js                   # Needs to the right thing to do, here; inventory hooks
+ui/interface.js                  # Notes, bubbles, tooltips, overlays
+ui/hud-images.js                 # Embedded HUD pictures (base64 PNG): data only
+ui/hud.js                        # The corner HUD: bars, days, clock, THEIR eye, evidence
+ui/pie-menu.js                   # The directional pie menu
+ui/case-board.js                 # The evidence board (case file)
+input/camera.js                  # Input and camera control
+input/walking.js                 # WASD walking relative to the camera
+input/targeting.js               # What E acts on; keyboard handling
+audio/sound.js                   # Sound, all synthesised (Web Audio)
+town/traffic-weather.js          # Traffic and weather
+horror/layer.js                  # The horror layer: shared machinery
+horror/midday.js                 # Midday scenes
+horror/night.js                  # Night scenes
+horror/half-forms.js             # Half-changed for a second
+gfx/reach-rig.js                 # Bones, arm solver, eyes that follow
+horror/half-forms-real.js        # Half-changed for real, late in the week
+horror/tenth-forms.js            # Tenth forms: barely visible traits
+horror/encounters.js             # Who's who; encounters: choosing when, where, who, and getting everyone in place
+horror/encounter-outcomes.js     # An encounter under way: the rite, being noticed, pulling victims out, how it ends
+horror/encounter-draw.js         # How an encounter looks: lights, poses, the bodies doing it
+taken/taken.js                   # Being taken: the capture
+taken/coming.js                  # What you see coming
+taken/down-there.js              # Down there, half awake
+taken/way-out.js                 # The way out of the lair: the setup for each lair
+taken/way-out-play.js            # Escaping the lair: watchers, sleepers, being caught, getting out
+taken/back-up.js                 # Back up top
+taken/lair-life.js               # THEIR places, alive while you are there
+chase/they-come.js               # When THEY come for you
+chase/hunt.js                    # When THEY come for you: the hunters, their tuning, how each kind of hunt starts
+chase/hunt-step.js               # The hunt each frame: seeing, chasing, grabs, being beaten
+chase/hunt-end.js                # How a hunt ends, and how it looks and sounds
+chase/flee.js                    # One of THEM running from you
+chase/fbi.js                     # The grey cars: the FBI takes one that gave up
+game/state.js                    # Game state, new game, saving, endings
+game/last-day.js                 # Friday: hell let loose
+game/loop.js                     # Per-frame simulation, main loop, boot
+
+# Developer-only (python3 build.py --dev): never in the real page
+dev dev/devtools.js              # window.__dev: state access, skip time, per-system timing

@@ -1,0 +1,41 @@
+{
+ "1": {
+  "when": "10:50 day 5",
+  "over": null,
+  "faction": "lizards",
+  "them": [
+   "earl",
+   "martin",
+   "hale"
+  ],
+  "people": "f5ebbfb9c7bf",
+  "state": "2ad15344ffc7",
+  "light": 9457.847916
+ },
+ "2": {
+  "when": "10:50 day 5",
+  "over": null,
+  "faction": "aliens",
+  "them": [
+   "hale",
+   "vic",
+   "earl"
+  ],
+  "people": "b93ca74c412b",
+  "state": "f98faff0a794",
+  "light": 121855.379973
+ },
+ "3": {
+  "when": "10:50 day 5",
+  "over": null,
+  "faction": "zombies",
+  "them": [
+   "vic",
+   "denise",
+   "ray"
+  ],
+  "people": "fdd2ba9399f6",
+  "state": "ee3137f5b5d1",
+  "light": 9463.331094
+ }
+}
