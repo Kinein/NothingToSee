@@ -20,21 +20,21 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  121 lines
+### data/tuning  ·  #2  ·  125 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
-- **Defines (19):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `FIGHT` `EVIDENCE` `AJAR`
+- **Defines (20):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `POLICE` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `FIGHT` `EVIDENCE` `AJAR`
 - **→ uses:** —
 - **← used by:** 37
 
-### data/lines  ·  #3  ·  185 lines
+### data/lines  ·  #3  ·  193 lines
 
 What people say and read: gossip, Lenny, rumours, news, endings. Change the words here
 
-- **Defines (58):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `ODDITY_HEARD` `PRESS_SAW` `PRESS_BOUGHT` `PRESS_VICTIM` `PRESS_NONE` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `ARENA_RANT` `ARENA_END` `ARENA_CROWD` `ARENA_BEAT` `ARENA_VERDICT` `ARENA_WHY` `ARENA_ROOM` `ARENA_TALK` `ENDINGS`
+- **Defines (61):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `ODDITY_HEARD` `PRESS_SAW` `PRESS_BOUGHT` `PRESS_VICTIM` `PRESS_NONE` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `COP_WARN` `COP_CHASE` `COP_CATCH` `ARENA_RANT` `ARENA_END` `ARENA_CROWD` `ARENA_BEAT` `ARENA_VERDICT` `ARENA_WHY` `ARENA_ROOM` `ARENA_TALK` … +1
 - **→ uses:** —
-- **← used by:** 14
+- **← used by:** 15
 
 ## world/
 
@@ -292,12 +292,12 @@ The player body: needs, Psychic, accidents, passing out, panic
 - **→ uses:** sim/core, ui/interface, sim/actions, data/tuning, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, world/light-map, play/advice, chase/hunt, play/items … +2
 - **← used by:** 34
 
-### player/work  ·  #34  ·  101 lines
+### player/work  ·  #34  ·  102 lines
 
 The work bar, shifts, getting fired
 
 - **Defines (8):** `playerAtDesk` `inOffice` `workBand` `workTick` `workHit` `workLost` `onTimeCross` `newDay`
-- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, player/needs, audio/sound, play/oddities, them/moves, town/echoes … +4
+- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, player/needs, audio/sound, play/oddities, them/moves … +5
 - **← used by:** 6 (town/npc-update, them/moves, play/stashes, play/advice, ui/hud, game/loop)
 
 ## town/
@@ -356,7 +356,7 @@ Being arrested, shown on the map
 
 - **Defines (17):** `ARREST` `COP_MESH` `copCarMesh` `arrested` `arrestCarIn` `copCarV` `arrestStart` `arrestCuffed` `arrestEscortTick` `arrestLoad` `arrestRide` `arrestInside` `arrestRelease` `arrestDropOff` `arrestTick` `arrestFrame` `arrestReset`
 - **→ uses:** sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, ui/interface, gfx/gl, world/paths, gfx/renderer, world/grid, them/moves, town/npc-update, sim/movement … +15
-- **← used by:** 17
+- **← used by:** 18
 
 ### town/cell  ·  #47  ·  444 lines
 
@@ -374,7 +374,7 @@ Suspicion and danger per person
 - **→ uses:** sim/core, ui/interface, core/util, town/fleeing, them/proofs, world/grid, town/echoes, sim/actions, them/awareness, world/light-map, world/vision, them/true-form, combat/timing-bar, player/needs … +2
 - **← used by:** 32
 
-### town/fleeing  ·  #49  ·  211 lines
+### town/fleeing  ·  #49  ·  212 lines
 
 Fleeing to hideouts
 
@@ -456,12 +456,12 @@ THEIR awareness of you, settled at 06:00
 - **→ uses:** sim/core, town/cast, core/util, ui/interface, town/echoes, data/tuning
 - **← used by:** 27
 
-### them/moves  ·  #45  ·  419 lines
+### them/moves  ·  #45  ·  474 lines
 
 THEIR morning moves: the Bought, Scatter, Destroy, Protect
 
-- **Defines (20):** `bought` `buy` `unbuyBy` `tryBribe` `misled` `tryUnder` `tryControl` `controlled` `catchControl` `tryScatter` `morningResist` `stealPrint` `abductCheck` `abduct` `lodgeTick` `destroyTick` `protectAfter` `policeTick` `heldUntil` `arrest`
-- **→ uses:** sim/core, core/util, town/npc-update, sim/actions, them/awareness, ui/interface, town/echoes, gfx/world-geometry, them/plan, town/cast, world/grid, audio/sound, town/suspicion, player/needs … +18
+- **Defines (22):** `bought` `buy` `unbuyBy` `tryBribe` `misled` `tryUnder` `tryControl` `controlled` `catchControl` `tryScatter` `morningResist` `stealPrint` `abductCheck` `abduct` `lodgeTick` `destroyTick` `protectAfter` `policeTick` `policeChaseTick` `policeWarn` `heldUntil` `arrest`
+- **→ uses:** sim/core, core/util, ui/interface, town/npc-update, sim/actions, them/awareness, town/echoes, data/tuning, gfx/world-geometry, them/plan, audio/sound, data/lines, town/cast, world/grid … +19
 - **← used by:** 21
 
 ### them/true-form  ·  #50  ·  567 lines
@@ -772,7 +772,7 @@ What E acts on; keyboard handling
 
 ## audio/
 
-### audio/sound  ·  #82  ·  779 lines
+### audio/sound  ·  #82  ·  807 lines
 
 Sound, all synthesised (Web Audio)
 
@@ -890,7 +890,7 @@ The grey cars: the FBI takes one that gave up
 
 ## game/
 
-### game/state  ·  #107  ·  544 lines
+### game/state  ·  #107  ·  545 lines
 
 Game state, new game, saving, endings
 

@@ -53,6 +53,7 @@ function freshG(start) {
     overtimeToday: false,
     filesAt: 0,
     policeAt: 0,
+    policeWarned: false, // the officer has had his word with you once: next time he takes you in
     ambushNight: 0,
     health: 100,
     binFood: [],

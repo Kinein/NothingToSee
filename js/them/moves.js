@@ -1,6 +1,6 @@
 //@ them/moves — THEIR morning moves: the Bought, Scatter, Destroy, Protect
 //@ Defines: buy, unbuyBy, tryBribe, tryUnder, tryControl, controlled, catchControl, tryScatter, morningResist, stealPrint, abductCheck, abduct, lodgeTick, destroyTick, protectAfter, policeTick, …
-//@ Uses:    sim/core, core/util, town/npc-update, sim/actions, them/awareness, ui/interface, town/echoes, gfx/world-geometry, them/plan, town/cast, …
+//@ Uses:    sim/core, core/util, ui/interface, town/npc-update, sim/actions, them/awareness, town/echoes, data/tuning, gfx/world-geometry, them/plan, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the Bought (lizards). Slight: they look past things and make your day worse. Heavy: THEIRS to the end.
 const bought = (n) => (G.bought && G.bought[n.id]) || 0;
@@ -377,6 +377,8 @@ function protectAfter(n) {
   if (G.aware < 70 || G.policeAt || G.away || !alive().some((m) => temper(m) === 'aggressive')) return;
   G.policeAt = G.t + rand(15, 60);
 }
+// The first time he comes it's a telling-off: he walks up, whistles, has his say and goes. Every time after that he
+// runs you down. Run if you like, and use the time (a photo, a stash, a card); he always gets you in the end.
 function policeTick() {
   const P = PLAYER,
     off = NPC.officer;
@@ -387,27 +389,80 @@ function policeTick() {
   }
   G.policeAt = 0;
   const side = P.x < W / 2 ? 'W' : 'E',
-    [x, z] = EDGES[side][P.z < 15.5 ? 0 : 1];
-  placeChar(off, x, z);
+    edge = EDGES[side][P.z < 15.5 ? 0 : 1],
+    warn = !G.policeWarned;
+  placeChar(off, edge[0], edge[1]);
   off.onMap = true;
   off.queue = [];
   off.shown = 0;
-  off.spd = 1;
+  off.spd = warn ? 1 : POLICE.start;
   enqueue(off, [
     chaseAct(P, {
       label: 'Officer',
-      walk: true,
-      giveUp: 90,
+      walk: warn,
+      giveUp: warn ? 90 : POLICE.giveUp,
       reach: 1.5,
       quit: () => !P.onMap || G.away,
+      tick: (c, a, d) => policeChaseTick(c, a, d, warn),
       onCatch: (c) => {
-        ui.say(c, 'You. Come with me.', 3);
+        if (warn) return policeWarn(c, edge);
+        c.spd = 1;
+        ui.say(c, pick(COP_CATCH), 3);
         arrestStart(c);
       },
-      onLose: () => {},
+      onLose: (c) => {
+        c.spd = 1;
+        // out of his reach behind a door: they come for you anyway, and there's no street to do it on
+        if (!warn && P.onMap && !G.away && !ARREST.on) {
+          ui.note('badge', 'A knock. The police, at the door.', 'bad');
+          arrest();
+        }
+      },
     }),
-    goAct([x, z], { label: 'Leaving' }),
+    goAct(edge, { label: 'Leaving' }),
   ]);
+}
+// on his way to you: the whistle when he first gets close, then (in a chase) a whistle and a shout every so often,
+// and the pace that wears you down
+function policeChaseTick(c, a, d, warn) {
+  if (!a.seen) {
+    if (d > 10) return;
+    a.seen = true;
+    a.blowAt = G.t;
+    audio.sting('whistle');
+    ui.bubble(c, 'exclaim', 'speech', 2.5);
+    ui.say(c, warn ? pick(COP_WARN.open) : pick(COP_CHASE), 2.5);
+    if (!warn) ui.note('badge', 'The officer is after you. Run, if you want to.', 'bad');
+  }
+  if (warn) return;
+  c.spd = POLICE.start + (POLICE.top - POLICE.start) * Math.min(1, (G.t - a.t0) / POLICE.ramp);
+  if (G.t - a.blowAt > POLICE.whistle) {
+    a.blowAt = G.t;
+    audio.sting('whistle');
+    ui.say(c, pick(COP_CHASE), 2.2);
+  }
+}
+// the first time: he stands in front of you and lets you have it, then goes
+function policeWarn(c, edge) {
+  const P = PLAYER,
+    face = (n) => (n.tdir = Math.atan2(P.x - n.x, P.z - n.z)),
+    line = (k) =>
+      waitAct({
+        label: 'Officer',
+        dur: POLICE.talk,
+        anim: 'talk',
+        interruptible: false,
+        onStart: (n) => {
+          face(n);
+          ui.say(n, pick(COP_WARN[k]), 2.6);
+        },
+        onTick: face,
+      });
+  G.policeWarned = true;
+  addStress(5);
+  hardReset(c);
+  enqueue(c, [line('mid'), line('close'), goAct(edge, { label: 'Leaving' })]);
+  setTimeout(() => !G.over && ui.note('badge', 'A warning from the police. Next time he takes you in.', 'bad'), 2600);
 }
 function heldUntil() {
   const h = hourF(),

@@ -57,6 +57,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `overtimeToday` | `false` | player/work, them/moves | — |
 | `filesAt` | `0` | them/moves | — |
 | `policeAt` | `0` | them/moves, town/doors, play/raids, game/state | — |
+| `policeWarned` | `false` | them/moves | — |
 | `ambushNight` | `0` | town/cell | — |
 | `health` | `100` | player/needs, combat/hits, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
@@ -92,7 +93,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `houseDark` | `{}` | them/night-attacks | game/loop |
 | `sickNext` | `false` | player/work, them/moves, combat/hits, taken/back-up | — |
 | `shakenUntil` | `0` | them/true-form, combat/hits, game/last-day | sim/movement, play/photos, input/walking |
-| `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, them/true-form, … |
+| `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, … |
 | `assaulted` | `[]` | — | combat/timing-bar, play/traps |
 | `fights` | `0` | combat/timing-bar | — |
 | `events` | `[]` | — | town/talk, town/echoes, play/confront, play/arena |

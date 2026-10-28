@@ -904,7 +904,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.4 · updated Oct 28, 2026</p>
+  <p id="version">v1.5 · updated Oct 28, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1260,6 +1260,10 @@ const CTRL = {
 // but it takes most of a shift away from the desk to get there.
 const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
 const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18 };   // what a blow costs your health
+// the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
+// He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
+// minutes, so running buys time, never freedom. Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
+const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -1452,6 +1456,14 @@ const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We
 const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
 const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
 const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
+// the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that
+const COP_WARN = {
+  open: ['Oi! You. Stop right there.', 'Hey! Yes, YOU. A word.', 'Hold it. Don’t you walk away from me.'],
+  mid: ['I’ve had calls about you. All week.', 'Creeping round people’s houses? Frightening folk?', 'People are scared of you. Do you know that?'],
+  close: ['This is a warning. The only one you get.', 'Next time it’s the cuffs. Understood?', 'One more call about you and you sleep at the station.'],
+};
+const COP_CHASE = ['Stop! Police!', 'Don’t make this worse!', 'You can’t run forever!', 'Stop right there!', 'I warned you!'];
+const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re coming with me.', 'Enough running. Turn round.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
 const ARENA_END = {
   total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },
@@ -13020,8 +13032,9 @@ function inOffice() {
 const workBand = (v = G.workBar) => (v < WORK.low ? 'bad' : v < 60 ? 'warn' : 'ok');
 // The work bar is your job, and nothing else. It only moves during the shift: seated at your own desk it fills,
 // anywhere else it drains, and fast: half a shift away from it empties a full bar. Empty, and Hale lets you go: that's the end of it.
+// In handcuffs or a cell it holds where it was: Hale can't sack you for being where the police put you.
 function workTick(dt) {
-  if (!inShift() || G.loose) return;
+  if (!inShift() || G.loose || ARREST.on || (G.away && G.away.kind === 'held')) return;
   const cur = PLAYER.queue[0];
   if (playerAtDesk()) {
     if (!cur.bonused) {
@@ -16571,6 +16584,8 @@ function protectAfter(n) {
   if (G.aware < 70 || G.policeAt || G.away || !alive().some((m) => temper(m) === 'aggressive')) return;
   G.policeAt = G.t + rand(15, 60);
 }
+// The first time he comes it's a telling-off: he walks up, whistles, has his say and goes. Every time after that he
+// runs you down. Run if you like, and use the time (a photo, a stash, a card); he always gets you in the end.
 function policeTick() {
   const P = PLAYER,
     off = NPC.officer;
@@ -16581,27 +16596,80 @@ function policeTick() {
   }
   G.policeAt = 0;
   const side = P.x < W / 2 ? 'W' : 'E',
-    [x, z] = EDGES[side][P.z < 15.5 ? 0 : 1];
-  placeChar(off, x, z);
+    edge = EDGES[side][P.z < 15.5 ? 0 : 1],
+    warn = !G.policeWarned;
+  placeChar(off, edge[0], edge[1]);
   off.onMap = true;
   off.queue = [];
   off.shown = 0;
-  off.spd = 1;
+  off.spd = warn ? 1 : POLICE.start;
   enqueue(off, [
     chaseAct(P, {
       label: 'Officer',
-      walk: true,
-      giveUp: 90,
+      walk: warn,
+      giveUp: warn ? 90 : POLICE.giveUp,
       reach: 1.5,
       quit: () => !P.onMap || G.away,
+      tick: (c, a, d) => policeChaseTick(c, a, d, warn),
       onCatch: (c) => {
-        ui.say(c, 'You. Come with me.', 3);
+        if (warn) return policeWarn(c, edge);
+        c.spd = 1;
+        ui.say(c, pick(COP_CATCH), 3);
         arrestStart(c);
       },
-      onLose: () => {},
+      onLose: (c) => {
+        c.spd = 1;
+        // out of his reach behind a door: they come for you anyway, and there's no street to do it on
+        if (!warn && P.onMap && !G.away && !ARREST.on) {
+          ui.note('badge', 'A knock. The police, at the door.', 'bad');
+          arrest();
+        }
+      },
     }),
-    goAct([x, z], { label: 'Leaving' }),
+    goAct(edge, { label: 'Leaving' }),
   ]);
+}
+// on his way to you: the whistle when he first gets close, then (in a chase) a whistle and a shout every so often,
+// and the pace that wears you down
+function policeChaseTick(c, a, d, warn) {
+  if (!a.seen) {
+    if (d > 10) return;
+    a.seen = true;
+    a.blowAt = G.t;
+    audio.sting('whistle');
+    ui.bubble(c, 'exclaim', 'speech', 2.5);
+    ui.say(c, warn ? pick(COP_WARN.open) : pick(COP_CHASE), 2.5);
+    if (!warn) ui.note('badge', 'The officer is after you. Run, if you want to.', 'bad');
+  }
+  if (warn) return;
+  c.spd = POLICE.start + (POLICE.top - POLICE.start) * Math.min(1, (G.t - a.t0) / POLICE.ramp);
+  if (G.t - a.blowAt > POLICE.whistle) {
+    a.blowAt = G.t;
+    audio.sting('whistle');
+    ui.say(c, pick(COP_CHASE), 2.2);
+  }
+}
+// the first time: he stands in front of you and lets you have it, then goes
+function policeWarn(c, edge) {
+  const P = PLAYER,
+    face = (n) => (n.tdir = Math.atan2(P.x - n.x, P.z - n.z)),
+    line = (k) =>
+      waitAct({
+        label: 'Officer',
+        dur: POLICE.talk,
+        anim: 'talk',
+        interruptible: false,
+        onStart: (n) => {
+          face(n);
+          ui.say(n, pick(COP_WARN[k]), 2.6);
+        },
+        onTick: face,
+      });
+  G.policeWarned = true;
+  addStress(5);
+  hardReset(c);
+  enqueue(c, [line('mid'), line('close'), goAct(edge, { label: 'Leaving' })]);
+  setTimeout(() => !G.over && ui.note('badge', 'A warning from the police. Next time he takes you in.', 'bad'), 2600);
 }
 function heldUntil() {
   const h = hourF(),
@@ -17581,6 +17649,7 @@ function chaseAct(tg, o) {
         return;
       }
       const d = Math.hypot(tg.x - c.x, tg.z - c.z);
+      if (o.tick) o.tick(c, a, d);
       if (d < (o.reach || 1.35) && (!o.reachOk || o.reachOk(c))) {
         c.path = null;
         c.moving = false;
@@ -28525,6 +28594,34 @@ const audio = (() => {
       } else if (kind === 'crowdlaugh') {
         for (let k = 0; k < 5; k++)
           setTimeout(() => ctx && tone('triangle', rand(240, 330), 0.01, 0.045, 0.14, rand(200, 260)), k * 130);
+      } else if (kind === 'whistle') {
+        // a police whistle: a short blast and a long one, the pea rattling inside
+        for (const [at, len] of [
+          [0, 0.3],
+          [0.4, 0.8],
+        ]) {
+          const t = now() + at,
+            o = ctx.createOscillator(),
+            lfo = ctx.createOscillator(),
+            dep = ctx.createGain(),
+            g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 2850;
+          lfo.frequency.value = 27;
+          dep.gain.value = 160;
+          lfo.connect(dep);
+          dep.connect(o.frequency);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.06, t + 0.02);
+          g.gain.setValueAtTime(0.06, t + len - 0.06);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+          o.connect(g);
+          g.connect(out(0));
+          o.start(t);
+          lfo.start(t);
+          o.stop(t + len + 0.05);
+          lfo.stop(t + len + 0.05);
+        }
       } else if (kind === 'slip') {
         // a wet click: the mask, slipping
         tone('sine', 1500, 0.002, 0.08, 0.07, 260);
@@ -40106,6 +40203,7 @@ function freshG(start) {
     overtimeToday: false,
     filesAt: 0,
     policeAt: 0,
+    policeWarned: false, // the officer has had his word with you once: next time he takes you in
     ambushNight: 0,
     health: 100,
     binFood: [],

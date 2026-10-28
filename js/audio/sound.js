@@ -184,6 +184,34 @@ const audio = (() => {
       } else if (kind === 'crowdlaugh') {
         for (let k = 0; k < 5; k++)
           setTimeout(() => ctx && tone('triangle', rand(240, 330), 0.01, 0.045, 0.14, rand(200, 260)), k * 130);
+      } else if (kind === 'whistle') {
+        // a police whistle: a short blast and a long one, the pea rattling inside
+        for (const [at, len] of [
+          [0, 0.3],
+          [0.4, 0.8],
+        ]) {
+          const t = now() + at,
+            o = ctx.createOscillator(),
+            lfo = ctx.createOscillator(),
+            dep = ctx.createGain(),
+            g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 2850;
+          lfo.frequency.value = 27;
+          dep.gain.value = 160;
+          lfo.connect(dep);
+          dep.connect(o.frequency);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.06, t + 0.02);
+          g.gain.setValueAtTime(0.06, t + len - 0.06);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+          o.connect(g);
+          g.connect(out(0));
+          o.start(t);
+          lfo.start(t);
+          o.stop(t + len + 0.05);
+          lfo.stop(t + len + 0.05);
+        }
       } else if (kind === 'slip') {
         // a wet click: the mask, slipping
         tone('sine', 1500, 0.002, 0.08, 0.07, 260);

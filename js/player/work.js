@@ -1,6 +1,6 @@
 //@ player/work — The work bar, shifts, getting fired
 //@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, onTimeCross, newDay
-//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, player/needs, …
+//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
 function playerAtDesk() {
@@ -14,8 +14,9 @@ function inOffice() {
 const workBand = (v = G.workBar) => (v < WORK.low ? 'bad' : v < 60 ? 'warn' : 'ok');
 // The work bar is your job, and nothing else. It only moves during the shift: seated at your own desk it fills,
 // anywhere else it drains, and fast: half a shift away from it empties a full bar. Empty, and Hale lets you go: that's the end of it.
+// In handcuffs or a cell it holds where it was: Hale can't sack you for being where the police put you.
 function workTick(dt) {
-  if (!inShift() || G.loose) return;
+  if (!inShift() || G.loose || ARREST.on || (G.away && G.away.kind === 'held')) return;
   const cur = PLAYER.queue[0];
   if (playerAtDesk()) {
     if (!cur.bonused) {

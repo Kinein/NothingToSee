@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, NEEDS, STRESS_K, SHAKEN_LOCK, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FIGHT_DIFF, FOE_HP, …
+//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, STRESS_K, SHAKEN_LOCK, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FIGHT_DIFF, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -43,6 +43,10 @@ const CTRL = {
 // but it takes most of a shift away from the desk to get there.
 const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
 const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18 };   // what a blow costs your health
+// the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
+// He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
+// minutes, so running buys time, never freedom. Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
+const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [

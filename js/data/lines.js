@@ -114,6 +114,14 @@ const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We
 const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
 const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
 const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
+// the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that
+const COP_WARN = {
+  open: ['Oi! You. Stop right there.', 'Hey! Yes, YOU. A word.', 'Hold it. Don’t you walk away from me.'],
+  mid: ['I’ve had calls about you. All week.', 'Creeping round people’s houses? Frightening folk?', 'People are scared of you. Do you know that?'],
+  close: ['This is a warning. The only one you get.', 'Next time it’s the cuffs. Understood?', 'One more call about you and you sleep at the station.'],
+};
+const COP_CHASE = ['Stop! Police!', 'Don’t make this worse!', 'You can’t run forever!', 'Stop right there!', 'I warned you!'];
+const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re coming with me.', 'Enough running. Turn round.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
 const ARENA_END = {
   total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },

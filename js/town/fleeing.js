@@ -140,6 +140,7 @@ function chaseAct(tg, o) {
         return;
       }
       const d = Math.hypot(tg.x - c.x, tg.z - c.z);
+      if (o.tick) o.tick(c, a, d);
       if (d < (o.reach || 1.35) && (!o.reachOk || o.reachOk(c))) {
         c.path = null;
         c.moving = false;
