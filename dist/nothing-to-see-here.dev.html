@@ -458,13 +458,24 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 .ar-stage{position:relative;width:min(1000px,100%);height:min(680px,calc(100vh - 24px));overflow:hidden}
 .ar-spot{position:absolute;left:50%;top:58%;width:78%;height:44%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(255,236,196,.2),rgba(255,226,170,.07) 55%,transparent 72%);box-shadow:0 0 120px 40px rgba(255,220,160,.04);pointer-events:none}
-.ar-lean{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font:12.5px/1 var(--f-type);letter-spacing:.18em;color:#9b927f}
+.ar-top{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;width:min(680px,96%);pointer-events:none;z-index:2}
+.ar-lean{display:flex;align-items:center;gap:10px;font:12.5px/1 var(--f-type);letter-spacing:.18em;color:#9b927f;text-transform:uppercase}
+.ar-side{min-width:56px;text-align:right}.ar-side.them{text-align:left}
 .ar-track{position:relative;display:flex;gap:6px;align-items:center;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.04)}
-.ar-track i{width:9px;height:9px;border-radius:50%;background:rgba(232,220,192,.12)}
-.ar-track i.mid{background:rgba(232,220,192,.3)}
-.ar-mark{position:absolute;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:var(--sodium);box-shadow:0 0 12px rgba(228,162,74,.7);transition:left .6s cubic-bezier(.3,1.4,.5,1)}
-.ar-ring{--lean:0;position:absolute;left:12%;right:12%;top:15%;height:150px}
-.ar-p{position:absolute;left:var(--x);top:calc(40px + var(--y));transform:translateX(calc(-50% + var(--lean) * 10px)) rotate(calc(var(--lean) * 2.2deg)) scale(var(--s));transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);font-style:normal}
+.ar-track i{flex:none;width:9px;height:9px;border-radius:50%;background:rgba(232,220,192,.14)}
+.ar-track i.win{background:rgba(255,210,122,.55)}.ar-track i.good{background:rgba(228,162,74,.3)}.ar-track i.bad{background:rgba(208,81,60,.32)}
+.ar-track i.mid{box-shadow:0 0 0 2px rgba(232,220,192,.22)}
+.ar-mark{--i:5;position:absolute;top:50%;left:calc(12.5px + var(--i) * 15px);width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:#d8cfba;box-shadow:0 0 10px rgba(232,220,192,.5);transition:left .6s cubic-bezier(.3,1.4,.5,1),background .4s}
+.ar-mark.win{background:var(--gold-hi);box-shadow:0 0 16px rgba(255,210,122,.9)}.ar-mark.good{background:var(--sodium);box-shadow:0 0 12px rgba(228,162,74,.7)}.ar-mark.bad{background:#e0583f;box-shadow:0 0 12px rgba(224,88,63,.7)}
+.ar-room{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.ar-room span{padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.05);font:11.5px/1.5 var(--f-type);letter-spacing:.03em}
+.ar-room .up{color:#e9c48a}.ar-room .down{color:#e0907e}
+.ar-beat{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:4px;text-align:center}
+.ar-beat.pop{animation:fadein .35s ease-out}
+.ar-beat b{font:italic 600 26px/1.05 var(--f-disp);color:#f2e6cc;text-shadow:0 2px 16px rgba(0,0,0,.9)}
+.ar-beat span{font:13.5px/1.3 var(--f-type);letter-spacing:.04em;color:#b9b09c}
+.ar-ring{--lean:0;position:absolute;left:12%;right:12%;top:19%;height:150px}
+.ar-p{position:absolute;left:var(--x);top:calc(40px + var(--y));transform:translateX(calc(-50% - var(--lean) * 10px)) rotate(calc(var(--lean) * -2.2deg)) scale(var(--s));transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);font-style:normal}
 .ar-p img{display:block;width:92px;height:104px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
 .ar-p.lit img{filter:brightness(.55) sepia(.3) drop-shadow(0 0 3px rgba(232,220,192,.6))}
 .ar-pq{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);padding:4px 9px;border-radius:9px;background:#efe9d8;color:#121214;font:500 13px/1.2 var(--f-ui);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.6);animation:pop .2s ease-out;z-index:2}
@@ -472,6 +483,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .ar-you,.ar-acc{position:absolute;bottom:31%;width:min(190px,22vw);margin:0}
 .ar-you{left:12%}
 .ar-acc{right:12%}
+.ar-you figcaption,.ar-acc figcaption{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);padding:3px 12px;border:1px solid var(--line2);background:rgba(10,11,14,.9);color:var(--ink);font:13px/1.2 var(--f-type);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.ar-acc figcaption{border-color:rgba(208,81,60,.45)}
 .ar-you img,.ar-acc img{display:block;width:100%;aspect-ratio:128/144;object-fit:cover;object-position:50% 25%;border-radius:50% 50% 46% 46%;-webkit-mask-image:radial-gradient(ellipse at 50% 45%,#000 58%,transparent 74%);mask-image:radial-gradient(ellipse at 50% 45%,#000 58%,transparent 74%);transition:filter .8s,transform .8s}
 .ar-you img{transform:scaleX(-1)}
 .ar-eyes{position:absolute;left:0;right:0;top:36%;height:10%;opacity:0;transition:opacity .4s;pointer-events:none}
@@ -480,47 +493,73 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .ar-acc.shine .ar-eyes{opacity:1;animation:flick 2.2s steps(2) infinite}
 @keyframes flick{0%,70%{opacity:1}75%{opacity:.1}80%{opacity:1}}
 .ar-acc.pull img{filter:contrast(1.3) saturate(.55) hue-rotate(35deg) brightness(.92);transform:scaleY(1.06) skewX(-2deg)}
-.ar-say{position:absolute;max-width:330px;padding:10px 14px 12px;border-radius:14px;background:#efe9d8;color:#121214;font:500 17px/1.3 var(--f-ui);box-shadow:0 10px 28px rgba(0,0,0,.6);opacity:0;transition:opacity .25s}
+.ar-say{position:absolute;max-width:min(300px,34%);padding:10px 14px 12px;border-radius:14px;background:#efe9d8;color:#121214;font:500 17px/1.3 var(--f-ui);box-shadow:0 10px 28px rgba(0,0,0,.6);opacity:0;transition:opacity .25s}
 .ar-say.on{opacity:1}
 .ar-say.pop{animation:pop .22s ease-out}
-.ar-say.them{right:calc(12% + min(190px,22vw) - 30px);bottom:calc(31% + min(200px,24vw))}
-.ar-say.you{left:calc(12% + min(190px,22vw) - 30px);bottom:calc(31% + min(200px,24vw));background:#d9e3ea}
+.ar-say.them{right:8%;bottom:calc(31% + min(200px,24vw))}
+.ar-say.you{left:8%;bottom:calc(31% + min(200px,24vw));background:#d9e3ea}
+.ar-say::after{content:'';position:absolute;bottom:-9px;border:9px solid transparent;border-bottom:0;border-top-color:#efe9d8}
+.ar-say.them::after{right:120px}.ar-say.you::after{left:120px;border-top-color:#d9e3ea}
 .ar-say p{margin:0}
-.ar-fi{float:left;display:grid;place-items:center;width:26px;height:26px;margin:-1px 8px 0 -2px;border-radius:50%;background:#1d1a16;color:#e8dcc0}
+.ar-fi{display:inline-flex;align-items:center;gap:5px;margin:0 0 6px;padding:2px 9px 2px 5px;border-radius:999px;background:#1d1a16;color:#e8dcc0;font:12px/1.5 var(--f-type);letter-spacing:.1em;text-transform:uppercase}
+.ar-fi em{font-style:normal}
 .ar-fi:empty{display:none}
 .ar-fi .ic{width:15px;height:15px}
-.ar-t{display:block;clear:both;height:3px;margin-top:8px;border-radius:2px;background:rgba(0,0,0,.1);overflow:hidden;font-style:normal}
+.ar-t{display:block;height:4px;margin-top:8px;border-radius:2px;background:rgba(0,0,0,.1);overflow:hidden;font-style:normal}
 .ar-t i{display:block;height:100%;width:0;background:#b02a1e}
-.ar-shown{position:absolute;left:50%;top:46%;width:150px;padding:8px 8px 12px;background:var(--polaroid);transform:translate(-50%,-50%) rotate(-3deg);box-shadow:0 20px 50px rgba(0,0,0,.7);animation:pop .25s ease-out;z-index:3}
+.ar-t.low i{background:#e0402c;animation:flate .3s steps(2) infinite}
+.ar-shown{position:absolute;left:50%;top:56%;width:124px;padding:7px 7px 6px;background:var(--polaroid);transform:translate(-50%,-50%) rotate(-3deg);box-shadow:0 20px 50px rgba(0,0,0,.7);animation:pop .25s ease-out;z-index:3}
 .ar-shown img{display:block;width:100%;aspect-ratio:180/230;object-fit:cover;object-position:50% 30%;background:#0b0b0b}
 .ar-shown.clear img{outline:4px solid #fffdf6}
 .ar-shown.fuzzy img{filter:blur(.8px)}
+.ar-shown em,.ar-card .ar-ct{display:block;margin-top:5px;color:#3a332a;font:11px/1.2 var(--f-type);letter-spacing:.06em;text-align:center;text-transform:uppercase;font-style:normal;white-space:nowrap}
+.ar-card .ar-ct{margin-top:4px;font-size:9.5px;letter-spacing:.02em}
 .ar-shown .pc-fi,.ar-card .pc-fi{position:absolute;right:-6px;top:-6px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1d1a16;color:#e8dcc0}
 .ar-shown .pc-fi .ic,.ar-card .pc-fi .ic{width:14px;height:14px}
-.ar-opts{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.ar-opts{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;white-space:nowrap;z-index:4}
 .ar-opt{display:flex;align-items:center;gap:7px;padding:7px 13px 7px 8px;border-radius:999px;border:1px solid var(--line2);background:rgba(10,11,14,.85);color:var(--ink);font:600 14.5px/1 var(--f-ui);cursor:pointer}
 .ar-opt:hover{border-color:var(--sodium)}
 .ar-opt kbd{min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:#e6dfcc;color:#16171a;font:700 12.5px/22px var(--f-ui);text-align:center}
 .ar-opt .ic{width:16px;height:16px}
 .ar-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(228,162,74,.16);border:1px solid rgba(228,162,74,.5);color:#f6dcae;font:14px var(--f-type)}
 .ar-chip .ic{width:15px;height:15px}
-.ar-bar{position:absolute;left:50%;bottom:150px;width:min(420px,80%);height:30px;transform:translateX(-50%);border-radius:7px;background:linear-gradient(#6a1d15,#3a0d09);border:1px solid rgba(255,255,255,.14);overflow:hidden;z-index:4}
-.ar-bar .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#8fd27a,#4f8a44);box-shadow:0 0 16px rgba(140,220,120,.55)}
-.ar-bar .ft{position:absolute;top:-2px;bottom:-2px;left:0;width:5px;margin-left:-2.5px;border-radius:2px;background:#fbf2dc;box-shadow:0 0 10px #fff}
-.ar-bar.hit{box-shadow:0 0 0 3px var(--ok)} .ar-bar.miss{box-shadow:0 0 0 3px var(--blood)}
+.ar-bar{position:absolute;left:50%;bottom:150px;width:min(420px,80%);height:32px;transform:translateX(-50%);background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,230,200,.09) calc(10% - 1px) 10%),repeating-linear-gradient(-45deg,rgba(0,0,0,.18) 0 4px,transparent 4px 9px),linear-gradient(#6e1f16,#3b0e0a 55%,#2a0806);border:1px solid rgba(255,220,190,.16);box-shadow:inset 0 2px 8px rgba(0,0,0,.7);overflow:hidden;z-index:4;cursor:crosshair}
+.ar-bfuse{position:absolute;left:50%;bottom:141px;width:min(420px,80%);height:3px;transform:translateX(-50%);background:rgba(255,220,190,.08);z-index:4}
+.ar-bfuse i{display:block;height:100%;background:var(--sodium);box-shadow:0 0 8px rgba(228,162,74,.6);transform-origin:0 50%}
+.ar-bfuse.late i{background:var(--blood);animation:flate .3s steps(2) infinite}
+.ar-bar .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#93d77c,#4e8b43 60%,#3e7536);box-shadow:0 0 16px rgba(140,220,120,.55),inset 1px 0 0 rgba(220,255,200,.5),inset -1px 0 0 rgba(220,255,200,.5)}
+.ar-bar .ft{position:absolute;top:0;bottom:0;left:0;width:4px;margin-left:-2px;background:#fffaf0;box-shadow:0 0 6px #fff,0 0 16px rgba(255,236,200,.9)}
+.ar-bar .ft::before{content:'';position:absolute;top:0;bottom:0;right:100%;width:46px;background:linear-gradient(to left,rgba(255,240,215,.42),transparent)}
+.ar-bar .ft.back::before{right:auto;left:100%;background:linear-gradient(to right,rgba(255,240,215,.42),transparent)}
+.ar-bar.hit{box-shadow:0 0 0 2px var(--ok),0 0 24px rgba(147,180,131,.6)} .ar-bar.miss{box-shadow:0 0 0 2px var(--blood),0 0 24px rgba(208,81,60,.55)}
 .ar-fan{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;justify-content:center;gap:4px;height:136px;align-items:flex-end}
-.ar-card{position:relative;width:86px;padding:5px 5px 10px;background:var(--polaroid);border:none;transform:rotate(var(--r)) translateY(14px);transform-origin:50% 100%;box-shadow:0 10px 20px rgba(0,0,0,.6);transition:transform .2s;cursor:pointer}
+.ar-card{position:relative;width:86px;padding:5px 5px 4px;background:var(--polaroid);border:none;transform:rotate(var(--r)) translateY(14px);transform-origin:50% 100%;box-shadow:0 10px 20px rgba(0,0,0,.6);transition:transform .2s;cursor:pointer}
 .ar-card img{display:block;width:100%;aspect-ratio:180/230;object-fit:cover;object-position:50% 30%;background:#0b0b0b}
 .ar-card.clear img{outline:3px solid #fffdf6}
 .ar-card.fuzzy img{filter:blur(.6px)}
 .ar-card.sel,.ar-card:hover{transform:rotate(0deg) translateY(-6px) scale(1.08);z-index:2}
 .ar-card.sel{box-shadow:0 0 0 3px var(--sodium),0 14px 26px rgba(0,0,0,.7)}
+.ar-card.fit:not(.sel){transform:rotate(var(--r)) translateY(2px);box-shadow:0 0 0 2px rgba(255,210,122,.55),0 0 18px rgba(255,200,110,.35),0 10px 20px rgba(0,0,0,.6)}
+.ar-card.fit .pc-fi{background:var(--sodium);color:#1a140c}
 .ar-stage.up .ar-spot{animation:spotup .7s ease-out}
 .ar-stage.down .ar-spot{animation:spotdn .7s ease-out}
 @keyframes spotup{30%{background:radial-gradient(ellipse at 50% 50%,rgba(255,236,196,.3),rgba(255,226,170,.1) 55%,transparent 72%)}}
 @keyframes spotdn{30%{background:radial-gradient(ellipse at 50% 50%,rgba(220,90,70,.2),rgba(160,40,30,.06) 55%,transparent 72%)}}
-#arena.ending .ar-fan,#arena.ending .ar-opts{opacity:0;transition:opacity .4s}
-@media (max-width:700px){.ar-ring{left:2%;right:2%}.ar-p img{width:52px;height:60px}.ar-you{left:3%}.ar-acc{right:3%}.ar-say{max-width:220px;font-size:15px}.ar-card{width:64px}}
+#arena.ending .ar-fan,#arena.ending .ar-opts,#arena.ending .ar-beat{opacity:0;transition:opacity .4s}
+#arena.ending .ar-delta{display:none}
+.ar-delta{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);padding:4px 14px;border-radius:999px;background:rgba(10,11,14,.82);font:600 19px/1.2 var(--f-ui);white-space:nowrap;opacity:0;pointer-events:none;z-index:4}
+.ar-delta.up{color:var(--gold-hi);box-shadow:0 0 0 1px rgba(255,210,122,.4),0 0 22px rgba(255,200,110,.25)}.ar-delta.down{color:#f08a74;box-shadow:0 0 0 1px rgba(240,138,116,.4)}
+.ar-delta.go{animation:ardelta 1.6s ease-out}
+@keyframes ardelta{0%{opacity:0;transform:translate(-50%,-20%) scale(.8)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}22%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-110%)}}
+.ar-verdict{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;gap:10px;width:min(620px,92%);text-align:center;pointer-events:none;z-index:5}
+.ar-verdict.on{display:flex;animation:arverdict .55s cubic-bezier(.2,1.3,.4,1) both}
+.ar-verdict b{font:italic 700 clamp(40px,7vw,68px)/1 var(--f-disp);text-shadow:0 4px 30px rgba(0,0,0,.95)}
+.ar-verdict span{font:15px/1.35 var(--f-type);letter-spacing:.05em;color:var(--ink);text-shadow:0 2px 10px #000}
+.ar-verdict.good b{color:var(--gold-hi)}.ar-verdict.meh b{color:#e6dfcc}.ar-verdict.bad b{color:#f08a74}
+@media (prefers-reduced-motion:reduce){.ar-delta.go{animation:arfade 1.6s linear}.ar-verdict.on{animation:fadein .3s}.ar-mark{transition:none}}
+@keyframes arfade{0%,80%{opacity:1}100%{opacity:0}}
+@keyframes arverdict{from{opacity:0;transform:translate(-50%,-50%) scale(1.25)}to{opacity:1;transform:translate(-50%,-50%)}}
+@media (max-width:700px){.ar-ring{left:2%;right:2%}.ar-p img{width:52px;height:60px}.ar-you{left:3%}.ar-acc{right:3%}.ar-say{max-width:46%;font-size:15px}.ar-say.them{right:3%}.ar-say.you{left:3%}.ar-say.them::after{right:30px}.ar-say.you::after{left:30px}.ar-card{width:64px}.ar-card .ar-ct{font-size:7.5px}.ar-beat b{font-size:21px}.ar-beat span{font-size:12px}.ar-side{min-width:0}.ar-you figcaption,.ar-acc figcaption{font-size:11px;padding:2px 8px}.ar-shown{top:66%;width:92px}.ar-delta{top:58%;font-size:15px}.ar-verdict{top:27%}}
 #over .sheet{max-width:520px;padding:30px 30px 26px;text-align:left}
 #over-ic .ic{width:48px;height:48px;color:var(--stamp);stroke-width:1.5}
 #over.won #over-ic .ic{color:var(--ok)}
@@ -865,7 +904,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.2 · updated Oct 28, 2026</p>
+  <p id="version">v1.3 · updated Oct 28, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1267,6 +1306,7 @@ const EVIDENCE = {
   statementSecs: 6,             // real seconds each statement waits for a card
   move: { clear: 2, fuzzyBacked: 1, fuzzyAlone: -1, wrongLie: -1, pass: -1, onTruth: -2 },
   rebuttalSecs: 6,
+  idleSecs: 1.8,                // ...but with nothing left to play, only this long: no standing there waiting
   know: { claims: [1, 2], right: 1, wrong: -1, secs: 8 },
   counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
   escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
@@ -1418,6 +1458,37 @@ const ARENA_END = {
   wrong: ['How could you.', 'I’ll never forget this.', 'Get away from me.'],
 };
 const ARENA_CROWD = { up: ['Oh my God.', 'It’s true…', 'Look at its face!'], down: ['Ha!', 'Get a grip.', 'Not this again.'], still: ['…', 'Hm.'] };
+// the banner over the ring: which part of it this is, and what you can do ({n}: the accused, {i} of {k}: the statement)
+const ARENA_BEAT = {
+  open:      ['Confronting {n}', 'Everyone in earshot is listening'],
+  stmt:      ['Testimony · {i} of {k}', 'A lie? Show the card from the same frame. Or let it pass'],
+  stmtEmpty: ['Testimony · {i} of {k}', 'No cards left to show'],
+  rebut:     ['It explains it away', 'Back it up: another card, a habit you watched, or a witness'],
+  rebutNone: ['It explains it away', 'Nothing to back it up with'],
+  know:      ['How well do you know me?', 'True, or a lie?'],
+  counter:   ['It turns it on you', 'Hold your nerve'],
+  escape:    ['It’s making a run for it', 'Block the way: E (or tap) in the green'],
+};
+// the verdict, big, when it's over
+const ARENA_VERDICT = {
+  total:   ['It gives up', 'The crowd holds it down. The FBI is on the way'],
+  partial: ['Its face comes off', 'Right in front of everyone'],
+  escaped: ['It breaks and runs', 'Everyone saw what it is. Go after it'],
+  pfail:   ['Doubt', 'The town will watch it. Tonight, it comes for you'],
+  fail:    ['They laugh at you', 'Nobody believes a word. People will talk'],
+  wrong:   ['Wrong person', 'You told the whole room their business'],
+};
+// why the crowd just moved, beside the number
+const ARENA_WHY = {
+  clear: 'caught in a lie', backed: 'backed up', alone: 'just a blur', wrongLie: 'wrong card for that', pass: 'a lie let go',
+  truth: 'that one was true', notMine: 'not theirs', innocent: 'only their own secret', planted: 'planted on them',
+  knowRight: 'you know them', knowWrong: 'you don’t', counter: 'you cracked', faced: 'that camera in their face', block: 'blocked the way',
+};
+// under the crowd meter: why it started where it did ({w}: someone in the room)
+const ARENA_ROOM = {
+  witness: '{w} saw it', friend: '{w} likes you', close: '{w} is close to them', grudge: '{w} holds a grudge',
+  unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
+};
 // what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
 const ARENA_TALK = {
   total: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
@@ -23349,14 +23420,17 @@ function testimony(A, i) {
   A.si = i;
   const s = A.stmts[i];
   arenaSay(A, 'them', s.text, s.f);
-  A.t = A.tMax = EVIDENCE.statementSecs;
+  A.t = A.tMax = A.hand.length ? EVIDENCE.statementSecs : EVIDENCE.idleSecs; // empty-handed: it goes by quickly
   arenaDraw(A);
 }
-const nextStatement = (A) => after(A, 1.7, () => checkEscape(A, () => testimony(A, A.si + 1)));
+function nextStatement(A) {
+  A.beat = 'wait'; // an answer given: nothing more to press until the next line (a second card would land on this one)
+  after(A, 1.7, () => checkEscape(A, () => testimony(A, A.si + 1)));
+}
 function letPass(A) {
   const s = A.stmts[A.si];
   if (s.lie) {
-    move(A, EVIDENCE.move.pass);
+    move(A, EVIDENCE.move.pass, null, 'pass');
     arenaSay(A, 'them', pick(ARENA_PASS));
   }
   nextStatement(A);
@@ -23381,23 +23455,23 @@ function showCard(A, p) {
   arenaShow(A, p);
   if (!A.isThem) return wrongPerson(A, p);
   if (!s.lie) {
-    move(A, EVIDENCE.move.onTruth, 'laugh');
+    move(A, EVIDENCE.move.onTruth, 'laugh', 'truth');
     arenaSay(A, 'them', pick(ARENA_TRUTH));
   } else if (p.frame !== s.f) {
-    move(A, EVIDENCE.move.wrongLie);
+    move(A, EVIDENCE.move.wrongLie, null, 'wrongLie');
     arenaSay(A, 'them', pick(ARENA_WRONG));
   } else if (!realOn(p, n)) {
-    move(A, EVIDENCE.wrong.other);
+    move(A, EVIDENCE.wrong.other, null, 'notMine');
     arenaSay(A, 'them', pick(ARENA_NOTMINE));
   } else if (p.q === 'clear') {
-    move(A, EVIDENCE.move.clear, 'gasp');
+    move(A, EVIDENCE.move.clear, 'gasp', 'clear');
     arenaSay(A, 'them', pick(ARENA_CLEAR));
   } else {
     // fuzzy: THEY explain it away, unless you can back it up
     A.beat = 'rebut';
     A.rebut = p;
     arenaSay(A, 'them', pick(ARENA_REBUT));
-    A.t = A.tMax = EVIDENCE.rebuttalSecs;
+    A.t = A.tMax = A.hand.length || habitFits(A) || A.wits.length ? EVIDENCE.rebuttalSecs : EVIDENCE.idleSecs;
     arenaDraw(A);
     return;
   }
@@ -23407,18 +23481,18 @@ function showCard(A, p) {
 function wrongPerson(A, p) {
   const n = A.n;
   if (p.innocent && p.innocent === n.id) {
-    move(A, EVIDENCE.wrong.innocent);
+    move(A, EVIDENCE.wrong.innocent, null, 'innocent');
     arenaSay(A, 'them', pick(ARENA_INNOCENT).replace('{t}', oddTruth(n) || 'nothing'));
     if (G.odd[n.id]) G.odd[n.id].public = true;
   } else if (p.planted) {
-    move(A, EVIDENCE.wrong.planted);
+    move(A, EVIDENCE.wrong.planted, null, 'planted');
     arenaSay(A, 'them', pick(ARENA_PLANTED));
     A.framed = true;
     const F = (G.framed || []).find((f) => f.id === n.id);
     if (F) F.known = true;
     for (const c of G.proofs.filter((x) => x.pin === n.id && x.planted)) flipCard(c, { what: 'planted' });
   } else {
-    move(A, EVIDENCE.wrong.other);
+    move(A, EVIDENCE.wrong.other, null, 'notMine');
     arenaSay(A, 'them', pick(ARENA_NOTMINE));
   }
   nextStatement(A);
@@ -23443,7 +23517,7 @@ function backUp(A, how, p) {
   }
   A.rebut = null;
   A.beat = 'stmt';
-  move(A, ok ? EVIDENCE.move.fuzzyBacked : EVIDENCE.move.fuzzyAlone, ok ? 'gasp' : null);
+  move(A, ok ? EVIDENCE.move.fuzzyBacked : EVIDENCE.move.fuzzyAlone, ok ? 'gasp' : null, ok ? 'backed' : 'alone');
   nextStatement(A);
 }
 // ── 3. "How well do you know me?": a claim about their routine, true or a lie. Watched it, and you know.
@@ -23476,7 +23550,7 @@ function callClaim(A, saysLie) {
   A.tMax = 0;
   const c = A.claims[A.ki],
     right = saysLie != null && saysLie === c.lie;
-  move(A, right ? EVIDENCE.know.right : EVIDENCE.know.wrong, right ? null : 'laugh');
+  move(A, right ? EVIDENCE.know.right : EVIDENCE.know.wrong, right ? null : 'laugh', right ? 'knowRight' : 'knowWrong');
   arenaSay(A, 'you', saysLie == null ? '…' : saysLie ? 'That’s a lie.' : 'That’s true.');
   A.beat = 'wait';
   after(A, 1.6, () => checkEscape(A, () => knowBeat(A, A.ki + 1)));
@@ -23491,11 +23565,11 @@ function counterBeat(A) {
     if (A.wits.length) arenaSay(A, A.wits[0], pick(ARENA_BACKED.witness));
     else if (100 - PLAYER.needs.stress >= C.psy) arenaSay(A, 'you', pick(ARENA_HOLD));
     else {
-      move(A, C.lose, 'laugh');
+      move(A, C.lose, 'laugh', 'counter');
       addStress(C.stress);
       arenaSay(A, 'you', '…');
     }
-    if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced); // you had a lens in their face only yesterday
+    if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced, null, 'faced'); // you had a lens in their face only yesterday
     after(A, 2, () => checkEscape(A, () => arenaEnd(A)));
   });
 }
@@ -23520,7 +23594,7 @@ function arenaBarTick(A, dt) {
     if (f.rt > 0) return;
     A.bar = null;
     if (f.res === 'hit') {
-      move(A, EVIDENCE.escapeBlock, 'gasp');
+      move(A, EVIDENCE.escapeBlock, 'gasp', 'block');
       arenaSay(A, 'you', 'You’re not going anywhere.');
       return after(A, 1.4, A.cont);
     }
@@ -23550,10 +23624,10 @@ function arenaStrike(froze) {
   arenaBarDraw(A);
 }
 // ── the crowd's lean
-function move(A, v, fx) {
+function move(A, v, fx, why) {
   if (!v) return;
   A.lean = clamp(A.lean + v, EVIDENCE.lean.min, EVIDENCE.lean.max);
-  arenaCrowd(A, v);
+  arenaCrowd(A, v, why);
   audio.sting(fx === 'gasp' ? 'gasp' : fx === 'laugh' || v < 0 ? 'crowdlaugh' : 'murmur');
   if (A.isThem && A.lean >= 3 && fx === 'gasp') audio.sting('slip'); // the mask, slipping
 }
@@ -26946,18 +27020,43 @@ function toggleHelp() {
 // ───────────── the arena on screen. A spotlit circle in the dark: you on the left, the accused on the right, the people who
 // were in earshot as silhouettes in a ring behind (up to eight). The crowd is the meter: it shuffles toward whoever
 // it believes. THEIR face shows the pressure (at +2 a flicker in the eyes, at +3 the skin pulls); a human's never slips.
+// the crowd meter runs from you (left, +5) to the accused (right, −5), coloured by what each end of it means
+function leanBand(L) {
+  const B = EVIDENCE.bands;
+  return L >= B.total ? 'win' : L >= B.partial ? 'good' : L >= B.pfail ? 'meh' : 'bad';
+}
 function arenaOpen(A) {
   const el = $('#arena');
   el.innerHTML =
-    '<div class="ar-stage"><div class="ar-lean"><span>THEM</span><div class="ar-track">' +
-    Array.from({ length: 11 }, (_, i) => '<i class="' + (i === 5 ? 'mid' : '') + '"></i>').join('') +
-    '<b class="ar-mark"></b></div><span>YOU</span></div><div class="ar-ring"></div><div class="ar-spot"></div>' +
-    '<figure class="ar-you"><img alt=""></figure><figure class="ar-acc"><img alt=""><i class="ar-eyes"></i></figure>' +
+    '<div class="ar-stage"><div class="ar-ring"></div><div class="ar-spot"></div><div class="ar-top">' +
+    '<div class="ar-lean"><span class="ar-side">You</span><div class="ar-track">' +
+    Array.from({ length: 11 }, (_, i) => '<i class="' + leanBand(5 - i) + (i === 5 ? ' mid' : '') + '"></i>').join('') +
+    '<b class="ar-mark"></b></div><span class="ar-side them"></span></div><div class="ar-room"></div>' +
+    '<div class="ar-beat"><b></b><span></span></div></div>' +
+    '<figure class="ar-you"><img alt=""><figcaption>You</figcaption></figure>' +
+    '<figure class="ar-acc"><img alt=""><i class="ar-eyes"></i><figcaption></figcaption></figure>' +
     '<div class="ar-say them"><span class="ar-fi"></span><p></p><i class="ar-t"><i></i></i></div>' +
-    '<div class="ar-say you"><p></p></div><div class="ar-shown" hidden></div><div class="ar-opts"></div>' +
-    '<div class="ar-bar" hidden><i class="fg"></i><i class="ft"></i></div><div class="ar-fan"></div></div>';
+    '<div class="ar-say you"><p></p></div><div class="ar-shown" hidden></div><b class="ar-delta"></b>' +
+    '<div class="ar-opts"></div><div class="ar-bar" hidden><i class="fg"></i><i class="ft"></i></div>' +
+    '<div class="ar-bfuse" hidden><i></i></div><div class="ar-verdict"><b></b><span></span></div>' +
+    '<div class="ar-fan"></div></div>';
   el.querySelector('.ar-you img').src = getPortrait(PLAYER);
   el.querySelector('.ar-acc img').src = A.n.trueForm ? snapImage(A.n, fightSnapRec(A.n)) : getPortrait(A.n); // held in your trap: no face to hide behind
+  el.querySelector('.ar-side.them').textContent = A.n.short;
+  el.querySelector('.ar-acc figcaption').textContent = A.n.short;
+  // why the meter starts where it does: only what you could know (who's THEIRS, or got to, stays unsaid)
+  const room = el.querySelector('.ar-room'),
+    said = new Set();
+  for (const m of A.mods) {
+    const w = m.w && (NPC[m.w] || CHARS.find((c) => c.id === m.w)),
+      t = ARENA_ROOM[m.why] && ARENA_ROOM[m.why].replace('{w}', w ? w.short : 'Someone');
+    if (!t || said.has(t) || said.size >= 4) continue;
+    said.add(t);
+    const c = document.createElement('span');
+    c.className = m.v > 0 ? 'up' : 'down';
+    c.textContent = (m.v > 0 ? '+' : '−') + Math.abs(m.v) + ' ' + t;
+    room.appendChild(c);
+  }
   const ring = el.querySelector('.ar-ring'),
     k = A.crowd.length;
   A.crowd.forEach((w, i) => {
@@ -26972,19 +27071,28 @@ function arenaOpen(A) {
     p.querySelector('img').src = getPortrait(w);
     ring.appendChild(p);
   });
+  // the escape bar takes a tap as well as E
+  el.querySelector('.ar-stage').onpointerdown = (e) => {
+    if (!UI.cf || !UI.cf.bar) return;
+    e.preventDefault();
+    arenaStrike();
+  };
   el.hidden = false;
   el.classList.remove('out');
   arenaCrowd(A, 0);
   arenaDraw(A);
 }
-// a line, in a bubble: THEIRS (with the frame it's about), yours, or someone's in the crowd
+// a line, in a bubble over whoever says it: THEIRS (tagged with the frame it's about), yours, or someone's in the crowd
 function arenaSay(A, who, text, frame) {
   const el = $('#arena');
   if (!el || el.hidden) return;
   if (who === 'them' || who === 'you') {
     const b = el.querySelector('.ar-say.' + who);
     b.querySelector('p').textContent = text;
-    if (who === 'them') b.querySelector('.ar-fi').innerHTML = frame ? svgIcon(FRAME[frame].icon) : '';
+    if (who === 'them')
+      b.querySelector('.ar-fi').innerHTML = frame
+        ? svgIcon(FRAME[frame].icon) + '<em>' + FRAME[frame].name + '</em>'
+        : '';
     b.classList.remove('pop');
     void b.offsetWidth;
     b.classList.add('pop', 'on');
@@ -27003,17 +27111,24 @@ function arenaSay(A, who, text, frame) {
     p.classList.remove('lit');
   }, 2600);
 }
-// the ring shuffles toward whoever it believes; a few of them murmur, gasp or laugh
-function arenaCrowd(A, v) {
+// the ring shuffles toward whoever it believes; a few of them murmur, gasp or laugh; the number says by how much, and why
+function arenaCrowd(A, v, why) {
   const el = $('#arena');
   if (!el) return;
-  const L = A.lean;
+  const L = A.lean,
+    mark = el.querySelector('.ar-mark');
   el.querySelector('.ar-ring').style.setProperty('--lean', L);
-  el.querySelector('.ar-mark').style.left = ((L + 5) * 10).toFixed(1) + '%';
+  mark.style.setProperty('--i', 5 - L);
+  mark.className = 'ar-mark ' + leanBand(L);
   const acc = el.querySelector('.ar-acc');
   acc.classList.toggle('shine', A.isThem && L >= 2);
   acc.classList.toggle('pull', A.isThem && L >= 3);
   if (!v) return;
+  const d = el.querySelector('.ar-delta');
+  d.textContent = (v > 0 ? '+' : '−') + Math.abs(v) + (ARENA_WHY[why] ? ' · ' + ARENA_WHY[why] : '');
+  d.className = 'ar-delta ' + (v > 0 ? 'up' : 'down');
+  void d.offsetWidth;
+  d.classList.add('go');
   const ps = [...el.querySelectorAll('.ar-p')];
   for (let i = 0; i < Math.min(2, ps.length); i++) {
     const p = pick(ps),
@@ -27030,34 +27145,69 @@ function arenaCrowd(A, v) {
 }
 function arenaTimer(A) {
   const el = $('#arena'),
-    t = el && el.querySelector('.ar-t i');
-  if (t) t.style.width = (A.tMax > 0 ? (100 * clamp(A.t / A.tMax, 0, 1)).toFixed(1) : 0) + '%';
+    t = el && el.querySelector('.ar-t');
+  if (!t) return;
+  const f = A.tMax > 0 ? clamp(A.t / A.tMax, 0, 1) : 0;
+  t.firstChild.style.width = (100 * f).toFixed(1) + '%';
+  t.classList.toggle('low', A.tMax > 0 && f < 0.34);
 }
-// the card you just laid down, big, for a moment
+// the card you just laid down, big, on the floor between you, for a moment
 function arenaShow(A, p) {
   const el = $('#arena .ar-shown');
   if (!el) return;
   el.className = 'ar-shown ' + p.q;
-  el.innerHTML = '<img alt=""><span class="pc-fi">' + svgIcon(FRAME[p.frame].icon) + '</span>';
+  el.innerHTML =
+    '<img alt=""><span class="pc-fi">' +
+    svgIcon(FRAME[p.frame].icon) +
+    '</span><em>' +
+    FRAME[p.frame].name +
+    ' · ' +
+    p.q +
+    '</em>';
   el.querySelector('img').src = proofImage(p);
   el.hidden = false;
   clearTimeout(UI.arShownT);
   UI.arShownT = setTimeout(() => (el.hidden = true), 1600);
 }
+// the banner: which part of it this is, and what you can do in it
+function arenaBeat(A) {
+  const T = ARENA_BEAT,
+    b = A.bar ? 'escape' : A.beat;
+  let x = T[b];
+  if (b === 'stmt' && !A.hand.length) x = T.stmtEmpty;
+  else if (b === 'rebut' && !(A.hand.length || habitFits(A) || A.wits.length)) x = T.rebutNone;
+  return x
+    ? x.map((s) =>
+        s
+          .replace('{n}', A.n.short)
+          .replace('{i}', A.si + 1)
+          .replace('{k}', A.stmts.length),
+      )
+    : null;
+}
 // your cards along the bottom, and what you can do right now
 function arenaDraw(A) {
   const el = $('#arena');
   if (!el || el.hidden) return;
-  const fan = el.querySelector('.ar-fan');
-  const key = A.hand.map((p) => p.id).join(',') + ':' + A.sel + ':' + A.beat;
+  const fan = el.querySelector('.ar-fan'),
+    s = A.beat === 'stmt' && A.stmts[A.si],
+    fits = s && s.f; // the frame this line is about: the card that could break it sits up
+  const key = A.hand.map((p) => p.id).join(',') + ':' + A.sel + ':' + A.beat + ':' + A.si;
   if (fan.dataset.k !== key) {
     fan.dataset.k = key;
     fan.innerHTML = '';
     A.hand.forEach((p, i) => {
       const c = document.createElement('button');
-      c.className = 'ar-card ' + p.q + (i === A.sel ? ' sel' : '');
+      c.className = 'ar-card ' + p.q + (i === A.sel ? ' sel' : '') + (fits && p.frame === fits ? ' fit' : '');
       c.style.setProperty('--r', ((i - (A.hand.length - 1) / 2) * 5).toFixed(1) + 'deg');
-      c.innerHTML = '<img alt=""><span class="pc-fi">' + svgIcon(FRAME[p.frame].icon) + '</span>';
+      c.innerHTML =
+        '<img alt=""><span class="pc-fi">' +
+        svgIcon(FRAME[p.frame].icon) +
+        '</span><em class="ar-ct">' +
+        FRAME[p.frame].name +
+        ' · ' +
+        p.q +
+        '</em>';
       c.querySelector('img').src = proofImage(p);
       c.onclick = () => {
         A.sel = i;
@@ -27079,7 +27229,7 @@ function arenaDraw(A) {
     if (A.wits.length) btn('S', 'people', A.wits[0].short, () => backUp(A, 'witness'));
   } else if (A.beat === 'know') {
     const c = A.claims[A.ki];
-    if (c && c.chip) o.push({ chip: true, icon: QUIRKS[c.q].icon, label: QUIRKS[c.q].short });
+    if (c && c.chip) o.push({ chip: true, icon: QUIRKS[c.q].icon, label: 'You watched: ' + QUIRKS[c.q].short });
     btn('A', 'chat', 'True', () => callClaim(A, false));
     btn('D', 'x', 'Lie', () => callClaim(A, true));
   }
@@ -27100,7 +27250,32 @@ function arenaDraw(A) {
       opts.appendChild(b);
     }
   }
-  el.querySelector('.ar-bar').hidden = !A.bar;
+  const bt = arenaBeat(A),
+    beat = el.querySelector('.ar-beat'),
+    bkey = bt ? bt.join('|') : '';
+  if (A.beat !== 'wait' && beat.dataset.k !== bkey) {
+    // between an answer and the next line it keeps saying what it said
+    beat.dataset.k = bkey;
+    beat.hidden = !bt;
+    if (bt) {
+      beat.querySelector('b').textContent = bt[0];
+      beat.querySelector('span').textContent = bt[1];
+      beat.classList.remove('pop');
+      void beat.offsetWidth;
+      beat.classList.add('pop');
+    }
+  }
+  const vd = el.querySelector('.ar-verdict');
+  if (A.res && !vd.dataset.k) {
+    const k = A.res === 'partial' && A.escaped ? 'escaped' : A.res,
+      V = ARENA_VERDICT[k] || ARENA_VERDICT.fail;
+    vd.dataset.k = k;
+    vd.className =
+      'ar-verdict on ' + (k === 'total' || k === 'partial' ? 'good' : k === 'pfail' || k === 'escaped' ? 'meh' : 'bad');
+    vd.querySelector('b').textContent = V[0];
+    vd.querySelector('span').textContent = V[1];
+  }
+  el.querySelector('.ar-bar').hidden = el.querySelector('.ar-bfuse').hidden = !A.bar;
   if (A.bar) {
     const fg = el.querySelector('.ar-bar .fg');
     fg.style.left = (A.bar.a * 100).toFixed(1) + '%';
@@ -27110,11 +27285,18 @@ function arenaDraw(A) {
   arenaTimer(A);
 }
 function arenaBarDraw(A) {
-  const el = $('#arena .ar-bar');
-  if (!el || !A.bar) return;
-  el.querySelector('.ft').style.left = (A.bar.pos * 100).toFixed(2) + '%';
-  el.classList.toggle('hit', A.bar.res === 'hit');
-  el.classList.toggle('miss', A.bar.res === 'miss');
+  const el = $('#arena'),
+    bar = el && el.querySelector('.ar-bar'),
+    f = A.bar;
+  if (!bar || !f) return;
+  const ft = bar.querySelector('.ft');
+  ft.style.left = (f.pos * 100).toFixed(2) + '%';
+  ft.classList.toggle('back', f.dir < 0);
+  bar.classList.toggle('hit', f.res === 'hit');
+  bar.classList.toggle('miss', f.res === 'miss');
+  const left = clamp(1 - (f.t - FIGHT.grace) / FIGHT.timeout, 0, 1); // the fuse under it, as in a fight
+  el.querySelector('.ar-bfuse i').style.transform = 'scaleX(' + left.toFixed(3) + ')';
+  el.querySelector('.ar-bfuse').classList.toggle('late', left < 0.3);
 }
 function arenaClose() {
   const el = $('#arena');
