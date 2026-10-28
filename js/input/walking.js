@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
-//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, SOLID, solidCells, bodyPush, settle, tryMove, steerAssist, driveTick
-//@ Uses:    world/grid, gfx/world-geometry, sim/core, input/camera, world/objects, data/tuning, ui/interface, gfx/renderer, sim/actions, town/arrest, …
+//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidCells, bodyPush, settle, tryMove, steerAssist, …
+//@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, sim/actions, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -108,12 +108,36 @@ function slimAt(i) {
   }
   return SLIM_AT[i];
 }
+// low things you go over at a run (Shift): a bench, a fence, a chair, a bin
+const VAULT = new Set([
+  'bench',
+  'fence4',
+  'fence3',
+  'chair',
+  'chair_office',
+  'lx_chair',
+  'trashcan',
+  'trashbags',
+  'boxes',
+  'hydrant',
+]);
+let VAULT_AT = null;
+function vaultAt(i) {
+  if (!VAULT_AT) {
+    VAULT_AT = new Int32Array(W * H).fill(-1);
+    for (const o of OBJ)
+      if (VAULT.has(o.type))
+        for (let z = o.z; z < o.z + o.h; z++) for (let x = o.x; x < o.x + o.w; x++) VAULT_AT[I(x, z)] = o.idx;
+  }
+  return VAULT_AT[i] >= 0 ? OBJ[VAULT_AT[i]] : null;
+}
 let SOLID = null;
 function solidCells() {
   if (SOLID) return SOLID;
   const cells = Array.from({ length: W * H }, () => []);
-  const add = (x0, z0, x1, z1) => {
+  const add = (x0, z0, x1, z1, o) => {
     const b = [x0, z0, x1, z1];
+    if (o && VAULT.has(o.type)) b.over = o; // something you can go over
     for (let z = Math.max(0, Math.floor(z0 - 0.5)); z <= Math.min(H - 1, Math.floor(z1 + 0.5)); z++)
       for (let x = Math.max(0, Math.floor(x0 - 0.5)); x <= Math.min(W - 1, Math.floor(x1 + 0.5)); x++)
         cells[I(x, z)].push(b);
@@ -158,17 +182,17 @@ function solidCells() {
   for (const o of OBJ) {
     if (o.t.ghost || o.t.flat) continue;
     if (o.type === 'fence4' || o.type === 'fence3') {
-      if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56);
-      else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h);
+      if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56, o);
+      else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h, o);
       continue;
     }
     if (FIT_BOX.has(o.type)) {
       const b = fittedBox(o);
-      add(b[0], b[1], b[2], b[3]);
+      add(b[0], b[1], b[2], b[3], o);
       continue;
     }
     const k = SOLID_INSET[o.type] != null ? SOLID_INSET[o.type] : 0.06;
-    add(o.x + k, o.z + k, o.x + o.w - k, o.z + o.h - k);
+    add(o.x + k, o.z + k, o.x + o.w - k, o.z + o.h - k, o);
   }
   return (SOLID = cells);
 }
@@ -353,9 +377,95 @@ function steerAssist(c, v) {
   }
   return best == null ? v : side(best);
 }
+// over it at a run. Sprinting into a bench, a fence or a chair, you hop it and land running on the other side, as long
+// as there's open floor to land on and nothing else (a wall, a desk, someone sitting there) in the way. Taken at a
+// slant, a fence or a bench is something you slide along, not over.
+function airOK(x, z, r) {
+  const fx = Math.floor(x),
+    fz = Math.floor(z);
+  if (!inb(fx, fz)) return false;
+  const i = I(fx, fz);
+  if (!vaultAt(i) && !tileOK(fx, fz)) return false;
+  for (const b of solidCells()[i]) {
+    if (b.over) continue;
+    const qx = x < b[0] ? b[0] : x > b[2] ? b[2] : x,
+      qz = z < b[1] ? b[1] : z > b[3] ? b[3] : z;
+    if (Math.hypot(x - qx, z - qz) < r) return false;
+  }
+  return true;
+}
+function vaultFind(c, ux, uz) {
+  const V = CTRL.vault,
+    r = CTRL.body;
+  let o = null,
+    d0 = 0;
+  for (let d = 0.05; d <= V.look + 1e-6; d += 0.05) {
+    const x = c.x + ux * d,
+      z = c.z + uz * d;
+    if (standOK(x, z)) continue;
+    if (bodyPush(x, z, r)) o = bodyPush.box.over || null;
+    else o = vaultAt(I(Math.floor(x), Math.floor(z))); // feet into its tile before the body touches it (a bin)
+    if (!o) return null; // a wall, a desk: walk into it as ever
+    d0 = d;
+    break;
+  }
+  if (!o || o.users.some((u) => u)) return null;
+  if ((o.w >= 2 * o.h && Math.abs(uz) < 0.5) || (o.h >= 2 * o.w && Math.abs(ux) < 0.5)) return null;
+  for (let d = d0; d <= V.reach; d += 0.05) {
+    const x = c.x + ux * d,
+      z = c.z + uz * d;
+    if (!airOK(x, z, r * 0.8)) return null;
+    if (!standOK(x, z)) continue;
+    const e = d + 0.12; // a touch further when there's room, so you don't come down on its edge
+    return [o, standOK(c.x + ux * e, c.z + uz * e) ? e : d];
+  }
+  return null;
+}
+function vaultStart(c, ux, uz, speed) {
+  const f = vaultFind(c, ux, uz);
+  if (!f) return false;
+  c.vault = {
+    x0: c.x,
+    z0: c.z,
+    ux,
+    uz,
+    len: f[1],
+    s: 0,
+    v: speed * CTRL.vault.pace,
+    h: Math.min(0.5, f[0].t.h * CTRL.vault.hop),
+    lead: Math.sin(c.walkPh) >= 0 ? 1 : -1,
+  };
+  return true;
+}
+// in the air: carried along the line you took off on, whatever the keys say, until you land
+function vaultTick(c, dt) {
+  const V = c.vault;
+  if (!c.onMap || G.away) {
+    c.vault = null;
+    return false;
+  }
+  const s0 = V.s;
+  V.s = Math.min(V.len, V.s + V.v * dt);
+  c.x = V.x0 + V.ux * V.s;
+  c.z = V.z0 + V.uz * V.s;
+  c.tdir = Math.atan2(V.ux, V.uz);
+  c.path = null;
+  c.moving = true;
+  c.run = true;
+  c.jog = false;
+  c.walkPh += (V.s - s0) * 4.6;
+  G.idleT = 0;
+  cam.follow = true;
+  if (V.s >= V.len) {
+    c.vault = null;
+    audio.hx('thud', 0, 0.16); // feet down
+  }
+  return true;
+}
 function driveTick(dt) {
-  const P = PLAYER,
-    v = moveInput();
+  const P = PLAYER;
+  if (P.vault && vaultTick(P, dt)) return;
+  const v = moveInput();
   if (!v || !P.onMap || G.away) {
     if (!P.queue.length) {
       P.run = false;
@@ -371,7 +481,12 @@ function driveTick(dt) {
   }
   const slow = (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow(),
     run = !!keys.Shift;
-  const sp = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow * dt;
+  const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
+    sp = speed * dt;
+  if (run && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+    vaultTick(P, dt);
+    return;
+  }
   const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
   P.tdir = Math.atan2(v[0], v[1]);

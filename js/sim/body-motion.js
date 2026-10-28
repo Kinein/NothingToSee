@@ -421,3 +421,41 @@ function poseOver(T, P, w) {
   if (w <= 0) return;
   for (const k in P) T[k] = T[k] == null ? P[k] : lerp(T[k], P[k], w);
 }
+// over a bench at a run: the lead leg reaching across, the other tucked up under you, a hand thrown forward toward the
+// top of it and the other out for balance, the whole body lifted on an arc. Which leg leads is whichever was swinging.
+const VAULT_L = {
+  thL: -1.5,
+  shL: 0.35,
+  thR: -0.75,
+  shR: 1.95,
+  uaL: 0.35,
+  aoL: 0.55,
+  uaR: -0.95,
+  faR: -0.25,
+  aoR: 0.15,
+  torso: 0.42,
+  twist: 0.12,
+  roll: -0.08,
+  hp: -0.12,
+};
+const VAULT_R = {
+  thR: -1.5,
+  shR: 0.35,
+  thL: -0.75,
+  shL: 1.95,
+  uaR: 0.35,
+  aoR: 0.55,
+  uaL: -0.95,
+  faL: -0.25,
+  aoL: 0.15,
+  torso: 0.42,
+  twist: -0.12,
+  roll: 0.08,
+  hp: -0.12,
+};
+function vaultPose(c, T) {
+  const V = c.vault,
+    a = Math.sin((Math.PI * V.s) / V.len);
+  poseOver(T, V.lead > 0 ? VAULT_L : VAULT_R, Math.min(1, a * 2.2));
+  T.float += a * V.h;
+}

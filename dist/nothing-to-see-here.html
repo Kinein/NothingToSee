@@ -904,7 +904,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.3 · updated Oct 28, 2026</p>
+  <p id="version">v1.4 · updated Oct 28, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -924,7 +924,7 @@ svg.na{fill:#cbbdaa;stroke:none}
     <header><h2>Controls</h2><button class="x" id="help-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="helpgrid">
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/></svg><kbd>W A S D</kbd><span>Walk · W into the scene</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run · over benches, fences, chairs</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E · Space</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of what’s in front. Every try fills one frame, greys one or finds nothing · film is free, a lens in someone’s face isn’t</span></div>
@@ -1230,6 +1230,9 @@ const PHOTO_RANGE = 11;
 const CTRL = {
   walk: 1.45,        // you jog everywhere: half again a townsperson's stroll, so you can keep up with anyone and still look about
   sprint: 1.5,       // Shift: on top of the jog
+  // Shift into a bench, a fence, a chair: over it without stopping. look: how far ahead it sees the thing coming;
+  // reach: the longest hop, take-off to landing; pace: share of your sprint kept in the air; hop: how high, × its height
+  vault: { look: 0.3, reach: 2.2, pace: 0.92, hop: 0.42 },
   npcPace: 0.9,      // an ordinary walk, a touch unhurried
   npcRun: 1.46,      // anybody running (a fright, or something not human): two thirds of your sprint
   body: 0.22,        // your radius against walls and furniture: a round body, about shoulder-wide
@@ -10988,6 +10991,44 @@ function poseOver(T, P, w) {
   if (w <= 0) return;
   for (const k in P) T[k] = T[k] == null ? P[k] : lerp(T[k], P[k], w);
 }
+// over a bench at a run: the lead leg reaching across, the other tucked up under you, a hand thrown forward toward the
+// top of it and the other out for balance, the whole body lifted on an arc. Which leg leads is whichever was swinging.
+const VAULT_L = {
+  thL: -1.5,
+  shL: 0.35,
+  thR: -0.75,
+  shR: 1.95,
+  uaL: 0.35,
+  aoL: 0.55,
+  uaR: -0.95,
+  faR: -0.25,
+  aoR: 0.15,
+  torso: 0.42,
+  twist: 0.12,
+  roll: -0.08,
+  hp: -0.12,
+};
+const VAULT_R = {
+  thR: -1.5,
+  shR: 0.35,
+  thL: -0.75,
+  shL: 1.95,
+  uaR: 0.35,
+  aoR: 0.55,
+  uaL: -0.95,
+  faL: -0.25,
+  aoL: 0.15,
+  torso: 0.42,
+  twist: -0.12,
+  roll: 0.08,
+  hp: -0.12,
+};
+function vaultPose(c, T) {
+  const V = c.vault,
+    a = Math.sin((Math.PI * V.s) / V.len);
+  poseOver(T, V.lead > 0 ? VAULT_L : VAULT_R, Math.min(1, a * 2.2));
+  T.float += a * V.h;
+}
 // ── onto a seat or a bed, and up off it: a couple of steps round, then the hips go back and down over feet that stay
 // planted, leaning out over them, arms forward for balance, and a small give as the seat takes the weight. Up again
 // is the other way about: feet in under you, lean over them, push up, step off. A bed is sat on at its edge first;
@@ -11482,6 +11523,7 @@ function animTargets(c, dt) {
         ge = g * g * (3 - 2 * g);
       for (const k in T) T[k] = D[k] + (T[k] - D[k]) * ge;
     } // a walk coming on, or dying away
+    if (c.vault) vaultPose(c, T);
     return T;
   }
   const pose = c.vpose || c.pose,
@@ -12271,6 +12313,7 @@ function hardReset(c) {
   c.moving = false;
   c.pose = 'stand';
   c.y = 0;
+  c.vault = null;
   if (c.fx) c.fx.prop = null;
   c.run = false;
   c.seatTr = null;
@@ -27566,12 +27609,36 @@ function slimAt(i) {
   }
   return SLIM_AT[i];
 }
+// low things you go over at a run (Shift): a bench, a fence, a chair, a bin
+const VAULT = new Set([
+  'bench',
+  'fence4',
+  'fence3',
+  'chair',
+  'chair_office',
+  'lx_chair',
+  'trashcan',
+  'trashbags',
+  'boxes',
+  'hydrant',
+]);
+let VAULT_AT = null;
+function vaultAt(i) {
+  if (!VAULT_AT) {
+    VAULT_AT = new Int32Array(W * H).fill(-1);
+    for (const o of OBJ)
+      if (VAULT.has(o.type))
+        for (let z = o.z; z < o.z + o.h; z++) for (let x = o.x; x < o.x + o.w; x++) VAULT_AT[I(x, z)] = o.idx;
+  }
+  return VAULT_AT[i] >= 0 ? OBJ[VAULT_AT[i]] : null;
+}
 let SOLID = null;
 function solidCells() {
   if (SOLID) return SOLID;
   const cells = Array.from({ length: W * H }, () => []);
-  const add = (x0, z0, x1, z1) => {
+  const add = (x0, z0, x1, z1, o) => {
     const b = [x0, z0, x1, z1];
+    if (o && VAULT.has(o.type)) b.over = o; // something you can go over
     for (let z = Math.max(0, Math.floor(z0 - 0.5)); z <= Math.min(H - 1, Math.floor(z1 + 0.5)); z++)
       for (let x = Math.max(0, Math.floor(x0 - 0.5)); x <= Math.min(W - 1, Math.floor(x1 + 0.5)); x++)
         cells[I(x, z)].push(b);
@@ -27616,17 +27683,17 @@ function solidCells() {
   for (const o of OBJ) {
     if (o.t.ghost || o.t.flat) continue;
     if (o.type === 'fence4' || o.type === 'fence3') {
-      if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56);
-      else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h);
+      if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56, o);
+      else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h, o);
       continue;
     }
     if (FIT_BOX.has(o.type)) {
       const b = fittedBox(o);
-      add(b[0], b[1], b[2], b[3]);
+      add(b[0], b[1], b[2], b[3], o);
       continue;
     }
     const k = SOLID_INSET[o.type] != null ? SOLID_INSET[o.type] : 0.06;
-    add(o.x + k, o.z + k, o.x + o.w - k, o.z + o.h - k);
+    add(o.x + k, o.z + k, o.x + o.w - k, o.z + o.h - k, o);
   }
   return (SOLID = cells);
 }
@@ -27811,9 +27878,95 @@ function steerAssist(c, v) {
   }
   return best == null ? v : side(best);
 }
+// over it at a run. Sprinting into a bench, a fence or a chair, you hop it and land running on the other side, as long
+// as there's open floor to land on and nothing else (a wall, a desk, someone sitting there) in the way. Taken at a
+// slant, a fence or a bench is something you slide along, not over.
+function airOK(x, z, r) {
+  const fx = Math.floor(x),
+    fz = Math.floor(z);
+  if (!inb(fx, fz)) return false;
+  const i = I(fx, fz);
+  if (!vaultAt(i) && !tileOK(fx, fz)) return false;
+  for (const b of solidCells()[i]) {
+    if (b.over) continue;
+    const qx = x < b[0] ? b[0] : x > b[2] ? b[2] : x,
+      qz = z < b[1] ? b[1] : z > b[3] ? b[3] : z;
+    if (Math.hypot(x - qx, z - qz) < r) return false;
+  }
+  return true;
+}
+function vaultFind(c, ux, uz) {
+  const V = CTRL.vault,
+    r = CTRL.body;
+  let o = null,
+    d0 = 0;
+  for (let d = 0.05; d <= V.look + 1e-6; d += 0.05) {
+    const x = c.x + ux * d,
+      z = c.z + uz * d;
+    if (standOK(x, z)) continue;
+    if (bodyPush(x, z, r)) o = bodyPush.box.over || null;
+    else o = vaultAt(I(Math.floor(x), Math.floor(z))); // feet into its tile before the body touches it (a bin)
+    if (!o) return null; // a wall, a desk: walk into it as ever
+    d0 = d;
+    break;
+  }
+  if (!o || o.users.some((u) => u)) return null;
+  if ((o.w >= 2 * o.h && Math.abs(uz) < 0.5) || (o.h >= 2 * o.w && Math.abs(ux) < 0.5)) return null;
+  for (let d = d0; d <= V.reach; d += 0.05) {
+    const x = c.x + ux * d,
+      z = c.z + uz * d;
+    if (!airOK(x, z, r * 0.8)) return null;
+    if (!standOK(x, z)) continue;
+    const e = d + 0.12; // a touch further when there's room, so you don't come down on its edge
+    return [o, standOK(c.x + ux * e, c.z + uz * e) ? e : d];
+  }
+  return null;
+}
+function vaultStart(c, ux, uz, speed) {
+  const f = vaultFind(c, ux, uz);
+  if (!f) return false;
+  c.vault = {
+    x0: c.x,
+    z0: c.z,
+    ux,
+    uz,
+    len: f[1],
+    s: 0,
+    v: speed * CTRL.vault.pace,
+    h: Math.min(0.5, f[0].t.h * CTRL.vault.hop),
+    lead: Math.sin(c.walkPh) >= 0 ? 1 : -1,
+  };
+  return true;
+}
+// in the air: carried along the line you took off on, whatever the keys say, until you land
+function vaultTick(c, dt) {
+  const V = c.vault;
+  if (!c.onMap || G.away) {
+    c.vault = null;
+    return false;
+  }
+  const s0 = V.s;
+  V.s = Math.min(V.len, V.s + V.v * dt);
+  c.x = V.x0 + V.ux * V.s;
+  c.z = V.z0 + V.uz * V.s;
+  c.tdir = Math.atan2(V.ux, V.uz);
+  c.path = null;
+  c.moving = true;
+  c.run = true;
+  c.jog = false;
+  c.walkPh += (V.s - s0) * 4.6;
+  G.idleT = 0;
+  cam.follow = true;
+  if (V.s >= V.len) {
+    c.vault = null;
+    audio.hx('thud', 0, 0.16); // feet down
+  }
+  return true;
+}
 function driveTick(dt) {
-  const P = PLAYER,
-    v = moveInput();
+  const P = PLAYER;
+  if (P.vault && vaultTick(P, dt)) return;
+  const v = moveInput();
   if (!v || !P.onMap || G.away) {
     if (!P.queue.length) {
       P.run = false;
@@ -27829,7 +27982,12 @@ function driveTick(dt) {
   }
   const slow = (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow(),
     run = !!keys.Shift;
-  const sp = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow * dt;
+  const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
+    sp = speed * dt;
+  if (run && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+    vaultTick(P, dt);
+    return;
+  }
   const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
   P.tdir = Math.atan2(v[0], v[1]);

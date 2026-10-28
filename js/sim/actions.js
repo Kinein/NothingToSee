@@ -140,6 +140,7 @@ function hardReset(c) {
   c.moving = false;
   c.pose = 'stand';
   c.y = 0;
+  c.vault = null;
   if (c.fx) c.fx.prop = null;
   c.run = false;
   c.seatTr = null;

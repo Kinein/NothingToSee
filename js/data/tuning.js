@@ -13,6 +13,9 @@ const PHOTO_RANGE = 11;
 const CTRL = {
   walk: 1.45,        // you jog everywhere: half again a townsperson's stroll, so you can keep up with anyone and still look about
   sprint: 1.5,       // Shift: on top of the jog
+  // Shift into a bench, a fence, a chair: over it without stopping. look: how far ahead it sees the thing coming;
+  // reach: the longest hop, take-off to landing; pace: share of your sprint kept in the air; hop: how high, × its height
+  vault: { look: 0.3, reach: 2.2, pace: 0.92, hop: 0.42 },
   npcPace: 0.9,      // an ordinary walk, a touch unhurried
   npcRun: 1.46,      // anybody running (a fright, or something not human): two thirds of your sprint
   body: 0.22,        // your radius against walls and furniture: a round body, about shoulder-wide

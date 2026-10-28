@@ -20,7 +20,7 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  118 lines
+### data/tuning  ·  #2  ·  121 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
@@ -242,11 +242,11 @@ Character records
 - **→ uses:** core/util, sim/core
 - **← used by:** 26
 
-### sim/body-motion  ·  #28  ·  419 lines
+### sim/body-motion  ·  #28  ·  457 lines
 
 The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses
 
-- **Defines (27):** `MOTION` `SETTLE` `settle0` `keyed` `bodySide` `bodySeed` `viaPose` `motionPre` `GAIT` `JOG_W` `GP` `gaitParams` `gaitTargets` `PUNCH` `GRAB` `keyPose` `handsToHead` `photoPose` `LEG_T` `LEG_S` `footY0` `legIK` `SEAT_FOOT` `seatLegs` `seatPose` `liePose` `poseOver`
+- **Defines (30):** `MOTION` `SETTLE` `settle0` `keyed` `bodySide` `bodySeed` `viaPose` `motionPre` `GAIT` `JOG_W` `GP` `gaitParams` `gaitTargets` `PUNCH` `GRAB` `keyPose` `handsToHead` `photoPose` `LEG_T` `LEG_S` `footY0` `legIK` `SEAT_FOOT` `seatLegs` `seatPose` `liePose` `poseOver` `VAULT_L` `VAULT_R` `vaultPose`
 - **→ uses:** core/util, gfx/reach-rig, gfx/renderer
 - **← used by:** 4 (sim/seat-moves, sim/pose, horror/layer, taken/taken)
 
@@ -258,7 +258,7 @@ Sitting down, getting up, lying down: the steps and the lowering
 - **→ uses:** core/util, sim/body-motion, sim/characters, world/paths, sim/actions
 - **← used by:** 2 (sim/pose, sim/actions)
 
-### sim/pose  ·  #30  ·  674 lines
+### sim/pose  ·  #30  ·  675 lines
 
 Each frame's pose: targets, gestures, door reach, blending, turning, animate
 
@@ -274,7 +274,7 @@ Following paths and moving characters
 - **→ uses:** data/tuning, sim/core, world/paths
 - **← used by:** 9
 
-### sim/actions  ·  #32  ·  644 lines
+### sim/actions  ·  #32  ·  645 lines
 
 The action queue shared by player and NPCs
 
@@ -754,12 +754,12 @@ Input and camera control
 - **→ uses:** gfx/renderer, ui/interface, sim/core, ui/menus, ui/pie-menu, taken/taken, sim/actions, core/util, world/vision, world/grid, play/stashes, world/objects, town/cast, town/fleeing
 - **← used by:** 8
 
-### input/walking  ·  #80  ·  383 lines
+### input/walking  ·  #80  ·  498 lines
 
 WASD walking relative to the camera
 
-- **Defines (17):** `moveInput` `SOLID_INSET` `SLIM` `FIT_BOX` `fittedBox` `SLIM_AT` `slimAt` `SOLID` `solidCells` `bodyPush` `tileOK` `footOK` `standOK` `settle` `tryMove` `steerAssist` `driveTick`
-- **→ uses:** world/grid, gfx/world-geometry, sim/core, input/camera, world/objects, data/tuning, ui/interface, gfx/renderer, sim/actions, town/arrest, gfx/gl, gfx/models, core/util, world/paths … +1
+- **Defines (24):** `moveInput` `SOLID_INSET` `SLIM` `FIT_BOX` `fittedBox` `SLIM_AT` `slimAt` `VAULT` `VAULT_AT` `vaultAt` `SOLID` `solidCells` `bodyPush` `tileOK` `footOK` `standOK` `settle` `tryMove` `steerAssist` `airOK` `vaultFind` `vaultStart` `vaultTick` `driveTick`
+- **→ uses:** world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, sim/actions, town/arrest, gfx/gl, gfx/models, core/util, world/paths … +2
 - **← used by:** 5 (town/arrest, town/fleeing, ui/menus, taken/way-out-play, game/loop)
 
 ### input/targeting  ·  #81  ·  342 lines
@@ -778,7 +778,7 @@ Sound, all synthesised (Web Audio)
 
 - **Defines (1):** `audio`
 - **→ uses:** core/util
-- **← used by:** 51
+- **← used by:** 52
 
 ## taken/
 

@@ -107,6 +107,7 @@ function animTargets(c, dt) {
         ge = g * g * (3 - 2 * g);
       for (const k in T) T[k] = D[k] + (T[k] - D[k]) * ge;
     } // a walk coming on, or dying away
+    if (c.vault) vaultPose(c, T);
     return T;
   }
   const pose = c.vpose || c.pose,
