@@ -666,77 +666,7 @@ body.capturing #view{cursor:default}
 #cap .cp-bub::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:#efe9d8;border-bottom:0}
 body.capturing #hunt{display:none}
 
-#fight{display:grid;place-items:center;padding:16px;background:radial-gradient(ellipse at 50% 50%,rgba(70,10,6,.22),rgba(30,3,2,.62) 62%,rgba(3,2,3,.86));z-index:9;cursor:crosshair;--fr:208,81,60}
-#fight::before,#fight::after{content:'';position:absolute;inset:0;pointer-events:none}
-#fight::before{box-shadow:inset 0 0 120px 30px rgba(120,10,6,.55);animation:fbeat 1.1s ease-in-out infinite}
-#fight::after{opacity:0;background:radial-gradient(circle at 50% 50%,transparent 30%,rgba(200,20,10,.5))}
-#fight.late::before{animation-duration:.55s}
-#fight.miss::after{animation:fblood .6s ease-out}
-#fight.hit::after{background:radial-gradient(circle at 50% 50%,rgba(255,244,220,.16),transparent 60%);animation:fblood .35s ease-out}
-#fight .fbox{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:12px;width:min(460px,calc(100vw - 32px));box-sizing:border-box;padding:18px 22px 14px;background:linear-gradient(#22100e,#0c0809);border:1px solid rgba(var(--fr),.5);box-shadow:0 0 0 1px rgba(0,0,0,.6),0 24px 70px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,220,190,.06);animation:pop .18s ease-out}
-#fight .fbox::after{content:'';position:absolute;inset:-7px;pointer-events:none;--c:rgba(var(--fr),.85);
-  background:linear-gradient(var(--c),var(--c)) 0 0/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 0 0/2px 12px no-repeat,
-  linear-gradient(var(--c),var(--c)) 100% 0/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 0/2px 12px no-repeat,
-  linear-gradient(var(--c),var(--c)) 0 100%/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 0 100%/2px 12px no-repeat,
-  linear-gradient(var(--c),var(--c)) 100% 100%/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 100%/2px 12px no-repeat}
-#fight .fhead{display:flex;align-items:center;gap:16px}
-#fight .fside{flex:none;display:flex;flex-direction:column;gap:7px;width:84px}
-#fight .fpic{position:relative;box-sizing:border-box;height:84px;padding:3px;border:1px solid rgba(var(--fr),.7);background:#0a0606;box-shadow:0 0 18px rgba(var(--fr),.35),0 8px 18px rgba(0,0,0,.6);overflow:hidden}
-#fight .fpic img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 25%;filter:contrast(1.12) saturate(.85)}
-#fight .fpic::after{content:'';position:absolute;inset:3px;pointer-events:none;background:radial-gradient(circle at 50% 40%,transparent 45%,rgba(60,0,0,.55));mix-blend-mode:multiply}
-#fight .fslash{position:absolute;left:-30%;top:50%;width:160%;height:3px;margin-top:-1.5px;background:linear-gradient(90deg,transparent,#fff6e2 30%,#fff 50%,#fff6e2 70%,transparent);box-shadow:0 0 10px #fff,0 0 22px rgba(255,220,170,.8);transform:rotate(-38deg) scaleX(0);opacity:0;pointer-events:none}
-#fight .ftxt{display:flex;flex-direction:column;gap:5px;min-width:0;padding-bottom:12px}
-#fight .fres{font:italic 700 40px/1 var(--f-disp);color:#f2e6cc;text-shadow:0 2px 14px rgba(0,0,0,.8);white-space:nowrap}
-#fight .fsub{min-height:1.2em;font:13.5px/1.2 var(--f-type);letter-spacing:.06em;color:var(--dim)}
-#fight .fhp{display:flex;gap:3px;height:7px;padding:0 2px}
-#fight .fhp i{flex:1;background:linear-gradient(#ef6a52,#a8301f);transform:skewX(-14deg);box-shadow:0 0 8px rgba(var(--fr),.6);transition:background .3s,box-shadow .3s,border-color .3s}
-#fight .fhp i.off{background:transparent;box-shadow:none;border:1.5px solid rgba(var(--fr),.4)}
-#fight .fhp i.gone{animation:fpip .5s ease-out}
-#fight .fbar{position:relative;height:34px;overflow-x:clip;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,230,200,.09) calc(10% - 1px) 10%),repeating-linear-gradient(-45deg,rgba(0,0,0,.18) 0 4px,transparent 4px 9px),linear-gradient(#6e1f16,#3b0e0a 55%,#2a0806);border:1px solid rgba(255,220,190,.16);box-shadow:inset 0 2px 8px rgba(0,0,0,.7),inset 0 -1px 0 rgba(255,255,255,.05);transition:box-shadow .2s,filter .2s}
-#fight .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#93d77c,#4e8b43 60%,#3e7536);box-shadow:0 0 16px rgba(140,220,120,.55),inset 1px 0 0 rgba(220,255,200,.5),inset -1px 0 0 rgba(220,255,200,.5)}
-#fight .fc{position:absolute;top:0;bottom:0;background:linear-gradient(#f4ffd8,#b6eb8c 55%,#8fd27a);box-shadow:0 0 12px rgba(230,255,190,.75)}
-#fight .fc::before,#fight .fc::after{content:'';position:absolute;left:50%;margin-left:-5px;border:5px solid transparent}
-#fight .fc::before{top:-1px;border-top-color:#fffbe8}
-#fight .fc::after{bottom:-1px;border-bottom-color:#fffbe8}
-#fight .ft{position:absolute;top:-5px;bottom:-5px;left:0;width:4px;margin-left:-2px;background:#fffaf0;box-shadow:0 0 6px #fff,0 0 16px rgba(255,236,200,.9)}
-#fight .ft::before{content:'';position:absolute;top:5px;bottom:5px;right:100%;width:46px;background:linear-gradient(to left,rgba(255,240,215,.42),transparent)}
-#fight .ft.back::before{right:auto;left:100%;background:linear-gradient(to right,rgba(255,240,215,.42),transparent)}
-#fight .fm{position:absolute;top:-7px;bottom:-7px;left:0;width:2px;margin-left:-1px;display:none;background:currentColor;color:#fff;box-shadow:0 0 10px currentColor}
-#fight .ffuse{height:3px;margin-top:-4px;background:rgba(255,220,190,.08)}
-#fight .ffuse i{display:block;height:100%;background:linear-gradient(90deg,rgba(228,162,74,.55),var(--sodium));box-shadow:0 0 8px rgba(228,162,74,.6);transform-origin:0 50%}
-#fight.late .ffuse i{background:var(--blood);box-shadow:0 0 10px rgba(var(--fr),.9);animation:flate .3s steps(2) infinite}
-#fight .fkey{align-self:center;font:14px var(--f-type);letter-spacing:.1em;color:var(--dim)}
-#fight .fkey kbd{font:inherit;color:var(--sodium)}
-#fight.ready .ft{animation:fready .35s ease-out}
-#fight.ready .fbar{filter:brightness(.8)}
-#fight.lunge .fpic{animation:flunge .35s cubic-bezier(.2,1.4,.4,1)}
-#fight.hit .fbox{animation:fshake .28s ease-out}
-#fight.hit .fbar{box-shadow:0 0 0 2px var(--ok),0 0 24px rgba(147,180,131,.6),inset 0 2px 8px rgba(0,0,0,.7)}
-#fight.hit .fres{color:#c6eab4}
-#fight.hit .fslash{animation:fslash .32s ease-out forwards}
-#fight.hit .fpic img{animation:fhurt .45s ease-out}
-#fight.hit .fm,#fight.miss .fm{display:block}
-#fight.hit .ft,#fight.miss .ft{opacity:0}
-#fight.clean .fres{color:#fff1c2;text-shadow:0 0 18px rgba(255,214,120,.7),0 2px 14px rgba(0,0,0,.8)}
-#fight.clean .fbar{box-shadow:0 0 0 2px #f5e3a0,0 0 30px rgba(255,220,140,.7),inset 0 2px 8px rgba(0,0,0,.7)}
-#fight.clean .fm{color:#fff3c4}
-#fight.clean .fbox{animation:fshake .4s ease-out}
-#fight.miss .fbox{animation:fshake .45s ease-out;border-color:rgba(var(--fr),.9)}
-#fight.miss .fbar{box-shadow:0 0 0 2px var(--blood),0 0 24px rgba(var(--fr),.55),inset 0 2px 8px rgba(0,0,0,.7)}
-#fight.miss .fres{color:#f08a74}
-#fight.miss .fsub{color:#e4a090}
-#fight.miss .fm{color:#ff8a6e}
-#fight.miss .fpic{animation:flunge .4s cubic-bezier(.2,1.4,.4,1);box-shadow:0 0 30px rgba(var(--fr),.8),0 8px 18px rgba(0,0,0,.6)}
-@keyframes fbeat{0%,100%{opacity:.7}14%{opacity:1}28%{opacity:.75}42%{opacity:.95}}
-@keyframes fblood{0%{opacity:1}100%{opacity:0}}
-@keyframes fshake{0%{transform:none}15%{transform:translate(-7px,2px)}30%{transform:translate(6px,-2px)}45%{transform:translate(-4px,1px)}60%{transform:translate(3px,0)}80%{transform:translate(-1px,0)}100%{transform:none}}
-@keyframes flunge{0%{transform:scale(1.28)}100%{transform:none}}
-@keyframes fslash{0%{transform:rotate(-38deg) scaleX(0);opacity:1}55%{transform:rotate(-38deg) scaleX(1);opacity:1}100%{transform:rotate(-38deg) scaleX(1);opacity:0}}
-@keyframes fhurt{0%{filter:brightness(2.4) contrast(1.4)}100%{filter:contrast(1.12) saturate(.85)}}
-@keyframes fpip{0%{transform:skewX(-14deg) scale(1.7);background:#fff;box-shadow:0 0 16px #fff}100%{transform:skewX(-14deg)}}
-@keyframes fready{0%{opacity:0;transform:scaleY(.2)}100%{opacity:1;transform:none}}
 @keyframes flate{50%{opacity:.45}}
-@media (prefers-reduced-motion:reduce){#fight::before,#fight .fbox,#fight .fpic,#fight.ready .ft{animation:none!important}}
 .aim{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
 .aim i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ff2a1a;box-shadow:0 0 12px 4px rgba(255,40,20,.7);animation:aimp .35s ease-in-out infinite}
 @keyframes aimp{50%{transform:scale(1.5)}}
@@ -880,12 +810,11 @@ svg.na{fill:#cbbdaa;stroke:none}
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
   <div id="zz" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleeping</div>
-  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act</span><span><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
+  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
   <div id="tools"></div>
 </div>
 <div id="pie" hidden></div>
 <div id="scene" class="overlay" hidden aria-hidden="true"><div class="beam"></div><div class="table"></div><i class="g g1"></i><i class="g g2"></i><i class="g g3"></i><b class="cap"></b></div>
-<div id="fight" class="overlay" hidden><div class="fbox" role="dialog" aria-label="Fight"><div class="fhead"><div class="fside"><div class="fpic"><img alt=""><i class="fslash"></i></div><span class="fhp"></span></div><div class="ftxt"><b class="fres"></b><span class="fsub"></span></div></div><div class="fbar"><i class="fg"><i class="fc"></i></i><i class="fm"></i><i class="ft"></i></div><div class="ffuse"><i></i></div><span class="fkey"><kbd>E</kbd> · <em class="tapword">Click</em> in the green</span></div></div>
 
 <div id="title" class="overlay">
   <div class="t-inner">
@@ -904,7 +833,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.5 · updated Oct 28, 2026</p>
+  <p id="version">v1.6 · updated Oct 28, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -925,7 +854,7 @@ svg.na{fill:#cbbdaa;stroke:none}
     <div class="helpgrid">
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/></svg><kbd>W A S D</kbd><span>Walk · W into the scene</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run · over benches, fences, chairs</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E · Space</kbd><span>Act on what you face</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of what’s in front. Every try fills one frame, greys one or finds nothing · film is free, a lens in someone’s face isn’t</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Act on what’s in reach</span></div>
@@ -941,7 +870,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: a Home card, or trap bait. THEY hate seeing them on you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting, only shouting it at them</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards you show are spent · alone, it’s Attack</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Fight</kbd><span>Swing up close. When IT lunges: E in the green · dead center knocks it down for a free hit</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Space</kbd><span>Hit · a red patch on the ground is where a blow lands: step out of it. Hit IT while it stands there open and it goes down</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down in front of people and it gives up · the FBI comes for it · alone, it dies and nobody saw</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Half-changed</kbd><span>Real only at night, late in THEIR week, with a clear head · shaken, it’s in your head and the camera shows nothing</span></div>
@@ -1243,9 +1172,11 @@ const CTRL = {
   facing: 70,        // half-angle you must roughly face to pick something new (a 140° wedge)
   holdDist: 0.6,     // once picked, a target stays picked out to reach + this…
   holdFacing: 110,   // …and to this half-angle, so a small step or a turn doesn't drop it
-  melee: 2.0,        // a swing connects if they're still this close when it lands
+  melee: 1.7,        // a swing connects with anyone this close, in front of you, when it lands
+  meleeArc: 75,      // …within this half-angle of where you face (closer than `close`, any side)
   windup: 0.5,       // the swing lands this long after the key (about a quarter second at normal speed): a moving enemy can slip it
   swingCd: 0.7,      // real seconds between your swings
+  crowbar: 0.35,     // a crowbar in your hand: this much more reach
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
@@ -1259,11 +1190,13 @@ const CTRL = {
 // the work bar: +30 on sitting down (once an hour), +25/h working, −9/h away. Empty, and you're let go: no second chances,
 // but it takes most of a shift away from the desk to get there.
 const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
-const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18 };   // what a blow costs your health
+const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18, thrown: 18, sting: 3 };   // what a blow costs your health
 // the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
 // He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
-// minutes, so running buys time, never freedom. Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
-const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5 };
+// minutes. Up close he reaches for you: `grab` game minutes of warning, and his hands close on anyone within `hold`.
+// Step out of it and you slip him; he stumbles for `stumble`. Slip him `slips` times and he gives up, winded.
+// Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
+const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5, grab: 0.8, hold: 1.0, lunge: 0.5, stumble: 2.2, slips: 3 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -1285,14 +1218,44 @@ const ATTACK_ODDS = [0, 0.33, 0.45, 0.6, 0.8, 0.95];
 const HORROR_MIX = [null, [0.5, 0.35, 0.15, 0], [0.35, 0.3, 0.25, 0.1], [0.25, 0.2, 0.3, 0.25], [0.15, 0.15, 0.3, 0.4], [0.1, 0.1, 0.3, 0.5]];
 const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY are cleaning up after THEMSELVES'], [55, 'eye', 'Someone watches your window'], [70, 'eye', 'THEY are coming for you'], [100, 'eye', 'THEY are ready for you']];
 
-// ── Fights (combat/timing-bar)
-// a fight is rounds of the timing bar. A true form takes several hits to put down; every miss, it gets you.
-const FIGHT_DIFF = { normal: [0.4, 0.55], them: [0.25, 0.85], aliens: [0.2, 0.9], lizards: [0.15, 1.15], zombies: [0.18, 1.0] };
+// ── Fights (combat/melee, combat/throws)
+// all out in the street, no panel. Space swings. A true form takes several hits to put down. Every blow it throws is
+// shown first, as a red patch on the ground where it will land: step out of it. Hit it while it stands there open
+// after hitting air, and it goes down. Times in game minutes (half that in seconds at normal speed).
 const FOE_HP = { aliens: 2, lizards: 3, zombies: 3 };
-// the timing bar itself (combat/timing-bar). grace: real seconds the tracker holds still as the panel opens, so a key
-// already on its way for something else doesn't waste the swing. timeout: real seconds before freezing up counts as a
-// miss. clean: the middle share of the green that lands a clean hit. down: game minutes a clean hit leaves it on the ground.
-const FIGHT = { grace: 0.35, timeout: 6, clean: 0.34, down: 3.2 };
+const MELEE = {
+  engage: 1.5,                  // it starts winding up when you're this close
+  wind: { lizards: 0.75, aliens: 1.0, zombies: 1.25 }, // the warning: red patch to blow
+  creep: 0.35,                  // while winding up it edges after you at this share of a walk
+  lunge: 0.7,                   // then throws itself this far forward…
+  reach: 1.05,                  // …and hits anything this close to the spot in front of it: that's the red patch
+  rec: 1.1,                     // stands after a blow that landed
+  open: 2.2,                    // stands after one that hit air: its guard is down, and a hit now knocks it flat
+  down: 3.2,                    // flat on the ground after that
+  stagger: 0.9,                 // knocked back by your hit: this long before it can wind up again
+  punch: 0.85,                  // a person's punch (someone you hit, a thug): warning to landing
+  punchReach: 0.8,              // …its patch, centred three quarters of a tile in front of them
+  punchTries: 3,                // a missed punch, they come again, this many times in all
+};
+// what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
+// laser (in them/true-form). A throw lands where you stood when it left the hands.
+const RANGED = {
+  from: 2.6, to: 9,             // the distances it bothers to throw or loose a swarm at
+  grab: 1.9,                    // a lizard picks up something no further than this from it
+  lift: 0.9,                    // overhead, in plain sight, this long before it lets go
+  fly: 0.55, flyPer: 0.06,      // flight time: this, plus this much per tile
+  hit: 0.85,                    // lands on you if you're this close to where it comes down
+  throwCd: 7,
+  wake: 0.9,                    // the dead: mouth open this long before the swarm comes out
+  swarmCd: 16,
+  swarmLife: 24,                // a swarm gives up after this long
+  swarmSpd: 1.75,               // × a walk: faster than your jog, slower than your sprint. Run.
+  swarmHit: 0.6, swarmEvery: 1.4, // stings anyone this close, this often
+};
+// the confrontation's own bar (play/arena) still uses these: how wide its green and how quick its tracker; grace:
+// real seconds it holds still as it opens; timeout: real seconds before freezing up counts as a miss
+const FIGHT_DIFF = { them: [0.25, 0.85] };
+const FIGHT = { grace: 0.35, timeout: 6 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
 // Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
@@ -1330,11 +1293,11 @@ const EVIDENCE = {
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { day: 3, sus: 15, aware: 10 },
-  // fights by situation (multipliers on FIGHT_DIFF and HURT): alone with it, it's far worse
+  // fights by situation (multipliers on MELEE.wind and HURT): alone with it, it's far worse
   fight: {
-    privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWindow: 0.85,
-    trapHp: -1, trapWindow: 1.5, trapSpeed: 0.8,
-    crowdSaw: 3, crowdSave: 0.3,  // three who saw it change land a free blow; then each miss, this chance someone pulls it off you
+    privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWind: 0.85,
+    trapHp: -1, trapWind: 1.3,
+    crowdSaw: 3, crowdSave: 0.3,  // three who saw it change land a free blow; then each blow it lands, this chance someone pulls it off you
     loseSight: 6,                 // seconds out of its sight, at night, to lose it
   },
 };
@@ -1456,7 +1419,8 @@ const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We
 const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
 const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
 const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
-// the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that
+// the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that; a grab you slip
+// (what he shouts), and when you've slipped him enough, giving up
 const COP_WARN = {
   open: ['Oi! You. Stop right there.', 'Hey! Yes, YOU. A word.', 'Hold it. Don’t you walk away from me.'],
   mid: ['I’ve had calls about you. All week.', 'Creeping round people’s houses? Frightening folk?', 'People are scared of you. Do you know that?'],
@@ -1464,6 +1428,8 @@ const COP_WARN = {
 };
 const COP_CHASE = ['Stop! Police!', 'Don’t make this worse!', 'You can’t run forever!', 'Stop right there!', 'I warned you!'];
 const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re coming with me.', 'Enough running. Turn round.'];
+const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
+const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
 const ARENA_END = {
   total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },
@@ -9359,6 +9325,14 @@ function creatureTargets(c) {
     T.aoR = 0;
     T.hy = 0;
   }
+  if (tl.wind) {
+    // reared back, both arms up over its head: the blow is coming
+    T.torso -= 0.28;
+    T.uaL = T.uaR = -2.75;
+    T.faL = T.faR = -0.85;
+    T.aoL = T.aoR = 0.25;
+    T.hp = 0.2;
+  }
   if (tl.lunge) {
     T.torso += 0.45;
     T.uaL = T.uaR = -1.75;
@@ -9742,6 +9716,11 @@ function renderFrame() {
   for (const c of CHARS) if (c.onMap && c.shown > 0.02 && !c.capHide && charInView(c)) drawChar(c);
   if (SHADE.on) drawChar(SHADE.c);
   try {
+    combatDraw();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     hxDrawWorld();
   } catch (e) {
     console.error(e);
@@ -9794,6 +9773,11 @@ function renderFrame() {
   }
   try {
     huntDecals();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    combatDecals();
   } catch (e) {
     console.error(e);
   }
@@ -11536,6 +11520,8 @@ function animTargets(c, dt) {
       for (const k in T) T[k] = D[k] + (T[k] - D[k]) * ge;
     } // a walk coming on, or dying away
     if (c.vault) vaultPose(c, T);
+    if (cur && cur.anim === 'punch' && cur.dur)
+      keyPose(T, cur.label === 'Catch' ? GRAB : PUNCH, clamp(cur.t / cur.dur, 0, 1), 1); // a swing on the move: the arms only
     return T;
   }
   const pose = c.vpose || c.pose,
@@ -11791,7 +11777,7 @@ function animTargets(c, dt) {
       break;
     }
     case 'punch': {
-      const p = act ? clamp(act.t / (CTRL.windup + 0.4), 0, 1) : 0.56;
+      const p = act ? clamp(act.t / (act.dur || CTRL.windup + 0.4), 0, 1) : 0.56;
       keyPose(T, act && act.label === 'Catch' ? GRAB : PUNCH, p, 1);
       fx.sharp = true;
       break;
@@ -12280,6 +12266,7 @@ function objSlots(o) {
   return slots;
 }
 function chooseSlot(c, o, prefer) {
+  if (o.wrecked) return null; // thrown and smashed: nothing to sit on till it's put back
   const slots = objSlots(o);
   let best = null,
     bd = 1e9;
@@ -13098,6 +13085,7 @@ function newDay() {
   if (!G.gatherDay || G.gatherDay < d) G.gatherDay = d + gatherGap();
   advanceWeek();
   if (G.over) return;
+  wreckReset(); // whatever got thrown at you yesterday is back where it stood
   marks();
   if (G.tearTonight > 0) {
     // after a failed confrontation THEY come into your flat and take a card
@@ -16604,30 +16592,83 @@ function policeTick() {
   off.shown = 0;
   off.spd = warn ? 1 : POLICE.start;
   enqueue(off, [
-    chaseAct(P, {
-      label: 'Officer',
-      walk: warn,
-      giveUp: warn ? 90 : POLICE.giveUp,
-      reach: 1.5,
-      quit: () => !P.onMap || G.away,
-      tick: (c, a, d) => policeChaseTick(c, a, d, warn),
-      onCatch: (c) => {
-        if (warn) return policeWarn(c, edge);
-        c.spd = 1;
-        ui.say(c, pick(COP_CATCH), 3);
-        arrestStart(c);
+    policeChase(edge, warn, { t0: G.t, seen: false, blowAt: 0, slips: 0 }),
+    goAct(edge, { label: 'Leaving' }),
+  ]);
+}
+// running you down. `st` lasts the whole visit, through every grab you slip: the pace, the whistle, the count.
+function policeChase(edge, warn, st) {
+  const P = PLAYER;
+  return chaseAct(P, {
+    label: 'Officer',
+    walk: warn,
+    giveUp: warn ? 90 : POLICE.giveUp,
+    reach: 1.5,
+    quit: () => !P.onMap || G.away,
+    tick: (c, a, d) => policeChaseTick(c, st, d, warn),
+    onCatch: (c) => (warn ? policeWarn(c, edge) : policeGrab(c, edge, st)),
+    onLose: (c) => {
+      c.spd = 1;
+      // out of his reach behind a door: they come for you anyway, and there's no street to do it on
+      if (!warn && P.onMap && !G.away && !ARREST.on) {
+        ui.note('badge', 'A knock. The police, at the door.', 'bad');
+        arrest();
+      }
+    },
+  });
+}
+// up close he reaches for you: the patch on the ground is where his hands close. Be out of it and you've slipped him;
+// he stumbles, then comes again. Slip him enough times and he gives up, winded.
+function policeGrab(c, edge, st) {
+  const P = PLAYER,
+    wind = POLICE.grab;
+  hardReset(c);
+  c.spd = 1;
+  enqueue(
+    c,
+    mkAct({
+      kind: 'wait',
+      label: 'Catch', // the reaching arms (GRAB)
+      dur: wind / 0.5, // GRAB is at full stretch at .5
+      anim: 'punch',
+      interruptible: false,
+      onStart: (n, a) => {
+        a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+        teleSet(n, n.x, n.z, POLICE.hold, wind);
+        audio.sting('whistle');
       },
-      onLose: (c) => {
-        c.spd = 1;
-        // out of his reach behind a door: they come for you anyway, and there's no street to do it on
-        if (!warn && P.onMap && !G.away && !ARREST.on) {
-          ui.note('badge', 'A knock. The police, at the door.', 'bad');
-          arrest();
+      onTick: (n, a) => {
+        if (a.landed) return;
+        if (a.t < wind * 0.7) a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+        n.tdir = a.dir;
+        const sx = Math.sin(a.dir),
+          sz = Math.cos(a.dir);
+        teleSet(n, n.x + sx * (POLICE.lunge + 0.3), n.z + sz * (POLICE.lunge + 0.3), POLICE.hold);
+        if (a.t < wind) return;
+        a.landed = true;
+        const T = n.tele;
+        teleEnd(n);
+        lungeChar(n, sx, sz, POLICE.lunge);
+        if (P.onMap && !G.away && !ARREST.on && Math.hypot(P.x - T.x, P.z - T.z) < T.r) {
+          ui.say(n, pick(COP_CATCH), 3);
+          return arrestStart(n);
+        }
+        // you slipped him
+        st.slips++;
+        audio.hx('whoosh', hxPan(n.x, n.z), 0.6);
+        if (P.onMap) ui.float(P, 'Slipped', 'good');
+        const quit = st.slips >= POLICE.slips;
+        ui.say(n, pick(quit ? COP_QUIT : COP_SLIP), 2.4);
+        enqueue(n, waitAct({ label: 'Officer', dur: POLICE.stumble, anim: 'stare', interruptible: false }));
+        if (!quit) enqueue(n, policeChase(edge, false, st));
+        enqueue(n, goAct(edge, { label: 'Leaving' }));
+        if (quit) {
+          addStress(-4);
+          setTimeout(() => !G.over && ui.note('badge', 'He’s given up on you. For today.', 'onto'), 2400);
         }
       },
     }),
-    goAct(edge, { label: 'Leaving' }),
-  ]);
+  );
 }
 // on his way to you: the whistle when he first gets close, then (in a chase) a whistle and a shout every so often,
 // and the pace that wears you down
@@ -16744,8 +16785,7 @@ function arrestStart(off) {
   if (G.loose) return;
   if (ARREST.on || !P.onMap || G.away || CAP.on || HUNT.on) return arrest();
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   if (UI.camMode) toggleCam(false);
@@ -17508,7 +17548,7 @@ function hitBack(n) {
   ui.say(n, pick(['That’s ENOUGH.', 'You want a fight?', 'Back off!']), 2.5);
   ui.bubble(n, 'exclaim', 'speech', 2);
   hardReset(n);
-  enqueue(n, chaseAct(PLAYER, { label: 'Fight', giveUp: 5, onCatch: (c) => swing(c, HURT.punch, false) }));
+  brawl(n, HURT.punch, { label: 'Fight', giveUp: 5 });
   echo('fight', { x: n.x, z: n.z, who: n.id });
 }
 // ───────────── fleeing: their flat, a den, the stockroom, the alley or the park at night. Lose them and they hide 1–3 hours.
@@ -17676,24 +17716,27 @@ function chaseAct(tg, o) {
     },
   });
 }
-// your blow: no bar, no minigame. You swing at whoever it is; it lands if they're still within reach when your arm comes round.
-// Fight unlocks on anyone you have confronted and on anyone in true form. On a frightened person running away it's a grab: they give up.
-function swingAct(n) {
+// your blow: one key, no panel. You swing at whoever you picked (or whoever's in front of you), and it lands on them if
+// they're still within reach when your arm comes round. Your legs stay free: swing on the move, step back out of the
+// answer. On a frightened person running away it's a grab: they give up.
+function swingAct(n, wind) {
   return mkAct({
     kind: 'wait',
-    label: n.fleeing && !n.isThem && !n.trueForm ? 'Catch' : 'Hit',
+    label: n && n.fleeing && !n.isThem && !n.trueForm ? 'Catch' : 'Hit',
     icon: 'fist',
-    dur: CTRL.windup + 0.4,
+    dur: wind / 0.56, // the punch keyframes land at .56
     anim: 'punch',
     swing: true,
     interruptible: false,
-    onStart: (c) => {
-      c.tdir = Math.atan2(n.x - c.x, n.z - c.z);
+    onStart: (c, a) => {
+      a.dir = n ? Math.atan2(n.x - c.x, n.z - c.z) : c.tdir;
+      c.tdir = a.dir;
     },
     onTick: (c, a, dt) => {
       if (a.landed) return;
-      c.tdir = Math.atan2(n.x - c.x, n.z - c.z);
-      if (n.fleeing && a.t < CTRL.windup) {
+      if (n && n.onMap) a.dir = Math.atan2(n.x - c.x, n.z - c.z);
+      c.tdir = a.dir;
+      if (n && n.fleeing && a.t < wind) {
         // after it: you throw yourself at it
         const dd = Math.hypot(n.x - c.x, n.z - c.z);
         if (dd > 0.75 && (a.lunge || 0) < 2.4) {
@@ -17703,17 +17746,46 @@ function swingAct(n) {
           c.walkPh += s * 4.6;
         }
       }
-      if (a.t < CTRL.windup) return;
+      if (a.t < wind) return;
       a.landed = true;
-      if (!n.onMap || n.slain || UI.fight || Math.hypot(n.x - c.x, n.z - c.z) > CTRL.melee) {
+      const reach = swingReach(),
+        t = n && n.onMap && !n.slain && Math.hypot(n.x - c.x, n.z - c.z) <= reach ? n : swingTarget(c, a.dir, reach);
+      if (!t) {
         ui.float(c, 'Missed', '');
-        audio.blip('click');
+        audio.hx('whoosh', 0, 0.35);
         return;
       }
-      if (n.fleeing && !n.isThem && !n.trueForm) return giveUp(n);
-      fightOutcome(n, true);
+      if (t.fleeing && !t.isThem && !t.trueForm) return giveUp(t);
+      fightOutcome(t);
     },
   });
+}
+const swingReach = () => CTRL.melee + (G.inv.crowbar ? CTRL.crowbar : 0);
+// who Space swings at: anything out of its skin, anyone coming at you or running from you, one of THEIRS on Friday,
+// one of THEM everyone knows about. Never a bystander who happens to be standing in front of you, nor the police.
+const swingable = (n) =>
+  !n.isPlayer &&
+  !n.surrendered &&
+  !n.def.officer &&
+  !n.def.fbi &&
+  (n.trueForm
+    ? n.tell && n.tell.t >= TF_CHANGE
+    : n.exposed || (G.loose && n.thrall) || (n.fleeing && !n.def.stranger) || hostileToYou(n));
+// the one a swing toward `dir` lands on: the nearest fair target in reach, in front of you (or right up against you)
+function swingTarget(c, dir, reach) {
+  let best = null,
+    bd = 1e9;
+  for (const n of CHARS) {
+    if (n === c || !n.onMap || n.slain || !swingable(n)) continue;
+    const dx = n.x - c.x,
+      dz = n.z - c.z,
+      d = Math.hypot(dx, dz);
+    if (d > reach || d >= bd) continue;
+    if (d > CTRL.close && Math.abs(angDiff(dir, Math.atan2(dx, dz))) > CTRL.meleeArc * DEG) continue;
+    bd = d;
+    best = n;
+  }
+  return best;
 }
 function playerMelee(n) {
   const P = PLAYER;
@@ -17721,7 +17793,16 @@ function playerMelee(n) {
   if (tooShaken()) return shakenNote(); // breaking: your hands won't do it
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
-  enqueue(P, swingAct(n)); // you swing where you stand: closing the gap is your legs' job
+  enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
+}
+// Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
+function attackKey() {
+  const P = PLAYER;
+  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on) return;
+  if (huntKey()) return; // its hands on you: Space tears at them like E does
+  if (UI.menuOpen) return closeMenu();
+  dismissHints();
+  playerMelee(swingTarget(P, P.tdir, swingReach() + 0.6));
 }
 // ───────────── true form: two game minutes to change, then it hunts you or runs
 function trueForm(n, why, mode) {
@@ -17746,7 +17827,7 @@ function trueForm(n, why, mode) {
   };
   warmLater(() => {
     if (n.trueForm) snapImage(n, fightSnapRec(n));
-  }); // its picture for the fight panel, drawn before the fight needs it
+  }); // its picture for the confrontation, should you trap it, drawn before anything needs it
   n.tell = { type: 'true', t: 0, w: 0, awarded: true, caught: true, fac: G.faction };
   if (!['raid', 'prowl', 'open', 'ambush', 'rite'].includes(why)) {
     n.danger = 100;
@@ -17804,6 +17885,7 @@ function trueFormTick(n, dt) {
     tf.stunUntil = 0;
     if (n.tell) n.tell.down = false;
   } // flat on the ground where you brought it down
+  if ((tf.atk || n.tell.wind) && tf.mode !== 'attack' && tf.mode !== 'trapped') foeCalm(n); // out of the fight: arms down
   if (tf.mode === 'hold') return huntHoldTick(n, dt);
   if (tf.mode === 'escort') return fbiEscortTick(n, dt);
   // nothing out of its skin should stand frozen on a way out it can't take. A few minutes stuck: out of your sight,
@@ -17892,7 +17974,7 @@ function trueFormTick(n, dt) {
         return killMember(n, 'mob');
       }
     }
-    if (P.onMap && d < 1.5 && n.tell.t >= TF_CHANGE && !UI.fight && R.time > (UI.fightCd || 0)) return openFight(n);
+    if (n.tell.t >= TF_CHANGE && foeMelee(n, d, dt, true)) return; // it can't come at you, but it can reach
     if (G.t >= tf.until) {
       n.trapped = false;
       n.tell.lunge = n.tell.feed = false;
@@ -17971,6 +18053,8 @@ function trueFormTick(n, dt) {
     return flee(n);
   }
   tf.cd -= dt;
+  if (foeMelee(n, d, dt)) return; // up close: the blow, shown first
+  if (foeRanged(n, d, sees)) return; // a few strides off: a throw, a swarm
   if (fac === 'aliens' && sees && d < (G.loose ? 11 : 9) && tf.cd <= 0) {
     // the laser: a red dot first, so breaking line of sight saves you
     n.path = null;
@@ -18001,17 +18085,6 @@ function trueFormTick(n, dt) {
     n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
     return;
   } // it keeps its distance while the gun recharges; cornered or hurt, it comes at you
-  if (d < 1.4) {
-    // on you: it's a fight now
-    n.path = null;
-    n.moving = false;
-    n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
-    if (!UI.fight && R.time > (UI.fightCd || 0) && P.onMap) {
-      tf.lunge = true;
-      return openFight(n, true);
-    }
-    return;
-  }
   tf.rp = (tf.rp || 0) - dt;
   if (tf.rp <= 0 || !n.path || n.pi >= n.path.length) {
     tf.rp = 0.5;
@@ -18253,8 +18326,7 @@ function exposedTick(n, dt) {
   }
   // you did this to it
   const P = PLAYER;
-  if (!P.onMap || G.away || G.sleeping || UI.fight || inRoomSet(P, (r) => r.home) || G.t - (n.huntAt || -1e9) < 360)
-    return;
+  if (!P.onMap || G.away || G.sleeping || inRoomSet(P, (r) => r.home) || G.t - (n.huntAt || -1e9) < 360) return;
   const d = Math.hypot(P.x - n.x, P.z - n.z);
   if (d > 10 || !seesSpot(n, P.x, P.z, 10)) return;
   const h = hourF(),
@@ -18331,7 +18403,7 @@ function boltTick(dt) {
       b.x += (b.dx * step) / k;
       b.z += (b.dz * step) / k;
       b.d += step / k;
-      if (P.onMap && !G.away && !UI.fight && Math.hypot(P.x - b.x, P.z - b.z) < CTRL.boltHit) {
+      if (P.onMap && !G.away && Math.hypot(P.x - b.x, P.z - b.z) < CTRL.boltHit) {
         gone = true;
         boltHits(b);
       } else if (b.d > CTRL.boltRange) gone = true;
@@ -18358,18 +18430,11 @@ function boltHits(b) {
   hurt(b.dmg, true);
 }
 // ───────────── the hit, and what it costs. Health stays hidden while full.
-function swing(c, dmg, byThem) {
-  G.lastHitBy = byThem ? c.id : null; // an id, never the person: G is saved whole
+// someone up close takes a swing at you: shown first, so you can step out of it (punchAct in combat/melee)
+function swing(c, dmg, byThem, again) {
+  hardReset(c);
   c.tdir = Math.atan2(PLAYER.x - c.x, PLAYER.z - c.z);
-  if (c.tell && c.tell.type === 'true') {
-    const tl = c.tell;
-    tl.lunge = true;
-    setTimeout(() => {
-      tl.lunge = false;
-    }, 450);
-  } else gesture(c, 'punch', 0.6, 0.4); // already swinging: it lands a beat from now
-  ui.bubble(c, 'exclaim', 'speech', 1.4);
-  hurt(dmg, byThem);
+  enqueue(c, punchAct(dmg, byThem, again));
 }
 function hurt(v, byThem) {
   if (G.over || !PLAYER.onMap) return;
@@ -18391,9 +18456,8 @@ function hurt(v, byThem) {
 // you can't die. Beaten, you black out and lose a day: you wake up in your own bed and nobody says how you got there.
 function knockOut(byThem) {
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
   BOLTS.length = 0;
+  combatClear();
   G.health = 100;
   G.sickNext = true;
   if (isWorkday() && tod() < 17 * 60) G.sickDay = true; // the day is lost, but not held against you
@@ -18484,12 +18548,11 @@ function comeBack() {
   cam.follow = true;
   if (!G.speed) G.speed = 1;
 }
-// ───────────── the one hit: a tracker sweeps a red bar; land it in the green. Dead center of the green is a clean
-// hit: it goes down for a moment, long enough to get another blow in. A fuse under the bar burns down to the miss.
-// the picture on the fight panel: one of THEM in its true form. The picture is the same every time (a witness
-// snapshot carries no date), so it's drawn once per person per game, ahead of time (warmLater in trueForm), and
-// cached under this same key: `at: 0` instead of the change's start time, so the second fight with the same
-// one doesn't redraw it either.
+// ───────────── blows, out in the street. Nothing stops for a fight: Space swings, and your feet do the dodging.
+// THEIR blow is shown before it comes: a red patch on the ground where it will land, darkening as it winds up. Be out of
+// the patch when it lands. A blow that hits air leaves it standing there open, and a hit then knocks it flat.
+// the picture of one of THEM in its true form (the confrontation shows it, held in your trap). The same every time,
+// so it's drawn once per person per game, ahead of time (warmLater in trueForm), and cached under this same key.
 const fightSnapRec = () => ({ type: 'true', how: 'witness', at: 0, t: 2, pose: 'stand' });
 // alone with it (you attacked it, a night ambush, guarding a witness), it's far tougher than in front of a crowd
 function privateFight(n) {
@@ -18502,162 +18565,193 @@ function privateFight(n) {
 const crowdHelp = (n) =>
   earshot(n).filter((w) => w !== n && !w.isThem && !w.def.stranger && sawRecently(w, n)).length >=
   EVIDENCE.fight.crowdSaw;
-function openFight(n, lunge) {
-  if (UI.fight || G.over || !n.onMap || !PLAYER.onMap || ARREST.on || UI.cf) return;
+// the red patch: where a blow will land, and (with `dur`) how long until it does
+function teleSet(c, x, z, r, dur) {
+  const T = c.tele || (c.tele = { at: 0, end: 0, x: 0, z: 0, r: 0 });
+  if (dur != null) {
+    T.at = G.t;
+    T.end = G.t + dur;
+  }
+  T.x = x;
+  T.z = z;
+  T.r = r;
+}
+function teleEnd(c) {
+  if (c.tele) c.tele.end = 0;
+}
+// thrown forward (a lunge, a creep): as far as the floor lets it, and never through you
+function lungeChar(c, sx, sz, len) {
+  for (let s = 0; s < len - 1e-6; s += 0.1) {
+    const k = Math.min(0.1, len - s),
+      x = c.x + sx * k,
+      z = c.z + sz * k;
+    if (!walkable(Math.floor(x), Math.floor(z), c) || Math.hypot(PLAYER.x - x, PLAYER.z - z) < 0.45) break;
+    c.x = x;
+    c.z = z;
+  }
+}
+// its warning: quicker alone with you, slower held in a trap, quicker on Friday the more of THEM are near
+function foeWind(n) {
   const tf = n.trueForm,
     F = EVIDENCE.fight;
-  let [g, sp] = FIGHT_DIFF[tf ? G.faction : n.isThem ? 'them' : 'normal'];
-  if (PLAYER.needs.stress >= 80) g *= 2 / 3; // breaking: fight power −30%
-  if (PLAYER.needs.energy < 30) sp *= 1.2;
-  if (G.inv.crowbar) g *= 1.3; // something heavy in your hand
-  if (tf && tf.mode === 'trapped') {
-    g *= F.trapWindow;
-    sp *= F.trapSpeed;
-    if (!tf.trapHit) {
-      tf.trapHit = true;
-      tf.hp = Math.max(1, tf.hp + F.trapHp); // caught fast: it's already hurt
+  let w = MELEE.wind[G.faction] || 1;
+  if (tf.mode === 'trapped') w *= F.trapWind;
+  if (tf.private && !G.loose) w *= F.privateWind;
+  if (G.loose) {
+    const pack = CHARS.filter(
+      (o) => o !== n && o.trueForm && o.onMap && !o.slain && Math.hypot(o.x - PLAYER.x, o.z - PLAYER.z) < 5,
+    ).length;
+    w *= Math.pow(0.9, G.loose.kills || 0) * Math.pow(0.92, pack);
+  }
+  return Math.max(0.45, w);
+}
+// out of the fight (it ran, it was knocked out of it): arms down, no patch
+function foeCalm(n) {
+  const tf = n.trueForm;
+  if (tf) tf.atk = null;
+  if (n.tell) n.tell.wind = n.tell.lunge = false;
+  teleEnd(n);
+}
+// up close, every sim step: wind up, lunge, stand. True while it's busy with a blow: nothing else moves it then.
+// `held`: in your trap, it can't lunge, only lash out where it is.
+function foeMelee(n, d, dt, held) {
+  const tf = n.trueForm,
+    P = PLAYER;
+  let A = tf.atk;
+  if (A && G.t - A.seen > 1) {
+    foeCalm(n); // not seen to for a while: whatever it was doing, it's over
+    A = null;
+  }
+  if (A) {
+    A.seen = G.t;
+    A.t += dt;
+    n.path = null;
+    n.moving = false;
+    if (A.ph === 'wind') {
+      if (A.t < A.dur * 0.7) A.dir = Math.atan2(P.x - n.x, P.z - n.z); // it follows you round, then commits
+      n.tdir = A.dir;
+      const sx = Math.sin(A.dir),
+        sz = Math.cos(A.dir);
+      if (!held && d > 0.9) lungeChar(n, sx, sz, WALK * MELEE.creep * dt);
+      const L = held ? 0.45 : MELEE.lunge;
+      teleSet(n, n.x + sx * L, n.z + sz * L, MELEE.reach);
+      if (A.t >= A.dur) foeStrike(n, A, held);
+      return true;
     }
-  } else if (tf && tf.wounded) g *= 1.12;
-  if (tf && tf.private && !G.loose) g *= F.privateWindow;
-  if (tf && !tf.private && !G.loose && !tf.crowdHit && tf.mode !== 'trapped' && crowdHelp(n)) {
+    if (A.t > 0.4) n.tell.lunge = false;
+    if (A.t < A.dur) return true;
+    tf.atk = null;
+    return false;
+  }
+  if (d > MELEE.engage || !P.onMap || G.away || ARREST.on) return false;
+  if (tf.mode === 'trapped' && !tf.trapHit) {
+    tf.trapHit = true;
+    tf.hp = Math.max(1, tf.hp + EVIDENCE.fight.trapHp); // caught fast: it's already hurt
+  }
+  if (!tf.private && !G.loose && !tf.crowdHit && tf.mode !== 'trapped' && crowdHelp(n)) {
     tf.crowdHit = true; // the crowd gets one in first
     tf.hp = Math.max(1, tf.hp - 1);
     const w = pick(earshot(n).filter((x) => x !== n && !x.isThem && !x.def.stranger));
     if (w) ui.say(w, pick(['Get it!', 'NOW!', 'Hold it down!']), 2);
+    gesture(n, 'flinch', 0.5);
   }
-  if (tf && G.loose) {
-    // Friday: the rest of THEM close in, and every one you put down makes the rest worse
-    const pack = CHARS.filter(
-        (o) => o !== n && o.trueForm && o.onMap && !o.slain && Math.hypot(o.x - PLAYER.x, o.z - PLAYER.z) < 5,
-      ).length,
-      k = G.loose.kills || 0;
-    g *= 0.86 * Math.pow(0.8, k) * Math.pow(0.85, pack);
-    sp *= 1 + 0.14 * k + 0.1 * pack;
-  }
-  g = clamp(g, 0.06, 0.6);
-  const a = rand(0.06, 0.94 - g),
-    c = tf ? (g * FIGHT.clean) / 2 : 0, // half the clean core: only a true form can be knocked flat
-    el = $('#fight');
-  UI.fight = {
-    n,
-    a,
-    b: a + g,
-    c0: a + g / 2 - c,
-    c1: a + g / 2 + c,
-    sp,
-    pos: 0,
-    dir: 1,
-    t: 0,
-    go: false,
-    late: false,
-    res: null,
-    clean: false,
-    rt: 0,
-    ft: el.querySelector('.ft'),
-    fuse: el.querySelector('.ffuse i'),
-  };
-  closeMenu();
-  el.className = 'overlay ready' + (lunge ? ' lunge' : '');
-  el.hidden = false;
-  el.querySelector('img').src = tf ? snapImage(n, fightSnapRec(n)) : getPortrait(n);
-  el.querySelector('.fres').textContent = lunge ? 'It lunges' : tf && tf.mode === 'trapped' ? 'It’s held' : 'Strike';
-  el.querySelector('.fsub').textContent = c ? 'Dead center knocks it down' : '';
-  const hp = el.querySelector('.fhp');
-  hp.innerHTML = tf
-    ? Array.from(
-        { length: Math.max(tf.maxHp || 0, FOE_HP[G.faction] || 3) },
-        (_, i) => '<i class="' + (i < tf.hp ? '' : 'off') + '"></i>',
-      ).join('')
-    : '';
-  hp.dataset.tip = tf ? 'How much fight it has left' : '';
-  const fg = el.querySelector('.fg'),
-    fc = el.querySelector('.fc');
-  fg.style.left = (a * 100).toFixed(1) + '%';
-  fg.style.width = (g * 100).toFixed(1) + '%';
-  fc.hidden = !c;
-  fc.style.left = ((1 - FIGHT.clean) * 50).toFixed(1) + '%';
-  fc.style.width = (FIGHT.clean * 100).toFixed(1) + '%';
-  UI.fight.ft.style.left = '0%';
-  UI.fight.ft.classList.remove('back');
-  UI.fight.fuse.style.transform = '';
+  const dur = foeWind(n);
+  tf.atk = { ph: 'wind', t: 0, dur, dir: Math.atan2(P.x - n.x, P.z - n.z), seen: G.t, open: false };
+  teleSet(n, n.x, n.z, MELEE.reach, dur);
+  n.tell.wind = true;
+  n.tell.lunge = false;
+  ui.bubble(n, 'exclaim', 'speech', 1.2);
+  audio.hx('hiss', hxPan(n.x, n.z), 0.55);
   if (G.speed > 1) G.speed = 1;
-  audio.blip('click');
+  return true;
 }
-function fightTick(dtReal) {
-  const f = UI.fight;
-  if (!f) return;
-  if (f.res) {
-    f.rt -= dtReal;
-    if (f.rt <= 0) closeFight();
+// the blow itself: it throws itself at the patch, and whoever is still in it gets hit
+function foeStrike(n, A, held) {
+  const tf = n.trueForm,
+    P = PLAYER,
+    T = n.tele;
+  n.tell.wind = false;
+  n.tell.lunge = true;
+  if (!held) lungeChar(n, Math.sin(A.dir), Math.cos(A.dir), MELEE.lunge);
+  teleEnd(n);
+  audio.hx('whoosh', hxPan(n.x, n.z), 0.7);
+  A.ph = 'rec';
+  A.t = 0;
+  if (!P.onMap || G.away || Math.hypot(P.x - T.x, P.z - T.z) >= T.r) {
+    // it hit air, and it's standing there open
+    A.dur = MELEE.open;
+    A.open = true;
+    if (P.onMap && Math.hypot(P.x - n.x, P.z - n.z) < 4) ui.float(P, 'Dodged', 'good');
     return;
   }
-  f.t += dtReal;
-  if (!f.go) {
-    if (f.t < FIGHT.grace) return; // the tracker holds still while the panel comes up
-    f.go = true;
-    $('#fight').classList.remove('ready');
+  A.dur = MELEE.rec;
+  if (!tf.private && !G.loose && crowdHelp(n) && chance(EVIDENCE.fight.crowdSave)) {
+    // somebody pulls it off you
+    const w = pick(earshot(n).filter((x) => x !== n && !x.isThem && !x.def.stranger));
+    if (w) ui.say(w, pick(['Get OFF them!', 'Not on my street!', 'Leave them ALONE!']), 2.2);
+    knockBack(n, P, 1.2);
+    return;
   }
-  f.pos += f.dir * f.sp * dtReal;
-  if (f.pos > 1) {
-    f.pos = 2 - f.pos;
-    f.dir = -1;
-    f.ft.classList.add('back');
-  } else if (f.pos < 0) {
-    f.pos = -f.pos;
-    f.dir = 1;
-    f.ft.classList.remove('back');
-  }
-  f.ft.style.left = (f.pos * 100).toFixed(2) + '%';
-  const left = 1 - (f.t - FIGHT.grace) / FIGHT.timeout; // the fuse under the bar
-  f.fuse.style.transform = 'scaleX(' + Math.max(0, left).toFixed(3) + ')';
-  if (left < 0.3 && !f.late) {
-    f.late = true;
-    $('#fight').classList.add('late');
-  }
-  if (left <= 0) strike(true); // freezing up counts as a miss
+  const blow = (HURT[G.faction] || 18) * (G.loose ? 1.2 : tf.private ? EVIDENCE.fight.privateBlow : 1);
+  G.lastHitBy = n.id; // an id, never the person: G is saved whole
+  ui.bubble(n, 'exclaim', 'speech', 1.4);
+  addStress(3);
+  hurt(Math.round(blow), true);
+  if (!G.over && P.onMap) knockBack(P, n, 0.9);
 }
-function strike(froze) {
-  const f = UI.fight;
-  if (!f || f.res || (!f.go && !froze)) return; // too soon: the panel is still coming up
-  const on = !froze && f.pos >= f.a && f.pos <= f.b;
-  f.res = on ? 'hit' : 'miss';
-  f.clean = on && f.pos >= f.c0 && f.pos <= f.c1 && f.c1 > f.c0;
-  f.rt = f.clean ? 0.95 : 0.8;
-  const el = $('#fight'),
-    tf = f.n.trueForm;
-  el.classList.remove('ready', 'late', 'lunge');
-  el.classList.add(f.res);
-  if (f.clean) el.classList.add('clean');
-  const fm = el.querySelector('.fm');
-  fm.style.left = (f.pos * 100).toFixed(2) + '%';
-  el.querySelector('.fres').textContent = f.clean ? 'Clean hit' : on ? 'Hit' : 'Miss';
-  // why it went wide, so the next one can be better: still coming up to the green, or already past it
-  const early = f.dir > 0 ? f.pos < f.a : f.pos > f.b;
-  el.querySelector('.fsub').textContent = on
-    ? f.clean && tf && tf.hp > 1
-      ? 'It’s down · hit it again'
-      : ''
-    : froze
-      ? 'You froze'
-      : early
-        ? 'Too early'
-        : 'Too late';
-  const hp = el.querySelector('.fhp');
-  if (on && tf && hp) {
-    const pips = hp.querySelectorAll('i:not(.off)');
-    if (pips.length) pips[pips.length - 1].classList.add('off', 'gone');
-  }
-  if (on) {
-    R.pulse = f.clean ? 0.9 : 0.6;
-    audio.hx('thud', 0, f.clean ? 1 : 0.8);
-    if (f.clean) audio.hx('crack', 0, 0.9);
-  } else audio.sting('awkward');
+// a person's punch: the fist drawn back where you can see it, then thrown. Step back out of it. `again` runs on a miss.
+function punchAct(dmg, byThem, again) {
+  const wind = MELEE.punch,
+    P = PLAYER;
+  return mkAct({
+    kind: 'wait',
+    label: 'Fight',
+    icon: 'fist',
+    dur: wind / 0.56, // the punch keyframes land at .56
+    anim: 'punch',
+    interruptible: false,
+    onStart: (c, a) => {
+      a.dir = Math.atan2(P.x - c.x, P.z - c.z);
+      ui.bubble(c, 'exclaim', 'speech', 1.2);
+      teleSet(c, c.x, c.z, MELEE.punchReach, wind);
+    },
+    onTick: (c, a) => {
+      if (a.landed) return;
+      if (a.t < wind * 0.7) a.dir = Math.atan2(P.x - c.x, P.z - c.z);
+      c.tdir = a.dir;
+      const sx = Math.sin(a.dir),
+        sz = Math.cos(a.dir);
+      teleSet(c, c.x + sx * 0.75, c.z + sz * 0.75, MELEE.punchReach);
+      if (a.t < wind) return;
+      a.landed = true;
+      const T = c.tele;
+      teleEnd(c);
+      lungeChar(c, sx, sz, 0.3);
+      audio.hx('whoosh', hxPan(c.x, c.z), 0.45);
+      if (P.onMap && !G.away && !ARREST.on && Math.hypot(P.x - T.x, P.z - T.z) < T.r) {
+        G.lastHitBy = byThem ? c.id : null;
+        hurt(dmg, byThem);
+        if (!G.over && P.onMap) knockBack(P, c, 0.6);
+        return;
+      }
+      if (P.onMap && Math.hypot(P.x - c.x, P.z - c.z) < 4) ui.float(P, 'Dodged', 'good');
+      if (again) again(c);
+    },
+  });
 }
-function closeFight() {
-  const f = UI.fight;
-  UI.fight = null;
-  $('#fight').hidden = true;
-  if (f) fightOutcome(f.n, f.res === 'hit', f.clean);
+// squaring up to you: run you down, swing, and if it missed, come again (a few times, then they've had enough)
+function brawl(n, dmg, o) {
+  let tries = MELEE.punchTries;
+  const go = () =>
+    enqueue(
+      n,
+      chaseAct(PLAYER, {
+        label: o.label,
+        giveUp: o.giveUp,
+        onCatch: (c) => swing(c, dmg, !!o.byThem, () => --tries > 0 && go()),
+      }),
+    );
+  go();
 }
 // push someone a step away from someone else
 function knockBack(c, from, dist) {
@@ -18676,125 +18770,105 @@ function knockBack(c, from, dist) {
   c.path = null;
   c.moving = false;
 }
-function fightOutcome(n, hit, clean) {
+// your swing landed on n
+function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
-  if (G.loose && n.thrall) return looseHitHelper(n, hit);
-  addStress(hit ? 2 : 5);
+  if (G.loose && n.thrall) return looseHitHelper(n, true);
+  addStress(2);
   G.fights = (G.fights || 0) + 1;
   const ear = earshot(n).filter((w) => w !== n && !w.isThem);
   const tf = n.trueForm;
   if (tf) {
-    UI.fightCd = R.time + (hit ? 1.8 : 1.3);
-    if (hit) {
-      tf.hp--;
-      gesture(n, 'flinch', 0.5);
-      if (tf.hp <= 0) {
-        if (G.loose) return looseKill(n); // nobody gives up on Friday
-        if (tf.guard) witnessSaved(tf.guard);
-        if (tf.private && !tf.witChange && !tf.public) return privateKill(n);
-        return surrender(n, 'beaten');
-      }
-      if (tf.mode === 'flee' && n.fleeing) {
-        hardReset(n);
-        n.fleeing = null;
-        tf.wounded = true;
-        tf.stunUntil = G.t + 2.6;
-        knockBack(n, PLAYER, 0.7);
-        ui.float(n, '−1', 'good');
-        n.tell.lunge = false;
-        audio.hx('thud', 0, 0.8);
-        return;
-      } // brought down from behind: it's on the ground a moment
+    const open = !!(tf.atk && tf.atk.open); // caught standing there after it hit air
+    tf.hp--;
+    gesture(n, 'flinch', 0.5);
+    foeCalm(n);
+    if (tf.hp <= 0) {
+      if (G.loose) return looseKill(n); // nobody gives up on Friday
+      if (tf.guard) witnessSaved(tf.guard);
+      if (tf.private && !tf.witChange && !tf.public) return privateKill(n);
+      return surrender(n, 'beaten');
+    }
+    if (tf.mode === 'flee' && n.fleeing) {
+      hardReset(n);
+      n.fleeing = null;
       tf.wounded = true;
-      n.tell.lunge = false;
-      if (tf.mode !== 'trapped') knockBack(n, PLAYER, 1.4);
+      tf.stunUntil = G.t + 2.6;
+      knockBack(n, PLAYER, 0.7);
       ui.float(n, '−1', 'good');
-      if (clean && tf.mode !== 'trapped') {
-        // dead center: it goes down where it lands, and it isn't running anywhere. Get to it before it gets up.
-        tf.mode = 'attack';
-        tf.lastSeen = G.t;
-        tf.t0 = Math.max(tf.t0, G.t - 6);
-        tf.stunUntil = G.t + FIGHT.down;
-        return;
-      }
-      // hurt and not cornered: it may break and run. Chase it down.
-      if (tf.mode !== 'trapped' && !tf.cornered && tf.hp === 1 && chance(G.faction === 'lizards' ? 0.7 : 0.55)) {
-        tf.mode = 'flee';
-        flee(n);
-        ui.note('fist', 'It’s hurt. It’s running.', 'onto');
-      } else if (tf.mode !== 'trapped') {
-        tf.mode = 'attack';
-        tf.lastSeen = G.t;
-        tf.t0 = Math.max(tf.t0, G.t - 6);
-      }
-    } else {
-      if (!tf.private && !G.loose && crowdHelp(n) && chance(EVIDENCE.fight.crowdSave)) {
-        // somebody pulls it off you
-        const w = pick(earshot(n).filter((x) => x !== n && !x.isThem && !x.def.stranger));
-        if (w) ui.say(w, pick(['Get OFF them!', 'Not on my street!', 'Leave them ALONE!']), 2.2);
-        knockBack(n, PLAYER, 1.2);
-        return;
-      }
-      const blow = (HURT[G.faction] || 18) * (G.loose ? 1.2 : tf.private ? EVIDENCE.fight.privateBlow : 1);
-      swing(n, Math.round(blow), true); // it gets you
-      if (!G.over) knockBack(PLAYER, n, 0.9);
+      audio.hx('thud', 0, 0.8);
+      return;
+    } // brought down from behind: it's on the ground a moment
+    tf.wounded = true;
+    tf.atk = { ph: 'rec', t: 0, dur: MELEE.stagger, seen: G.t, open: false };
+    if (tf.mode !== 'trapped') knockBack(n, PLAYER, open ? 0.6 : 1.4);
+    ui.float(n, '−1', 'good');
+    if (open && tf.mode !== 'trapped') {
+      // caught it open: it goes down where it stands, and it isn't running anywhere. Get to it before it gets up.
+      tf.atk = null;
+      tf.mode = 'attack';
+      tf.lastSeen = G.t;
+      tf.t0 = Math.max(tf.t0, G.t - 6);
+      tf.stunUntil = G.t + MELEE.down;
+      audio.hx('crack', 0, 0.8);
+      return;
+    }
+    // hurt and not cornered: it may break and run. Chase it down.
+    if (tf.mode !== 'trapped' && !tf.cornered && tf.hp === 1 && chance(G.faction === 'lizards' ? 0.7 : 0.55)) {
+      tf.mode = 'flee';
+      flee(n);
+      ui.note('fist', 'It’s hurt. It’s running.', 'onto');
+    } else if (tf.mode !== 'trapped') {
+      tf.mode = 'attack';
+      tf.lastSeen = G.t;
+      tf.t0 = Math.max(tf.t0, G.t - 6);
     }
     return;
   }
-  UI.fightCd = R.time + 3;
   if (ear.length) protectAfter(n);
   echo('fight', { x: n.x, z: n.z, who: n.id });
   if (n.isThem) {
     // a hit is a test. At night, alone with you, or late in THEIR week, it drops the mask and fights you for real.
     const H = EVIDENCE.hit;
-    if (hit && (darkNow() || !ear.length || theirDay() >= H.day)) {
+    if (darkNow() || !ear.length || theirDay() >= H.day) {
       n.cfOk = G.t;
       if (trueForm(n, 'hit', 'attack')) {
         privateFight(n);
         return;
       }
     }
-    if (hit) {
-      // by day, with people about, early on: it plays the victim
-      for (const w of ear) addSus(w, H.sus);
-      ui.say(n, pick(['Somebody help!', 'Get OFF me!', 'Are you insane?']), 2.2);
-      if (ear.some((w) => !w.def.stranger || w.def.officer)) caution(n, 'assault');
-      bookAware(EVIDENCE.aware.hitNoChange);
-      flee(n);
-      return;
-    }
-    for (const w of ear) addSus(w, 10);
-    if (n.exposed || caseSize(n) >= 3 || chance(0.5)) {
-      ui.say(n, pick(['Get OFF me.', 'Out of my way.']), 2);
-      flee(n);
-    } else ridicule(n);
+    // by day, with people about, early on: it plays the victim
+    for (const w of ear) addSus(w, H.sus);
+    ui.say(n, pick(['Somebody help!', 'Get OFF me!', 'Are you insane?']), 2.2);
+    if (ear.some((w) => !w.def.stranger || w.def.officer)) caution(n, 'assault');
+    bookAware(EVIDENCE.aware.hitNoChange);
+    flee(n);
     return;
   }
-  // a normal person: hit or miss, it was still an assault
+  // a normal person: it was an assault
   for (const w of ear) addSus(w, 25);
   addSus(n, 40);
   n.rel -= 25;
   caution(n, 'assault');
   if (G.assaulted.length >= 3) return;
-  if (hit) {
-    hardReset(n);
-    n.fleeing = null;
-    enqueue(
-      n,
-      waitAct({
-        label: 'Down',
-        dur: 2,
-        anim: 'stare',
-        interruptible: false,
-        onStart: (c) => (c.pose = 'floorlie'),
-        onEnd: (c) => {
-          c.pose = 'stand';
-          if (!G.over) flee(c);
-        },
-      }),
-    );
-  } else if ((G.traits[n.id] || {}).temper === 'aggressive') swing(n, HURT.punch, false);
-  else flee(n);
+  hardReset(n);
+  n.fleeing = null;
+  knockBack(n, PLAYER, 0.6);
+  if ((G.traits[n.id] || {}).temper === 'aggressive') return hitBack(n); // they hit back
+  enqueue(
+    n,
+    waitAct({
+      label: 'Down',
+      dur: 2,
+      anim: 'stare',
+      interruptible: false,
+      onStart: (c) => (c.pose = 'floorlie'),
+      onEnd: (c) => {
+        c.pose = 'stand';
+        if (!G.over) flee(c);
+      },
+    }),
+  );
 }
 // people in earshot of you: the same room, or within 6 tiles
 function earshot(except) {
@@ -18906,6 +18980,336 @@ function privateKill(n) {
   setTimeout(() => {
     if (!G.over) ui.note('eye', 'Nobody saw. THEY will want to know who did it.', 'bad');
   }, 2400);
+}
+// ───────────── what THEY do from a few strides off. A lizard tears up the nearest chair or bin, holds it overhead and
+// throws it at where you stood when it let go: a red ring shows where it comes down, so get out of the ring. The dead
+// let out a swarm that follows you, stinging, until it tires: faster than your jog, slower than your sprint, and it
+// can't get through a wall or a locked door. (The aliens' laser is in combat/bolts.)
+const THROWN = [];
+const SWARMS = [];
+const THROWABLE = new Set(['chair', 'chair_office', 'trashcan', 'boxes', 'trashbags', 'crates', 'bucket']);
+const THROW_ID = M4.ident();
+const CB_COL = new Float32Array(4); // decal colours, filled in place: nothing new every frame
+// from a few strides off, a lizard throws and the dead loose a swarm. True while it's busy at it: it stands and faces you.
+function foeRanged(n, d, sees) {
+  const tf = n.trueForm,
+    P = PLAYER;
+  if (G.t < (tf.busy || 0)) {
+    n.path = null;
+    n.moving = false;
+    if (P.onMap) n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
+    return true;
+  }
+  if (G.t < (tf.rcd || 0) || !sees || d < RANGED.from || d > RANGED.to || tf.atk || !P.onMap || G.away) return false;
+  if (G.faction === 'lizards') {
+    const o = throwPick(n);
+    if (!o) {
+      tf.rcd = G.t + 1; // nothing to hand: look again in a minute
+      return false;
+    }
+    throwStart(n, o);
+    tf.busy = G.t + RANGED.lift;
+    tf.rcd = G.t + RANGED.throwCd;
+    return true;
+  }
+  if (G.faction === 'zombies' && !swarmOf(n)) {
+    swarmStart(n);
+    tf.busy = G.t + RANGED.wake;
+    tf.rcd = G.t + RANGED.swarmCd;
+    return true;
+  }
+  return false;
+}
+// the nearest thing it can pick up: free, not sat on, close to hand
+function throwPick(n) {
+  let best = null,
+    bd = RANGED.grab;
+  for (const o of OBJ) {
+    if (!THROWABLE.has(o.type) || o.wrecked || !o.mesh || o.t.lair) continue;
+    const d = Math.hypot(o.cx - n.x, o.cz - n.z);
+    if (d >= bd || o.users.some((u) => u)) continue;
+    bd = d;
+    best = o;
+  }
+  return best;
+}
+function throwStart(n, o) {
+  const m = o.mesh;
+  if (!m.home) {
+    m.home = m.model; // where it stood, to put it back in the morning
+    m.homeC = m.center.slice();
+  }
+  m.model = new Float32Array(16);
+  m.center = m.homeC.slice();
+  o.wrecked = true;
+  solidReset();
+  const tk = tuckOf(o),
+    f = DIRS[o.face];
+  THROWN.push({
+    o,
+    by: n,
+    ph: 'lift',
+    t: 0,
+    dur: RANGED.lift,
+    fx: o.cx + f[0] * tk,
+    fy: 0,
+    fz: o.cz + f[1] * tk,
+    x: o.cx + f[0] * tk,
+    y: 0,
+    z: o.cz + f[1] * tk,
+    tx: 0,
+    tz: 0,
+    arc: 0,
+    ang: FACE_ANG[o.face],
+    spin: 0,
+    J: new Float32Array(16),
+  });
+  n.tell.wind = true;
+  ui.bubble(n, 'exclaim', 'speech', 1.2);
+  audio.hx('crack', hxPan(o.cx, o.cz), 0.6);
+  if (G.speed > 1) G.speed = 1;
+}
+// in its hands, then in the air: every sim step
+function throwTick(th, dt) {
+  const n = th.by,
+    P = PLAYER;
+  th.t += dt;
+  const u = Math.min(1, th.t / th.dur);
+  if (th.ph === 'lift') {
+    const ok = n.onMap && !n.slain && n.trueForm && n.trueForm.mode === 'attack' && !n.trueForm.stunUntil;
+    if (!ok) return throwFly(th, n.x, n.z, 0.5); // knocked out of it: it drops at its feet
+    const e = u * u * (3 - 2 * u),
+      hx = n.x + Math.sin(n.dir) * 0.15,
+      hz = n.z + Math.cos(n.dir) * 0.15;
+    th.x = lerp(th.fx, hx, e);
+    th.z = lerp(th.fz, hz, e);
+    th.y = lerp(th.fy, 1.75, e);
+    th.spin = e * 0.5;
+    if (u >= 1) {
+      // it lets go at where you are now
+      n.tell.wind = false;
+      n.tell.lunge = true;
+      n.lungeOff = G.t + 0.4;
+      audio.hx('whoosh', hxPan(n.x, n.z), 0.8);
+      if (P.onMap && !G.away) throwFly(th, P.x, P.z, 0);
+      else throwFly(th, n.x, n.z, 0.5);
+    }
+    return;
+  }
+  th.x = lerp(th.fx, th.tx, u);
+  th.z = lerp(th.fz, th.tz, u);
+  th.y = lerp(th.fy, 0, u) + 4 * th.arc * u * (1 - u);
+  th.spin += dt * 9;
+  if (u >= 1) throwLand(th);
+}
+function throwFly(th, tx, tz, dur) {
+  if (th.by.tell) th.by.tell.wind = false;
+  th.ph = 'fly';
+  th.t = 0;
+  th.fx = th.x;
+  th.fy = th.y;
+  th.fz = th.z;
+  th.tx = tx;
+  th.tz = tz;
+  const d = Math.hypot(tx - th.x, tz - th.z);
+  th.dur = dur || RANGED.fly + RANGED.flyPer * d;
+  th.arc = dur ? 0 : 0.6 + d * 0.06;
+}
+// down it comes, in pieces. On you, if you're still under it.
+function throwLand(th) {
+  const P = PLAYER,
+    o = th.o;
+  o.mesh.show = false;
+  audio.hx('crack', hxPan(th.tx, th.tz), 0.9);
+  audio.hx('thud', hxPan(th.tx, th.tz), 0.6);
+  const d = Math.hypot(P.x - th.tx, P.z - th.tz);
+  if (d < 6) HX.shake = Math.max(HX.shake || 0, 0.25);
+  if (P.onMap && !G.away && d < RANGED.hit) {
+    G.lastHitBy = th.by.id;
+    hurt(HURT.thrown, true);
+    if (!G.over && P.onMap) knockBack(P, th, 0.8);
+  } else if (P.onMap && d < 3 && th.arc) ui.float(P, 'Dodged', 'good');
+  th.done = true;
+}
+// where its mesh is drawn: carried, then tumbling. Turned about its middle, not its feet.
+function throwMatrix(th) {
+  const m = th.o.mesh;
+  M4.jointInto(th.J, THROW_ID, th.x, th.y + 0.45, th.z, th.spin, th.ang + th.spin * 0.6, 0);
+  M4.partInto(m.model, th.J, 0, -0.45, 0, 1, 1, 1);
+  m.center[0] = th.x;
+  m.center[1] = th.y + 0.5;
+  m.center[2] = th.z;
+}
+const swarmOf = (n) => {
+  for (const s of SWARMS) if (s.by === n) return s;
+  return null;
+};
+function swarmStart(n) {
+  SWARMS.push({ by: n, x: n.x, z: n.z, vx: 0, vz: 0, wake: RANGED.wake, life: RANGED.swarmLife, sting: 0, fade: 1 });
+  n.tell.feed = true;
+  ui.bubble(n, 'exclaim', 'speech', 1.2);
+  audio.hx('buzz', hxPan(n.x, n.z), 0.6);
+  if (G.speed > 1) G.speed = 1;
+}
+// where a swarm can fly: anywhere but through a wall or a locked door
+function flyOK(x, z) {
+  const fx = Math.floor(x),
+    fz = Math.floor(z);
+  if (!inb(fx, fz)) return false;
+  const c = tiles[I(fx, fz)];
+  return c !== '#' && c !== 'W' && c !== 'L' && !VOIDISH.has(c);
+}
+function swarmTick(s, dt) {
+  const n = s.by,
+    P = PLAYER;
+  if (s.wake > 0) {
+    // still coming out of its mouth
+    s.wake -= dt;
+    s.x = n.x + Math.sin(n.dir) * 0.4;
+    s.z = n.z + Math.cos(n.dir) * 0.4;
+    if (s.wake <= 0 && n.tell) n.tell.feed = false;
+    return;
+  }
+  s.life -= dt;
+  if (!P.onMap || G.away || !n.trueForm || n.slain) s.life = Math.min(s.life, 0);
+  if (s.life <= 0) {
+    s.fade -= dt * 0.6; // it thins out and drifts off
+    if (s.fade <= 0) s.done = true;
+    return;
+  }
+  const dx = P.x - s.x,
+    dz = P.z - s.z,
+    d = Math.hypot(dx, dz) || 1,
+    sp = WALK * RANGED.swarmSpd,
+    k = Math.min(1, dt * 2.5);
+  s.vx += ((dx / d) * sp - s.vx) * k;
+  s.vz += ((dz / d) * sp - s.vz) * k;
+  const nx = s.x + s.vx * dt,
+    nz = s.z + s.vz * dt;
+  if (flyOK(nx, nz)) {
+    s.x = nx;
+    s.z = nz;
+  } else if (flyOK(nx, s.z)) s.x = nx;
+  else if (flyOK(s.x, nz)) s.z = nz;
+  else {
+    s.vx *= -0.3;
+    s.vz *= -0.3;
+  }
+  s.sting -= dt;
+  if (d < RANGED.swarmHit && s.sting <= 0) {
+    s.sting = RANGED.swarmEvery;
+    swarmSting(s);
+  }
+}
+// a sting: a little off your health and your nerve. Not the flinch and the shakes of a blow: you can still run.
+function swarmSting(s) {
+  if (G.over || !PLAYER.onMap) return;
+  G.health = Math.max(0, G.health - HURT.sting);
+  G.sickNext = true;
+  G.lastHitBy = s.by.id;
+  addStress(1.5);
+  R.pulse = Math.max(R.pulse || 0, 0.35);
+  ui.float(PLAYER, '−' + HURT.sting, 'bad');
+  audio.hx('sting', 0, 0.45);
+  if (G.health <= 0) knockOut(true);
+}
+// every sim step: throws in the air, swarms on the wing, a creature's lunge coming back down
+function combatTick(dt) {
+  for (let i = THROWN.length - 1; i >= 0; i--) {
+    const th = THROWN[i];
+    throwTick(th, dt);
+    if (th.done) THROWN.splice(i, 1);
+    else throwMatrix(th);
+  }
+  for (let i = SWARMS.length - 1; i >= 0; i--) {
+    swarmTick(SWARMS[i], dt);
+    if (SWARMS[i].done) SWARMS.splice(i, 1);
+  }
+  for (const c of CHARS)
+    if (c.lungeOff && G.t >= c.lungeOff) {
+      c.lungeOff = 0;
+      if (c.tell) c.tell.lunge = false;
+    }
+}
+// beaten, taken, a new game: nothing left in the air. Whatever was mid-throw is in pieces.
+function combatClear() {
+  for (const th of THROWN) th.o.mesh.show = false;
+  THROWN.length = 0;
+  SWARMS.length = 0;
+  for (const c of CHARS) {
+    teleEnd(c);
+    if (c.tell) c.tell.wind = false;
+    if (c.trueForm) c.trueForm.atk = null;
+  }
+}
+// in the morning it's all back where it stood, as if nothing had been thrown at anyone
+function wreckReset() {
+  THROWN.length = 0;
+  let any = false;
+  for (const o of OBJ) {
+    if (!o.wrecked) continue;
+    o.wrecked = false;
+    any = true;
+    const m = o.mesh;
+    if (m && m.home) {
+      m.model = m.home;
+      m.center = m.homeC;
+      m.home = null;
+    }
+    if (m) m.show = true;
+  }
+  if (any) solidReset();
+}
+// the swarm itself, in the world pass: specks wheeling round its middle, a glint on each so you see it at night
+function combatDraw() {
+  if (!SWARMS.length) return;
+  gl.uniform1f(U.uEmitMul, 1);
+  gl.uniform1f(U.uDyn, 1);
+  gl.uniform1i(U.uCut, 0);
+  drawHi = 0;
+  const t = R.time;
+  for (const s of SWARMS) {
+    if (visAt(s.x, s.z) < 0.2) continue;
+    const n = s.wake > 0 ? Math.round(16 * (1 - s.wake / RANGED.wake)) : Math.round(16 * s.fade);
+    for (let k = 0; k < n; k++) {
+      const a = t * (2.1 + (k % 5) * 0.37) + k * 2.4,
+        r = 0.18 + ((k * 37) % 11) * 0.025,
+        x = s.x + Math.cos(a) * r + Math.sin(t * 7 + k) * 0.04,
+        z = s.z + Math.sin(a * 1.13) * r,
+        y = 1.05 + Math.sin(a * 0.7 + k) * 0.28;
+      part(THROW_ID, x, y, z, 0.035, 0.026, 0.035, 'box', k % 3 ? SWARM_DARK : SWARM_GOLD, SWARM_GLINT);
+    }
+  }
+}
+const SWARM_DARK = [0.08, 0.07, 0.04],
+  SWARM_GOLD = [0.7, 0.55, 0.1],
+  SWARM_GLINT = [0.18, 0.15, 0.03];
+function cbDecal(x, z, r, cr, cg, cb, a, shape) {
+  CB_COL[0] = cr;
+  CB_COL[1] = cg;
+  CB_COL[2] = cb;
+  CB_COL[3] = a;
+  drawDecal(x, z, r, CB_COL, shape, 0.017);
+}
+// on the floor: the red patch of every blow on its way, the ring where a throw comes down, a swarm's shadow
+function combatDecals() {
+  if (!G || !G.started) return;
+  for (const c of CHARS) {
+    const T = c.tele;
+    if (!T || !c.onMap || G.t >= T.end) continue;
+    const k = clamp((G.t - T.at) / Math.max(0.01, T.end - T.at), 0, 1),
+      hot = k > 0.8 ? 0.5 + 0.5 * Math.sin(R.time * 40) : 0;
+    cbDecal(T.x, T.z, T.r, 0.95, 0.12, 0.06, 0.16 + 0.42 * k + 0.2 * hot, 0);
+    cbDecal(T.x, T.z, T.r * 1.08, 1, 0.3, 0.15, 0.55 + 0.4 * k, 1);
+  }
+  for (const th of THROWN) {
+    cbDecal(th.x, th.z, 0.42, 0, 0, 0, 0.3, 0);
+    if (th.ph !== 'fly' || !th.arc) continue;
+    const k = clamp(th.t / th.dur, 0, 1);
+    cbDecal(th.tx, th.tz, RANGED.hit, 0.95, 0.12, 0.06, 0.15 + 0.4 * k, 0);
+    cbDecal(th.tx, th.tz, RANGED.hit * 1.08, 1, 0.3, 0.15, 0.6 + 0.4 * k, 1);
+  }
+  for (const s of SWARMS) if (s.wake <= 0) cbDecal(s.x, s.z, 0.55, 0, 0, 0, 0.22 * s.fade, 0);
 }
 // ───────────── awkwardness: the restroom lock is broken
 // ───────────── doors left ajar
@@ -20619,7 +21023,7 @@ function sentAfter() {
   if (!b) return false;
   hardReset(b);
   ui.say(b, pick(['THEY want a word.', 'Come here.', 'You should’ve minded your business.']), 3);
-  enqueue(b, chaseAct(P, { label: 'After you', giveUp: 6, onCatch: (c) => swing(c, HURT.thug, false) }));
+  brawl(b, HURT.thug, { label: 'After you', giveUp: 6 });
   echo('fight', { x: b.x, z: b.z, who: b.id });
   return true;
 }
@@ -23193,10 +23597,7 @@ function surrender(n, why) {
   tf.cornered = false;
   tf.aim = 0;
   if (UI.aim && UI.aim.c === n) UI.aim = null;
-  if (UI.fight && UI.fight.n === n) {
-    UI.fight = null;
-    $('#fight').hidden = true;
-  }
+  foeCalm(n);
   for (let i = BOLTS.length - 1; i >= 0; i--) if (BOLTS[i].by === n) BOLTS.splice(i, 1);
   n.fleeing = null;
   n.trapped = false;
@@ -23438,7 +23839,7 @@ function arenaRoom(n) {
 }
 // ── starting it
 function openConfront(n) {
-  if (!n || !n.onMap || UI.cf || UI.fight || G.over) return;
+  if (!n || !n.onMap || UI.cf || G.over) return;
   closeMenu();
   const room = arenaRoom(n);
   if (!room.ear.length) return ui.note('confront', 'Nobody here to hear it', '');
@@ -24013,7 +24414,7 @@ function photoCone() {
 }
 function playerPhoto() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.fight || UI.scene || ARREST.on) return;
+  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
   cancelAll(P);
@@ -27574,8 +27975,7 @@ function handleHover(px, py) {
 }
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
-  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.fight || UI.scene || UI.cf || ARREST.on)
-    return null;
+  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.scene || UI.cf || ARREST.on) return null;
   let f = 0,
     r = 0;
   if (held('w') || held('ArrowUp')) f += 1;
@@ -27696,12 +28096,17 @@ function vaultAt(i) {
   if (!VAULT_AT) {
     VAULT_AT = new Int32Array(W * H).fill(-1);
     for (const o of OBJ)
-      if (VAULT.has(o.type))
+      if (VAULT.has(o.type) && !o.wrecked)
         for (let z = o.z; z < o.z + o.h; z++) for (let x = o.x; x < o.x + o.w; x++) VAULT_AT[I(x, z)] = o.idx;
   }
   return VAULT_AT[i] >= 0 ? OBJ[VAULT_AT[i]] : null;
 }
 let SOLID = null;
+// a thing gone from where it stood (thrown, smashed) or back again: work the room out afresh
+function solidReset() {
+  SOLID = null;
+  VAULT_AT = null;
+}
 function solidCells() {
   if (SOLID) return SOLID;
   const cells = Array.from({ length: W * H }, () => []);
@@ -27750,7 +28155,7 @@ function solidCells() {
       }
     }
   for (const o of OBJ) {
-    if (o.t.ghost || o.t.flat) continue;
+    if (o.t.ghost || o.t.flat || o.wrecked) continue;
     if (o.type === 'fence4' || o.type === 'fence3') {
       if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56, o);
       else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h, o);
@@ -28043,9 +28448,10 @@ function driveTick(dt) {
     }
     return;
   }
-  if (P.queue.length) {
+  const swinging = P.queue.length && P.queue[0].swing; // a swing leaves your legs free
+  if (P.queue.length && !swinging) {
     const cur = P.queue[0];
-    if (cur.interruptible === false || cur.swing || cur.photo) return; // passing out, a breakdown, a swing: you can't just walk off
+    if (cur.interruptible === false || cur.photo) return; // passing out, a breakdown: you can't just walk off
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
@@ -28053,13 +28459,13 @@ function driveTick(dt) {
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = speed * dt;
-  if (run && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+  if (run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
   const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
-  P.tdir = Math.atan2(v[0], v[1]);
+  if (!swinging) P.tdir = Math.atan2(v[0], v[1]); // mid-swing you keep facing what you swung at
   P.path = null;
   P.run = run;
   P.jog = !run;
@@ -28129,7 +28535,7 @@ function pickFocus() {
     );
   }
   for (const o of OBJ) {
-    if (Math.abs(o.cx - P.x) > 5 || Math.abs(o.cz - P.z) > 5 || !interactive(o) || HUNT.on) continue; // while THEY're after you, nothing to fiddle with
+    if (Math.abs(o.cx - P.x) > 5 || Math.abs(o.cz - P.z) > 5 || !interactive(o) || HUNT.on || o.wrecked) continue; // while THEY're after you, nothing to fiddle with
     const qx = clamp(P.x, o.x, o.x + o.w),
       qz = clamp(P.z, o.z, o.z + o.h),
       d = Math.hypot(qx - P.x, qz - P.z);
@@ -28156,8 +28562,7 @@ function pickFocus() {
 }
 function updateFocus(dtReal) {
   UI.focusT = (UI.focusT || 0) - dtReal;
-  const live =
-    G && G.started && !G.over && !UI.caseOpen && !UI.fight && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
+  const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
   if (!live) UI.focus = null;
   else if (!UI.menuOpen && UI.focusT <= 0) {
     UI.focusT = 0.1;
@@ -28326,13 +28731,6 @@ function initInput() {
     if (!G || !G.started) return;
     const k = e.key.toLowerCase();
     if (k.startsWith('arrow') || k === ' ' || k === 'tab') e.preventDefault();
-    if (UI.fight) {
-      if (k === ' ' || k === 'enter' || k === 'e') {
-        e.preventDefault();
-        if (!e.repeat) strike();
-      }
-      return;
-    } // THEIR attack: the timing bar
     if (CAP.on) {
       capKeyDown(k, e);
       return;
@@ -28381,8 +28779,12 @@ function initInput() {
       if (!e.repeat && boardKey(k)) e.preventDefault();
       return;
     }
-    if (k === 'e' || k === ' ') {
+    if (k === 'e') {
       if (!e.repeat) interact();
+      return;
+    }
+    if (k === ' ') {
+      if (!e.repeat) attackKey(); // the one key for a fight
       return;
     }
     if (k === 'f') {
@@ -29845,7 +30247,7 @@ function hxUpdate(dtReal) {
   HX.beams.length = 0;
   if (!G) return;
   const live = G.started;
-  const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.fight || UI.scene);
+  const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.scene);
   const k = paused ? 0 : !live ? 1 : G.sleeping || G.away ? 0 : [0, 1, 1.3, 1.6][G.speed] || 1;
   const dt = dtReal * k;
   const h = hourF();
@@ -32803,7 +33205,7 @@ function riteTick(n, dt) {
   }
   encHold(n, E, dt);
   // it's busy, not blind: right up close, in front of it, or with you running about, it knows you're there
-  if (P.onMap && !G.away && !UI.fight) {
+  if (P.onMap && !G.away) {
     const ahead = Math.abs(angDiff(n.dir, Math.atan2(P.x - n.x, P.z - n.z))) < 1.0;
     if (d < 1.2 || (d < 5 && seesSpot(n, P.x, P.z, 5) && (ahead || P.run))) return encNoticed(E, n);
     if (n.tell && n.tell.photo && d < 12) return encNoticed(E, n); // the flash
@@ -34503,8 +34905,7 @@ function capture(how, o = {}) {
     how === 'out' ? false : o.escape != null ? !!o.escape : CAP.forceEsc != null ? CAP.forceEsc : chance(CAP_ESCAPE);
   // the world stops for it: the menu, the fight, the bolt in the air, whatever was on the street
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   capClearFocus();
@@ -38173,19 +38574,7 @@ function groundTick(dtReal) {
   const Z = G && GROUND[G.faction],
     P = PLAYER;
   HUNT.ring = null;
-  if (
-    !Z ||
-    !G.started ||
-    G.over ||
-    !P ||
-    !P.onMap ||
-    G.away ||
-    G.sleeping ||
-    UI.fight ||
-    UI.caseOpen ||
-    UI.scene ||
-    HUNT.on
-  ) {
+  if (!Z || !G.started || G.over || !P || !P.onMap || G.away || G.sleeping || UI.caseOpen || UI.scene || HUNT.on) {
     CAP.deep = 0;
     return;
   }
@@ -38437,8 +38826,7 @@ function huntStart(kind, o = {}) {
   });
   HUNT.lead = pick(alive()) || null;
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   if (HX.scene) hxEndScene();
@@ -38707,7 +39095,7 @@ function huntFrame(dtR) {
     huntUI();
     return;
   }
-  const live = G.speed > 0 && !UI.caseOpen && !UI.fight && !UI.scene && !UI.cf;
+  const live = G.speed > 0 && !UI.caseOpen && !UI.scene && !UI.cf;
   const dt = live ? dtR : 0;
   if (G.speed > 1) G.speed = 1; // no fast-forward through this
   HUNT.t += dt;
@@ -39177,8 +39565,7 @@ function huntDown(foe) {
   });
   HUNT.down = { foe, k: 0, t: 0, gloat: 1.7, need: 6, shake: 0 };
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   G.health = 1;
@@ -39293,7 +39680,7 @@ function huntUp(got) {
     f.trueForm.lastSeen = G.t;
     f.trueForm.cd = 3;
     f.spd = 1;
-    UI.fightCd = R.time + 2.5;
+    f.trueForm.atk = { ph: 'rec', t: 0, dur: 5, seen: G.t, open: false }; // a moment before it comes at you again
   }
   if (got) {
     audio.hx('breath', 0, 0.9);
@@ -39680,7 +40067,7 @@ const TRIP_POSE = (T) => {
 function chaseFrame(dtR) {
   const P = PLAYER;
   if (!G || !G.started || G.over || !P || CAP.on) return;
-  const live = G.speed > 0 && !UI.caseOpen && !UI.fight;
+  const live = G.speed > 0 && !UI.caseOpen;
   for (const n of CHARS) {
     if (!n.isThem || !n.onMap || !n.fleeing) {
       if (n.chase) {
@@ -40353,13 +40740,13 @@ function resetWorld() {
   }
   UI.camMode = false;
   UI.pinSel = null;
-  UI.fight = null;
   UI.aim = null;
-  UI.fightCd = 0;
   UI.scene = null;
   UI.swingCd = 0;
   UI.focus = null;
   BOLTS.length = 0;
+  wreckReset();
+  SWARMS.length = 0;
   const se = $('#scene');
   if (se) se.hidden = true;
   const sr = roomByKey('shop');
@@ -40368,8 +40755,6 @@ function resetWorld() {
   if (sg) sg.col = [1, 0.25, 0.45];
   const sl = LIGHTS.find((x) => x.grp === 'shopSign');
   if (sl) sl.col = hex(0xff4d86);
-  const fe = $('#fight');
-  if (fe) fe.hidden = true;
   CHARS.length = 0;
   for (const k in NPC) delete NPC[k];
   for (const o of OBJ) {
@@ -40662,8 +41047,6 @@ function gameOver(kind) {
   G.over = kind;
   G.speed = 0;
   const e = kind === 'taken' || kind === 'plan' || kind === 'killed' ? ENDINGS[kind][G.faction] : ENDINGS[kind];
-  UI.fight = null;
-  $('#fight').hidden = true;
   UI.aim = null;
   $('#over-title').textContent = e[0];
   $('#over-body').textContent = e[1];
@@ -40825,7 +41208,7 @@ function looseTick(dt) {
     const c = looseChar(id);
     if (c) looseHelper(c, L);
   }
-  if (P.onMap && !G.away && !FRI.hold && !UI.fight && !HUNT.on && P.x > LOOSE_EXIT_X && P.z < TOWN_H) looseEscape();
+  if (P.onMap && !G.away && !FRI.hold && !HUNT.on && P.x > LOOSE_EXIT_X && P.z < TOWN_H) looseEscape();
 }
 function looseThem(n, L) {
   if (n.slain || n.surrendered) return;
@@ -41003,7 +41386,7 @@ function looseStep(c, a, dt) {
       else hxSound(G.faction === 'zombies' ? 'groan' : 'thrum', c.x, c.z, 0.6);
     }
     if (c.gun && live && looseGun(c, d)) return;
-    if (live && d < 0.95 && !FRI.hold && !UI.fight && !HUNT.on && G.t >= (c.looseCd || 0) && G.t >= FRI.grace) {
+    if (live && d < 0.95 && !FRI.hold && !HUNT.on && G.t >= (c.looseCd || 0) && G.t >= FRI.grace) {
       looseGrab(c);
       return;
     }
@@ -41042,7 +41425,7 @@ function looseGun(c, d) {
     c.path = null;
     c.moving = false;
     c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-    if (!seesSpot(c, P.x, P.z, 13) || FRI.hold || UI.fight || !(UI.aim && UI.aim.c === c)) {
+    if (!seesSpot(c, P.x, P.z, 13) || FRI.hold || !(UI.aim && UI.aim.c === c)) {
       c.aimAt = 0;
       if (UI.aim && UI.aim.c === c) UI.aim = null;
       c.gunCd = G.t + 3;
@@ -41181,8 +41564,7 @@ function looseFrame(dtR) {
   if (H) {
     const c = H.c,
       P = PLAYER;
-    if (G.over || !G.loose || !c || !c.onMap || UI.fight || !P.onMap || G.away || CAP.on || HUNT.on)
-      looseRelease(false);
+    if (G.over || !G.loose || !c || !c.onMap || !P.onMap || G.away || CAP.on || HUNT.on) looseRelease(false);
     else if (G.speed > 0 && !UI.caseOpen && !UI.scene && !UI.cf) {
       H.t += dtR;
       H.shake = Math.max(0, H.shake - dtR * 4);
@@ -41311,6 +41693,7 @@ function simStep(dtReal, spdOver) {
       perceptionTick(sub);
       trapTick();
       boltTick(sub);
+      combatTick(sub);
       if (Math.floor(t0) !== Math.floor(G.t)) {
         destroyTick();
         policeTick();
@@ -41518,11 +41901,10 @@ function frame(now) {
     } else if (CAP.on) {
       if (G.over) capFinish();
       else if (!UI.caseOpen) capUpdate(dtReal);
-    } else if (!G.over && !UI.caseOpen && !UI.fight && !UI.scene) {
+    } else if (!G.over && !UI.caseOpen && !UI.scene) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
       simStep(dtReal);
     }
-    if (UI.fight) fightTick(dtReal);
     if (UI.cf) arenaTick(dtReal);
     styleStep(dtReal);
     worldStep(dtReal, preview);
@@ -41625,10 +42007,6 @@ function boot() {
     showTitle();
   };
   $('#bd-close').onclick = closeBoard;
-  $('#fight').addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    strike();
-  });
   $('#board').addEventListener('pointerdown', (e) => {
     if (e.target.id === 'board') closeBoard();
   });

@@ -80,6 +80,7 @@ function newDay() {
   if (!G.gatherDay || G.gatherDay < d) G.gatherDay = d + gatherGap();
   advanceWeek();
   if (G.over) return;
+  wreckReset(); // whatever got thrown at you yesterday is back where it stood
   marks();
   if (G.tearTonight > 0) {
     // after a failed confrontation THEY come into your flat and take a card

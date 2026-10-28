@@ -74,6 +74,11 @@ function renderFrame() {
   for (const c of CHARS) if (c.onMap && c.shown > 0.02 && !c.capHide && charInView(c)) drawChar(c);
   if (SHADE.on) drawChar(SHADE.c);
   try {
+    combatDraw();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     hxDrawWorld();
   } catch (e) {
     console.error(e);
@@ -126,6 +131,11 @@ function renderFrame() {
   }
   try {
     huntDecals();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    combatDecals();
   } catch (e) {
     console.error(e);
   }

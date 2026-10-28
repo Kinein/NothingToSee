@@ -1,6 +1,6 @@
 //@ horror/director — Horror director: daily events by THEIR phase
 //@ Defines: SMELL, MOVED, planDay, sentAfter, openTick, lureTick, lureEnd
-//@ Uses:    sim/core, core/util, sim/actions, them/plan, data/tuning, town/echoes, them/true-form, ui/interface, town/fleeing, gfx/renderer, …
+//@ Uses:    sim/core, core/util, sim/actions, them/plan, data/tuning, town/echoes, them/true-form, ui/interface, gfx/renderer, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the horror director: a few events a day from four kinds, more as THEIR plan grows
 // stray signs point the right way more often than not, never always: the town is strange in more than one way
@@ -104,7 +104,7 @@ function sentAfter() {
   if (!b) return false;
   hardReset(b);
   ui.say(b, pick(['THEY want a word.', 'Come here.', 'You should’ve minded your business.']), 3);
-  enqueue(b, chaseAct(P, { label: 'After you', giveUp: 6, onCatch: (c) => swing(c, HURT.thug, false) }));
+  brawl(b, HURT.thug, { label: 'After you', giveUp: 6 });
   echo('fight', { x: b.x, z: b.z, who: b.id });
   return true;
 }

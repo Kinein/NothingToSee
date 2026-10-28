@@ -203,13 +203,13 @@ function resetWorld() {
   }
   UI.camMode = false;
   UI.pinSel = null;
-  UI.fight = null;
   UI.aim = null;
-  UI.fightCd = 0;
   UI.scene = null;
   UI.swingCd = 0;
   UI.focus = null;
   BOLTS.length = 0;
+  wreckReset();
+  SWARMS.length = 0;
   const se = $('#scene');
   if (se) se.hidden = true;
   const sr = roomByKey('shop');
@@ -218,8 +218,6 @@ function resetWorld() {
   if (sg) sg.col = [1, 0.25, 0.45];
   const sl = LIGHTS.find((x) => x.grp === 'shopSign');
   if (sl) sl.col = hex(0xff4d86);
-  const fe = $('#fight');
-  if (fe) fe.hidden = true;
   CHARS.length = 0;
   for (const k in NPC) delete NPC[k];
   for (const o of OBJ) {
@@ -512,8 +510,6 @@ function gameOver(kind) {
   G.over = kind;
   G.speed = 0;
   const e = kind === 'taken' || kind === 'plan' || kind === 'killed' ? ENDINGS[kind][G.faction] : ENDINGS[kind];
-  UI.fight = null;
-  $('#fight').hidden = true;
   UI.aim = null;
   $('#over-title').textContent = e[0];
   $('#over-body').textContent = e[1];

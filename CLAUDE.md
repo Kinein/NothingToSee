@@ -75,7 +75,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | False cards: innocent oddities, rumours, THEIR frame-ups, Press | `js/play/oddities.js` |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
-| True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`openFight`, `hurt`, `fireBolt`) |
+| True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |
 | Horror events and scenes | `js/horror/director.js` (daily plan), `layer.js` (machinery), `midday.js`, `night.js` |
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |

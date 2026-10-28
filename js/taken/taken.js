@@ -427,8 +427,7 @@ function capture(how, o = {}) {
     how === 'out' ? false : o.escape != null ? !!o.escape : CAP.forceEsc != null ? CAP.forceEsc : chance(CAP_ESCAPE);
   // the world stops for it: the menu, the fight, the bolt in the air, whatever was on the street
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   capClearFocus();

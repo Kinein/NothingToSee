@@ -1,6 +1,6 @@
 //@ chase/they-come — When THEY come for you
 //@ Defines: sleepTakeCheck, sleepTake, GROUND, groundTick, groundSigns, capKeyDown, capKeyUp, capReset
-//@ Uses:    sim/core, taken/taken, core/util, them/plan, horror/layer, ui/interface, gfx/renderer, audio/sound, chase/hunt, taken/coming, …
+//@ Uses:    sim/core, taken/taken, core/util, them/plan, horror/layer, gfx/renderer, ui/interface, audio/sound, chase/hunt, taken/coming, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── when THEY come for you
 // In your sleep: once THEIR week is well along, or once THEY know too much about you. It's decided when you lie down,
@@ -72,19 +72,7 @@ function groundTick(dtReal) {
   const Z = G && GROUND[G.faction],
     P = PLAYER;
   HUNT.ring = null;
-  if (
-    !Z ||
-    !G.started ||
-    G.over ||
-    !P ||
-    !P.onMap ||
-    G.away ||
-    G.sleeping ||
-    UI.fight ||
-    UI.caseOpen ||
-    UI.scene ||
-    HUNT.on
-  ) {
+  if (!Z || !G.started || G.over || !P || !P.onMap || G.away || G.sleeping || UI.caseOpen || UI.scene || HUNT.on) {
     CAP.deep = 0;
     return;
   }

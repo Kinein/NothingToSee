@@ -1,6 +1,6 @@
 //@ chase/hunt-step — The hunt each frame: seeing, chasing, grabs, being beaten
 //@ Defines: huntFrame, huntSees, huntStep, huntRoam, huntMove, huntLeave, huntLeaveStep, huntBeamTick, huntSlow, huntGrab, huntGrabTick, huntKey, huntWinNear, huntClimb, huntDown, huntDownTick, …
-//@ Uses:    chase/hunt, sim/core, horror/layer, audio/sound, chase/hunt-end, taken/taken, gfx/renderer, sim/actions, core/util, ui/interface, …
+//@ Uses:    chase/hunt, sim/core, horror/layer, audio/sound, chase/hunt-end, taken/taken, sim/actions, core/util, gfx/renderer, world/paths, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ── every frame (after the horror layer has cleared its lights)
 function huntFrame(dtR) {
@@ -29,7 +29,7 @@ function huntFrame(dtR) {
     huntUI();
     return;
   }
-  const live = G.speed > 0 && !UI.caseOpen && !UI.fight && !UI.scene && !UI.cf;
+  const live = G.speed > 0 && !UI.caseOpen && !UI.scene && !UI.cf;
   const dt = live ? dtR : 0;
   if (G.speed > 1) G.speed = 1; // no fast-forward through this
   HUNT.t += dt;
@@ -499,8 +499,7 @@ function huntDown(foe) {
   });
   HUNT.down = { foe, k: 0, t: 0, gloat: 1.7, need: 6, shake: 0 };
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   G.health = 1;
@@ -615,7 +614,7 @@ function huntUp(got) {
     f.trueForm.lastSeen = G.t;
     f.trueForm.cd = 3;
     f.spd = 1;
-    UI.fightCd = R.time + 2.5;
+    f.trueForm.atk = { ph: 'rec', t: 0, dur: 5, seen: G.t, open: false }; // a moment before it comes at you again
   }
   if (got) {
     audio.hx('breath', 0, 0.9);

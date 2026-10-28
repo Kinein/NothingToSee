@@ -1,6 +1,6 @@
 //@ chase/hunt — When THEY come for you: the hunters, their tuning, how each kind of hunt starts
 //@ Defines: HUNT, HUNT_WHO, HUNT_SPD, HUNT_SRCH, HUNT_SEE, HUNT_LOSE, HUNT_GRAB, BED_SPOT, WIN_IN, WIN_OUT, BLDG_OUT, huntActor, huntH, huntStart, HUNT_SETUP, huntBeam
-//@ Uses:    sim/core, audio/sound, horror/layer, core/util, ui/interface, taken/coming, taken/taken, world/paths, chase/they-come, sim/characters, …
+//@ Uses:    sim/core, audio/sound, horror/layer, core/util, taken/coming, ui/interface, taken/taken, world/paths, chase/they-come, sim/characters, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── when THEY come for you: the chase before the dark ─────────────────────────
 // Nothing is decided off-screen. THEY come in through the front door, the bedroom window, a cover in the alley, the ground
@@ -145,8 +145,7 @@ function huntStart(kind, o = {}) {
   });
   HUNT.lead = pick(alive()) || null;
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   if (HX.scene) hxEndScene();

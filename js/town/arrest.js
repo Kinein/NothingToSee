@@ -1,6 +1,6 @@
 //@ town/arrest — Being arrested, shown on the map
 //@ Defines: ARREST, COP_MESH, copCarMesh, arrestCarIn, copCarV, arrestStart, arrestCuffed, arrestEscortTick, arrestLoad, arrestRide, arrestInside, arrestRelease, arrestDropOff, arrestTick, arrestFrame, arrestReset
-//@ Uses:    sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, ui/interface, gfx/gl, world/paths, gfx/renderer, …
+//@ Uses:    sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, gfx/gl, world/paths, gfx/renderer, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── arrested, start to finish, out where you can see it: hands behind your back, the cuffs, a squad car
 // pulling up on Main street with its lights going, the walk to it in front of the officer, the door, the car pulling
@@ -63,8 +63,7 @@ function arrestStart(off) {
   if (G.loose) return;
   if (ARREST.on || !P.onMap || G.away || CAP.on || HUNT.on) return arrest();
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
+  combatClear();
   UI.aim = null;
   BOLTS.length = 0;
   if (UI.camMode) toggleCam(false);

@@ -1,11 +1,10 @@
 //@ input/walking — WASD walking relative to the camera
-//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidCells, bodyPush, settle, tryMove, steerAssist, …
+//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, settle, tryMove, …
 //@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, sim/actions, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
-  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.fight || UI.scene || UI.cf || ARREST.on)
-    return null;
+  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.scene || UI.cf || ARREST.on) return null;
   let f = 0,
     r = 0;
   if (held('w') || held('ArrowUp')) f += 1;
@@ -126,12 +125,17 @@ function vaultAt(i) {
   if (!VAULT_AT) {
     VAULT_AT = new Int32Array(W * H).fill(-1);
     for (const o of OBJ)
-      if (VAULT.has(o.type))
+      if (VAULT.has(o.type) && !o.wrecked)
         for (let z = o.z; z < o.z + o.h; z++) for (let x = o.x; x < o.x + o.w; x++) VAULT_AT[I(x, z)] = o.idx;
   }
   return VAULT_AT[i] >= 0 ? OBJ[VAULT_AT[i]] : null;
 }
 let SOLID = null;
+// a thing gone from where it stood (thrown, smashed) or back again: work the room out afresh
+function solidReset() {
+  SOLID = null;
+  VAULT_AT = null;
+}
 function solidCells() {
   if (SOLID) return SOLID;
   const cells = Array.from({ length: W * H }, () => []);
@@ -180,7 +184,7 @@ function solidCells() {
       }
     }
   for (const o of OBJ) {
-    if (o.t.ghost || o.t.flat) continue;
+    if (o.t.ghost || o.t.flat || o.wrecked) continue;
     if (o.type === 'fence4' || o.type === 'fence3') {
       if (o.w >= o.h) add(o.x, o.z + 0.44, o.x + o.w, o.z + 0.56, o);
       else add(o.x + 0.44, o.z, o.x + 0.56, o.z + o.h, o);
@@ -473,9 +477,10 @@ function driveTick(dt) {
     }
     return;
   }
-  if (P.queue.length) {
+  const swinging = P.queue.length && P.queue[0].swing; // a swing leaves your legs free
+  if (P.queue.length && !swinging) {
     const cur = P.queue[0];
-    if (cur.interruptible === false || cur.swing || cur.photo) return; // passing out, a breakdown, a swing: you can't just walk off
+    if (cur.interruptible === false || cur.photo) return; // passing out, a breakdown: you can't just walk off
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
@@ -483,13 +488,13 @@ function driveTick(dt) {
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = speed * dt;
-  if (run && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+  if (run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
   const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
-  P.tdir = Math.atan2(v[0], v[1]);
+  if (!swinging) P.tdir = Math.atan2(v[0], v[1]); // mid-swing you keep facing what you swung at
   P.path = null;
   P.run = run;
   P.jog = !run;

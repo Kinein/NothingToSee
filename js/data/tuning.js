@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, STRESS_K, SHAKEN_LOCK, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FIGHT_DIFF, …
+//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, STRESS_K, SHAKEN_LOCK, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FOE_HP, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -26,9 +26,11 @@ const CTRL = {
   facing: 70,        // half-angle you must roughly face to pick something new (a 140° wedge)
   holdDist: 0.6,     // once picked, a target stays picked out to reach + this…
   holdFacing: 110,   // …and to this half-angle, so a small step or a turn doesn't drop it
-  melee: 2.0,        // a swing connects if they're still this close when it lands
+  melee: 1.7,        // a swing connects with anyone this close, in front of you, when it lands
+  meleeArc: 75,      // …within this half-angle of where you face (closer than `close`, any side)
   windup: 0.5,       // the swing lands this long after the key (about a quarter second at normal speed): a moving enemy can slip it
   swingCd: 0.7,      // real seconds between your swings
+  crowbar: 0.35,     // a crowbar in your hand: this much more reach
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
@@ -42,11 +44,13 @@ const CTRL = {
 // the work bar: +30 on sitting down (once an hour), +25/h working, −9/h away. Empty, and you're let go: no second chances,
 // but it takes most of a shift away from the desk to get there.
 const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
-const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18 };   // what a blow costs your health
+const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18, thrown: 18, sting: 3 };   // what a blow costs your health
 // the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
 // He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
-// minutes, so running buys time, never freedom. Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
-const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5 };
+// minutes. Up close he reaches for you: `grab` game minutes of warning, and his hands close on anyone within `hold`.
+// Step out of it and you slip him; he stumbles for `stumble`. Slip him `slips` times and he gives up, winded.
+// Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
+const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5, grab: 0.8, hold: 1.0, lunge: 0.5, stumble: 2.2, slips: 3 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -68,14 +72,44 @@ const ATTACK_ODDS = [0, 0.33, 0.45, 0.6, 0.8, 0.95];
 const HORROR_MIX = [null, [0.5, 0.35, 0.15, 0], [0.35, 0.3, 0.25, 0.1], [0.25, 0.2, 0.3, 0.25], [0.15, 0.15, 0.3, 0.4], [0.1, 0.1, 0.3, 0.5]];
 const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY are cleaning up after THEMSELVES'], [55, 'eye', 'Someone watches your window'], [70, 'eye', 'THEY are coming for you'], [100, 'eye', 'THEY are ready for you']];
 
-// ── Fights (combat/timing-bar)
-// a fight is rounds of the timing bar. A true form takes several hits to put down; every miss, it gets you.
-const FIGHT_DIFF = { normal: [0.4, 0.55], them: [0.25, 0.85], aliens: [0.2, 0.9], lizards: [0.15, 1.15], zombies: [0.18, 1.0] };
+// ── Fights (combat/melee, combat/throws)
+// all out in the street, no panel. Space swings. A true form takes several hits to put down. Every blow it throws is
+// shown first, as a red patch on the ground where it will land: step out of it. Hit it while it stands there open
+// after hitting air, and it goes down. Times in game minutes (half that in seconds at normal speed).
 const FOE_HP = { aliens: 2, lizards: 3, zombies: 3 };
-// the timing bar itself (combat/timing-bar). grace: real seconds the tracker holds still as the panel opens, so a key
-// already on its way for something else doesn't waste the swing. timeout: real seconds before freezing up counts as a
-// miss. clean: the middle share of the green that lands a clean hit. down: game minutes a clean hit leaves it on the ground.
-const FIGHT = { grace: 0.35, timeout: 6, clean: 0.34, down: 3.2 };
+const MELEE = {
+  engage: 1.5,                  // it starts winding up when you're this close
+  wind: { lizards: 0.75, aliens: 1.0, zombies: 1.25 }, // the warning: red patch to blow
+  creep: 0.35,                  // while winding up it edges after you at this share of a walk
+  lunge: 0.7,                   // then throws itself this far forward…
+  reach: 1.05,                  // …and hits anything this close to the spot in front of it: that's the red patch
+  rec: 1.1,                     // stands after a blow that landed
+  open: 2.2,                    // stands after one that hit air: its guard is down, and a hit now knocks it flat
+  down: 3.2,                    // flat on the ground after that
+  stagger: 0.9,                 // knocked back by your hit: this long before it can wind up again
+  punch: 0.85,                  // a person's punch (someone you hit, a thug): warning to landing
+  punchReach: 0.8,              // …its patch, centred three quarters of a tile in front of them
+  punchTries: 3,                // a missed punch, they come again, this many times in all
+};
+// what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
+// laser (in them/true-form). A throw lands where you stood when it left the hands.
+const RANGED = {
+  from: 2.6, to: 9,             // the distances it bothers to throw or loose a swarm at
+  grab: 1.9,                    // a lizard picks up something no further than this from it
+  lift: 0.9,                    // overhead, in plain sight, this long before it lets go
+  fly: 0.55, flyPer: 0.06,      // flight time: this, plus this much per tile
+  hit: 0.85,                    // lands on you if you're this close to where it comes down
+  throwCd: 7,
+  wake: 0.9,                    // the dead: mouth open this long before the swarm comes out
+  swarmCd: 16,
+  swarmLife: 24,                // a swarm gives up after this long
+  swarmSpd: 1.75,               // × a walk: faster than your jog, slower than your sprint. Run.
+  swarmHit: 0.6, swarmEvery: 1.4, // stings anyone this close, this often
+};
+// the confrontation's own bar (play/arena) still uses these: how wide its green and how quick its tracker; grace:
+// real seconds it holds still as it opens; timeout: real seconds before freezing up counts as a miss
+const FIGHT_DIFF = { them: [0.25, 0.85] };
+const FIGHT = { grace: 0.35, timeout: 6 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
 // Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
@@ -113,11 +147,11 @@ const EVIDENCE = {
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { day: 3, sus: 15, aware: 10 },
-  // fights by situation (multipliers on FIGHT_DIFF and HURT): alone with it, it's far worse
+  // fights by situation (multipliers on MELEE.wind and HURT): alone with it, it's far worse
   fight: {
-    privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWindow: 0.85,
-    trapHp: -1, trapWindow: 1.5, trapSpeed: 0.8,
-    crowdSaw: 3, crowdSave: 0.3,  // three who saw it change land a free blow; then each miss, this chance someone pulls it off you
+    privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWind: 0.85,
+    trapHp: -1, trapWind: 1.3,
+    crowdSaw: 3, crowdSave: 0.3,  // three who saw it change land a free blow; then each blow it lands, this chance someone pulls it off you
     loseSight: 6,                 // seconds out of its sight, at night, to lose it
   },
 };

@@ -50,7 +50,7 @@ other module, exactly as in the original single file:
 | Engine | `core/` `world/` `gfx/` `audio/` `input/` | Math, the grid and rooms, light and sight, A* paths, the WebGL2 renderer, models, people and creature drawing, synthesised sound, keyboard and camera |
 | Simulation | `sim/` `player/` | Shared state (`G`, `PLAYER`, `NPC`, `CHARS`), the body in motion, the action queue every character runs, your needs and work |
 | Town | `town/` | The cast, plans, habits, quirks, NPC update, suspicion, fleeing, police, talk and gossip, echoes, doors, traffic |
-| THEM | `them/` `combat/` `horror/` | THEIR week, tells, evidence cards, awareness, true forms, night attacks, the office at night; bolts, hits, the timing bar; the horror director, scenes, half and tenth forms, encounters |
+| THEM | `them/` `combat/` `horror/` | THEIR week, tells, evidence cards, awareness, true forms, night attacks, the office at night; bolts, hits, blows out in the street, thrown furniture and swarms; the horror director, scenes, half and tenth forms, encounters |
 | Player verbs | `play/` | Items, stashes, traps, raids, snooping, false cards, the confrontation arena, photos, advice |
 | Set pieces | `taken/` `chase/` | Being taken to THEIR lair and getting out; THEY come for you, chases, the FBI, Friday |
 | Shell | `ui/` `game/` | Menus, notes, HUD, pie menu, case board; game state, saving, endings, the main loop and `boot()` |

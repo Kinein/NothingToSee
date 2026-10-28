@@ -78,7 +78,7 @@ function arenaRoom(n) {
 }
 // ── starting it
 function openConfront(n) {
-  if (!n || !n.onMap || UI.cf || UI.fight || G.over) return;
+  if (!n || !n.onMap || UI.cf || G.over) return;
   closeMenu();
   const room = arenaRoom(n);
   if (!room.ear.length) return ui.note('confront', 'Nobody here to hear it', '');

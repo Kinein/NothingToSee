@@ -1,6 +1,6 @@
 //@ town/suspicion — Suspicion and danger per person
 //@ Defines: addSus, addDanger, seesSpot, reactTo, ridicule, hitBack
-//@ Uses:    sim/core, ui/interface, core/util, town/fleeing, them/proofs, world/grid, town/echoes, sim/actions, them/awareness, world/light-map, …
+//@ Uses:    sim/core, ui/interface, core/util, them/proofs, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, world/light-map, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── suspicion
 function addSus(n, v) {
@@ -83,6 +83,6 @@ function hitBack(n) {
   ui.say(n, pick(['That’s ENOUGH.', 'You want a fight?', 'Back off!']), 2.5);
   ui.bubble(n, 'exclaim', 'speech', 2);
   hardReset(n);
-  enqueue(n, chaseAct(PLAYER, { label: 'Fight', giveUp: 5, onCatch: (c) => swing(c, HURT.punch, false) }));
+  brawl(n, HURT.punch, { label: 'Fight', giveUp: 5 });
   echo('fight', { x: n.x, z: n.z, who: n.id });
 }

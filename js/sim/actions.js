@@ -95,6 +95,7 @@ function objSlots(o) {
   return slots;
 }
 function chooseSlot(c, o, prefer) {
+  if (o.wrecked) return null; // thrown and smashed: nothing to sit on till it's put back
   const slots = objSlots(o);
   let best = null,
     bd = 1e9;

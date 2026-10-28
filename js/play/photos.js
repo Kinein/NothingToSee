@@ -125,7 +125,7 @@ function photoCone() {
 }
 function playerPhoto() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.fight || UI.scene || ARREST.on) return;
+  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
   cancelAll(P);

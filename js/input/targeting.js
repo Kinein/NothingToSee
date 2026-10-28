@@ -61,7 +61,7 @@ function pickFocus() {
     );
   }
   for (const o of OBJ) {
-    if (Math.abs(o.cx - P.x) > 5 || Math.abs(o.cz - P.z) > 5 || !interactive(o) || HUNT.on) continue; // while THEY're after you, nothing to fiddle with
+    if (Math.abs(o.cx - P.x) > 5 || Math.abs(o.cz - P.z) > 5 || !interactive(o) || HUNT.on || o.wrecked) continue; // while THEY're after you, nothing to fiddle with
     const qx = clamp(P.x, o.x, o.x + o.w),
       qz = clamp(P.z, o.z, o.z + o.h),
       d = Math.hypot(qx - P.x, qz - P.z);
@@ -88,8 +88,7 @@ function pickFocus() {
 }
 function updateFocus(dtReal) {
   UI.focusT = (UI.focusT || 0) - dtReal;
-  const live =
-    G && G.started && !G.over && !UI.caseOpen && !UI.fight && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
+  const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
   if (!live) UI.focus = null;
   else if (!UI.menuOpen && UI.focusT <= 0) {
     UI.focusT = 0.1;
@@ -258,13 +257,6 @@ function initInput() {
     if (!G || !G.started) return;
     const k = e.key.toLowerCase();
     if (k.startsWith('arrow') || k === ' ' || k === 'tab') e.preventDefault();
-    if (UI.fight) {
-      if (k === ' ' || k === 'enter' || k === 'e') {
-        e.preventDefault();
-        if (!e.repeat) strike();
-      }
-      return;
-    } // THEIR attack: the timing bar
     if (CAP.on) {
       capKeyDown(k, e);
       return;
@@ -313,8 +305,12 @@ function initInput() {
       if (!e.repeat && boardKey(k)) e.preventDefault();
       return;
     }
-    if (k === 'e' || k === ' ') {
+    if (k === 'e') {
       if (!e.repeat) interact();
+      return;
+    }
+    if (k === ' ') {
+      if (!e.repeat) attackKey(); // the one key for a fight
       return;
     }
     if (k === 'f') {

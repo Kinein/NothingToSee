@@ -1,6 +1,6 @@
 //@ combat/bolts — Projectiles THEY shoot
 //@ Defines: BOLTS, fireBolt, boltTick, boltHits
-//@ Uses:    sim/core, gfx/renderer, data/tuning, world/grid, ui/interface, core/util, audio/sound, world/light-map, town/fleeing, chase/hunt, …
+//@ Uses:    sim/core, gfx/renderer, data/tuning, world/grid, core/util, audio/sound, world/light-map, town/fleeing, chase/hunt, taken/taken, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what THEY shoot at you: a bolt you can see coming, flying at where you stood when it fired. Get off the line.
 const BOLTS = [];
@@ -43,7 +43,7 @@ function boltTick(dt) {
       b.x += (b.dx * step) / k;
       b.z += (b.dz * step) / k;
       b.d += step / k;
-      if (P.onMap && !G.away && !UI.fight && Math.hypot(P.x - b.x, P.z - b.z) < CTRL.boltHit) {
+      if (P.onMap && !G.away && Math.hypot(P.x - b.x, P.z - b.z) < CTRL.boltHit) {
         gone = true;
         boltHits(b);
       } else if (b.d > CTRL.boltRange) gone = true;

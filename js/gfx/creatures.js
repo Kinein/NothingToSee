@@ -711,6 +711,14 @@ function creatureTargets(c) {
     T.aoR = 0;
     T.hy = 0;
   }
+  if (tl.wind) {
+    // reared back, both arms up over its head: the blow is coming
+    T.torso -= 0.28;
+    T.uaL = T.uaR = -2.75;
+    T.faL = T.faR = -0.85;
+    T.aoL = T.aoR = 0.25;
+    T.hp = 0.2;
+  }
   if (tl.lunge) {
     T.torso += 0.45;
     T.uaL = T.uaR = -1.75;

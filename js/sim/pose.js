@@ -108,6 +108,8 @@ function animTargets(c, dt) {
       for (const k in T) T[k] = D[k] + (T[k] - D[k]) * ge;
     } // a walk coming on, or dying away
     if (c.vault) vaultPose(c, T);
+    if (cur && cur.anim === 'punch' && cur.dur)
+      keyPose(T, cur.label === 'Catch' ? GRAB : PUNCH, clamp(cur.t / cur.dur, 0, 1), 1); // a swing on the move: the arms only
     return T;
   }
   const pose = c.vpose || c.pose,
@@ -363,7 +365,7 @@ function animTargets(c, dt) {
       break;
     }
     case 'punch': {
-      const p = act ? clamp(act.t / (CTRL.windup + 0.4), 0, 1) : 0.56;
+      const p = act ? clamp(act.t / (act.dur || CTRL.windup + 0.4), 0, 1) : 0.56;
       keyPose(T, act && act.label === 'Catch' ? GRAB : PUNCH, p, 1);
       fx.sharp = true;
       break;

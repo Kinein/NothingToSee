@@ -1,6 +1,6 @@
 //@ game/last-day — Friday: hell let loose
 //@ Defines: FRI, LOOSE_SPD, LOOSE_POSTS, LOOSE_GATE, LOOSE_FIRES, LOOSE_EXIT_X, LOOSE_LINES, LOOSE_BOUGHT, THRALL_PALLOR, looseCanBegin, looseBegin, looseTick, looseThem, looseShed, looseArm, looseKill, …
-//@ Uses:    sim/core, ui/interface, world/grid, horror/layer, core/util, sim/actions, gfx/renderer, audio/sound, chase/hunt, them/awareness, …
+//@ Uses:    sim/core, world/grid, ui/interface, horror/layer, core/util, sim/actions, gfx/renderer, audio/sound, chase/hunt, them/awareness, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── THEIR last day: hell let loose ─────────────────────────
 // Friday. THEY don't hide any more, nothing waits for the dark, and no door keeps THEM out. Whoever of THEM is left comes
@@ -130,7 +130,7 @@ function looseTick(dt) {
     const c = looseChar(id);
     if (c) looseHelper(c, L);
   }
-  if (P.onMap && !G.away && !FRI.hold && !UI.fight && !HUNT.on && P.x > LOOSE_EXIT_X && P.z < TOWN_H) looseEscape();
+  if (P.onMap && !G.away && !FRI.hold && !HUNT.on && P.x > LOOSE_EXIT_X && P.z < TOWN_H) looseEscape();
 }
 function looseThem(n, L) {
   if (n.slain || n.surrendered) return;
@@ -308,7 +308,7 @@ function looseStep(c, a, dt) {
       else hxSound(G.faction === 'zombies' ? 'groan' : 'thrum', c.x, c.z, 0.6);
     }
     if (c.gun && live && looseGun(c, d)) return;
-    if (live && d < 0.95 && !FRI.hold && !UI.fight && !HUNT.on && G.t >= (c.looseCd || 0) && G.t >= FRI.grace) {
+    if (live && d < 0.95 && !FRI.hold && !HUNT.on && G.t >= (c.looseCd || 0) && G.t >= FRI.grace) {
       looseGrab(c);
       return;
     }
@@ -347,7 +347,7 @@ function looseGun(c, d) {
     c.path = null;
     c.moving = false;
     c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-    if (!seesSpot(c, P.x, P.z, 13) || FRI.hold || UI.fight || !(UI.aim && UI.aim.c === c)) {
+    if (!seesSpot(c, P.x, P.z, 13) || FRI.hold || !(UI.aim && UI.aim.c === c)) {
       c.aimAt = 0;
       if (UI.aim && UI.aim.c === c) UI.aim = null;
       c.gunCd = G.t + 3;
@@ -486,8 +486,7 @@ function looseFrame(dtR) {
   if (H) {
     const c = H.c,
       P = PLAYER;
-    if (G.over || !G.loose || !c || !c.onMap || UI.fight || !P.onMap || G.away || CAP.on || HUNT.on)
-      looseRelease(false);
+    if (G.over || !G.loose || !c || !c.onMap || !P.onMap || G.away || CAP.on || HUNT.on) looseRelease(false);
     else if (G.speed > 0 && !UI.caseOpen && !UI.scene && !UI.cf) {
       H.t += dtR;
       H.shake = Math.max(0, H.shake - dtR * 4);

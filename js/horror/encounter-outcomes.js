@@ -62,7 +62,7 @@ function riteTick(n, dt) {
   }
   encHold(n, E, dt);
   // it's busy, not blind: right up close, in front of it, or with you running about, it knows you're there
-  if (P.onMap && !G.away && !UI.fight) {
+  if (P.onMap && !G.away) {
     const ahead = Math.abs(angDiff(n.dir, Math.atan2(P.x - n.x, P.z - n.z))) < 1.0;
     if (d < 1.2 || (d < 5 && seesSpot(n, P.x, P.z, 5) && (ahead || P.run))) return encNoticed(E, n);
     if (n.tell && n.tell.photo && d < 12) return encNoticed(E, n); // the flash

@@ -25,7 +25,7 @@ function trueForm(n, why, mode) {
   };
   warmLater(() => {
     if (n.trueForm) snapImage(n, fightSnapRec(n));
-  }); // its picture for the fight panel, drawn before the fight needs it
+  }); // its picture for the confrontation, should you trap it, drawn before anything needs it
   n.tell = { type: 'true', t: 0, w: 0, awarded: true, caught: true, fac: G.faction };
   if (!['raid', 'prowl', 'open', 'ambush', 'rite'].includes(why)) {
     n.danger = 100;
@@ -83,6 +83,7 @@ function trueFormTick(n, dt) {
     tf.stunUntil = 0;
     if (n.tell) n.tell.down = false;
   } // flat on the ground where you brought it down
+  if ((tf.atk || n.tell.wind) && tf.mode !== 'attack' && tf.mode !== 'trapped') foeCalm(n); // out of the fight: arms down
   if (tf.mode === 'hold') return huntHoldTick(n, dt);
   if (tf.mode === 'escort') return fbiEscortTick(n, dt);
   // nothing out of its skin should stand frozen on a way out it can't take. A few minutes stuck: out of your sight,
@@ -171,7 +172,7 @@ function trueFormTick(n, dt) {
         return killMember(n, 'mob');
       }
     }
-    if (P.onMap && d < 1.5 && n.tell.t >= TF_CHANGE && !UI.fight && R.time > (UI.fightCd || 0)) return openFight(n);
+    if (n.tell.t >= TF_CHANGE && foeMelee(n, d, dt, true)) return; // it can't come at you, but it can reach
     if (G.t >= tf.until) {
       n.trapped = false;
       n.tell.lunge = n.tell.feed = false;
@@ -250,6 +251,8 @@ function trueFormTick(n, dt) {
     return flee(n);
   }
   tf.cd -= dt;
+  if (foeMelee(n, d, dt)) return; // up close: the blow, shown first
+  if (foeRanged(n, d, sees)) return; // a few strides off: a throw, a swarm
   if (fac === 'aliens' && sees && d < (G.loose ? 11 : 9) && tf.cd <= 0) {
     // the laser: a red dot first, so breaking line of sight saves you
     n.path = null;
@@ -280,17 +283,6 @@ function trueFormTick(n, dt) {
     n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
     return;
   } // it keeps its distance while the gun recharges; cornered or hurt, it comes at you
-  if (d < 1.4) {
-    // on you: it's a fight now
-    n.path = null;
-    n.moving = false;
-    n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
-    if (!UI.fight && R.time > (UI.fightCd || 0) && P.onMap) {
-      tf.lunge = true;
-      return openFight(n, true);
-    }
-    return;
-  }
   tf.rp = (tf.rp || 0) - dt;
   if (tf.rp <= 0 || !n.path || n.pi >= n.path.length) {
     tf.rp = 0.5;
@@ -532,8 +524,7 @@ function exposedTick(n, dt) {
   }
   // you did this to it
   const P = PLAYER;
-  if (!P.onMap || G.away || G.sleeping || UI.fight || inRoomSet(P, (r) => r.home) || G.t - (n.huntAt || -1e9) < 360)
-    return;
+  if (!P.onMap || G.away || G.sleeping || inRoomSet(P, (r) => r.home) || G.t - (n.huntAt || -1e9) < 360) return;
   const d = Math.hypot(P.x - n.x, P.z - n.z);
   if (d > 10 || !seesSpot(n, P.x, P.z, 10)) return;
   const h = hourF(),

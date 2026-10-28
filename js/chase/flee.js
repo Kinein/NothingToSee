@@ -1,6 +1,6 @@
 //@ chase/flee — One of THEM running from you
 //@ Defines: TRIP_POSE, chaseFrame, chaseTrail, chaseGoal
-//@ Uses:    gfx/world-geometry, sim/core, core/util, horror/layer, ui/interface, world/vision, gfx/renderer, taken/taken, audio/sound
+//@ Uses:    gfx/world-geometry, sim/core, core/util, horror/layer, world/vision, gfx/renderer, taken/taken, ui/interface, audio/sound
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the chase: one of THEM running from you ─────────────────────────
 // It can sprint, but not for long: close on it and it tires, stumbles, slows. Out of sight it leaves a trail, and the
@@ -13,7 +13,7 @@ const TRIP_POSE = (T) => {
 function chaseFrame(dtR) {
   const P = PLAYER;
   if (!G || !G.started || G.over || !P || CAP.on) return;
-  const live = G.speed > 0 && !UI.caseOpen && !UI.fight;
+  const live = G.speed > 0 && !UI.caseOpen;
   for (const n of CHARS) {
     if (!n.isThem || !n.onMap || !n.fleeing) {
       if (n.chase) {

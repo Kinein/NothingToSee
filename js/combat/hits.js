@@ -1,20 +1,13 @@
 //@ combat/hits — Taking hits, knockouts, hospital, limbo
 //@ Defines: swing, hurt, knockOut, hospital, goAway, comeBack
-//@ Uses:    sim/core, ui/interface, taken/taken, sim/pose, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, …
+//@ Uses:    sim/core, ui/interface, taken/taken, sim/actions, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the hit, and what it costs. Health stays hidden while full.
-function swing(c, dmg, byThem) {
-  G.lastHitBy = byThem ? c.id : null; // an id, never the person: G is saved whole
+// someone up close takes a swing at you: shown first, so you can step out of it (punchAct in combat/melee)
+function swing(c, dmg, byThem, again) {
+  hardReset(c);
   c.tdir = Math.atan2(PLAYER.x - c.x, PLAYER.z - c.z);
-  if (c.tell && c.tell.type === 'true') {
-    const tl = c.tell;
-    tl.lunge = true;
-    setTimeout(() => {
-      tl.lunge = false;
-    }, 450);
-  } else gesture(c, 'punch', 0.6, 0.4); // already swinging: it lands a beat from now
-  ui.bubble(c, 'exclaim', 'speech', 1.4);
-  hurt(dmg, byThem);
+  enqueue(c, punchAct(dmg, byThem, again));
 }
 function hurt(v, byThem) {
   if (G.over || !PLAYER.onMap) return;
@@ -36,9 +29,8 @@ function hurt(v, byThem) {
 // you can't die. Beaten, you black out and lose a day: you wake up in your own bed and nobody says how you got there.
 function knockOut(byThem) {
   closeMenu();
-  UI.fight = null;
-  $('#fight').hidden = true;
   BOLTS.length = 0;
+  combatClear();
   G.health = 100;
   G.sickNext = true;
   if (isWorkday() && tod() < 17 * 60) G.sickDay = true; // the day is lost, but not held against you

@@ -529,7 +529,7 @@ function hxUpdate(dtReal) {
   HX.beams.length = 0;
   if (!G) return;
   const live = G.started;
-  const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.fight || UI.scene);
+  const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.scene);
   const k = paused ? 0 : !live ? 1 : G.sleeping || G.away ? 0 : [0, 1, 1.3, 1.6][G.speed] || 1;
   const dt = dtReal * k;
   const h = hourF();

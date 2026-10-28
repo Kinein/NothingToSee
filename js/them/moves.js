@@ -1,6 +1,6 @@
 //@ them/moves — THEIR morning moves: the Bought, Scatter, Destroy, Protect
 //@ Defines: buy, unbuyBy, tryBribe, tryUnder, tryControl, controlled, catchControl, tryScatter, morningResist, stealPrint, abductCheck, abduct, lodgeTick, destroyTick, protectAfter, policeTick, …
-//@ Uses:    sim/core, core/util, ui/interface, town/npc-update, sim/actions, them/awareness, town/echoes, data/tuning, gfx/world-geometry, them/plan, …
+//@ Uses:    sim/core, core/util, sim/actions, ui/interface, town/npc-update, data/tuning, them/awareness, town/echoes, gfx/world-geometry, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the Bought (lizards). Slight: they look past things and make your day worse. Heavy: THEIRS to the end.
 const bought = (n) => (G.bought && G.bought[n.id]) || 0;
@@ -397,30 +397,83 @@ function policeTick() {
   off.shown = 0;
   off.spd = warn ? 1 : POLICE.start;
   enqueue(off, [
-    chaseAct(P, {
-      label: 'Officer',
-      walk: warn,
-      giveUp: warn ? 90 : POLICE.giveUp,
-      reach: 1.5,
-      quit: () => !P.onMap || G.away,
-      tick: (c, a, d) => policeChaseTick(c, a, d, warn),
-      onCatch: (c) => {
-        if (warn) return policeWarn(c, edge);
-        c.spd = 1;
-        ui.say(c, pick(COP_CATCH), 3);
-        arrestStart(c);
+    policeChase(edge, warn, { t0: G.t, seen: false, blowAt: 0, slips: 0 }),
+    goAct(edge, { label: 'Leaving' }),
+  ]);
+}
+// running you down. `st` lasts the whole visit, through every grab you slip: the pace, the whistle, the count.
+function policeChase(edge, warn, st) {
+  const P = PLAYER;
+  return chaseAct(P, {
+    label: 'Officer',
+    walk: warn,
+    giveUp: warn ? 90 : POLICE.giveUp,
+    reach: 1.5,
+    quit: () => !P.onMap || G.away,
+    tick: (c, a, d) => policeChaseTick(c, st, d, warn),
+    onCatch: (c) => (warn ? policeWarn(c, edge) : policeGrab(c, edge, st)),
+    onLose: (c) => {
+      c.spd = 1;
+      // out of his reach behind a door: they come for you anyway, and there's no street to do it on
+      if (!warn && P.onMap && !G.away && !ARREST.on) {
+        ui.note('badge', 'A knock. The police, at the door.', 'bad');
+        arrest();
+      }
+    },
+  });
+}
+// up close he reaches for you: the patch on the ground is where his hands close. Be out of it and you've slipped him;
+// he stumbles, then comes again. Slip him enough times and he gives up, winded.
+function policeGrab(c, edge, st) {
+  const P = PLAYER,
+    wind = POLICE.grab;
+  hardReset(c);
+  c.spd = 1;
+  enqueue(
+    c,
+    mkAct({
+      kind: 'wait',
+      label: 'Catch', // the reaching arms (GRAB)
+      dur: wind / 0.5, // GRAB is at full stretch at .5
+      anim: 'punch',
+      interruptible: false,
+      onStart: (n, a) => {
+        a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+        teleSet(n, n.x, n.z, POLICE.hold, wind);
+        audio.sting('whistle');
       },
-      onLose: (c) => {
-        c.spd = 1;
-        // out of his reach behind a door: they come for you anyway, and there's no street to do it on
-        if (!warn && P.onMap && !G.away && !ARREST.on) {
-          ui.note('badge', 'A knock. The police, at the door.', 'bad');
-          arrest();
+      onTick: (n, a) => {
+        if (a.landed) return;
+        if (a.t < wind * 0.7) a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+        n.tdir = a.dir;
+        const sx = Math.sin(a.dir),
+          sz = Math.cos(a.dir);
+        teleSet(n, n.x + sx * (POLICE.lunge + 0.3), n.z + sz * (POLICE.lunge + 0.3), POLICE.hold);
+        if (a.t < wind) return;
+        a.landed = true;
+        const T = n.tele;
+        teleEnd(n);
+        lungeChar(n, sx, sz, POLICE.lunge);
+        if (P.onMap && !G.away && !ARREST.on && Math.hypot(P.x - T.x, P.z - T.z) < T.r) {
+          ui.say(n, pick(COP_CATCH), 3);
+          return arrestStart(n);
+        }
+        // you slipped him
+        st.slips++;
+        audio.hx('whoosh', hxPan(n.x, n.z), 0.6);
+        if (P.onMap) ui.float(P, 'Slipped', 'good');
+        const quit = st.slips >= POLICE.slips;
+        ui.say(n, pick(quit ? COP_QUIT : COP_SLIP), 2.4);
+        enqueue(n, waitAct({ label: 'Officer', dur: POLICE.stumble, anim: 'stare', interruptible: false }));
+        if (!quit) enqueue(n, policeChase(edge, false, st));
+        enqueue(n, goAct(edge, { label: 'Leaving' }));
+        if (quit) {
+          addStress(-4);
+          setTimeout(() => !G.over && ui.note('badge', 'He’s given up on you. For today.', 'onto'), 2400);
         }
       },
     }),
-    goAct(edge, { label: 'Leaving' }),
-  ]);
+  );
 }
 // on his way to you: the whistle when he first gets close, then (in a chase) a whistle and a shout every so often,
 // and the pace that wears you down

@@ -66,6 +66,7 @@ function simStep(dtReal, spdOver) {
       perceptionTick(sub);
       trapTick();
       boltTick(sub);
+      combatTick(sub);
       if (Math.floor(t0) !== Math.floor(G.t)) {
         destroyTick();
         policeTick();
@@ -273,11 +274,10 @@ function frame(now) {
     } else if (CAP.on) {
       if (G.over) capFinish();
       else if (!UI.caseOpen) capUpdate(dtReal);
-    } else if (!G.over && !UI.caseOpen && !UI.fight && !UI.scene) {
+    } else if (!G.over && !UI.caseOpen && !UI.scene) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
       simStep(dtReal);
     }
-    if (UI.fight) fightTick(dtReal);
     if (UI.cf) arenaTick(dtReal);
     styleStep(dtReal);
     worldStep(dtReal, preview);
@@ -380,10 +380,6 @@ function boot() {
     showTitle();
   };
   $('#bd-close').onclick = closeBoard;
-  $('#fight').addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    strike();
-  });
   $('#board').addEventListener('pointerdown', (e) => {
     if (e.target.id === 'board') closeBoard();
   });

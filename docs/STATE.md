@@ -20,11 +20,11 @@ All live state sits in a handful of shared globals (every module can reach them)
 | Field | Starts as | Written in | Read in |
 | --- | --- | --- | --- |
 | `t` | `start` | game/loop | world/paths, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, town/npc-update, … |
-| `speed` | `1` | town/arrest, them/true-form, combat/hits, combat/timing-bar, play/verbs, play/arena, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
+| `speed` | `1` | town/arrest, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/arena, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
 | `inv` | `{
       trap: 0,
       flashlight: false,
-   …` | — | gfx/portraits, sim/pose, player/needs, combat/timing-bar, town/talk, play/stashes, play/traps, play/raids, … |
+   …` | — | gfx/portraits, sim/pose, player/needs, town/fleeing, combat/melee, town/talk, play/stashes, play/traps, … |
 | `slain` | `[]` | — | town/suspicion, them/true-form, play/confront, ui/hud, ui/case-board, game/state |
 | `stashes` | `[]` | them/true-form, play/stashes, play/confront | play/oddities, ui/menus, game/state |
 | `stashId` | `0` | play/stashes | play/oddities |
@@ -41,9 +41,9 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sleepFrom` | `0` | play/verbs | — |
 | `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions |
 | `whisperCd` | `30` | horror/visions | — |
-| `clinicDay` | `0` | combat/timing-bar | — |
+| `clinicDay` | `0` | combat/melee | — |
 | `lore` | `{}` | — | — |
-| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, town/suspicion, them/true-form, combat/timing-bar, town/talk, play/photos, game/state |
+| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, town/suspicion, them/true-form, combat/melee, town/talk, play/photos, game/state |
 | `cover` | `{}` | town/quirks | town/talk, game/state |
 | `prints` | `[]` | — | play/photos |
 | `printId` | `0` | — | play/photos |
@@ -59,7 +59,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `policeAt` | `0` | them/moves, town/doors, play/raids, game/state | — |
 | `policeWarned` | `false` | them/moves | — |
 | `ambushNight` | `0` | town/cell | — |
-| `health` | `100` | player/needs, combat/hits, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
+| `health` | `100` | player/needs, combat/hits, combat/throws, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
 | `tvBugged` | `null` | — | — |
 | `control` | `null` | them/moves, game/state | sim/actions, town/doors, town/company, play/stashes, play/arena, horror/encounters |
@@ -91,11 +91,11 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `tapeUntil` | `0` | them/night-attacks, them/office-night | — |
 | `agnesDark` | `0` | them/night-attacks | game/loop |
 | `houseDark` | `{}` | them/night-attacks | game/loop |
-| `sickNext` | `false` | player/work, them/moves, combat/hits, taken/back-up | — |
+| `sickNext` | `false` | player/work, them/moves, combat/hits, combat/throws, taken/back-up | — |
 | `shakenUntil` | `0` | them/true-form, combat/hits, game/last-day | sim/movement, play/photos, input/walking |
 | `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, … |
-| `assaulted` | `[]` | — | combat/timing-bar, play/traps |
-| `fights` | `0` | combat/timing-bar | — |
+| `assaulted` | `[]` | — | combat/melee, play/traps |
+| `fights` | `0` | combat/melee | — |
 | `events` | `[]` | — | town/talk, town/echoes, play/confront, play/arena |
 | `heard` | `[]` | — | town/echoes, ui/case-board |
 | `headline` | `null` | town/echoes | ui/menus |
@@ -120,7 +120,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sleeping` | `false` | town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/quirks, them/plan, town/npc-update, town/cell, them/true-form, town/talk, … |
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
-| `over` | `null` | game/state | player/work, them/plan, them/moves, town/arrest, town/cell, them/true-form, combat/hits, combat/timing-bar, … |
+| `over` | `null` | game/state | player/work, them/plan, them/moves, town/arrest, town/cell, town/fleeing, them/true-form, combat/hits, … |
 | `started` | `false` | game/state | gfx/draw-helpers, gfx/frame, town/routines, town/quirks, them/plan, town/npc-update, them/tells, town/cell, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |
@@ -162,7 +162,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `grudge` | `{}` | — | play/arena |
 | `watchedUntil` | `{}` | — | them/awareness, play/arena |
 | `fearUntil` | `0` | play/arena | town/daily-plans |
-| `huntNights` | `0` | player/work, combat/timing-bar | them/true-form, town/company, ui/hud, chase/they-come |
+| `huntNights` | `0` | player/work, combat/melee | them/true-form, town/company, ui/hud, chase/they-come |
 | `huntNight` | `0` | play/arena | them/true-form, chase/they-come |
 | `follower` | `null` | town/company | play/arena, ui/menus |
 | `awareExtra` | `0` | them/awareness | — |
@@ -204,7 +204,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | `endAt` | them/plan, them/true-form, play/confront |
 | `groundCd` | chase/hunt-end |
 | `houseLit` | game/loop |
-| `lastHitBy` | combat/bolts, combat/hits |
+| `lastHitBy` | combat/bolts, combat/hits, combat/melee, combat/throws |
 | `loose` | game/last-day |
 | `lure` | horror/director, them/office-night, game/state |
 | `on` | them/office-night, game/state |
@@ -212,7 +212,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | `onNight` | them/office-night |
 | `overCd` | town/npc-update |
 | `overtimeBy` | them/moves |
-| `percT` | combat/timing-bar |
+| `percT` | combat/melee |
 | `pingRitual` | town/npc-update |
 | `shakenFrom` | them/true-form, combat/hits |
 | `slipSeen` | town/routines |

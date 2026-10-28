@@ -24,10 +24,7 @@ function surrender(n, why) {
   tf.cornered = false;
   tf.aim = 0;
   if (UI.aim && UI.aim.c === n) UI.aim = null;
-  if (UI.fight && UI.fight.n === n) {
-    UI.fight = null;
-    $('#fight').hidden = true;
-  }
+  foeCalm(n);
   for (let i = BOLTS.length - 1; i >= 0; i--) if (BOLTS[i].by === n) BOLTS.splice(i, 1);
   n.fleeing = null;
   n.trapped = false;
