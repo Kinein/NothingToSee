@@ -351,6 +351,7 @@ function arenaBarTick(A, dt) {
     return after(A, 1.2, () => arenaEnd(A));
   }
   f.t += dt;
+  if (f.t < FIGHT.grace) return; // the tracker holds still while the bar comes up, as in a fight
   f.pos += f.dir * f.sp * dt;
   if (f.pos > 1) {
     f.pos = 2 - f.pos;
@@ -360,13 +361,13 @@ function arenaBarTick(A, dt) {
     f.dir = 1;
   }
   arenaBarDraw(A);
-  if (f.t > 6) arenaStrike(); // freezing counts as a miss
+  if (f.t > FIGHT.grace + FIGHT.timeout) arenaStrike(true); // freezing counts as a miss
 }
-function arenaStrike() {
+function arenaStrike(froze) {
   const A = UI.cf,
     f = A && A.bar;
-  if (!f || f.res) return;
-  f.res = f.pos >= f.a && f.pos <= f.b ? 'hit' : 'miss';
+  if (!f || f.res || (f.t < FIGHT.grace && !froze)) return; // too soon: the bar is still coming up
+  f.res = !froze && f.pos >= f.a && f.pos <= f.b ? 'hit' : 'miss';
   f.rt = 0.7;
   audio.sting(f.res === 'hit' ? 'caught' : 'awkward');
   arenaBarDraw(A);

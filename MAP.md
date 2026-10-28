@@ -20,11 +20,11 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  113 lines
+### data/tuning  ·  #2  ·  117 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
-- **Defines (18):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `EVIDENCE` `AJAR`
+- **Defines (19):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `FIGHT` `EVIDENCE` `AJAR`
 - **→ uses:** —
 - **← used by:** 36
 
@@ -506,12 +506,12 @@ Taking hits, knockouts, hospital, limbo
 - **→ uses:** sim/core, ui/interface, taken/taken, sim/pose, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, player/needs, audio/sound, ui/pie-menu, combat/bolts … +7
 - **← used by:** 9
 
-### combat/timing-bar  ·  #53  ·  362 lines
+### combat/timing-bar  ·  #53  ·  423 lines
 
 THEIR attack: the timing bar
 
 - **Defines (14):** `fightSnapRec` `privateFight` `crowdHelp` `openFight` `fightTick` `strike` `closeFight` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `clinicCheck` `privateKill`
-- **→ uses:** sim/core, ui/interface, core/util, town/suspicion, data/tuning, world/grid, audio/sound, town/fleeing, them/awareness, gfx/renderer, player/needs, sim/actions, town/cast, them/proofs … +19
+- **→ uses:** sim/core, ui/interface, data/tuning, core/util, town/suspicion, world/grid, audio/sound, town/fleeing, them/awareness, gfx/renderer, player/needs, sim/actions, town/cast, them/proofs … +19
 - **← used by:** 15
 
 ## horror/
@@ -662,7 +662,7 @@ Giving up, the FBI, the talk options
 - **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, play/verbs, chase/fbi, them/tells, audio/sound, them/awareness … +13
 - **← used by:** 6 (them/true-form, combat/timing-bar, town/talk, play/arena, ui/menus, chase/fbi)
 
-### play/arena  ·  #69  ·  524 lines
+### play/arena  ·  #69  ·  525 lines
 
 The confrontation: an arena battle in front of the town, and what it leaves on the map
 

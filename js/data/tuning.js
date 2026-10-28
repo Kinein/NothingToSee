@@ -65,6 +65,10 @@ const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY a
 // a fight is rounds of the timing bar. A true form takes several hits to put down; every miss, it gets you.
 const FIGHT_DIFF = { normal: [0.4, 0.55], them: [0.25, 0.85], aliens: [0.2, 0.9], lizards: [0.15, 1.15], zombies: [0.18, 1.0] };
 const FOE_HP = { aliens: 2, lizards: 3, zombies: 3 };
+// the timing bar itself (combat/timing-bar). grace: real seconds the tracker holds still as the panel opens, so a key
+// already on its way for something else doesn't waste the swing. timeout: real seconds before freezing up counts as a
+// miss. clean: the middle share of the green that lands a clean hit. down: game minutes a clean hit leaves it on the ground.
+const FIGHT = { grace: 0.35, timeout: 6, clean: 0.34, down: 3.2 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
 // Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
