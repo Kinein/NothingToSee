@@ -1,6 +1,6 @@
 //@ ui/arena-view — How the confrontation looks: the spotlit ring, the crowd, the speech, your cards
 //@ Defines: arenaOpen, arenaSay, arenaCrowd, arenaTimer, arenaShow, arenaDraw, arenaBarDraw, arenaClose
-//@ Uses:    ui/interface, play/arena, them/proofs, gfx/portraits, game/loop, core/util, data/lines, town/quirks, sim/core
+//@ Uses:    ui/interface, play/arena, them/proofs, gfx/portraits, game/loop, core/util, data/lines, town/quirks, sim/core, combat/timing-bar
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the arena on screen. A spotlit circle in the dark: you on the left, the accused on the right, the people who
 // were in earshot as silhouettes in a ring behind (up to eight). The crowd is the meter: it shuffles toward whoever
@@ -16,7 +16,7 @@ function arenaOpen(A) {
     '<div class="ar-say you"><p></p></div><div class="ar-shown" hidden></div><div class="ar-opts"></div>' +
     '<div class="ar-bar" hidden><i class="fg"></i><i class="ft"></i></div><div class="ar-fan"></div></div>';
   el.querySelector('.ar-you img').src = getPortrait(PLAYER);
-  el.querySelector('.ar-acc img').src = getPortrait(A.n);
+  el.querySelector('.ar-acc img').src = A.n.trueForm ? snapImage(A.n, fightSnapRec(A.n)) : getPortrait(A.n); // held in your trap: no face to hide behind
   const ring = el.querySelector('.ar-ring'),
     k = A.crowd.length;
   A.crowd.forEach((w, i) => {

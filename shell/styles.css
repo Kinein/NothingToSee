@@ -369,12 +369,12 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .bd-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;position:relative}
 .cork.paged .bd-grid{grid-template-columns:minmax(0,1fr) min(400px,44%)}
 #bd-pols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px 16px;padding-top:8px}
-.cork.paged #bd-pols{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cork.paged #bd-pols{grid-template-columns:repeat(4,minmax(0,1fr))}
 .pol2{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 8px 10px;background:var(--polaroid);color:#1d1a16;transform:rotate(var(--tilt,0deg));box-shadow:0 10px 22px rgba(0,0,0,.55);transition:transform .15s,box-shadow .15s}
 .pol2:hover,.pol2:focus-visible{transform:rotate(0deg) scale(1.04);z-index:2}
 .pol2.sel{box-shadow:0 0 0 3px var(--sodium),0 10px 22px rgba(0,0,0,.55)}
 .pol2.over{box-shadow:0 0 0 3px #e8d36a,0 10px 22px rgba(0,0,0,.55);transform:scale(1.05)}
-.pol2 img{width:100%;aspect-ratio:128/144;object-fit:cover;object-position:50% 30%;background:radial-gradient(circle at 50% 40%,#3a3c42,#16171b)}
+.pol2 img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 30%;background:radial-gradient(circle at 50% 40%,#3a3c42,#16171b)}
 .pol2 b{font:16px var(--f-type)}
 .pol2 .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%}
 .slot{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:3px;border:1.5px solid rgba(60,48,34,.25);background:rgba(60,48,34,.06);color:rgba(60,48,34,.38);overflow:hidden}
@@ -458,7 +458,7 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .ar-mark{position:absolute;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:var(--sodium);box-shadow:0 0 12px rgba(228,162,74,.7);transition:left .6s cubic-bezier(.3,1.4,.5,1)}
 .ar-ring{--lean:0;position:absolute;left:12%;right:12%;top:15%;height:150px}
 .ar-p{position:absolute;left:var(--x);top:calc(40px + var(--y));transform:translateX(calc(-50% + var(--lean) * 10px)) rotate(calc(var(--lean) * 2.2deg)) scale(var(--s));transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);font-style:normal}
-.ar-p img{display:block;width:76px;height:86px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
+.ar-p img{display:block;width:92px;height:104px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
 .ar-p.lit img{filter:brightness(.55) sepia(.3) drop-shadow(0 0 3px rgba(232,220,192,.6))}
 .ar-pq{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);padding:4px 9px;border-radius:9px;background:#efe9d8;color:#121214;font:500 13px/1.2 var(--f-ui);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.6);animation:pop .2s ease-out;z-index:2}
 .ar-pq.small{padding:2px 7px;background:rgba(239,233,216,.8);font-size:12px;bottom:calc(100% + 26px)}
@@ -742,8 +742,7 @@ svg.na{fill:#cbbdaa;stroke:none}
   #title h1{font-size:58px}
   .helpgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   #bd-pols{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cf-proofs{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .sticky,#bd-faction{width:150px}
-  #bd-detail{left:12px;right:12px;width:auto;top:56px}
+  .cork header{flex-wrap:wrap}
+  #bd-top{order:3;flex-basis:100%;flex-wrap:wrap}
 }
-@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i{animation:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}
+@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i,#arena,.ar-say.pop,.ar-shown,.ar-pq,.ar-acc.shine .ar-eyes{animation:none}.ar-p,.ar-mark{transition:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}

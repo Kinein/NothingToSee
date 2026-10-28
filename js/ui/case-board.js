@@ -63,17 +63,17 @@ function drawTop() {
   eye.innerHTML = svgIcon('eye') + '<b></b>';
   eye.querySelector('b').textContent = eyeLine();
 }
+// a card says where and when, nothing else: THEIRS and an innocent's look the same. A grey one says what it really was.
+const cardWhen = (p) =>
+  (p.grey && p.truth ? p.truth + ' · ' : '') +
+  (p.where ? p.where + ' · ' : '') +
+  DOW[dow(dayNo(p.at))] +
+  ' ' +
+  fmtTime(p.at);
 function slotHtml(n, f, big) {
   const st = frameState(n, f),
     p = cardIn(n, f);
-  const tip = p
-    ? (p.truth ? p.truth : p.what || '') +
-      (p.where ? ' · ' + p.where : '') +
-      ' · ' +
-      DOW[dow(dayNo(p.at))] +
-      ' ' +
-      fmtTime(p.at)
-    : SLOT_TIP[st];
+  const tip = p ? cardWhen(p) : SLOT_TIP[st];
   return (
     '<span class="slot ' +
     st +
@@ -160,7 +160,7 @@ function drawPrints() {
     el.innerHTML = '<img alt=""><span></span><i class="pq">' + svgIcon(FRAME[p.frame].icon) + '</i>';
     el.querySelector('img').src = proofImage(p);
     el.querySelector('span').textContent = DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
-    el.dataset.tip = FRAME[p.frame].name + ' · ' + (p.what || '') + (p.where ? ' · ' + p.where : '');
+    el.dataset.tip = FRAME[p.frame].name + ' · ' + cardWhen(p);
     el.onclick = (e) => {
       e.stopPropagation();
       UI.pinSel = UI.pinSel === p.id ? null : p.id;
@@ -361,13 +361,7 @@ function showSuspect(n) {
       zoom.className = 'sd-zoom ' + (p.grey ? 'grey' : p.q);
       zoom.innerHTML = '<img alt=""><span></span>';
       zoom.querySelector('img').src = proofImage(p);
-      zoom.querySelector('span').textContent =
-        (p.truth || p.what || '') +
-        (p.where ? ' · ' + p.where : '') +
-        ' · ' +
-        DOW[dow(dayNo(p.at))] +
-        ' ' +
-        fmtTime(p.at);
+      zoom.querySelector('span').textContent = cardWhen(p);
       zoom.onclick = () => (zoom.hidden = true);
     };
   });

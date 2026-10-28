@@ -47,7 +47,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `cover` | `{}` | town/quirks | town/talk, game/state |
 | `prints` | `[]` | — | play/photos |
 | `printId` | `0` | — | play/photos |
-| `aware` | `0` | them/awareness, chase/hunt-end | them/tells, them/moves, town/cell, them/true-form, town/talk, them/night-attacks, horror/director, play/stashes, … |
+| `aware` | `0` | them/awareness, chase/hunt-end | them/tells, them/moves, town/cell, them/true-form, town/talk, them/night-attacks, town/company, horror/director, … |
 | `awareBook` | `{}` | them/awareness | — |
 | `awareRemoved` | `0` | them/awareness | — |
 | `sus60` | `{}` | — | town/suspicion |
@@ -61,7 +61,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `health` | `100` | player/needs, combat/hits, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
 | `tvBugged` | `null` | — | — |
-| `control` | `null` | them/moves, game/state | sim/actions, town/doors, play/stashes, play/arena, horror/encounters |
+| `control` | `null` | them/moves, game/state | sim/actions, town/doors, town/company, play/stashes, play/arena, horror/encounters |
 | `pickAt` | `-999` | — | — |
 | `hotRooms` | `null` | them/plan | player/needs |
 | `takenAt` | `-1e9` | them/moves, taken/taken, chase/they-come, chase/hunt-end | — |
@@ -161,13 +161,15 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `grudge` | `{}` | — | play/arena |
 | `watchedUntil` | `{}` | — | them/awareness, play/arena |
 | `fearUntil` | `0` | play/arena | town/daily-plans |
-| `huntNights` | `0` | player/work, combat/timing-bar | them/true-form, ui/hud, chase/they-come |
+| `huntNights` | `0` | player/work, combat/timing-bar | them/true-form, town/company, ui/hud, chase/they-come |
 | `huntNight` | `0` | play/arena | them/true-form, chase/they-come |
-| `follower` | `null` | town/company | ui/menus |
+| `follower` | `null` | town/company | play/arena, ui/menus |
 | `awareExtra` | `0` | them/awareness | — |
 | `tearTonight` | `0` | player/work, play/arena | — |
 | `hintsUntil` | `0` | play/arena | ui/menus |
 | `witVisit` | `null` | town/company | — |
+| `tail` | `null` | town/company | — |
+| `tailNext` | `0` | town/company | — |
 | `arenaTalk` | `[]` | play/arena | — |
 | `ritualBroke` | `0` | them/tells, play/photos | them/plan |
 | `gatherKnown` | `false` | them/plan | — |

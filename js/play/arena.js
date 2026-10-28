@@ -38,7 +38,8 @@ function arenaRoom(n) {
   for (const w of ear) {
     crowd.push(w);
     if (w.isThem) {
-      hidden.push(w); // shows nothing
+      hidden.push(w); // shows nothing, unless you brought it along yourself
+      if (G.follower && G.follower.id === w.id) add(E.bought, 'theirs', w);
       continue;
     }
     if (G.recant[w.id] && (sawRecently(w, n) || witnessOf(w, n) || G.recant[w.id] === 'bribed')) {
@@ -426,7 +427,7 @@ function arenaOutcome(A) {
     // it drops the act: on its knees, the crowd holding it, the grey cars on the way
     n.cfOk = G.t;
     surrender(n, 'confront');
-    for (const w of suspects()) if (!w.isThem) relFx(w, EVIDENCE.success.rel);
+    for (const w of suspects()) if (!w.isThem) w.rel += EVIDENCE.success.rel; // they believe you now
     G.hintsUntil = G.t + 1440;
     return;
   }
@@ -491,10 +492,12 @@ function arenaTalkLater(res, n) {
     });
 }
 function arenaTalkTick() {
-  const due = G.arenaTalk && G.arenaTalk.filter((x) => G.t >= x.at);
-  if (!due || !due.length) return;
-  G.arenaTalk = G.arenaTalk.filter((x) => G.t < x.at);
-  for (const x of due) hear(null, x.text, x.by || 'stranger');
+  const L = G.arenaTalk; // runs every step: look before building anything
+  let due = false;
+  for (let i = 0; i < L.length; i++) if (G.t >= L[i].at) due = true;
+  if (!due) return;
+  for (const x of L.filter((y) => G.t >= y.at)) hear(null, x.text, x.by || 'stranger');
+  G.arenaTalk = L.filter((y) => G.t < y.at);
 }
 // keys during the battle: A/D pick a card, E shows it; in the rebuttal W cites a habit, S calls a witness;
 // in "How well do you know me?" A says true, D says lie

@@ -1,6 +1,6 @@
 //@ town/company — Come with me; the witnesses THEY go after at night, and standing guard for one
-//@ Defines: resolveCome, followAct, endFollow, witnessNight, witnessTick, recant, witnessSaved
-//@ Uses:    sim/core, ui/interface, core/util, data/tuning, data/lines, sim/actions, world/paths, them/proofs, town/suspicion, sim/movement, …
+//@ Defines: resolveCome, followAct, endFollow, witnessNight, witnessTick, recant, witnessSaved, tailTick, tailAct
+//@ Uses:    sim/core, ui/interface, core/util, sim/actions, data/tuning, world/paths, sim/movement, town/suspicion, data/lines, them/proofs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── company. Anyone who likes you enough comes with you for an hour, and stands in the crowd when you call
 // someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
@@ -128,4 +128,73 @@ function witnessSaved(id) {
   relFx(w, EVIDENCE.saved);
   delete G.recant[id];
   ui.note('people', w.short + ' · safe', 'good');
+}
+// ── by day, when THEY hunt you, only THEIR people come: the bought, the controlled, the shambling. They keep a few
+// steps behind you, and when they've seen enough they report it. They don't lay a hand on you before day 5.
+const theirPeople = () =>
+  suspects().filter(
+    (w) =>
+      !w.isThem &&
+      !w.gone &&
+      w.id !== 'lenny' &&
+      w.onMap &&
+      !asleep(w) &&
+      !w.fleeing &&
+      !w.engaged &&
+      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)) &&
+      !(G.follower && G.follower.id === w.id),
+  );
+function tailTick() {
+  const T = EVIDENCE.tail,
+    P = PLAYER;
+  if (G.tail && (G.t > G.tail.until || !NPC[G.tail.id] || !NPC[G.tail.id].onMap)) {
+    const w = NPC[G.tail.id];
+    if (w && G.t > G.tail.until && G.tail.saw) bookAware(T.aware); // what they saw goes back to THEM
+    G.tail = null;
+  }
+  if (G.tail || G.t < (G.tailNext || 0) || !P.onMap || G.away || G.sleeping || darkNow() || theirDay() >= 5) return;
+  if (!(G.aware >= 70 || G.huntNights > 0)) return;
+  G.tailNext = G.t + T.every;
+  const w = pick(theirPeople().filter((x) => Math.hypot(x.x - P.x, x.z - P.z) < 25));
+  if (!w) return;
+  G.tail = { id: w.id, until: G.t + T.mins, saw: false };
+  for (const a of w.queue) a.cancel = true;
+  enqueue(w, tailAct(w));
+}
+function tailAct(n) {
+  return mkAct({
+    kind: 'wait',
+    label: '…',
+    icon: 'walk',
+    dur: null,
+    anim: 'idle',
+    interruptible: false,
+    onStart: (c, a) => (a.rp = 99),
+    onTick: (c, a, dt) => {
+      const T = G.tail,
+        P = PLAYER;
+      if (!T || T.id !== c.id || !P.onMap || G.away) {
+        a.cancel = true;
+        c.path = null;
+        c.moving = false;
+        return;
+      }
+      const d = Math.hypot(P.x - c.x, P.z - c.z);
+      if (d < 7 && npcSeesPlayer(c, 9)) T.saw = true;
+      if (d < 4) {
+        c.path = null;
+        c.moving = false;
+        c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+        return;
+      }
+      a.rp += dt;
+      if (a.rp > 0.8 || !c.path || c.pi >= c.path.length) {
+        a.rp = 0;
+        const t = nearestWalkable(P.x, P.z, c, 3);
+        if (t) setPath(c, t[0], t[1]);
+      }
+      c.run = d > 9;
+      followPath(c, dt);
+    },
+  });
 }

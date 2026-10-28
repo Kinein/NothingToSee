@@ -375,12 +375,12 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .bd-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;position:relative}
 .cork.paged .bd-grid{grid-template-columns:minmax(0,1fr) min(400px,44%)}
 #bd-pols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px 16px;padding-top:8px}
-.cork.paged #bd-pols{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cork.paged #bd-pols{grid-template-columns:repeat(4,minmax(0,1fr))}
 .pol2{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 8px 10px;background:var(--polaroid);color:#1d1a16;transform:rotate(var(--tilt,0deg));box-shadow:0 10px 22px rgba(0,0,0,.55);transition:transform .15s,box-shadow .15s}
 .pol2:hover,.pol2:focus-visible{transform:rotate(0deg) scale(1.04);z-index:2}
 .pol2.sel{box-shadow:0 0 0 3px var(--sodium),0 10px 22px rgba(0,0,0,.55)}
 .pol2.over{box-shadow:0 0 0 3px #e8d36a,0 10px 22px rgba(0,0,0,.55);transform:scale(1.05)}
-.pol2 img{width:100%;aspect-ratio:128/144;object-fit:cover;object-position:50% 30%;background:radial-gradient(circle at 50% 40%,#3a3c42,#16171b)}
+.pol2 img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 30%;background:radial-gradient(circle at 50% 40%,#3a3c42,#16171b)}
 .pol2 b{font:16px var(--f-type)}
 .pol2 .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%}
 .slot{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:3px;border:1.5px solid rgba(60,48,34,.25);background:rgba(60,48,34,.06);color:rgba(60,48,34,.38);overflow:hidden}
@@ -464,7 +464,7 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .ar-mark{position:absolute;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:var(--sodium);box-shadow:0 0 12px rgba(228,162,74,.7);transition:left .6s cubic-bezier(.3,1.4,.5,1)}
 .ar-ring{--lean:0;position:absolute;left:12%;right:12%;top:15%;height:150px}
 .ar-p{position:absolute;left:var(--x);top:calc(40px + var(--y));transform:translateX(calc(-50% + var(--lean) * 10px)) rotate(calc(var(--lean) * 2.2deg)) scale(var(--s));transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);font-style:normal}
-.ar-p img{display:block;width:76px;height:86px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
+.ar-p img{display:block;width:92px;height:104px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
 .ar-p.lit img{filter:brightness(.55) sepia(.3) drop-shadow(0 0 3px rgba(232,220,192,.6))}
 .ar-pq{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);padding:4px 9px;border-radius:9px;background:#efe9d8;color:#121214;font:500 13px/1.2 var(--f-ui);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.6);animation:pop .2s ease-out;z-index:2}
 .ar-pq.small{padding:2px 7px;background:rgba(239,233,216,.8);font-size:12px;bottom:calc(100% + 26px)}
@@ -748,11 +748,10 @@ svg.na{fill:#cbbdaa;stroke:none}
   #title h1{font-size:58px}
   .helpgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   #bd-pols{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cf-proofs{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .sticky,#bd-faction{width:150px}
-  #bd-detail{left:12px;right:12px;width:auto;top:56px}
+  .cork header{flex-wrap:wrap}
+  #bd-top{order:3;flex-basis:100%;flex-wrap:wrap}
 }
-@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i{animation:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}
+@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i,#arena,.ar-say.pop,.ar-shown,.ar-pq,.ar-acc.shine .ar-eyes{animation:none}.ar-p,.ar-mark{transition:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}
 </style>
 
 
@@ -842,7 +841,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 4h18v14H3zM8 21l4-3 4 3M8 9l7 3M8 9h.01M15 12h.01"/></svg><kbd>Tab</kbd><span>The evidence book · Home, Habit, Body, Contact: one card each, clear or fuzzy · arrows, E, A/D</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Rummage</kbd><span>Feel something in there? Open it up before it settles · back shelves hide a trap, a flashlight, pills</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: a Home card, or trap bait. THEY hate seeing them on you</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting, only shouting it at them</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards you show are spent · alone, it’s Attack</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Fight</kbd><span>Swing up close. When IT lunges: E in the green</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down and it gives up · the FBI comes for it</span></div>
@@ -1218,6 +1217,7 @@ const EVIDENCE = {
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
   come: { rel: 20, mins: 60 },  // "Come with me": anyone who likes you this much follows you for this long
   saved: 25,                    // liking from a witness you stood guard for
+  tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { day: 3, sus: 15, aware: 10 },
   // fights by situation (multipliers on FIGHT_DIFF and HURT): alone with it, it's far worse
@@ -20141,6 +20141,75 @@ function witnessSaved(id) {
   delete G.recant[id];
   ui.note('people', w.short + ' · safe', 'good');
 }
+// ── by day, when THEY hunt you, only THEIR people come: the bought, the controlled, the shambling. They keep a few
+// steps behind you, and when they've seen enough they report it. They don't lay a hand on you before day 5.
+const theirPeople = () =>
+  suspects().filter(
+    (w) =>
+      !w.isThem &&
+      !w.gone &&
+      w.id !== 'lenny' &&
+      w.onMap &&
+      !asleep(w) &&
+      !w.fleeing &&
+      !w.engaged &&
+      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)) &&
+      !(G.follower && G.follower.id === w.id),
+  );
+function tailTick() {
+  const T = EVIDENCE.tail,
+    P = PLAYER;
+  if (G.tail && (G.t > G.tail.until || !NPC[G.tail.id] || !NPC[G.tail.id].onMap)) {
+    const w = NPC[G.tail.id];
+    if (w && G.t > G.tail.until && G.tail.saw) bookAware(T.aware); // what they saw goes back to THEM
+    G.tail = null;
+  }
+  if (G.tail || G.t < (G.tailNext || 0) || !P.onMap || G.away || G.sleeping || darkNow() || theirDay() >= 5) return;
+  if (!(G.aware >= 70 || G.huntNights > 0)) return;
+  G.tailNext = G.t + T.every;
+  const w = pick(theirPeople().filter((x) => Math.hypot(x.x - P.x, x.z - P.z) < 25));
+  if (!w) return;
+  G.tail = { id: w.id, until: G.t + T.mins, saw: false };
+  for (const a of w.queue) a.cancel = true;
+  enqueue(w, tailAct(w));
+}
+function tailAct(n) {
+  return mkAct({
+    kind: 'wait',
+    label: '…',
+    icon: 'walk',
+    dur: null,
+    anim: 'idle',
+    interruptible: false,
+    onStart: (c, a) => (a.rp = 99),
+    onTick: (c, a, dt) => {
+      const T = G.tail,
+        P = PLAYER;
+      if (!T || T.id !== c.id || !P.onMap || G.away) {
+        a.cancel = true;
+        c.path = null;
+        c.moving = false;
+        return;
+      }
+      const d = Math.hypot(P.x - c.x, P.z - c.z);
+      if (d < 7 && npcSeesPlayer(c, 9)) T.saw = true;
+      if (d < 4) {
+        c.path = null;
+        c.moving = false;
+        c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+        return;
+      }
+      a.rp += dt;
+      if (a.rp > 0.8 || !c.path || c.pi >= c.path.length) {
+        a.rp = 0;
+        const t = nearestWalkable(P.x, P.z, c, 3);
+        if (t) setPath(c, t[0], t[1]);
+      }
+      c.run = d > 9;
+      followPath(c, dt);
+    },
+  });
+}
 // ───────────── the horror director: a few events a day from four kinds, more as THEIR plan grows
 // stray signs point the right way more often than not, never always: the town is strange in more than one way
 const clueFaction = () =>
@@ -21441,6 +21510,7 @@ function stashTick() {
   framingTick();
   arenaTalkTick();
   witnessTick();
+  tailTick();
   for (const st of G.stashes) {
     const n = NPC[st.by];
     if (!n || n.slain || n.gone) continue;
@@ -23021,7 +23091,8 @@ function arenaRoom(n) {
   for (const w of ear) {
     crowd.push(w);
     if (w.isThem) {
-      hidden.push(w); // shows nothing
+      hidden.push(w); // shows nothing, unless you brought it along yourself
+      if (G.follower && G.follower.id === w.id) add(E.bought, 'theirs', w);
       continue;
     }
     if (G.recant[w.id] && (sawRecently(w, n) || witnessOf(w, n) || G.recant[w.id] === 'bribed')) {
@@ -23409,7 +23480,7 @@ function arenaOutcome(A) {
     // it drops the act: on its knees, the crowd holding it, the grey cars on the way
     n.cfOk = G.t;
     surrender(n, 'confront');
-    for (const w of suspects()) if (!w.isThem) relFx(w, EVIDENCE.success.rel);
+    for (const w of suspects()) if (!w.isThem) w.rel += EVIDENCE.success.rel; // they believe you now
     G.hintsUntil = G.t + 1440;
     return;
   }
@@ -23474,10 +23545,12 @@ function arenaTalkLater(res, n) {
     });
 }
 function arenaTalkTick() {
-  const due = G.arenaTalk && G.arenaTalk.filter((x) => G.t >= x.at);
-  if (!due || !due.length) return;
-  G.arenaTalk = G.arenaTalk.filter((x) => G.t < x.at);
-  for (const x of due) hear(null, x.text, x.by || 'stranger');
+  const L = G.arenaTalk; // runs every step: look before building anything
+  let due = false;
+  for (let i = 0; i < L.length; i++) if (G.t >= L[i].at) due = true;
+  if (!due) return;
+  for (const x of L.filter((y) => G.t >= y.at)) hear(null, x.text, x.by || 'stranger');
+  G.arenaTalk = L.filter((y) => G.t < y.at);
 }
 // keys during the battle: A/D pick a card, E shows it; in the rebuttal W cites a habit, S calls a witness;
 // in "How well do you know me?" A says true, D says lie
@@ -23789,6 +23862,15 @@ function takePhoto(tg) {
       secretSeen(n, n.secret.spot);
       filed = true;
     }
+  // somebody slipping off at their hour, and nothing odd on the film: Habit is searched. It tells you nothing.
+  for (const n of chars) {
+    const cur = n.queue[0];
+    if (!got.has(n) && cur && cur.habit && !n.secret && !n.def.never && dashFrame(n, 'habit')) {
+      ui.note('clock', n.short + ' · nothing at their hour', '');
+      got.add(n);
+      filed = true;
+    }
+  }
   // a face up close and nothing in it: that frame is searched. It tells you nothing.
   const subj = tg.char;
   if (
@@ -26355,17 +26437,17 @@ function drawTop() {
   eye.innerHTML = svgIcon('eye') + '<b></b>';
   eye.querySelector('b').textContent = eyeLine();
 }
+// a card says where and when, nothing else: THEIRS and an innocent's look the same. A grey one says what it really was.
+const cardWhen = (p) =>
+  (p.grey && p.truth ? p.truth + ' · ' : '') +
+  (p.where ? p.where + ' · ' : '') +
+  DOW[dow(dayNo(p.at))] +
+  ' ' +
+  fmtTime(p.at);
 function slotHtml(n, f, big) {
   const st = frameState(n, f),
     p = cardIn(n, f);
-  const tip = p
-    ? (p.truth ? p.truth : p.what || '') +
-      (p.where ? ' · ' + p.where : '') +
-      ' · ' +
-      DOW[dow(dayNo(p.at))] +
-      ' ' +
-      fmtTime(p.at)
-    : SLOT_TIP[st];
+  const tip = p ? cardWhen(p) : SLOT_TIP[st];
   return (
     '<span class="slot ' +
     st +
@@ -26452,7 +26534,7 @@ function drawPrints() {
     el.innerHTML = '<img alt=""><span></span><i class="pq">' + svgIcon(FRAME[p.frame].icon) + '</i>';
     el.querySelector('img').src = proofImage(p);
     el.querySelector('span').textContent = DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
-    el.dataset.tip = FRAME[p.frame].name + ' · ' + (p.what || '') + (p.where ? ' · ' + p.where : '');
+    el.dataset.tip = FRAME[p.frame].name + ' · ' + cardWhen(p);
     el.onclick = (e) => {
       e.stopPropagation();
       UI.pinSel = UI.pinSel === p.id ? null : p.id;
@@ -26653,13 +26735,7 @@ function showSuspect(n) {
       zoom.className = 'sd-zoom ' + (p.grey ? 'grey' : p.q);
       zoom.innerHTML = '<img alt=""><span></span>';
       zoom.querySelector('img').src = proofImage(p);
-      zoom.querySelector('span').textContent =
-        (p.truth || p.what || '') +
-        (p.where ? ' · ' + p.where : '') +
-        ' · ' +
-        DOW[dow(dayNo(p.at))] +
-        ' ' +
-        fmtTime(p.at);
+      zoom.querySelector('span').textContent = cardWhen(p);
       zoom.onclick = () => (zoom.hidden = true);
     };
   });
@@ -26756,7 +26832,7 @@ function arenaOpen(A) {
     '<div class="ar-say you"><p></p></div><div class="ar-shown" hidden></div><div class="ar-opts"></div>' +
     '<div class="ar-bar" hidden><i class="fg"></i><i class="ft"></i></div><div class="ar-fan"></div></div>';
   el.querySelector('.ar-you img').src = getPortrait(PLAYER);
-  el.querySelector('.ar-acc img').src = getPortrait(A.n);
+  el.querySelector('.ar-acc img').src = A.n.trueForm ? snapImage(A.n, fightSnapRec(A.n)) : getPortrait(A.n); // held in your trap: no face to hide behind
   const ring = el.querySelector('.ar-ring'),
     k = A.crowd.length;
   A.crowd.forEach((w, i) => {
@@ -39676,6 +39752,8 @@ function freshG(start) {
     tearTonight: 0, // cards THEY tear from your flat tonight
     hintsUntil: 0, // after a total success people share more
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
+    tail: null, // { id, until, saw }: one of THEIR people a few steps behind you, by day
+    tailNext: 0,
     arenaTalk: [], // what the town says after a confrontation, still to be heard: { at, text, by }
     ritualBroke: 0,
     gatherKnown: false,

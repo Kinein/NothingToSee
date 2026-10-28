@@ -98,6 +98,7 @@ const EVIDENCE = {
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
   come: { rel: 20, mins: 60 },  // "Come with me": anyone who likes you this much follows you for this long
   saved: 25,                    // liking from a witness you stood guard for
+  tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { day: 3, sus: 15, aware: 10 },
   // fights by situation (multipliers on FIGHT_DIFF and HURT): alone with it, it's far worse

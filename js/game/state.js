@@ -164,6 +164,8 @@ function freshG(start) {
     tearTonight: 0, // cards THEY tear from your flat tonight
     hintsUntil: 0, // after a total success people share more
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
+    tail: null, // { id, until, saw }: one of THEIR people a few steps behind you, by day
+    tailNext: 0,
     arenaTalk: [], // what the town says after a confrontation, still to be heard: { at, text, by }
     ritualBroke: 0,
     gatherKnown: false,

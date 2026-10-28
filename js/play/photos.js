@@ -285,6 +285,15 @@ function takePhoto(tg) {
       secretSeen(n, n.secret.spot);
       filed = true;
     }
+  // somebody slipping off at their hour, and nothing odd on the film: Habit is searched. It tells you nothing.
+  for (const n of chars) {
+    const cur = n.queue[0];
+    if (!got.has(n) && cur && cur.habit && !n.secret && !n.def.never && dashFrame(n, 'habit')) {
+      ui.note('clock', n.short + ' · nothing at their hour', '');
+      got.add(n);
+      filed = true;
+    }
+  }
   // a face up close and nothing in it: that frame is searched. It tells you nothing.
   const subj = tg.char;
   if (

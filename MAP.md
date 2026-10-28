@@ -20,7 +20,7 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  112 lines
+### data/tuning  ·  #2  ·  113 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
@@ -406,12 +406,12 @@ Echoes: what happened, where, who saw
 - **→ uses:** sim/core, gfx/renderer, core/util, data/lines, town/suspicion, play/photos
 - **← used by:** 25
 
-### town/company  ·  #58  ·  127 lines
+### town/company  ·  #58  ·  196 lines
 
 Come with me; the witnesses THEY go after at night, and standing guard for one
 
-- **Defines (8):** `resolveCome` `followAct` `endFollow` `witnessNight` `witnessDoor` `witnessTick` `recant` `witnessSaved`
-- **→ uses:** sim/core, ui/interface, core/util, data/tuning, data/lines, sim/actions, world/paths, them/proofs, town/suspicion, sim/movement, world/grid, them/awareness, town/cast, taken/taken … +8
+- **Defines (11):** `resolveCome` `followAct` `endFollow` `witnessNight` `witnessDoor` `witnessTick` `recant` `witnessSaved` `theirPeople` `tailTick` `tailAct`
+- **→ uses:** sim/core, ui/interface, core/util, sim/actions, data/tuning, world/paths, sim/movement, town/suspicion, data/lines, them/proofs, them/awareness, town/cast, world/grid, them/moves … +10
 - **← used by:** 4 (combat/timing-bar, them/night-attacks, play/stashes, play/confront)
 
 ### town/traffic-weather  ·  #83  ·  99 lines
@@ -430,7 +430,7 @@ THEIR five-day plan: phases, stages, how it moves on each midnight
 
 - **Defines (28):** `WEEK` `PHASES` `STAGE_OF_PHASE` `phaseNow` `phaseName` `theirDay` `theyStir` `theyOut` `darkNow` `forYou` `mayShed` `heardIt` `STAGES` `STAGE_HOOKS` `holdings` `EMBLEM_AT` `emblemMesh` `marks` `stageName` `opDone` `advanceWeek` `finale` `gatherGap` `nextGatherT` `gatherAware` `gatherNow` `gatheringOver` `stakeoutGoal`
 - **→ uses:** sim/core, core/util, ui/interface, gfx/renderer, game/state, them/awareness, audio/sound, sim/actions, town/cast, world/grid, gfx/gl, gfx/world-geometry, town/fleeing, world/objects … +9
-- **← used by:** 34
+- **← used by:** 35
 
 ### them/tells  ·  #42  ·  518 lines
 
@@ -438,7 +438,7 @@ Tells: the small signs THEY give
 
 - **Defines (12):** `npcSeesPlayer` `roomHasOthers` `tryTell` `beginTell` `notifyPing` `endTell` `tellTick` `applyTellAnim` `awardTell` `caughtWatching` `ritualCaught` `revealFaction`
 - **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, world/vision, player/needs, town/suspicion, them/proofs, them/awareness … +10
-- **← used by:** 19
+- **← used by:** 20
 
 ### them/proofs  ·  #43  ·  287 lines
 
@@ -512,7 +512,7 @@ THEIR attack: the timing bar
 
 - **Defines (14):** `fightSnapRec` `privateFight` `crowdHelp` `openFight` `fightTick` `strike` `closeFight` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `clinicCheck` `privateKill`
 - **→ uses:** sim/core, ui/interface, core/util, town/suspicion, data/tuning, world/grid, audio/sound, town/fleeing, them/awareness, gfx/renderer, player/needs, sim/actions, town/cast, them/proofs … +19
-- **← used by:** 14
+- **← used by:** 15
 
 ## horror/
 
@@ -614,7 +614,7 @@ Items left behind
 - **→ uses:** sim/core, gfx/renderer, gfx/props
 - **← used by:** 14
 
-### play/stashes  ·  #62  ·  594 lines
+### play/stashes  ·  #62  ·  595 lines
 
 Stashes and rummaging
 
@@ -662,7 +662,7 @@ Giving up, the FBI, the talk options
 - **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, play/verbs, chase/fbi, them/tells, audio/sound, them/awareness … +13
 - **← used by:** 6 (them/true-form, combat/timing-bar, town/talk, play/arena, ui/menus, chase/fbi)
 
-### play/arena  ·  #69  ·  521 lines
+### play/arena  ·  #69  ·  524 lines
 
 The confrontation: an arena battle in front of the town, and what it leaves on the map
 
@@ -670,7 +670,7 @@ The confrontation: an arena battle in front of the town, and what it leaves on t
 - **→ uses:** sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, town/quirks, world/grid, town/suspicion, player/needs … +12
 - **← used by:** 5 (play/stashes, ui/menus, ui/arena-view, input/targeting, game/loop)
 
-### play/photos  ·  #70  ·  393 lines
+### play/photos  ·  #70  ·  402 lines
 
 Photos: reading what is in frame
 
@@ -728,11 +728,11 @@ The directional pie menu
 - **→ uses:** ui/interface, core/util, audio/sound, ui/menus, sim/actions, town/arrest
 - **← used by:** 15
 
-### ui/case-board  ·  #77  ·  448 lines
+### ui/case-board  ·  #77  ·  442 lines
 
 The evidence book: four frames on every suspect, the suspect page, the Whose? tray
 
-- **Defines (21):** `SLOT_TIP` `MARK_STAMP` `openBoard` `drawTop` `slotHtml` `fillSlotImgs` `stampFor` `drawPols` `drawPrints` `drawHeard` `dragFrom` `dropOn` `pinPrint` `refreshBoard` `drawStrings` `showSuspect` `closeSuspect` `focusPol` `boardKey` `closeBoard` `toggleHelp`
+- **Defines (22):** `SLOT_TIP` `MARK_STAMP` `openBoard` `drawTop` `cardWhen` `slotHtml` `fillSlotImgs` `stampFor` `drawPols` `drawPrints` `drawHeard` `dragFrom` `dropOn` `pinPrint` `refreshBoard` `drawStrings` `showSuspect` `closeSuspect` `focusPol` `boardKey` `closeBoard` `toggleHelp`
 - **→ uses:** ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, ui/pie-menu
 - **← used by:** 4 (ui/interface, ui/hud, input/targeting, game/loop)
 
@@ -741,7 +741,7 @@ The evidence book: four frames on every suspect, the suspect page, the Whose? tr
 How the confrontation looks: the spotlit ring, the crowd, the speech, your cards
 
 - **Defines (8):** `arenaOpen` `arenaSay` `arenaCrowd` `arenaTimer` `arenaShow` `arenaDraw` `arenaBarDraw` `arenaClose`
-- **→ uses:** ui/interface, play/arena, them/proofs, gfx/portraits, game/loop, core/util, data/lines, town/quirks, sim/core
+- **→ uses:** ui/interface, play/arena, them/proofs, gfx/portraits, game/loop, core/util, data/lines, town/quirks, sim/core, combat/timing-bar
 - **← used by:** 1 (play/arena)
 
 ## input/
@@ -890,7 +890,7 @@ The grey cars: the FBI takes one that gave up
 
 ## game/
 
-### game/state  ·  #107  ·  542 lines
+### game/state  ·  #107  ·  544 lines
 
 Game state, new game, saving, endings
 

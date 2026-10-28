@@ -405,6 +405,7 @@ function stashTick() {
   framingTick();
   arenaTalkTick();
   witnessTick();
+  tailTick();
   for (const st of G.stashes) {
     const n = NPC[st.by];
     if (!n || n.slain || n.gone) continue;
