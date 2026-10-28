@@ -18,6 +18,7 @@ gfx/wall-dressing.js             # What hangs on the walls: art, signs, neon
 gfx/models.js                    # Furniture and object models (front = +z)
 gfx/lair-models.js               # Models for things inside THEIR lairs
 gfx/lair-dressing.js             # Lair lights: halos, shafts, wall pieces
+gfx/station.js                   # The police cells drawn: bars, benches, the booking corner, the sliding doors
 gfx/props.js                     # Evidence props, dynamic bits and cars
 world/light-map.js               # Line of sight helpers and the per-cell light map
 world/vision.js                  # What the player can see: field of view and explored cells

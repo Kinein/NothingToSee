@@ -221,8 +221,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #almost .ways .ic{width:22px;height:22px;stroke-width:2}
 #almost .ways em{font:14px var(--f-type);letter-spacing:.2em;color:#b7ad97;font-style:normal}
 @media (prefers-reduced-motion:no-preference){#almost b{animation:tflick 4.1s infinite steps(1)}}
-#cell{position:fixed;inset:0;width:100%;height:100%;z-index:3;display:block;image-rendering:crisp-edges;image-rendering:pixelated;opacity:0;transition:opacity 1.1s ease;pointer-events:none;background:#06070a}
-#cell.on{opacity:1}
 #zz{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(10,12,20,.7);border:1px solid var(--line);color:#c8cfe6;font:16px var(--f-type);pointer-events:none}
 #zz .ic{width:22px;height:22px;animation:zz 2s ease-in-out infinite}
 @keyframes zz{50%{transform:translateY(-4px) rotate(-8deg)}}
@@ -833,7 +831,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.7 · updated Oct 28, 2026</p>
+  <p id="version">v1.9 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1525,7 +1523,7 @@ const BRAWL_HELP = ['Somebody help!', 'Get OFF me!', 'Are you insane?'];
 // small helpers so the layout reads like a floor plan.
 const W = 62,
   TOWN_H = 34,
-  H = 63;
+  H = 72; // the town, then THEIR places under it, then the police cells under those
 const tiles = new Array(W * H).fill(',');
 const I = (x, z) => z * W + x;
 const inb = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
@@ -1810,6 +1808,28 @@ const LAIRS = {};
     };
   }
 })();
+// ───────────────────────── the police cells ─────────────────────────
+// Below THEIR places and sealed off the same way: nobody walks here. While you're held, the hours go by in here
+// (town/cell.js). Three barred cells along the back wall, each with a window high up; the corridor in front of them;
+// the booking corner at the end, with the height chart. The bars stand on the line between the cells and the corridor.
+// Legend: # wall · W window · c a cell's concrete · o the corridor's tiles.
+const STATION_Z0 = LAIR_Z0 + 28;
+const STATION_MAP = [
+  '###W#####W#####W##########',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#oooooooooooooooooooooooo#',
+  '#oooooooooooooooooooooooo#',
+  '#oooooooooooooooooooooooo#',
+  '##########################',
+];
+STATION_MAP.forEach((row, lz) => {
+  for (let lx = 0; lx < row.length; lx++) tset(lx, STATION_Z0 + lz, row[lx]);
+});
+const SZ = (lx, lz) => [lx, STATION_Z0 + lz];
+const STATION = { x0: 0, z0: STATION_Z0, x1: STATION_MAP[0].length - 1, z1: STATION_Z0 + STATION_MAP.length - 1 };
+
 const lairAt = (x, z) => {
   if (z < LAIR_Z0) return null;
   for (const k in LAIRS) {
@@ -1939,6 +1959,7 @@ ROOM_DEFS.push(
     mat: 'sewer',
   },
   { key: 'lxDen', name: 'The nest', at: LZ('den', 10, 19), wall: 0x56432f, bld: 'lair', lair: 'den', mat: 'flesh' },
+  { key: 'station', name: 'The cells', at: SZ(9, 5), wall: 0x5d6862, bld: 'station', mat: 'brick' },
 );
 
 const roomOf = new Int16Array(W * H).fill(-1);
@@ -5330,7 +5351,7 @@ function buildDecor() {
       x,
       z,
       (r) => {
-        if (!r) return [null];
+        if (!r || r.bld === 'station') return [null]; // the cells' windows have bars, not curtains (gfx/station.js)
         if (r.bld === 'office') return ['blinds'];
         if (r.bld === 'shop') return [r.key === 'shop' && z === 12 ? 'shop' : null];
         if (r.private && !r.house) return ['blinds']; // bathrooms
@@ -6871,6 +6892,245 @@ function buildObject(o) {
   o.mesh = m;
   return m;
 }
+// ───────────── the police cells, drawn: the bars, the steel benches and toilets, the booking corner with its height
+// chart and camera, the desk. Lit and seen only while you're held (town/cell.js plays the hours in here). The cell doors
+// slide, so each is a mesh of its own; the tubes, the clock's hands and the sky in the windows are drawn live by cell.js.
+const STN = {
+  steel: C(0x80878a),
+  steelD: C(0x3f4549),
+  bar: C(0x2a2e32),
+  wood: C(0x5e4631),
+  woodD: C(0x3a2a1c),
+  paper: C(0xd8d4c8),
+  navy: C(0x1d2a44),
+};
+const CELL_X = [1, 7, 13]; // each cell's first tile from the west; yours is the last, nearest the booking corner
+const CELL_N = STATION_Z0 + 0.5 + WT; // the back wall's face
+const CELL_BARS_Z = STATION_Z0 + 3.5 + WT; // the bars' line, flush with the ends of the walls between the cells
+const CELL_DOOR = { at: 1.9, w: 1.2, slide: 1.15 }; // the door: its west edge from the cell's first tile, its width, how far it slides
+const CELL_CLOCK = [CELL_X[2] + 4.2, 1.98, CELL_N + 0.005]; // high on your cell's back wall, to the right of the window
+const CELL_CHART_X = 21.5; // the height chart, and where you stand against it
+
+// a run of bars from x0 to x1 along z: uprights, a rail at the foot, one across the middle, one along the top
+function stnBars(g, x0, x1, z) {
+  const n = Math.max(1, Math.round((x1 - x0) / 0.2));
+  for (let k = 0; k <= n; k++) g.cyl(x0 + ((x1 - x0) * k) / n, 0.04, z, 0.021, 0.021, 2.55, 6, STN.bar, XM('metal'));
+  g.bx((x0 + x1) / 2, 0, z, x1 - x0 + 0.04, 0.07, 0.07, STN.bar, XM('metal'));
+  g.bx((x0 + x1) / 2, 1.0, z, x1 - x0 + 0.04, 0.05, 0.06, STN.bar, XM('metal'));
+  g.bx((x0 + x1) / 2, 2.56, z, x1 - x0 + 0.04, 0.1, 0.08, STN.bar, XM('metal'));
+}
+// a piece on a wall's face that sinks with the wall when it's cut away: (wx, wz) the wall's tile, `side` the way the
+// face looks. Local frame as for mount(): x along the wall, y up, z out of the face.
+function stnWall(g, wx, wz, side, along, fn) {
+  const [dx, dz, a] = { S: [0, 1, 0], N: [0, -1, Math.PI], E: [1, 0, Math.PI / 2], W: [-1, 0, -Math.PI / 2] }[side];
+  const prevCell = g.cell,
+    prevMat = g.mat;
+  g.cell = [wx + 1000.5, wz + 0.5];
+  g.mat = M4.mul(M4.mul(M4.trans(wx + 0.5 + dx * WT, 0, wz + 0.5 + dz * WT), M4.rotY(a)), M4.trans(along, 0, 0));
+  try {
+    fn(g);
+  } finally {
+    g.mat = prevMat;
+    g.cell = prevCell;
+  }
+}
+function stnDoorGeo() {
+  const g = new Geo(),
+    w = CELL_DOOR.w;
+  g.ao = 0.8;
+  g.aoH = 1.4;
+  stnBars(g, 0.05, w - 0.05, 0);
+  for (const x of [0.02, w - 0.02]) g.bx(x, 0, 0, 0.05, 2.6, 0.06, STN.bar, XM('metal')); // the frame
+  g.bx(w - 0.12, 0.92, 0.05, 0.14, 0.24, 0.05, STN.steelD, XM('metal')); // the lock, on the corridor side
+  g.bx(w - 0.12, 1.0, 0.085, 0.05, 0.05, 0.02, C(0x8a8a80));
+  g.bx(w - 0.3, 0.98, 0.06, 0.16, 0.04, 0.04, STN.steelD); // the handle
+  return makeMesh(g);
+}
+function stnSteelToilet(g, x, z) {
+  g.bx(x, 0.0, z + 0.05, 0.44, 0.38, 0.42, STN.steel, XM('metal'));
+  g.cyl(x, 0.38, z + 0.08, 0.2, 0.19, 0.03, 12, mul3(STN.steel, 1.1), XM('metal'));
+  g.cyl(x, 0.405, z + 0.08, 0.14, 0.14, 0.006, 12, C(0x1c2224));
+  g.bx(x, 0.0, z - 0.2, 0.5, 0.98, 0.16, STN.steel, XM('metal')); // the back, with the basin on top
+  g.bx(x, 0.98, z - 0.14, 0.42, 0.06, 0.26, mul3(STN.steel, 1.05), XM('metal'));
+  g.bx(x, 1.005, z - 0.12, 0.3, 0.04, 0.16, C(0x2a3032));
+  g.cyl(x, 1.04, z - 0.24, 0.02, 0.02, 0.1, 6, STN.steelD);
+}
+function stnBench(g, x0, x1) {
+  g.bx((x0 + x1) / 2, 0.4, CELL_N + 0.24, x1 - x0, 0.06, 0.48, STN.steel, XM('metal'));
+  g.bx((x0 + x1) / 2, 0.36, CELL_N + 0.46, x1 - x0, 0.1, 0.04, STN.steelD, XM('metal'));
+  for (const x of [x0 + 0.25, x1 - 0.25]) {
+    g.bx(x, 0.02, CELL_N + 0.02, 0.06, 0.38, 0.04, STN.steelD);
+    g.xf(M4.mul(M4.trans(x, 0.22, CELL_N + 0.2), M4.rotX(0.75)), () => g.bx(0, -0.02, 0, 0.05, 0.05, 0.42, STN.steelD));
+  }
+}
+// the tube's cage over a window; the tube inside it is drawn lit by cell.js
+function stnTubeCage(g, x) {
+  const z = CELL_N + 0.07;
+  g.bx(x, 2.36, z - 0.03, 1.08, 0.04, 0.08, STN.steelD, XM('metal'));
+  g.bx(x, 2.5, z - 0.03, 1.08, 0.04, 0.08, STN.steelD, XM('metal'));
+  for (let k = 0; k < 6; k++) g.bx(x - 0.5 + k * 0.2, 2.36, z + 0.04, 0.012, 0.18, 0.012, STN.bar);
+  for (const y of [2.39, 2.47]) g.bx(x, y, z + 0.05, 1.02, 0.012, 0.012, STN.bar);
+}
+function stnDesk(g, x, z) {
+  g.bx(x, 0.72, z, 1.5, 0.05, 0.76, STN.wood, XM('wood'));
+  for (const s of [-1, 1]) g.bx(x + s * 0.55, 0, z, 0.38, 0.72, 0.7, STN.woodD, XM('wood'));
+  g.bx(x, 0.4, z + 0.36, 0.72, 0.3, 0.02, STN.woodD);
+  g.bx(x - 0.35, 0.77, z + 0.05, 0.42, 0.12, 0.3, C(0x2f3134)); // a typewriter, a sheet in it
+  g.bx(x - 0.35, 0.86, z - 0.05, 0.3, 0.16, 0.01, STN.paper, XM('print'));
+  for (let k = 0; k < 3; k++)
+    g.bx(
+      x + 0.15 + k * 0.012,
+      0.77 + k * 0.012,
+      z + 0.1 - k * 0.02,
+      0.24,
+      0.012,
+      0.32,
+      mul3(STN.paper, 1 - k * 0.06),
+      XM('print'),
+    );
+  g.cyl(x + 0.05, 0.77, z - 0.22, 0.045, 0.04, 0.1, 8, C(0xd8d4c8)); // a mug
+  g.bx(x + 0.35, 0.77, z - 0.22, 0.2, 0.12, 0.1, C(0x2a2a2a)); // the radio
+  g.cyl(x + 0.43, 0.89, z - 0.25, 0.006, 0.006, 0.25, 4, COL.black);
+  g.cyl(x + 0.6, 0.77, z - 0.1, 0.08, 0.08, 0.02, 10, STN.steelD); // the lamp's foot and stem
+  g.cyl(x + 0.6, 0.79, z - 0.1, 0.012, 0.012, 0.32, 6, STN.steelD);
+}
+function stnTripod(g, x, z) {
+  for (let k = 0; k < 3; k++) {
+    const a = (k / 3) * TAU + 0.5;
+    g.xf(M4.mul(M4.mul(M4.trans(x + Math.sin(a) * 0.2, 0, z + Math.cos(a) * 0.2), M4.rotY(a)), M4.rotX(-0.16)), () =>
+      g.bx(0, 0, 0, 0.025, 1.36, 0.025, COL.black),
+    );
+  }
+  g.cyl(x, 1.3, z, 0.035, 0.035, 0.12, 6, COL.black);
+  g.bx(x, 1.42, z, 0.22, 0.16, 0.18, C(0x26282b)); // the camera, looking north at the chart
+  g.cyl(x, 1.5, z - 0.09, 0.05, 0.05, 0.1, 10, C(0x18191b));
+  g.xf(M4.mul(M4.trans(x, 1.5, z - 0.14), M4.rotX(Math.PI / 2)), () =>
+    g.cyl(0, 0, 0, 0.05, 0.055, 0.1, 10, C(0x18191b)),
+  );
+  g.bx(x + 0.1, 1.58, z, 0.08, 0.12, 0.06, C(0x3a3c3e)); // the flash
+  g.bx(x + 0.1, 1.64, z - 0.032, 0.07, 0.05, 0.004, C(0xe8e8e0), EMIT(0.15));
+}
+function buildStation() {
+  const g = new Geo(),
+    lit = new Geo();
+  g.ao = 0.7;
+  g.aoH = 1.6;
+  const Z0 = STATION_Z0;
+  // ── the three cells
+  CELL_X.forEach((x0, k) => {
+    const xl = x0 - 0.5 + WT,
+      xr = x0 + 5.5 - WT,
+      d0 = x0 + CELL_DOOR.at,
+      d1 = d0 + CELL_DOOR.w;
+    stnBars(g, xl, d0, CELL_BARS_Z);
+    stnBars(g, d1, xr, CELL_BARS_Z);
+    g.bx((xl + d1) / 2, 2.6, CELL_BARS_Z + 0.07, d1 - xl, 0.06, 0.05, STN.steelD, XM('metal')); // the door's track
+    stnBench(g, x0 + 1.15, x0 + 3.85);
+    stnSteelToilet(g, x0 + 4.75, CELL_N + 0.3);
+    stnTubeCage(g, x0 + 2.5);
+    for (let b = 0; b < 4; b++) g.cyl(x0 + 2.2 + b * 0.2, 0.93, Z0 + 0.6, 0.018, 0.018, 1.22, 6, STN.bar, XM('metal')); // the window's bars
+    g.bx(x0 + 2.5, 0.88, Z0 + 0.62, 1.0, 0.05, 0.1, C(0x6a6e6c)); // its sill
+    if (k === 1) {
+      g.xf(M4.mul(M4.trans(x0 + 1.2, 0.04, Z0 + 2.3), M4.rotY(1.1)), () => {
+        g.cyl(0, -0.04, 0, 0.04, 0.04, 0.24, 8, C(0x3a2a14), GLASS); // a bottle, rolled under the bench
+        g.cyl(0, 0.2, 0, 0.018, 0.018, 0.06, 6, C(0x3a2a14));
+      });
+      g.bx(x0 + 3.3, 0, Z0 + 1.9, 0.12, 0.08, 0.28, COL.black); // one shoe, kicked off
+    } else if (k === 0) {
+      g.bx(x0 + 2.2, 0.46, CELL_N + 0.24, 0.7, 0.1, 0.4, C(0x5a5f5a), XM('fabric')); // a blanket, folded
+      g.bx(x0 + 2.5, 2.415, CELL_N + 0.06, 0.92, 0.05, 0.05, C(0x4a4e4c)); // its tube, dead
+    }
+  });
+  // the clock's face: the hands go round in cell.js
+  {
+    const [cx, cy, cz] = CELL_CLOCK;
+    g.xf(M4.mul(M4.trans(cx, cy, cz), M4.rotX(Math.PI / 2)), () => {
+      g.cyl(0, 0, 0, 0.19, 0.19, 0.05, 18, C(0x2a2724)); // rotX turns its axis out of the wall
+      g.cyl(0, 0.05, 0, 0.165, 0.165, 0.005, 18, C(0xd8d2c0));
+    });
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * TAU;
+      g.bx(
+        cx + Math.sin(a) * 0.13,
+        cy + Math.cos(a) * 0.13 - 0.008,
+        cz + 0.057,
+        0.01,
+        k % 3 ? 0.014 : 0.035,
+        0.004,
+        COL.black,
+      );
+    }
+    g.xf(M4.mul(M4.trans(cx, cy, cz + 0.12), M4.rotX(Math.PI / 2)), () => {
+      for (let k = 0; k < 5; k++) g.bx(-0.16 + k * 0.08, 0, 0, 0.01, 0.01, 0.4, STN.bar); // its cage
+      g.cyl(0, -0.005, 0, 0.21, 0.21, 0.01, 18, STN.bar, null, false);
+    });
+  }
+  // what you've scratched into the paint, or someone before you: tallies over the end of the bench
+  for (let k = 0; k < 9; k++) {
+    const grp = Math.floor(k / 5),
+      i = k % 5,
+      x = CELL_X[2] + 3.45 + grp * 0.2 + i * 0.03;
+    if (i < 4) g.bx(x, 1.05, CELL_N + 0.003, 0.008, 0.11, 0.004, C(0x9a9c94));
+    else
+      g.xf(M4.mul(M4.trans(x - 0.05, 1.1, CELL_N + 0.004), M4.rotZ(1.0)), () =>
+        g.bx(0, -0.07, 0, 0.008, 0.15, 0.004, C(0x9a9c94)),
+      );
+  }
+  // ── the booking corner: the chart, the camera on its legs, a cabinet
+  stnWall(g, CELL_CHART_X - 0.5, Z0, 'S', 0, (g) => {
+    g.bx(0, 0.25, 0.006, 1.24, 1.9, 0.012, C(0xcdc8b8));
+    for (let k = 0; k <= 17; k++) {
+      const y = 0.4 + k * 0.1,
+        big = k % 3 === 0;
+      g.bx(0, y, 0.014, big ? 1.16 : 0.6, big ? 0.014 : 0.007, 0.003, C(0x2a2a28));
+      if (big) for (const s of [-1, 1]) g.bx(s * 0.52, y + 0.03, 0.015, 0.08, 0.035, 0.003, C(0x2a2a28)); // the heights
+    }
+    g.bx(0, 2.13, 0.012, 0.9, 0.16, 0.02, STN.navy);
+    g.bx(0, 2.18, 0.024, 0.66, 0.05, 0.004, C(0xc8b880));
+  });
+  stnTubeCage(g, CELL_CHART_X);
+  stnTripod(g, CELL_CHART_X, Z0 + 3.1);
+  g.bx(19.45, 0, CELL_N + 0.32, 0.6, 1.32, 0.62, C(0x6d726c), XM('metal')); // the filing cabinet
+  for (let k = 0; k < 4; k++) g.bx(19.45, 0.12 + k * 0.31, CELL_N + 0.635, 0.5, 0.26, 0.01, C(0x5f645e));
+  // ── the corridor: the desk, a chair each side, the board of notices, a bench to wait on, water
+  stnDesk(g, 23.6, Z0 + 5.05);
+  lit.cyl(24.2, 1.1, Z0 + 4.95, 0.13, 0.07, 0.14, 10, C(0x2e5a3a), EMIT(0.35)); // the green shade
+  lit.cyl(24.2, 1.09, Z0 + 4.95, 0.08, 0.08, 0.01, 10, C(0xfff0c8), EMIT(1.4));
+  g.xf(M4.trans(23.6, 0, Z0 + 4.3), () => MODELS.chair_office(g));
+  g.xf(M4.mul(M4.trans(22.2, 0, Z0 + 5.4), M4.rotY(Math.PI / 2 + 0.3)), () => MODELS.chair(g, { x: 22, z: Z0 + 5 }));
+  stnWall(g, 25, Z0 + 2, 'W', 0, (g) => {
+    DK.board(g, 1.3, 0.9, 1.15, 'notes', 41);
+    g.xf(M4.trans(-0.1, 0, 0.03), () => DK.missing(g, 1.35, 7));
+  });
+  stnWall(g, 25, Z0 + 4, 'W', 0.1, (g) => DK.calendar(g, 1.3, 12));
+  stnWall(g, 25, Z0 + 6, 'W', 0, (g) => DK.switchPlate(g));
+  stnWall(g, 0, Z0 + 5, 'E', 0, (g) => DK.extinguisher(g));
+  g.xf(M4.mul(M4.trans(9.5, 0, Z0 + 6.95), M4.rotY(Math.PI)), () => {
+    g.bx(0, 0.42, 0, 2.2, 0.05, 0.42, STN.wood, XM('wood'));
+    for (const s of [-1, 1]) g.bx(s * 0.95, 0, 0, 0.06, 0.42, 0.36, STN.woodD);
+  });
+  g.xf(M4.mul(M4.trans(17.5, 0, Z0 + 6.95), M4.rotY(Math.PI)), () => MODELS.watercooler(g));
+  g.xf(M4.trans(3.2, 0, Z0 + 6.4), () => MODELS.bucket(g));
+  const out = [makeMesh(g, { cut: 1 })],
+    lm = makeMesh(lit);
+  lm.litGrp = 'station';
+  out.push(lm);
+  return out;
+}
+function stationRenderInit() {
+  R.decor.push(...buildStation());
+  R.cellDoors = CELL_X.map((x0) => {
+    const m = stnDoorGeo();
+    m.model = M4.trans(x0 + CELL_DOOR.at, 0, CELL_BARS_Z + 0.07);
+    m.center = [x0 + CELL_DOOR.at, 1, CELL_BARS_Z];
+    return m;
+  });
+  for (const t of STATION_TUBES)
+    R.glows.push({ p: [t.x, t.y, t.z + 0.06], col: nrm3(t.l.col), size: 0.55, grp: 'station', light: t.l, spec: 0.8 });
+  const lamp = LIGHTS.find((l) => l.grp === 'station' && l.col[0] > l.col[2] * 1.3);
+  if (lamp)
+    R.glows.push({ p: [24.2, 1.05, STATION_Z0 + 4.95], col: nrm3(lamp.col), size: 0.4, grp: 'station', light: lamp });
+}
 // ───────────────────────── evidence props & dynamic bits
 function buildItemMesh(it) {
   const g = new Geo();
@@ -7205,6 +7465,25 @@ const LAIR_LAMPS = []; // { k, x, z, y, col, size, cone } for the glow and the s
     [17, 14],
   ])
     A('den', lx, lz, 0x5affc8, 0.42, 3.0, { glow: 1, y: 0.25, size: 0.2, fungus: 1, spec: 0.5 });
+})();
+
+// the cells light themselves only while you're held (lightGroupOn: 'station'): a caged tube over each window, the one
+// in your cell given to stuttering, the one next door worse, the empty cell's dead; two lights down the corridor, hard white over the height
+// chart, and the desk lamp
+const STATION_TUBES = []; // { l, x, z, y, len } the tubes town/cell.js draws lit, each by its own light
+(function stationLights() {
+  const A = (lx, lz, col, int, r, o = {}) => {
+    const [x, z] = SZ(lx, lz),
+      l = addLight(x, z, col, int, r, Object.assign({ grp: 'station' }, o));
+    if (lz === 1) STATION_TUBES.push({ l, x: x + 0.5, z: STATION_Z0 + 0.72, y: 2.42, len: 0.95 }); // on the back wall
+    return l;
+  };
+  A(9, 1, 0xc8e4d8, 0.6, 4.2, { flick: 0.45 });
+  A(15, 1, 0xd2efe4, 0.85, 4.6, { flick: 0.3 });
+  A(5, 5, 0xdde8e2, 0.6, 6.5);
+  A(14, 5, 0xdde8e2, 0.55, 6.5, { flick: 0.2 });
+  A(21, 1, 0xf2eee2, 0.95, 5.5);
+  A(24, 5, 0xffc98a, 0.5, 2.8);
 })();
 
 const WINDOWS = [];
@@ -7814,6 +8093,7 @@ function initRender(canvas) {
     m.light = LIGHTS.find((l) => l.x === o.x && l.z === o.z && l.grp === 'street');
   }
   lairRenderInit();
+  stationRenderInit();
   initParticles();
   R.ready = true;
 }
@@ -9748,6 +10028,11 @@ function renderFrame() {
     console.error(e);
   }
   try {
+    cellDraw();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     huntDraw();
   } catch (e) {
     console.error(e);
@@ -10049,7 +10334,7 @@ function composite() {
     gl.uniform1f(u.uSat, 0.8);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
-    if (u.uFade) gl.uniform1f(u.uFade, CAP.fx.fade);
+    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
     if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
@@ -10449,6 +10734,7 @@ const NO_TINT = [1, 1, 1],
 function lightGroupOn(grp) {
   if (grp.startsWith('house:')) return !!(G && G.houseLit && G.houseLit[grp.slice(6)]);
   if (grp.startsWith('lair:')) return CAP.lit === grp.slice(5);
+  if (grp === 'station') return CELL.on; // the cells, only while you're in them
   switch (grp) {
     case 'always':
       return true;
@@ -16380,7 +16666,7 @@ function controlled(o, dur) {
       waitAct({ label: '…', dur: Math.min(dur, 15), anim: 'stare', interruptible: false }),
     ]);
   if (k === 'window') {
-    const w = pick(WINDOWS);
+    const w = pick(WINDOWS.filter((p) => p[1] < TOWN_H)); // a window up in the town, not one in the cells
     const t = nearestWalkable(w[0] + 0.5, w[1] + 0.5, o, 2);
     if (t)
       return enqueue(o, [
@@ -16754,6 +17040,7 @@ function arrest() {
   addStress(8);
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
+  CELL.book = true;
   goAway('held', heldUntil());
 }
 // ───────────── arrested, start to finish, out where you can see it: hands behind your back, the cuffs, a squad car
@@ -16959,6 +17246,7 @@ function arrestInside() {
   ARREST.phase = null;
   ARREST.car = null;
   ARREST.off = null;
+  CELL.book = true;
   goAway('held', Math.max(ARREST.until, G.t + 60));
 }
 // let out: the same car, the other way, and you on the kerb
@@ -17055,374 +17343,444 @@ function arrestReset() {
   Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0 });
   if (PLAYER) PLAYER.poseFn = null;
 }
-// ───────────── the cell: the hours you're held go by in here, drawn small and blown up like the rest of the town.
-// The booking photo first, the flash, then the cell: the window high up going from day to dusk to night, the patch of
-// light it throws sliding across the floor, the clock behind its cage spinning, the tube light buzzing, you on the bench.
+// ───────────── held: the hours you're held go by in the cells under the town (STATION in world/grid, drawn by
+// gfx/station), lit and drawn like everywhere else. Booked first: you against the height chart, the flash, face on and
+// then side on. The officer walks you down the corridor and slides the door shut on you. Then the bench: head down,
+// mostly; now and then you look up, back at the window, or lean back against the wall, and late at night you lie down on
+// it. The light in the window goes from day to dusk to night and its patch slides across the floor, the clock spins, the
+// tube buzzes and stutters, the man in the next cell sleeps it off, and the officer gets up from his desk now and then to
+// walk past the bars. When your time's up, the car brings you back (ARREST).
 const CELL = {
-  el: null,
-  ctx: null,
-  w: 0,
-  h: 112,
-  t: 0,
   on: false,
-  show: 0,
-  flick: 1,
-  flickT: 2,
-  face: null,
-  faceImg: null,
-  motes: null,
+  book: false, // set by the arrest: booked on the way in (a save loaded mid-stay starts you on the bench)
+  phase: null,
+  t: 0,
+  pt: 0,
+  eye: null,
+  fade: 0,
+  leave: 0,
+  actors: [],
+  you: null,
+  cop: null,
+  drunk: null,
+  route: null,
+  door: 0,
+  doorT: 0,
   clang: false,
-  shut: false,
+  mood: 0,
+  moodT: 0,
+  moodK: [0, 0, 0, 0],
+  patrolAt: 0,
+  saved: null,
+  cam: { x: 0, z: 0, zoom: 3 },
 };
-const rgbOf = (c, k = 1) =>
-  'rgb(' +
-  Math.round(((c >> 16) & 255) * k) +
-  ',' +
-  Math.round(((c >> 8) & 255) * k) +
-  ',' +
-  Math.round((c & 255) * k) +
-  ')';
-function cellEl() {
-  if (CELL.el) return CELL.el;
-  const c = document.createElement('canvas');
-  c.id = 'cell';
-  c.setAttribute('aria-hidden', 'true');
-  c.hidden = true;
-  document.body.appendChild(c);
-  CELL.el = c;
-  CELL.ctx = c.getContext('2d');
-  return c;
-}
-function cellFrame(dt) {
-  const want = !!(G && G.started && !G.over && G.away && G.away.kind === 'held');
-  if (want && !CELL.on) {
-    const el = cellEl();
-    CELL.on = true;
-    CELL.t = 0;
-    CELL.clang = false;
-    CELL.shut = false;
-    el.hidden = false;
-    void el.offsetWidth;
-    el.classList.add('on');
-    const src = getPortrait(PLAYER);
-    if (src && CELL.face !== src) {
-      CELL.face = src;
-      const im = new Image();
-      im.src = src;
-      CELL.faceImg = im;
-    }
-  }
-  if (!want && CELL.on) {
-    CELL.on = false;
-    if (CELL.el) CELL.el.classList.remove('on');
-  }
-  if (!CELL.el) return;
-  CELL.show = CELL.on ? 1 : CELL.show - dt / 1.1;
-  if (CELL.show <= 0) {
-    CELL.el.hidden = true;
+const CELL_YOU = CELL_X[2] + 2.2; // where you sit: a little left of the window, so it and the clock are both in view
+const CELL_ID = M4.ident(),
+  CELL_DOOR_M = M4.ident(),
+  CELL_SKY = [0, 0, 0],
+  CELL_SKY_E = [0, 0, 0],
+  CELL_SUN = [0, 0, 0],
+  CELL_TUBE = [0.9, 0.95, 0.92],
+  CELL_TUBE_E = STATION_TUBES.map(() => [0, 0, 0]),
+  CELL_HAND = [0.08, 0.08, 0.075],
+  CELL_BOARD = [0.07, 0.075, 0.08],
+  CELL_CHALK = [0.82, 0.8, 0.74],
+  CELL_CHALK_E = [0.12, 0.12, 0.11];
+// the speed the clock runs while you sleep or are away: the hours fly, except while you're booked and walked down
+const awaySpeed = () => (CELL.on && CELL.phase !== 'held' ? 1 : SLEEP_SPEED);
+
+// cuffed in front: hands together in your lap when you sit, held up with the board when you're booked; the head goes
+// where your mood puts it (CELL.moodK: down, up at the bars, back over your shoulder at the window, leant on the wall)
+const CELL_POSE = (T, a) => {
+  if (a.pose === 'lie') return;
+  if (a.board) {
+    T.uaL = T.uaR = -0.42;
+    T.faL = T.faR = -1.55;
+    T.aoL = T.aoR = -0.2;
     return;
   }
-  CELL.t += dt;
-  const el = CELL.el,
-    h = CELL.h,
-    w = Math.max(150, Math.round(h * (window.innerWidth / Math.max(1, window.innerHeight))));
-  if (el.width !== w || el.height !== h) {
-    el.width = w;
-    el.height = h;
-    CELL.motes = null;
+  T.uaL = T.uaR = -0.3;
+  T.faL = T.faR = -0.95;
+  T.aoL = T.aoR = -0.2;
+  if (a.pose !== 'sit') return;
+  const K = CELL.moodK,
+    down = K[0],
+    up = K[1],
+    back = K[2],
+    lean = K[3];
+  T.hp = (T.hp || 0) + 0.55 * down - 0.12 * up - 0.3 * back - 0.32 * lean;
+  T.hy = (T.hy || 0) * (1 - back) + 1.25 * back;
+  T.torso = (T.torso || 0) + 0.16 * down - 0.14 * lean;
+};
+// the officer at his desk: reading what's in front of him
+const CELL_COP_POSE = (T, a) => {
+  if (a.pose === 'sit') T.hp = (T.hp || 0) + 0.32;
+};
+
+function cellFrame(dt) {
+  const want = !!(G && G.started && !G.over && G.away && G.away.kind === 'held');
+  if (want && !CELL.on && !CELL.leave) cellEnter();
+  if (!CELL.on) {
+    CELL.fade = Math.max(0, CELL.fade - dt * 2);
+    return;
   }
-  CELL.w = w;
+  if (!want && !CELL.leave) CELL.leave = 0.001; // let out: the screen goes dark on the cell, and comes up on the street
+  if (CELL.leave) {
+    CELL.leave += dt;
+    CELL.fade = Math.min(1, CELL.fade + dt * 2.6);
+    if (CELL.leave > 0.45) return cellExit();
+  }
+  CELL.t += dt;
+  CELL.pt += dt;
   try {
-    cellDraw(CELL.ctx, w, h, CELL.t);
+    cellStep(dt);
+    for (const a of CELL.actors) capAnimate(a, dt);
+    cellLights();
   } catch (e) {
     console.error(e);
   }
+  const c = CELL.cam,
+    k = Math.min(1, dt * (CELL.phase === 'held' ? 0.8 : 2.4)),
+    drift = CELL.phase === 'held' ? Math.sin(CELL.t * 0.07) * 0.25 : 0;
+  cam.follow = false;
+  cam.tx += (c.x + drift - cam.tx) * k;
+  cam.tz += (c.z - cam.tz) * k;
+  cam.zoomT = c.zoom;
+  cam.yawT = 0;
+  audio.update({
+    hum: true,
+    outside: false,
+    night: hourF() > 20 || hourF() < 6,
+    stress: PLAYER.needs.stress,
+    rain: (G.rainK || 0) * 0.3,
+    car: 0,
+    dread: 0,
+  });
 }
-// the light outside the window, by the hour: blue night, a warm low sun, flat grey day
-function cellSky() {
-  const hh = hourF(),
-    k = (a, b, x) => clamp((x - a) / (b - a), 0, 1);
-  const day = Math.min(k(5.2, 7.2, hh), 1 - k(18.6, 20.6, hh)),
-    warm = Math.max(1 - Math.abs(hh - 6.6) / 1.4, 1 - Math.abs(hh - 19.4) / 1.4, 0);
-  const night = [30, 42, 74],
-    noon = [178, 192, 200],
-    gold = [222, 146, 92];
-  let c = night.map((v, i) => lerp(v, noon[i], day));
-  c = c.map((v, i) => lerp(v, gold[i], clamp(warm, 0, 1) * 0.8));
-  return { c, day, warm };
+function cellEnter() {
+  const Z0 = STATION_Z0;
+  CELL.on = true;
+  CELL.t = 0;
+  CELL.leave = 0;
+  CELL.fade = 1;
+  CELL.clang = false;
+  CELL.saved = { yaw: cam.yawT, zoom: cam.zoomT, darkSight };
+  darkSight = 5;
+  lightT = 0;
+  CELL.actors.length = 0;
+  CELL.you = sceneActor('you', CELL_CHART_X, Z0 + 1.12, { look: PLAYER.look, name: PLAYER.name, poseFn: CELL_POSE });
+  CELL.you.fx.foil = !!G.inv.foilOn;
+  CELL.cop = sceneActor('cop', CELL_CHART_X + 0.75, Z0 + 3.6, {
+    look: NPC.officer.look,
+    dir: Math.PI,
+    poseFn: CELL_COP_POSE,
+  });
+  CELL.drunk = sceneActor('drunk', CELL_X[1] + 2.5, CELL_N + 0.25, { dir: -Math.PI / 2, pose: 'lie', y: -0.12 });
+  CELL.actors.push(CELL.you, CELL.cop, CELL.drunk);
+  CELL.moodK.fill(0);
+  CELL.moodK[0] = 1;
+  CELL.mood = 0;
+  CELL.moodT = 6;
+  CELL.patrolAt = CELL.t + rand(6, 12);
+  if (CELL.book) cellPhase('book');
+  else {
+    cellSeat();
+    cellCopAtDesk();
+    cellPhase('held');
+  }
+  CELL.book = false;
+  for (const a of CELL.actors) {
+    a.dir = a.tdir;
+    capAnimate(a, 0.5);
+  }
+  cam.tx = CELL.cam.x;
+  cam.tz = CELL.cam.z;
+  cam.zoom = CELL.cam.zoom;
+  cam.yaw = cam.yawT = 0;
 }
-function cellDraw(g, w, h, t) {
-  const cx = Math.round(w / 2),
-    floorY = 84;
-  const P = PLAYER,
-    L = P.look || {};
-  // the tube light: steady, and every so often it stutters
-  CELL.flickT -= Math.min(0.1, 1 / 60);
-  if (CELL.flickT <= 0) {
-    CELL.flick = CELL.flick < 1 ? 1 : chance(0.5) ? 0.35 : 0.6;
-    CELL.flickT = CELL.flick < 1 ? rand(0.04, 0.16) : rand(1.2, 5);
+function cellExit() {
+  CELL.on = false;
+  CELL.leave = 0;
+  CELL.phase = null;
+  CELL.actors.length = 0;
+  CELL.you = CELL.cop = CELL.drunk = null;
+  CELL.eye = null;
+  const s = CELL.saved;
+  if (s) {
+    darkSight = s.darkSight;
+    cam.yaw = cam.yawT = s.yaw;
+    cam.zoomT = s.zoom;
   }
-  const lit = CELL.flick,
-    sky = cellSky(),
-    m = (v) => Math.round(v);
-  // ── the wall: painted block, the mortar a shade darker
-  g.fillStyle = '#20242a';
-  g.fillRect(0, 0, w, floorY);
-  for (let row = 0, y = 0; y < floorY; row++, y += 7) {
-    g.fillStyle = '#1a1d22';
-    g.fillRect(0, y, w, 1);
-    for (let x = (row % 2) * 9 - 18; x < w; x += 18) {
-      const n = hash2(x, row, 3);
-      g.fillStyle = n < 0.33 ? '#23272d' : n < 0.66 ? '#21252b' : '#1f2328';
-      g.fillRect(x + 1, y + 1, 17, 6);
-      g.fillStyle = '#1a1d22';
-      g.fillRect(x, y, 1, 7);
-    }
+  cam.follow = true;
+  if (PLAYER) {
+    cam.tx = PLAYER.x;
+    cam.tz = PLAYER.z;
   }
-  // a stain down the wall under the window, and scratched tallies by the bench
-  g.fillStyle = 'rgba(12,14,16,.35)';
-  g.fillRect(cx - 26, 32, 6, 30);
-  g.fillRect(cx - 24, 62, 3, 14);
-  g.fillStyle = 'rgba(150,150,140,.22)';
-  for (let k = 0; k < 7; k++)
-    g.fillRect(cx + 78 + k * 2 - (k === 4 ? 6 : 0), k === 4 ? 66 : 62, k === 4 ? 9 : 1, k === 4 ? 1 : 6);
-  // ── the floor
-  g.fillStyle = '#15171b';
-  g.fillRect(0, floorY, w, h - floorY);
-  g.fillStyle = '#2b3036';
-  g.fillRect(0, floorY, w, 1);
-  g.fillStyle = '#191b1f';
-  for (let y = floorY + 6, s = 6; y < h; s += 3, y += s) g.fillRect(0, y, w, 1);
-  // ── the window, high up, barred: the day going by outside
-  const wx = cx - 34,
-    wy = 14,
-    ww = 22,
-    wh = 16,
-    [sr, sg, sb] = sky.c;
-  g.fillStyle = '#101216';
-  g.fillRect(wx - 2, wy - 2, ww + 4, wh + 4);
-  g.fillStyle = 'rgb(' + m(sr) + ',' + m(sg) + ',' + m(sb) + ')';
-  g.fillRect(wx, wy, ww, wh);
-  if (sky.day < 0.3) {
-    g.fillStyle = 'rgba(230,236,255,' + (0.8 * (1 - sky.day / 0.3)).toFixed(2) + ')';
-    g.fillRect(wx + 15, wy + 4, 3, 3);
-  } // the moon
-  g.fillStyle = '#0b0c0f';
-  for (let k = 1; k < 4; k++) g.fillRect(wx + Math.round((ww * k) / 4) - 1, wy, 2, wh);
-  g.fillRect(wx, wy + 7, ww, 1);
-  // the patch it throws, sliding across the floor as the sun goes over; the bars across it in shadow
-  const sun = clamp((hourF() - 6) / 14, 0, 1),
-    shift = lerp(30, -26, sun),
-    a = (0.07 + 0.18 * sky.day) * (0.75 + 0.25 * lit);
-  const px0 = wx + shift,
-    py0 = floorY + 4,
-    pw = 30,
-    ph = 18,
-    skew = lerp(-14, 14, sun);
-  g.save();
-  g.globalCompositeOperation = 'lighter';
-  g.fillStyle = 'rgba(' + m(sr) + ',' + m(sg) + ',' + m(sb) + ',' + (a * 0.28).toFixed(3) + ')';
-  g.beginPath();
-  g.moveTo(wx, wy + wh);
-  g.lineTo(wx + ww, wy + wh);
-  g.lineTo(px0 + pw + skew, py0 + ph);
-  g.lineTo(px0 + skew, py0 + ph);
-  g.closePath();
-  g.fill();
-  g.fillStyle = 'rgba(' + m(sr) + ',' + m(sg) + ',' + m(sb) + ',' + a.toFixed(3) + ')';
-  g.beginPath();
-  g.moveTo(px0, py0);
-  g.lineTo(px0 + pw, py0);
-  g.lineTo(px0 + pw + skew, py0 + ph);
-  g.lineTo(px0 + skew, py0 + ph);
-  g.closePath();
-  g.fill();
-  g.restore();
-  g.fillStyle = 'rgba(8,9,12,.55)';
-  for (let k = 1; k < 4; k++) {
-    const bx = px0 + (pw * k) / 4;
-    g.beginPath();
-    g.moveTo(bx - 1, py0);
-    g.lineTo(bx + 1, py0);
-    g.lineTo(bx + 1 + skew * 1.1, py0 + ph);
-    g.lineTo(bx - 2 + skew * 1.1, py0 + ph);
-    g.closePath();
-    g.fill();
-  }
-  // dust turning over in the light
-  if (!CELL.motes) CELL.motes = Array.from({ length: 14 }, () => [Math.random(), Math.random(), rand(0.4, 1)]);
-  g.fillStyle = 'rgba(' + m(sr) + ',' + m(sg) + ',' + m(sb) + ',' + (0.25 + 0.4 * sky.day).toFixed(2) + ')';
-  for (const mo of CELL.motes) {
-    const u = (mo[0] + t * 0.012 * mo[2]) % 1,
-      v = (mo[1] + Math.sin(t * 0.4 + mo[2] * 9) * 0.03 + t * 0.006) % 1;
-    const x = lerp(wx + ww * u, px0 + skew + pw * u, v),
-      y = lerp(wy + wh, py0 + ph, v);
-    g.fillRect(m(x), m(y), 1, 1);
-  }
-  // ── the clock, caged, high on the wall: the hours going round
-  const ox = cx + 56,
-    oy = 30,
-    r = 8,
-    tm = tod();
-  g.fillStyle = '#0d0f12';
-  g.beginPath();
-  g.arc(ox, oy, r + 2, 0, TAU);
-  g.fill();
-  g.fillStyle = '#b8b2a2';
-  g.beginPath();
-  g.arc(ox, oy, r, 0, TAU);
-  g.fill();
-  g.fillStyle = '#3a3a36';
-  for (let k = 0; k < 12; k++) {
-    const an = (k / 12) * TAU;
-    g.fillRect(m(ox + Math.sin(an) * (r - 1.5)), m(oy - Math.cos(an) * (r - 1.5)), 1, 1);
-  }
-  g.fillStyle = 'rgba(14,15,18,.4)';
-  for (let k = -r; k <= r; k++) {
-    g.fillRect(ox + k, oy - 3, 1, 1);
-    g.fillRect(ox + k, oy + 3, 1, 1);
-  } // the cage
-  const hand = (an, len, wd, col) => {
-    g.fillStyle = col;
-    for (let q = 0; q <= len; q += 0.5) {
-      const x = Math.round(ox + Math.sin(an) * q),
-        y = Math.round(oy - Math.cos(an) * q);
-      g.fillRect(x, y, wd, wd);
-    }
-  };
-  hand(((tm % 720) / 720) * TAU, r * 0.5, 2, '#121317');
-  hand(((tm % 60) / 60) * TAU, r * 0.85, 1, '#121317');
-  g.fillStyle = '#7a2a22';
-  g.fillRect(ox, oy, 1, 1);
-  // ── the bench, and you on it: head down, mostly. Now and then you look up at the window, or the clock.
-  const bx0 = cx + 10,
-    bx1 = cx + 70;
-  g.fillStyle = '#2a2622';
-  g.fillRect(bx0, 72, bx1 - bx0, 4);
-  g.fillStyle = '#3a342e';
-  g.fillRect(bx0, 72, bx1 - bx0, 1);
-  g.fillStyle = '#1b1916';
-  g.fillRect(bx0 + 2, 76, 3, 10);
-  g.fillRect(bx1 - 5, 76, 3, 10);
-  const fx = cx + 32,
-    br = Math.round(Math.sin(t * 1.6) * 0.5 + 0.5),
-    look = Math.sin(t * 0.37) + Math.sin(t * 0.13 + 1) > 1.25 ? (Math.sin(t * 0.11) > 0 ? -1 : 1) : 0;
-  const skin = rgbOf(L.skin || 0xd8b399),
-    skinD = rgbOf(L.skin || 0xd8b399, 0.62),
-    top = rgbOf(L.top || 0x8a6e36),
-    topD = rgbOf(L.top || 0x8a6e36, 0.6),
-    bot = rgbOf(L.bottom || 0x2d3340),
-    hair = rgbOf(L.hairCol || 0x2a1f17);
-  g.fillStyle = '#0e0f12';
-  g.fillRect(fx - 4, 86, 3, 2);
-  g.fillRect(fx + 2, 86, 3, 2); // shoes
-  g.fillStyle = bot;
-  g.fillRect(fx - 4, 76, 3, 10);
-  g.fillRect(fx + 2, 76, 3, 10); // shins
-  g.fillRect(fx - 4, 71, 9, 5); // thighs, on the bench
-  g.fillStyle = top;
-  g.fillRect(fx - 4, 60 + br, 9, 12 - br); // torso
-  g.fillStyle = topD;
-  g.fillRect(fx - 5, 61 + br, 2, 9);
-  g.fillRect(fx + 4, 61 + br, 2, 9); // arms, down to the lap
-  g.fillStyle = skin;
-  g.fillRect(fx - 1, 70, 3, 2); // hands together
-  g.fillStyle = '#8f9399';
-  g.fillRect(fx - 1, 71, 3, 1); // the cuffs
-  const hy = look ? 53 + br : 55 + br,
-    hx = fx - 2 + (look < 0 ? -1 : look > 0 ? 1 : 0);
-  g.fillStyle = skin;
-  g.fillRect(hx, hy, 5, 6);
-  g.fillStyle = hair;
-  g.fillRect(hx, hy - 1, 5, look ? 2 : 3);
-  if (look) {
-    g.fillStyle = '#16171a';
-    g.fillRect(hx + 1 + (look > 0 ? 1 : 0), hy + 2, 1, 1);
-    g.fillRect(hx + 3 + (look > 0 ? 1 : 0), hy + 2, 1, 1);
-  } else {
-    g.fillStyle = skinD;
-    g.fillRect(hx, hy + 4, 5, 2);
-  }
-  // ── the tube on the ceiling, and what it lights
-  g.fillStyle = lit >= 1 ? '#e6efe9' : lit > 0.5 ? '#9aa39e' : '#3b4045';
-  g.fillRect(cx - 24, 1, 48, 2);
-  g.fillStyle = '#121418';
-  g.fillRect(cx - 26, 0, 52, 1);
-  const lg = g.createRadialGradient(cx, 0, 4, cx, 30, 120);
-  lg.addColorStop(0, 'rgba(210,228,218,' + (0.16 * lit).toFixed(3) + ')');
-  lg.addColorStop(1, 'rgba(210,228,218,0)');
-  g.save();
-  g.globalCompositeOperation = 'lighter';
-  g.fillStyle = lg;
-  g.fillRect(0, 0, w, h);
-  g.restore();
-  if (lit < 1) {
-    g.fillStyle = 'rgba(0,0,0,' + ((1 - lit) * 0.35).toFixed(2) + ')';
-    g.fillRect(0, 0, w, h);
-  }
-  // ── the bars, between you and the corridor
-  const barCol = '#0a0b0e',
-    hi = 'rgba(120,132,140,' + (0.35 * lit + 0.1).toFixed(2) + ')';
-  for (let x = ((cx + 8) % 16) - 16; x < w; x += 16) {
-    g.fillStyle = barCol;
-    g.fillRect(x, 0, 3, h);
-    g.fillStyle = hi;
-    g.fillRect(x, 0, 1, h);
-  } // spaced so you sit between two of them
-  for (const y of [5, 97]) {
-    g.fillStyle = barCol;
-    g.fillRect(0, y, w, 4);
-    g.fillStyle = hi;
-    g.fillRect(0, y, w, 1);
-  }
-  // ── the dark round the edges
-  const vg = g.createRadialGradient(cx, h * 0.55, h * 0.35, cx, h * 0.55, Math.max(w, h) * 0.75);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,.72)');
-  g.fillStyle = vg;
-  g.fillRect(0, 0, w, h);
-  // ── booked: the photo against the height chart, the flash, then the door shuts on you
-  const BOOK = 1.9;
-  if (t < BOOK + 0.6) {
-    const k = clamp((BOOK + 0.6 - t) / 0.6, 0, 1);
-    g.save();
-    g.globalAlpha = t < BOOK ? 1 : k;
-    g.fillStyle = '#7b7e7c';
-    g.fillRect(0, 0, w, h);
-    g.fillStyle = 'rgba(30,32,34,.55)';
-    for (let y = 14; y < h; y += 8) g.fillRect(cx - 40, y, 80, 1);
-    g.fillStyle = 'rgba(30,32,34,.8)';
-    for (let y = 14; y < h; y += 16) (g.fillRect(cx - 44, y, 6, 1), g.fillRect(cx + 38, y, 6, 1));
-    const im = CELL.faceImg;
-    if (im && im.complete && im.naturalWidth) {
-      const fh = 62,
-        fw = Math.round((fh * im.naturalWidth) / im.naturalHeight);
-      g.imageSmoothingEnabled = true;
-      g.drawImage(im, cx - Math.round(fw / 2), 18, fw, fh);
-    } else {
-      g.fillStyle = '#2b2d30';
-      g.fillRect(cx - 16, 26, 32, 50);
-    }
-    g.fillStyle = '#121315';
-    g.fillRect(cx - 22, 80, 44, 14); // the board, held at your chest
-    g.fillStyle = '#cfcabd';
-    for (let k2 = 0; k2 < 6; k2++) g.fillRect(cx - 18 + k2 * 6, 84, 4, 2);
-    for (let k2 = 0; k2 < 4; k2++) g.fillRect(cx - 14 + k2 * 7, 89, 5, 1);
-    g.restore();
-    const fl = clamp(1 - Math.abs(t - 1.15) / 0.22, 0, 1);
-    if (fl > 0) {
-      g.fillStyle = 'rgba(255,255,250,' + fl.toFixed(2) + ')';
-      g.fillRect(0, 0, w, h);
-    }
-    if (t > 1.0 && !CELL.clang) {
-      CELL.clang = true;
+  lastPlayerCell = -1;
+  lightT = 0;
+}
+function cellPhase(p) {
+  CELL.phase = p;
+  CELL.pt = 0;
+  const Z0 = STATION_Z0,
+    c = CELL.cam;
+  if (p === 'book') Object.assign(c, { x: CELL_CHART_X, z: Z0 + 0.6, zoom: 1.9 });
+  else if (p === 'walk') Object.assign(c, { x: 17.6, z: Z0 + 2.4, zoom: 3.3 });
+  else if (p === 'held') Object.assign(c, { x: CELL_X[2] + 2.6, z: Z0 + 1.35, zoom: 2.55 });
+  CELL.eye = p === 'book' ? [CELL_CHART_X, Z0 + 3] : [CELL_X[2] + 2.5, Z0 + 6.5]; // what the scene sees from
+  lastPlayerCell = -1;
+}
+// you on the bench, the cop at his desk: where a stay picks up when there's nothing to show on the way in
+function cellSeat() {
+  const y = CELL.you;
+  Object.assign(y, {
+    x: CELL_YOU,
+    z: CELL_N + 0.3,
+    dir: 0,
+    tdir: 0,
+    pose: 'sit',
+    seatY: 0.46,
+    moving: false,
+    board: false,
+  });
+  CELL.door = CELL.doorT = 0;
+  CELL.clang = true;
+}
+function cellCopAtDesk() {
+  Object.assign(CELL.cop, { x: 23.6, z: STATION_Z0 + 4.32, dir: 0, tdir: 0, pose: 'sit', seatY: 0.5, moving: false });
+  CELL.route = null;
+}
+// walk an actor along a list of points; true once it's at the last
+function cellRoute(a, pts, spd, dt) {
+  while (pts.length && capWalk(a, pts[0][0], pts[0][1], spd, dt)) pts.shift();
+  return !pts.length;
+}
+function cellStep(dt) {
+  const Z0 = STATION_Z0,
+    you = CELL.you,
+    cop = CELL.cop,
+    t = CELL.pt;
+  CELL.door += (CELL.doorT - CELL.door) * Math.min(1, dt * 3.2);
+  if (CELL.phase === 'book') {
+    // the booking photo: face on, the flash; side on, the flash again
+    if (t < 0.6) CELL.fade = Math.max(0, 1 - t / 0.5);
+    you.board = true;
+    you.tdir = t > 1.7 && t < 2.9 ? -Math.PI / 2 : 0;
+    cop.tdir = Math.PI;
+    if ((t - dt < 1.15 && t >= 1.15) || (t - dt < 2.35 && t >= 2.35)) {
+      R.flash = 0.85;
       audio.blip('shutter');
     }
-  } else if (!CELL.shut) {
-    CELL.shut = true;
-    audio.hx('knock', 0, 0.9);
+    if (t > 3.3) CELL.fade = Math.min(1, (t - 3.3) / 0.35);
+    if (t > 3.7) {
+      // cut: down the corridor, his hand on your arm, the door already open
+      you.board = false;
+      Object.assign(you, { x: 20.4, z: Z0 + 4.35, dir: -Math.PI / 2, tdir: -Math.PI / 2 });
+      Object.assign(cop, { x: 21.3, z: Z0 + 4.45, dir: -Math.PI / 2, tdir: -Math.PI / 2 });
+      CELL.door = CELL.doorT = 1;
+      const dx = CELL_X[2] + 2.5;
+      you.route = [
+        [dx + 0.3, Z0 + 4.3],
+        [dx, Z0 + 3.4],
+        [CELL_YOU, Z0 + 1.6],
+      ];
+      CELL.route = [[dx + 1.05, Z0 + 4.35]];
+      cellPhase('walk');
+      cam.tx = CELL.cam.x;
+      cam.tz = CELL.cam.z;
+      cam.zoom = CELL.cam.zoom;
+    }
+    return;
+  }
+  if (CELL.phase === 'walk') {
+    if (t < 0.5) CELL.fade = Math.max(0, 1 - t / 0.4);
+    if (you.route) {
+      if (cellRoute(you, you.route, 1.25, dt)) you.route = null;
+    } else if (you.pose !== 'sit') {
+      // in: turn round, and down onto the bench
+      you.tdir = 0;
+      if (Math.abs(angDiff(you.dir, 0)) < 0.3) Object.assign(you, { pose: 'sit', seatY: 0.46, sitT: 0 });
+    } else {
+      you.sitT += dt;
+      you.z += (CELL_N + 0.3 - you.z) * Math.min(1, dt * 4);
+    }
+    if (CELL.route) {
+      if (cellRoute(cop, CELL.route, 1.15, dt)) CELL.route = null;
+    } else if (!CELL.clang) {
+      cop.tdir = Math.PI;
+      if (you.z < Z0 + 2.6) CELL.doorT = 0; // you're in: he slides it shut
+      if (CELL.doorT === 0 && CELL.door < 0.06) {
+        CELL.clang = true;
+        audio.hx('knock', 0, 0.9);
+        CELL.route = [
+          [CELL_X[2] + 4.5, Z0 + 4.0],
+          [23.6, Z0 + 4.0],
+          [23.6, Z0 + 4.32],
+        ];
+      }
+    } else if (cop.pose !== 'sit') {
+      cop.tdir = 0;
+      if (Math.abs(angDiff(cop.dir, 0)) < 0.3) Object.assign(cop, { pose: 'sit', seatY: 0.5 });
+    }
+    if (you.pose === 'sit' && you.sitT > 1.2 && CELL.clang) cellPhase('held');
+    return;
+  }
+  // ── the hours
+  if (!CELL.leave) CELL.fade = Math.max(0, CELL.fade - dt * 2);
+  cellMood(dt);
+  const h = hourF(),
+    night = h >= 23.5 || h < 5.5;
+  // late, you lie down on the bench; at first light you sit up again
+  if (night && you.pose === 'sit')
+    Object.assign(you, { pose: 'lie', x: CELL_X[2] + 2.5, z: CELL_N + 0.25, y: -0.12, tdir: Math.PI / 2 });
+  else if (!night && you.pose === 'lie')
+    Object.assign(you, { pose: 'sit', x: CELL_YOU, z: CELL_N + 0.3, y: 0, tdir: 0, dir: 0 });
+  // the officer: at his desk, and now and then a walk down past the bars and back
+  if (CELL.route) {
+    if (cellRoute(cop, CELL.route, 1.05, dt)) {
+      if (cop.z > Z0 + 4.2) {
+        cop.tdir = 0;
+        cop.pose = 'sit';
+        cop.seatY = 0.5;
+        CELL.route = null;
+      } else CELL.route = null;
+    }
+  } else if (cop.pose === 'stand' && cop.z < Z0 + 4.2) {
+    // stopped at your bars: a look in, then back
+    cop.tdir = Math.PI;
+    cop.lookT = (cop.lookT || 0) + dt;
+    if (cop.lookT > 2.2)
+      CELL.route = [
+        [23.6, Z0 + 4.0],
+        [23.6, Z0 + 4.32],
+      ];
+  } else if (CELL.t > CELL.patrolAt) {
+    CELL.patrolAt = CELL.t + rand(9, 20);
+    cop.pose = 'stand';
+    cop.lookT = 0;
+    CELL.route = [
+      [23.6, Z0 + 4.0],
+      [chance(0.5) ? CELL_X[1] + 2.5 : CELL_X[2] + 2.2, Z0 + 4.0],
+    ];
   }
 }
+// where your eyes go while you wait: mostly the floor
+function cellMood(dt) {
+  CELL.moodT -= dt;
+  if (CELL.moodT <= 0) {
+    CELL.mood = CELL.mood ? 0 : 1 + Math.floor(Math.random() * 3);
+    CELL.moodT = CELL.mood ? rand(1.6, 3.2) : rand(2.5, 6);
+  }
+  for (let k = 0; k < 4; k++)
+    CELL.moodK[k] += ((k === CELL.mood ? 1 : 0) - CELL.moodK[k]) * Math.min(1, dt * (k === 2 ? 1.2 : 1.8));
+}
+// the light the window lets in: a patch of it sliding over the floor as the sun goes over, and the sky in the glass
+function cellLights() {
+  const day = cellSky(),
+    sun = clamp((hourF() - 6) / 14, 0, 1),
+    k = (0.15 + 0.85 * day) * (1 - CELL.fade);
+  if (k > 0.02) {
+    for (let c = 0; c < 3; c++) CELL_SUN[c] = CELL_SKY[c] * 0.9 * k;
+    hxLight(
+      CELL_X[2] + 2.5 + lerp(1.3, -1.3, sun),
+      0.25,
+      STATION_Z0 + lerp(1.7, 2.3, Math.abs(sun - 0.5) * 2),
+      1.5,
+      CELL_SUN,
+    );
+  }
+}
+// the light outside the window, by the hour: blue night, a warm low sun, flat grey day. Into CELL_SKY (0…1); returns
+// how much day there is
+const CELL_NIGHT = [30, 42, 74],
+  CELL_NOON = [178, 192, 200],
+  CELL_GOLD = [222, 146, 92];
+function cellSky() {
+  const hh = hourF(),
+    day = Math.min(clamp((hh - 5.2) / 2, 0, 1), 1 - clamp((hh - 18.6) / 2, 0, 1)),
+    warm = clamp(Math.max(1 - Math.abs(hh - 6.6) / 1.4, 1 - Math.abs(hh - 19.4) / 1.4), 0, 1);
+  for (let i = 0; i < 3; i++)
+    CELL_SKY[i] = lerp(lerp(CELL_NIGHT[i], CELL_NOON[i], day), CELL_GOLD[i], warm * 0.8) / 255;
+  return day;
+}
+function cellHand(ang, len, wd) {
+  const c = CELL_CLOCK;
+  partR(
+    CELL_ID,
+    c[0] + Math.sin(ang) * len * 0.4,
+    c[1] + Math.cos(ang) * len * 0.4,
+    c[2] + 0.064,
+    0,
+    0,
+    -ang,
+    wd,
+    len,
+    0.006,
+    'box',
+    CELL_HAND,
+  );
+}
+// in the world pass: the people, your door, the tubes, the sky in the windows, the clock's hands, the booking board
+function cellDraw() {
+  if (!CELL.on) return;
+  gl.uniform1f(U.uVisMin, 0);
+  for (const a of CELL.actors) drawChar(a);
+  const doors = R.cellDoors;
+  if (doors) {
+    const m = doors[2];
+    CELL_DOOR_M[12] = CELL_X[2] + CELL_DOOR.at - CELL.door * CELL_DOOR.slide;
+    CELL_DOOR_M[14] = CELL_BARS_Z + 0.07;
+    m.model = CELL_DOOR_M;
+    drawMesh(doors[0]);
+    drawMesh(doors[1]);
+    drawMesh(m);
+  }
+  gl.uniform1f(U.uEmitMul, 1);
+  gl.uniform1f(U.uDyn, 1);
+  gl.uniform1i(U.uCut, 0);
+  drawHi = 0;
+  drawSpec = 0;
+  for (let i = 0; i < STATION_TUBES.length; i++) {
+    const tb = STATION_TUBES[i],
+      e = CELL_TUBE_E[i];
+    for (let c = 0; c < 3; c++) e[c] = tb.l.col[c] * tb.l.cur * 1.6;
+    part(CELL_ID, tb.x, tb.y + 0.025, tb.z, tb.len, 0.04, 0.04, 'box', CELL_TUBE, e);
+  }
+  const day = cellSky();
+  for (let c = 0; c < 3; c++) CELL_SKY_E[c] = CELL_SKY[c] * (0.3 + 0.3 * day);
+  for (const x0 of CELL_X)
+    part(CELL_ID, x0 + 2.5, 1.54, STATION_Z0 + 0.54, 0.94, 1.2, 0.01, 'box', CELL_SKY, CELL_SKY_E);
+  // the hands, going round
+  const tm = tod();
+  cellHand(((tm % 720) / 720) * TAU, 0.11, 0.018);
+  cellHand(((tm % 60) / 60) * TAU, 0.15, 0.011);
+  // the board you hold for the photo
+  const y = CELL.you;
+  if (y && y.board) {
+    const fx = Math.sin(y.dir),
+      fz = Math.cos(y.dir),
+      bx = y.x + fx * 0.27,
+      bz = y.z + fz * 0.27;
+    partR(CELL_ID, bx, 1.08, bz, 0, y.dir, 0, 0.44, 0.22, 0.02, 'box', CELL_BOARD);
+    for (let r = 0; r < 3; r++)
+      partR(
+        CELL_ID,
+        bx + fx * 0.012,
+        1.14 - r * 0.055,
+        bz + fz * 0.012,
+        0,
+        y.dir,
+        0,
+        0.34 - r * 0.07,
+        0.022,
+        0.004,
+        'box',
+        CELL_CHALK,
+        CELL_CHALK_E,
+      );
+  }
+}
+
 // alone with you at night, at awareness 70+: one of THEM comes to eat you
 function ambushTick() {
   const P = PLAYER,
@@ -20213,6 +20571,14 @@ function talkAct(n, kind) {
       if (G.inv.foilOn && chance(0.5)) ui.bubble(n, 'question', 'speech', 2);
     },
     onTick: (c, a, dt) => {
+      // halfway along the bar they come out with it, and the line stays up, with no faces over it, while you're still there
+      if (K.mid && !a.said && a.t >= K.dur / 2) {
+        a.said = true;
+        ui.unbubble(c);
+        ui.unbubble(n);
+        K.res(n, a.win, a);
+      }
+      if (a.said) return ui.holdSay(n);
       a.bt = (a.bt || 0) + dt;
       if (a.bt > 1.7) {
         a.bt = 0;
@@ -20226,7 +20592,7 @@ function talkAct(n, kind) {
       }
     },
     onEnd: (c, a, ok) => {
-      if (ok) K.res(n, a.win, a);
+      if (ok && !a.said) K.res(n, a.win, a);
     },
   });
 }
@@ -23844,15 +24210,17 @@ function fbiTake(n) {
     }, 4500);
   }
 }
+// mid: what they say comes halfway through the talk, not at the end (talkAct)
 const SOC = {
-  chat: { label: 'Chat', icon: 'chat', dur: 10, fx: {}, res: (n, w) => resolveChat(n, w) },
-  gossip: { label: 'Gossip', icon: 'ear', dur: 9, fx: {}, res: (n) => resolveGossip(n) },
-  press: { label: 'Press', icon: 'ear', dur: 6, fx: { stress: 3 }, res: (n) => resolvePress(n) },
+  chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
+  gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
+  press: { label: 'Press', icon: 'ear', dur: 6, mid: true, fx: { stress: 3 }, res: (n) => resolvePress(n) },
   come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
     icon: 'ear',
     dur: 15,
+    mid: true,
     fx: { stress: 10 },
     res: (n) => {
       G.lennyToday++;
@@ -23875,6 +24243,7 @@ const SOC = {
     label: 'Hello',
     icon: 'wave',
     dur: 2,
+    mid: true,
     fx: {},
     res: (n) => {
       const ev = G.events.filter((e) => G.t - e.t < 1440 && ECHO[e.k] && flav(ECHO[e.k].heard));
@@ -26371,6 +26740,18 @@ const ui = {
     el.innerHTML = c.isPlayer ? artIcon(icon) : svgIcon(icon);
     $('#fx').appendChild(el);
     UI.bubbles.push({ el, c, t: 0, life: secs || 2 });
+  },
+  unbubble(c) {
+    const b = UI.bubbles.find((bb) => bb.c === c);
+    if (b) {
+      b.el.remove();
+      UI.bubbles.splice(UI.bubbles.indexOf(b), 1);
+    }
+  },
+  // keep what they just said up: its clock stays at the start while this is called, then runs its full length
+  holdSay(c) {
+    const s = UI.says.find((ss) => ss.c === c);
+    if (s) s.t = Math.min(s.t, 0.4);
   },
   float(c, text, cls) {
     if (!c || !c.onMap) return;
@@ -34699,6 +35080,7 @@ const CAP = {
 };
 const CAP_ESCAPE = 1 / 3; // the odds of coming round alone, with a way out
 function camBounds() {
+  if (CELL.on) return [STATION.x0 - 2, STATION.z0 - 2, STATION.x1 + 3, STATION.z1 + 3];
   const L = CAP.on && CAP.lair && CAP.lit === CAP.lair ? LAIRS[CAP.lair] : null;
   return L ? [L.x0 - 2, L.z0 - 2, L.x1 + 3, L.z1 + 3] : [-2, -2, W + 2, TOWN_H + 2];
 }
@@ -34854,6 +35236,12 @@ function capSkipShown(v) {
 
 // ── phantoms for the scenes: THEM as they are, people, and you, drawn from your own looks
 function capActor(kind, x, z, o = {}) {
+  const a = sceneActor(kind, x, z, o);
+  CAP.actors.push(a);
+  return a;
+}
+// one, not yet in any scene (the cells keep their own: town/cell.js)
+function sceneActor(kind, x, z, o = {}) {
   const fac = kind === 'grey' ? 'aliens' : kind === 'lizard' ? 'lizards' : kind === 'dead' ? 'zombies' : null;
   const a = Object.assign(
     {
@@ -34890,7 +35278,6 @@ function capActor(kind, x, z, o = {}) {
   );
   if (fac && !o.look) a.look = null;
   a.tdir = a.dir;
-  CAP.actors.push(a);
   return a;
 }
 function capYou(x, z, o = {}) {
@@ -41829,7 +42216,7 @@ function hurrying() {
 }
 function simStep(dtReal, spdOver) {
   const spd =
-    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? SLEEP_SPEED : SPEEDS[hurrying() ? 2 : 1];
+    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? awaySpeed() : SPEEDS[hurrying() ? 2 : 1];
   if (spd > 0) SIM_SPD = spd;
   const dtg = dtReal * spd;
   if (dtg > 0) {
@@ -42012,8 +42399,9 @@ function worldStep(dtReal, preview) {
   const sl = SKY[0] * 0.3 + SKY[1] * 0.59 + SKY[2] * 0.11;
   FOG_COL = mix3([0.011, 0.013, 0.026], [0.038, 0.042, 0.054], clamp(sl / 0.6, 0, 1));
   lightT -= dtReal;
-  const ex = CAP.on && CAP.eye ? CAP.eye[0] : PLAYER.x,
-    ez = CAP.on && CAP.eye ? CAP.eye[1] : PLAYER.z; // a scene sees from where its camera is
+  const eye = CAP.on && CAP.eye ? CAP.eye : CELL.on ? CELL.eye : null,
+    ex = eye ? eye[0] : PLAYER.x,
+    ez = eye ? eye[1] : PLAYER.z; // a scene sees from where its camera is
   const cell = I(Math.floor(ex), Math.floor(ez));
   if (lightT <= 0 || cell !== lastPlayerCell || DYN.length) {
     lightT = 0.08;
@@ -42103,6 +42491,11 @@ function frame(now) {
     } catch (e) {
       console.error(e);
     }
+    try {
+      cellFrame(dtReal); // the cells, while you're held: after the horror layer has cleared its lights for the frame
+    } catch (e) {
+      console.error(e);
+    }
     if (!preview)
       try {
         looseFrame(dtReal);
@@ -42115,11 +42508,6 @@ function frame(now) {
       if (!CAP.on) updateFocus(dtReal);
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
-    }
-    try {
-      cellFrame(dtReal);
-    } catch (e) {
-      console.error(e);
     }
   } catch (err) {
     console.error(err);

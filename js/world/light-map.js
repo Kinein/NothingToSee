@@ -1,5 +1,5 @@
 //@ world/light-map — Line of sight helpers and the per-cell light map
-//@ Defines: doorClosed, blocksSight, blocksLight, fov, losClear, LIGHTS, DYN, addLight, LAIR_LAMPS, WINDOWS, SKY, lightOn, STY, ST_RED, ST_AMBER, ST_TEAL, …
+//@ Defines: doorClosed, blocksSight, blocksLight, fov, losClear, LIGHTS, DYN, addLight, LAIR_LAMPS, STATION_TUBES, WINDOWS, SKY, lightOn, STY, ST_RED, ST_AMBER, …
 //@ Uses:    world/grid, core/util, world/objects, sim/core, gfx/world-geometry
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────── sight, light and paths ─────────────────────
@@ -188,6 +188,25 @@ const LAIR_LAMPS = []; // { k, x, z, y, col, size, cone } for the glow and the s
     [17, 14],
   ])
     A('den', lx, lz, 0x5affc8, 0.42, 3.0, { glow: 1, y: 0.25, size: 0.2, fungus: 1, spec: 0.5 });
+})();
+
+// the cells light themselves only while you're held (lightGroupOn: 'station'): a caged tube over each window, the one
+// in your cell given to stuttering, the one next door worse, the empty cell's dead; two lights down the corridor, hard white over the height
+// chart, and the desk lamp
+const STATION_TUBES = []; // { l, x, z, y, len } the tubes town/cell.js draws lit, each by its own light
+(function stationLights() {
+  const A = (lx, lz, col, int, r, o = {}) => {
+    const [x, z] = SZ(lx, lz),
+      l = addLight(x, z, col, int, r, Object.assign({ grp: 'station' }, o));
+    if (lz === 1) STATION_TUBES.push({ l, x: x + 0.5, z: STATION_Z0 + 0.72, y: 2.42, len: 0.95 }); // on the back wall
+    return l;
+  };
+  A(9, 1, 0xc8e4d8, 0.6, 4.2, { flick: 0.45 });
+  A(15, 1, 0xd2efe4, 0.85, 4.6, { flick: 0.3 });
+  A(5, 5, 0xdde8e2, 0.6, 6.5);
+  A(14, 5, 0xdde8e2, 0.55, 6.5, { flick: 0.2 });
+  A(21, 1, 0xf2eee2, 0.95, 5.5);
+  A(24, 5, 0xffc98a, 0.5, 2.8);
 })();
 
 const WINDOWS = [];

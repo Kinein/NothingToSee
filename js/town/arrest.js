@@ -205,6 +205,7 @@ function arrestInside() {
   ARREST.phase = null;
   ARREST.car = null;
   ARREST.off = null;
+  CELL.book = true;
   goAway('held', Math.max(ARREST.until, G.t + 60));
 }
 // let out: the same car, the other way, and you on the kerb

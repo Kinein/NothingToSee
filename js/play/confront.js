@@ -106,15 +106,17 @@ function fbiTake(n) {
     }, 4500);
   }
 }
+// mid: what they say comes halfway through the talk, not at the end (talkAct)
 const SOC = {
-  chat: { label: 'Chat', icon: 'chat', dur: 10, fx: {}, res: (n, w) => resolveChat(n, w) },
-  gossip: { label: 'Gossip', icon: 'ear', dur: 9, fx: {}, res: (n) => resolveGossip(n) },
-  press: { label: 'Press', icon: 'ear', dur: 6, fx: { stress: 3 }, res: (n) => resolvePress(n) },
+  chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
+  gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
+  press: { label: 'Press', icon: 'ear', dur: 6, mid: true, fx: { stress: 3 }, res: (n) => resolvePress(n) },
   come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
     icon: 'ear',
     dur: 15,
+    mid: true,
     fx: { stress: 10 },
     res: (n) => {
       G.lennyToday++;
@@ -137,6 +139,7 @@ const SOC = {
     label: 'Hello',
     icon: 'wave',
     dur: 2,
+    mid: true,
     fx: {},
     res: (n) => {
       const ev = G.events.filter((e) => G.t - e.t < 1440 && ECHO[e.k] && flav(ECHO[e.k].heard));

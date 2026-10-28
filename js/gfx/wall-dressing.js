@@ -581,7 +581,7 @@ function buildDecor() {
       x,
       z,
       (r) => {
-        if (!r) return [null];
+        if (!r || r.bld === 'station') return [null]; // the cells' windows have bars, not curtains (gfx/station.js)
         if (r.bld === 'office') return ['blinds'];
         if (r.bld === 'shop') return [r.key === 'shop' && z === 12 ? 'shop' : null];
         if (r.private && !r.house) return ['blinds']; // bathrooms

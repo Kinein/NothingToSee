@@ -1,6 +1,6 @@
 //@ sim/core — Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 //@ Defines: PLAN_MAX, DOW, DOW_LONG, CHARS, PLAYER, NPC, FOG_COL, SHADE, CAL0, MONTHS, shopOpen, officeLit, inRoomSet, NO_TINT, NEON_OFF, lightGroupOn, …
-//@ Uses:    core/util, world/grid, taken/taken
+//@ Uses:    core/util, world/grid, taken/taken, town/cell
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── simulation core ─────────────────────────
 const PLAN_MAX = 8;
@@ -41,6 +41,7 @@ const NO_TINT = [1, 1, 1],
 function lightGroupOn(grp) {
   if (grp.startsWith('house:')) return !!(G && G.houseLit && G.houseLit[grp.slice(6)]);
   if (grp.startsWith('lair:')) return CAP.lit === grp.slice(5);
+  if (grp === 'station') return CELL.on; // the cells, only while you're in them
   switch (grp) {
     case 'always':
       return true;

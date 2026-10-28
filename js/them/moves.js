@@ -168,7 +168,7 @@ function controlled(o, dur) {
       waitAct({ label: '…', dur: Math.min(dur, 15), anim: 'stare', interruptible: false }),
     ]);
   if (k === 'window') {
-    const w = pick(WINDOWS);
+    const w = pick(WINDOWS.filter((p) => p[1] < TOWN_H)); // a window up in the town, not one in the cells
     const t = nearestWalkable(w[0] + 0.5, w[1] + 0.5, o, 2);
     if (t)
       return enqueue(o, [
@@ -542,5 +542,6 @@ function arrest() {
   addStress(8);
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
+  CELL.book = true;
   goAway('held', heldUntil());
 }

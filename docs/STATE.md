@@ -24,7 +24,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `inv` | `{
       trap: 0,
       flashlight: false,
-   …` | — | gfx/portraits, sim/pose, player/needs, town/fleeing, combat/melee, town/talk, play/stashes, play/traps, … |
+   …` | — | gfx/portraits, sim/pose, player/needs, town/cell, town/fleeing, combat/melee, town/talk, play/stashes, … |
 | `slain` | `[]` | — | town/suspicion, them/true-form, play/confront, ui/hud, ui/case-board, game/state |
 | `stashes` | `[]` | them/true-form, play/stashes, play/confront | play/oddities, ui/menus, game/state |
 | `stashId` | `0` | play/stashes | play/oddities |
@@ -187,7 +187,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `rainFrom` | `19.5` | player/work | town/traffic-weather |
 | `rainTo` | `3` | player/work | town/traffic-weather |
 | `rainAmt` | `0.8` | player/work | town/traffic-weather |
-| `rainK` | `0` | town/traffic-weather, game/state | gfx/draw-helpers, gfx/frame, game/loop |
+| `rainK` | `0` | town/traffic-weather, game/state | gfx/draw-helpers, gfx/frame, town/cell, game/loop |
 | `wet` | `0` | town/traffic-weather, game/state | gfx/draw-helpers, gfx/frame |
 | `dayShown` | `0` | ui/interface, chase/they-come, chase/hunt | play/verbs |
 

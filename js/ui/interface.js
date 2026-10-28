@@ -283,6 +283,18 @@ const ui = {
     $('#fx').appendChild(el);
     UI.bubbles.push({ el, c, t: 0, life: secs || 2 });
   },
+  unbubble(c) {
+    const b = UI.bubbles.find((bb) => bb.c === c);
+    if (b) {
+      b.el.remove();
+      UI.bubbles.splice(UI.bubbles.indexOf(b), 1);
+    }
+  },
+  // keep what they just said up: its clock stays at the start while this is called, then runs its full length
+  holdSay(c) {
+    const s = UI.says.find((ss) => ss.c === c);
+    if (s) s.t = Math.min(s.t, 0.4);
+  },
   float(c, text, cls) {
     if (!c || !c.onMap) return;
     const el = document.createElement('div');

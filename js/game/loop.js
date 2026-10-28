@@ -1,6 +1,6 @@
 //@ game/loop — Per-frame simulation, main loop, boot
 //@ Defines: hurrying, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
-//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, taken/taken, game/state, core/util, horror/layer, world/grid, world/vision, …
+//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, game/state, taken/taken, core/util, horror/layer, world/grid, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── per-frame simulation
 let lightT = 0,
@@ -24,7 +24,7 @@ function hurrying() {
 }
 function simStep(dtReal, spdOver) {
   const spd =
-    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? SLEEP_SPEED : SPEEDS[hurrying() ? 2 : 1];
+    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? awaySpeed() : SPEEDS[hurrying() ? 2 : 1];
   if (spd > 0) SIM_SPD = spd;
   const dtg = dtReal * spd;
   if (dtg > 0) {
@@ -207,8 +207,9 @@ function worldStep(dtReal, preview) {
   const sl = SKY[0] * 0.3 + SKY[1] * 0.59 + SKY[2] * 0.11;
   FOG_COL = mix3([0.011, 0.013, 0.026], [0.038, 0.042, 0.054], clamp(sl / 0.6, 0, 1));
   lightT -= dtReal;
-  const ex = CAP.on && CAP.eye ? CAP.eye[0] : PLAYER.x,
-    ez = CAP.on && CAP.eye ? CAP.eye[1] : PLAYER.z; // a scene sees from where its camera is
+  const eye = CAP.on && CAP.eye ? CAP.eye : CELL.on ? CELL.eye : null,
+    ex = eye ? eye[0] : PLAYER.x,
+    ez = eye ? eye[1] : PLAYER.z; // a scene sees from where its camera is
   const cell = I(Math.floor(ex), Math.floor(ez));
   if (lightT <= 0 || cell !== lastPlayerCell || DYN.length) {
     lightT = 0.08;
@@ -298,6 +299,11 @@ function frame(now) {
     } catch (e) {
       console.error(e);
     }
+    try {
+      cellFrame(dtReal); // the cells, while you're held: after the horror layer has cleared its lights for the frame
+    } catch (e) {
+      console.error(e);
+    }
     if (!preview)
       try {
         looseFrame(dtReal);
@@ -310,11 +316,6 @@ function frame(now) {
       if (!CAP.on) updateFocus(dtReal);
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
-    }
-    try {
-      cellFrame(dtReal);
-    } catch (e) {
-      console.error(e);
     }
   } catch (err) {
     console.error(err);

@@ -89,6 +89,11 @@ function renderFrame() {
     console.error(e);
   }
   try {
+    cellDraw();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     huntDraw();
   } catch (e) {
     console.error(e);
@@ -390,7 +395,7 @@ function composite() {
     gl.uniform1f(u.uSat, 0.8);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
-    if (u.uFade) gl.uniform1f(u.uFade, CAP.fx.fade);
+    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
     if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);

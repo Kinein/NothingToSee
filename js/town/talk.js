@@ -1,6 +1,6 @@
 //@ town/talk — Talk: what people say, and the talking action itself
 //@ Defines: sneakLine, Q_BLOCKS, quirkNext, soonK, gossip, sayTalk, quirkTalk, talkOfQ, trueTalk, lieTalk, mundaneTalk, selfLine, slipLine, chatLine, noteOnce, chatPick, …
-//@ Uses:    sim/core, core/util, data/lines, town/quirks, world/grid, town/npc-update, town/echoes, world/objects, gfx/renderer, ui/interface, …
+//@ Uses:    sim/core, core/util, data/lines, town/quirks, world/grid, town/npc-update, ui/interface, town/echoes, world/objects, gfx/renderer, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── talk: what people say. Short, human, and never the whole story.
 // a part of the day, the way people say it: never a clock time
@@ -655,6 +655,14 @@ function talkAct(n, kind) {
       if (G.inv.foilOn && chance(0.5)) ui.bubble(n, 'question', 'speech', 2);
     },
     onTick: (c, a, dt) => {
+      // halfway along the bar they come out with it, and the line stays up, with no faces over it, while you're still there
+      if (K.mid && !a.said && a.t >= K.dur / 2) {
+        a.said = true;
+        ui.unbubble(c);
+        ui.unbubble(n);
+        K.res(n, a.win, a);
+      }
+      if (a.said) return ui.holdSay(n);
       a.bt = (a.bt || 0) + dt;
       if (a.bt > 1.7) {
         a.bt = 0;
@@ -668,7 +676,7 @@ function talkAct(n, kind) {
       }
     },
     onEnd: (c, a, ok) => {
-      if (ok) K.res(n, a.win, a);
+      if (ok && !a.said) K.res(n, a.win, a);
     },
   });
 }

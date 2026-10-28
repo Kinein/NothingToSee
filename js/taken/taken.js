@@ -1,6 +1,6 @@
 //@ taken/taken — Being taken: the capture
 //@ Defines: CAP, CAP_ESCAPE, camBounds, capOnce, capUI, capLine, capSay, capTime, capTimeOff, capReason, capPrompt, capGoal, capPortrait, capSayAt, capBub, capSkipShown, …
-//@ Uses:    sim/core, gfx/renderer, core/util, ui/interface, horror/layer, world/grid, audio/sound, game/loop, world/vision, world/objects, …
+//@ Uses:    sim/core, gfx/renderer, core/util, world/grid, ui/interface, horror/layer, audio/sound, game/loop, world/vision, world/objects, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── taken ─────────────────────────
 // When THEY get you. First what you see coming (in your own bed, in THEIR part of town, on the ground after a fight);
@@ -43,6 +43,7 @@ const CAP = {
 };
 const CAP_ESCAPE = 1 / 3; // the odds of coming round alone, with a way out
 function camBounds() {
+  if (CELL.on) return [STATION.x0 - 2, STATION.z0 - 2, STATION.x1 + 3, STATION.z1 + 3];
   const L = CAP.on && CAP.lair && CAP.lit === CAP.lair ? LAIRS[CAP.lair] : null;
   return L ? [L.x0 - 2, L.z0 - 2, L.x1 + 3, L.z1 + 3] : [-2, -2, W + 2, TOWN_H + 2];
 }
@@ -198,6 +199,12 @@ function capSkipShown(v) {
 
 // ── phantoms for the scenes: THEM as they are, people, and you, drawn from your own looks
 function capActor(kind, x, z, o = {}) {
+  const a = sceneActor(kind, x, z, o);
+  CAP.actors.push(a);
+  return a;
+}
+// one, not yet in any scene (the cells keep their own: town/cell.js)
+function sceneActor(kind, x, z, o = {}) {
   const fac = kind === 'grey' ? 'aliens' : kind === 'lizard' ? 'lizards' : kind === 'dead' ? 'zombies' : null;
   const a = Object.assign(
     {
@@ -234,7 +241,6 @@ function capActor(kind, x, z, o = {}) {
   );
   if (fac && !o.look) a.look = null;
   a.tdir = a.dir;
-  CAP.actors.push(a);
   return a;
 }
 function capYou(x, z, o = {}) {

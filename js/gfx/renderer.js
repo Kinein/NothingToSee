@@ -120,6 +120,7 @@ function initRender(canvas) {
     m.light = LIGHTS.find((l) => l.x === o.x && l.z === o.z && l.grp === 'street');
   }
   lairRenderInit();
+  stationRenderInit();
   initParticles();
   R.ready = true;
 }

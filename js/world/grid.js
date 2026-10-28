@@ -1,5 +1,5 @@
 //@ world/grid — Town tile grid, houses, THEIR lairs under the town, buildings and rooms
-//@ Defines: TOWN_H, tset, fill, box, WALLISH, OUTDOOR, VOIDISH, HOUSE_DEFS, HOUSE_OF, HOUSE_DOOR, LAIR_Z0, LAIR_MAPS, LAIR_OF, LAIRS, LZ, BUILDINGS, …
+//@ Defines: TOWN_H, tset, fill, box, WALLISH, OUTDOOR, VOIDISH, HOUSE_DEFS, HOUSE_OF, HOUSE_DOOR, LAIR_Z0, LAIR_MAPS, LAIR_OF, LAIRS, STATION_Z0, STATION_MAP, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the town grid ─────────────────────────
@@ -7,7 +7,7 @@
 // small helpers so the layout reads like a floor plan.
 const W = 62,
   TOWN_H = 34,
-  H = 63;
+  H = 72; // the town, then THEIR places under it, then the police cells under those
 const tiles = new Array(W * H).fill(',');
 const I = (x, z) => z * W + x;
 const inb = (x, z) => x >= 0 && z >= 0 && x < W && z < H;
@@ -292,6 +292,28 @@ const LAIRS = {};
     };
   }
 })();
+// ───────────────────────── the police cells ─────────────────────────
+// Below THEIR places and sealed off the same way: nobody walks here. While you're held, the hours go by in here
+// (town/cell.js). Three barred cells along the back wall, each with a window high up; the corridor in front of them;
+// the booking corner at the end, with the height chart. The bars stand on the line between the cells and the corridor.
+// Legend: # wall · W window · c a cell's concrete · o the corridor's tiles.
+const STATION_Z0 = LAIR_Z0 + 28;
+const STATION_MAP = [
+  '###W#####W#####W##########',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#ccccc#ccccc#ccccc#oooooo#',
+  '#oooooooooooooooooooooooo#',
+  '#oooooooooooooooooooooooo#',
+  '#oooooooooooooooooooooooo#',
+  '##########################',
+];
+STATION_MAP.forEach((row, lz) => {
+  for (let lx = 0; lx < row.length; lx++) tset(lx, STATION_Z0 + lz, row[lx]);
+});
+const SZ = (lx, lz) => [lx, STATION_Z0 + lz];
+const STATION = { x0: 0, z0: STATION_Z0, x1: STATION_MAP[0].length - 1, z1: STATION_Z0 + STATION_MAP.length - 1 };
+
 const lairAt = (x, z) => {
   if (z < LAIR_Z0) return null;
   for (const k in LAIRS) {
@@ -421,6 +443,7 @@ ROOM_DEFS.push(
     mat: 'sewer',
   },
   { key: 'lxDen', name: 'The nest', at: LZ('den', 10, 19), wall: 0x56432f, bld: 'lair', lair: 'den', mat: 'flesh' },
+  { key: 'station', name: 'The cells', at: SZ(9, 5), wall: 0x5d6862, bld: 'station', mat: 'brick' },
 );
 
 const roomOf = new Int16Array(W * H).fill(-1);

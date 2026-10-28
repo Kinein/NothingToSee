@@ -68,7 +68,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | What an NPC decides each frame | `js/town/npc-update.js` (`npcUpdate`, `npcThink`) |
 | Suspicion, panic, fleeing | `js/town/suspicion.js`, `js/town/fleeing.js` |
 | Talking and gossip | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
-| Police, arrest, the cell | `js/town/arrest.js`, `js/town/cell.js` |
+| Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
 | Tells, THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
 | Evidence: four frames per suspect, clear/fuzzy/grey/dashed cards | `js/them/proofs.js` (`addProof`, `cardIn`, `frameState`, `greyFrame`) |
