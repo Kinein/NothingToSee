@@ -401,6 +401,21 @@ function policeTick() {
     goAct(edge, { label: 'Leaving' }),
   ]);
 }
+// the officer saw it himself (a fight, a door kicked in): no call needed, he comes for you from where he stands. A
+// telling-off the first time, as ever.
+function policeSaw(off) {
+  const P = PLAYER;
+  if (!off.onMap || ARREST.on || G.loose || G.away || !P.onMap || off.queue.some((a) => a.chase === P)) return;
+  G.policeAt = 0;
+  const edge = EDGES[off.x < W / 2 ? 'W' : 'E'][off.z < 15.5 ? 0 : 1],
+    warn = !G.policeWarned;
+  hardReset(off);
+  off.spd = warn ? 1 : POLICE.start;
+  enqueue(off, [
+    policeChase(edge, warn, { t0: G.t, seen: false, blowAt: 0, slips: 0 }),
+    goAct(edge, { label: 'Leaving' }),
+  ]);
+}
 // running you down. `st` lasts the whole visit, through every grab you slip: the pace, the whistle, the count.
 function policeChase(edge, warn, st) {
   const P = PLAYER;

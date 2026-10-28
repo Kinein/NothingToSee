@@ -43,7 +43,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `whisperCd` | `30` | horror/visions | — |
 | `clinicDay` | `0` | combat/melee | — |
 | `lore` | `{}` | — | — |
-| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, town/suspicion, them/true-form, combat/melee, town/talk, play/photos, game/state |
+| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, town/suspicion, them/true-form, town/talk, play/photos, game/state |
 | `cover` | `{}` | town/quirks | town/talk, game/state |
 | `prints` | `[]` | — | play/photos |
 | `printId` | `0` | — | play/photos |
@@ -56,7 +56,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `overtimeDay` | `0` | them/moves | — |
 | `overtimeToday` | `false` | player/work, them/moves | — |
 | `filesAt` | `0` | them/moves | — |
-| `policeAt` | `0` | them/moves, town/doors, play/raids, game/state | — |
+| `policeAt` | `0` | them/moves, combat/brawl, town/doors, play/raids, game/state | — |
 | `policeWarned` | `false` | them/moves | — |
 | `ambushNight` | `0` | town/cell | — |
 | `health` | `100` | player/needs, combat/hits, combat/throws, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
@@ -94,7 +94,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sickNext` | `false` | player/work, them/moves, combat/hits, combat/throws, taken/back-up | — |
 | `shakenUntil` | `0` | them/true-form, combat/hits, game/last-day | sim/movement, play/photos, input/walking |
 | `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, … |
-| `assaulted` | `[]` | — | combat/melee, play/traps |
+| `assaulted` | `[]` | — | play/traps |
 | `fights` | `0` | combat/melee | — |
 | `events` | `[]` | — | town/talk, town/echoes, play/confront, play/arena |
 | `heard` | `[]` | — | town/echoes, ui/case-board |

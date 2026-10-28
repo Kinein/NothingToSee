@@ -124,6 +124,7 @@ const COP_WARN = {
 const COP_CHASE = ['Stop! Police!', 'Don’t make this worse!', 'You can’t run forever!', 'Stop right there!', 'I warned you!'];
 const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re coming with me.', 'Enough running. Turn round.'];
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
+const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
 const ARENA_END = {
@@ -198,3 +199,8 @@ const ENDINGS = {
     zombies: ['It’s done.', 'Everyone came in on Monday. Nobody wanted lunch.'],
   },
 };
+// a fight in the street (combat/brawl): onlookers egging it on, backing off, calling it in
+const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];
+const BRAWL_SCARED = ['Somebody stop them!', 'Oh God. Oh God.', 'Not again. Not here.'];
+const BRAWL_CALL = ['That’s it, I’m calling the police!', 'Police? Yes. There’s a fight.', 'Police! I need the police!', 'I’m phoning the police. Right now.'];
+const BRAWL_HELP = ['Somebody help!', 'Get OFF me!', 'Are you insane?'];

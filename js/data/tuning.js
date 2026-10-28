@@ -91,6 +91,17 @@ const MELEE = {
   punchReach: 0.8,              // …its patch, centred three quarters of a tile in front of them
   punchTries: 3,                // a missed punch, they come again, this many times in all
 };
+// hitting people (combat/brawl). Anyone can be hit. The count is per person, per fight: a fight is over once nobody's
+// hit them for `forget` game minutes. A scuffle most people let go (each onlooker calls the police `callSoft` of the
+// time); `hard` blows landed and someone calls them (the victim, unless they're brave or one of THEM; else an
+// onlooker). `ko` blows and they're out cold for `koMins`. One of THEM keeps its face unless you're alone with it or
+// it knows you've got it pinned, and even then only `shed` of the time (`shedBoth` when it's both).
+const BRAWL = {
+  hard: 3, ko: 6, forget: 30, koMins: [90, 160],
+  callSoft: 0.1, copIn: [8, 18],
+  strangerFight: 0.3,           // a stranger you hit swings back this often (townspeople: by temper)
+  shed: 0.3, shedBoth: 0.6,
+};
 // what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
 // laser (in them/true-form). A throw lands where you stood when it left the hands.
 const RANGED = {
@@ -146,7 +157,7 @@ const EVIDENCE = {
   saved: 25,                    // liking from a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
-  hit: { day: 3, sus: 15, aware: 10 },
+  hit: { sus: 15, aware: 10 },
   // fights by situation (multipliers on MELEE.wind and HURT): alone with it, it's far worse
   fight: {
     privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWind: 0.85,

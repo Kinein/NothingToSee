@@ -56,6 +56,7 @@ them/true-form.js                # True form: the change, then hunt or flee
 combat/bolts.js                  # Projectiles THEY shoot
 combat/hits.js                   # Taking hits, knockouts, hospital, limbo
 combat/melee.js                  # Blows out in the street: THEIR telegraphed strikes, yours, people punching
+combat/brawl.js                  # Hitting people: the count, onlookers, the police call, out cold
 combat/throws.js                 # What THEY throw from further off: furniture, swarms; the red patches on the floor
 town/doors.js                    # Broken restroom lock, doors left ajar
 town/talk.js                     # Talk: what people say, and the talking action itself

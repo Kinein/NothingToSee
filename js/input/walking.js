@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
 //@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, settle, tryMove, …
-//@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, sim/actions, town/arrest, …
+//@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, core/util, sim/actions, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -413,15 +413,22 @@ function vaultFind(c, ux, uz) {
     d0 = d;
     break;
   }
-  if (!o || o.users.some((u) => u)) return null;
+  if (!o) return null;
   if ((o.w >= 2 * o.h && Math.abs(uz) < 0.5) || (o.h >= 2 * o.w && Math.abs(ux) < 0.5)) return null;
   for (let d = d0; d <= V.reach; d += 0.05) {
     const x = c.x + ux * d,
       z = c.z + uz * d;
     if (!airOK(x, z, r * 0.8)) return null;
     if (!standOK(x, z)) continue;
-    const e = d + 0.12; // a touch further when there's room, so you don't come down on its edge
-    return [o, standOK(c.x + ux * e, c.z + uz * e) ? e : d];
+    const e = d + 0.12, // a touch further when there's room, so you don't come down on its edge
+      len = standOK(c.x + ux * e, c.z + uz * e) ? e : d;
+    // someone sitting on it: over the empty end of a bench, never through them
+    for (const u of o.users) {
+      if (!u) continue;
+      const k = clamp((u.x - c.x) * ux + (u.z - c.z) * uz, 0, len);
+      if (Math.hypot(c.x + ux * k - u.x, c.z + uz * k - u.z) < 0.42) return null;
+    }
+    return [o, len];
   }
   return null;
 }

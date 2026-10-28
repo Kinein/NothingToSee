@@ -1,6 +1,6 @@
 //@ combat/melee — Blows out in the street: THEIR telegraphed strikes, yours, people punching
 //@ Defines: privateFight, teleSet, teleEnd, lungeChar, foeWind, foeCalm, foeMelee, foeStrike, punchAct, brawl, knockBack, fightOutcome, earshot, viewLine, perceptionTick, clinicCheck, …
-//@ Uses:    sim/core, data/tuning, ui/interface, town/suspicion, core/util, world/grid, input/camera, audio/sound, sim/actions, player/needs, …
+//@ Uses:    sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, player/needs, world/grid, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── blows, out in the street. Nothing stops for a fight: Space swings, and your feet do the dodging.
 // THEIR blow is shown before it comes: a red patch on the ground where it will land, darkening as it winds up. Be out of
@@ -228,9 +228,12 @@ function knockBack(c, from, dist) {
 function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, true);
+  if (n.def.officer && !n.trueForm && !G.loose) {
+    ui.say(n, pick(COP_HIT), 2.6);
+    return arrestStart(n); // no warning for that
+  }
   addStress(2);
   G.fights = (G.fights || 0) + 1;
-  const ear = earshot(n).filter((w) => w !== n && !w.isThem);
   const tf = n.trueForm;
   if (tf) {
     const open = !!(tf.atk && tf.atk.open); // caught standing there after it hit air
@@ -279,50 +282,7 @@ function fightOutcome(n) {
     }
     return;
   }
-  if (ear.length) protectAfter(n);
-  echo('fight', { x: n.x, z: n.z, who: n.id });
-  if (n.isThem) {
-    // a hit is a test. At night, alone with you, or late in THEIR week, it drops the mask and fights you for real.
-    const H = EVIDENCE.hit;
-    if (darkNow() || !ear.length || theirDay() >= H.day) {
-      n.cfOk = G.t;
-      if (trueForm(n, 'hit', 'attack')) {
-        privateFight(n);
-        return;
-      }
-    }
-    // by day, with people about, early on: it plays the victim
-    for (const w of ear) addSus(w, H.sus);
-    ui.say(n, pick(['Somebody help!', 'Get OFF me!', 'Are you insane?']), 2.2);
-    if (ear.some((w) => !w.def.stranger || w.def.officer)) caution(n, 'assault');
-    bookAware(EVIDENCE.aware.hitNoChange);
-    flee(n);
-    return;
-  }
-  // a normal person: it was an assault
-  for (const w of ear) addSus(w, 25);
-  addSus(n, 40);
-  n.rel -= 25;
-  caution(n, 'assault');
-  if (G.assaulted.length >= 3) return;
-  hardReset(n);
-  n.fleeing = null;
-  knockBack(n, PLAYER, 0.6);
-  if ((G.traits[n.id] || {}).temper === 'aggressive') return hitBack(n); // they hit back
-  enqueue(
-    n,
-    waitAct({
-      label: 'Down',
-      dur: 2,
-      anim: 'stare',
-      interruptible: false,
-      onStart: (c) => (c.pose = 'floorlie'),
-      onEnd: (c) => {
-        c.pose = 'stand';
-        if (!G.over) flee(c);
-      },
-    }),
-  );
+  struck(n); // anyone else (combat/brawl)
 }
 // people in earshot of you: the same room, or within 6 tiles
 function earshot(except) {

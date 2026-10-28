@@ -562,6 +562,12 @@ function menuForChar(n) {
       );
     return { title: n.name, sub: moodWord(), img: getPortrait(n), ops };
   }
+  if (n.ko)
+    return {
+      title: n.def.stranger ? 'Stranger' : n.name,
+      icon: 'sick',
+      ops: [opt('Out cold', 'sick', null, 'Not now')],
+    };
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length

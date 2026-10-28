@@ -833,7 +833,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.6 · updated Oct 28, 2026</p>
+  <p id="version">v1.7 · updated Oct 28, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1237,6 +1237,17 @@ const MELEE = {
   punchReach: 0.8,              // …its patch, centred three quarters of a tile in front of them
   punchTries: 3,                // a missed punch, they come again, this many times in all
 };
+// hitting people (combat/brawl). Anyone can be hit. The count is per person, per fight: a fight is over once nobody's
+// hit them for `forget` game minutes. A scuffle most people let go (each onlooker calls the police `callSoft` of the
+// time); `hard` blows landed and someone calls them (the victim, unless they're brave or one of THEM; else an
+// onlooker). `ko` blows and they're out cold for `koMins`. One of THEM keeps its face unless you're alone with it or
+// it knows you've got it pinned, and even then only `shed` of the time (`shedBoth` when it's both).
+const BRAWL = {
+  hard: 3, ko: 6, forget: 30, koMins: [90, 160],
+  callSoft: 0.1, copIn: [8, 18],
+  strangerFight: 0.3,           // a stranger you hit swings back this often (townspeople: by temper)
+  shed: 0.3, shedBoth: 0.6,
+};
 // what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
 // laser (in them/true-form). A throw lands where you stood when it left the hands.
 const RANGED = {
@@ -1292,7 +1303,7 @@ const EVIDENCE = {
   saved: 25,                    // liking from a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
-  hit: { day: 3, sus: 15, aware: 10 },
+  hit: { sus: 15, aware: 10 },
   // fights by situation (multipliers on MELEE.wind and HURT): alone with it, it's far worse
   fight: {
     privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWind: 0.85,
@@ -1429,6 +1440,7 @@ const COP_WARN = {
 const COP_CHASE = ['Stop! Police!', 'Don’t make this worse!', 'You can’t run forever!', 'Stop right there!', 'I warned you!'];
 const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re coming with me.', 'Enough running. Turn round.'];
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
+const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
 const ARENA_END = {
@@ -1503,6 +1515,11 @@ const ENDINGS = {
     zombies: ['It’s done.', 'Everyone came in on Monday. Nobody wanted lunch.'],
   },
 };
+// a fight in the street (combat/brawl): onlookers egging it on, backing off, calling it in
+const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];
+const BRAWL_SCARED = ['Somebody stop them!', 'Oh God. Oh God.', 'Not again. Not here.'];
+const BRAWL_CALL = ['That’s it, I’m calling the police!', 'Police? Yes. There’s a fight.', 'Police! I need the police!', 'I’m phoning the police. Right now.'];
+const BRAWL_HELP = ['Somebody help!', 'Get OFF me!', 'Are you insane?'];
 // ───────────────────────── the town grid ─────────────────────────
 // One tile = one metre. x grows east, z grows south. Buildings are drawn with
 // small helpers so the layout reads like a floor plan.
@@ -2138,7 +2155,7 @@ const PLACE = [
   ['payphone', 32, 21, 3],
   ['parklamp', 32, 27, 0],
   ['parklamp', 41, 25, 0],
-  ['trashcan', 36, 25, 0],
+  ['trashcan', 37, 25, 0], // a step clear of the bench and Lenny's trolley: room to hop it
   ['fence4', 24, 19, 0],
   ['fence4', 28, 19, 0],
   ['fence4', 35, 19, 0],
@@ -16596,6 +16613,21 @@ function policeTick() {
     goAct(edge, { label: 'Leaving' }),
   ]);
 }
+// the officer saw it himself (a fight, a door kicked in): no call needed, he comes for you from where he stands. A
+// telling-off the first time, as ever.
+function policeSaw(off) {
+  const P = PLAYER;
+  if (!off.onMap || ARREST.on || G.loose || G.away || !P.onMap || off.queue.some((a) => a.chase === P)) return;
+  G.policeAt = 0;
+  const edge = EDGES[off.x < W / 2 ? 'W' : 'E'][off.z < 15.5 ? 0 : 1],
+    warn = !G.policeWarned;
+  hardReset(off);
+  off.spd = warn ? 1 : POLICE.start;
+  enqueue(off, [
+    policeChase(edge, warn, { t0: G.t, seen: false, blowAt: 0, slips: 0 }),
+    goAct(edge, { label: 'Leaving' }),
+  ]);
+}
 // running you down. `st` lasts the whole visit, through every grab you slip: the pace, the whistle, the count.
 function policeChase(edge, warn, st) {
   const P = PLAYER;
@@ -17718,7 +17750,7 @@ function chaseAct(tg, o) {
 }
 // your blow: one key, no panel. You swing at whoever you picked (or whoever's in front of you), and it lands on them if
 // they're still within reach when your arm comes round. Your legs stay free: swing on the move, step back out of the
-// answer. On a frightened person running away it's a grab: they give up.
+// answer. On a frightened person running away it's a grab: they give up (and the next one is a blow).
 function swingAct(n, wind) {
   return mkAct({
     kind: 'wait',
@@ -17751,27 +17783,29 @@ function swingAct(n, wind) {
       const reach = swingReach(),
         t = n && n.onMap && !n.slain && Math.hypot(n.x - c.x, n.z - c.z) <= reach ? n : swingTarget(c, a.dir, reach);
       if (!t) {
-        ui.float(c, 'Missed', '');
+        if (n) ui.float(c, 'Missed', ''); // swung at someone who got away; at the air, just the whoosh
         audio.hx('whoosh', 0, 0.35);
         return;
       }
-      if (t.fleeing && !t.isThem && !t.trueForm) return giveUp(t);
+      if (t.fleeing && !t.isThem && !t.trueForm && !(t.brawl && t.brawl.react === 'cower')) {
+        brawlOf(t).react = 'cower'; // caught: they give up, and stay down if you keep on
+        return giveUp(t);
+      }
       fightOutcome(t);
     },
   });
 }
 const swingReach = () => CTRL.melee + (G.inv.crowbar ? CTRL.crowbar : 0);
-// who Space swings at: anything out of its skin, anyone coming at you or running from you, one of THEIRS on Friday,
-// one of THEM everyone knows about. Never a bystander who happens to be standing in front of you, nor the police.
+// who Space swings at: anyone at all (combat/brawl has what that costs you), though not someone already out cold, a
+// true form still coming out of its skin, or the FBI.
 const swingable = (n) =>
-  !n.isPlayer &&
-  !n.surrendered &&
-  !n.def.officer &&
-  !n.def.fbi &&
-  (n.trueForm
-    ? n.tell && n.tell.t >= TF_CHANGE
-    : n.exposed || (G.loose && n.thrall) || (n.fleeing && !n.def.stranger) || hostileToYou(n));
-// the one a swing toward `dir` lands on: the nearest fair target in reach, in front of you (or right up against you)
+  !n.isPlayer && !n.surrendered && !n.ko && !n.def.fbi && (!n.trueForm || (n.tell && n.tell.t >= TF_CHANGE));
+// who a swing goes to first, when there's a choice: anything out of its skin, anyone coming at you or running from you,
+// one of THEIRS on Friday, one of THEM everyone knows about. A bystander only when there's nobody else there.
+const swingFirst = (n) =>
+  !!(n.trueForm || n.exposed || (G.loose && n.thrall) || (n.fleeing && !n.def.stranger) || hostileToYou(n));
+// the one a swing toward `dir` lands on: the nearest in reach, in front of you (or right up against you), and not on
+// the other side of a wall. Fair game counts a tile nearer.
 function swingTarget(c, dir, reach) {
   let best = null,
     bd = 1e9;
@@ -17779,10 +17813,12 @@ function swingTarget(c, dir, reach) {
     if (n === c || !n.onMap || n.slain || !swingable(n)) continue;
     const dx = n.x - c.x,
       dz = n.z - c.z,
-      d = Math.hypot(dx, dz);
-    if (d > reach || d >= bd) continue;
+      d = Math.hypot(dx, dz),
+      s = d - (swingFirst(n) ? 1 : 0);
+    if (d > reach || s >= bd) continue;
     if (d > CTRL.close && Math.abs(angDiff(dir, Math.atan2(dx, dz))) > CTRL.meleeArc * DEG) continue;
-    bd = d;
+    if (!losClear(Math.floor(c.x), Math.floor(c.z), Math.floor(n.x), Math.floor(n.z))) continue;
+    bd = s;
     best = n;
   }
   return best;
@@ -18774,9 +18810,12 @@ function knockBack(c, from, dist) {
 function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, true);
+  if (n.def.officer && !n.trueForm && !G.loose) {
+    ui.say(n, pick(COP_HIT), 2.6);
+    return arrestStart(n); // no warning for that
+  }
   addStress(2);
   G.fights = (G.fights || 0) + 1;
-  const ear = earshot(n).filter((w) => w !== n && !w.isThem);
   const tf = n.trueForm;
   if (tf) {
     const open = !!(tf.atk && tf.atk.open); // caught standing there after it hit air
@@ -18825,50 +18864,7 @@ function fightOutcome(n) {
     }
     return;
   }
-  if (ear.length) protectAfter(n);
-  echo('fight', { x: n.x, z: n.z, who: n.id });
-  if (n.isThem) {
-    // a hit is a test. At night, alone with you, or late in THEIR week, it drops the mask and fights you for real.
-    const H = EVIDENCE.hit;
-    if (darkNow() || !ear.length || theirDay() >= H.day) {
-      n.cfOk = G.t;
-      if (trueForm(n, 'hit', 'attack')) {
-        privateFight(n);
-        return;
-      }
-    }
-    // by day, with people about, early on: it plays the victim
-    for (const w of ear) addSus(w, H.sus);
-    ui.say(n, pick(['Somebody help!', 'Get OFF me!', 'Are you insane?']), 2.2);
-    if (ear.some((w) => !w.def.stranger || w.def.officer)) caution(n, 'assault');
-    bookAware(EVIDENCE.aware.hitNoChange);
-    flee(n);
-    return;
-  }
-  // a normal person: it was an assault
-  for (const w of ear) addSus(w, 25);
-  addSus(n, 40);
-  n.rel -= 25;
-  caution(n, 'assault');
-  if (G.assaulted.length >= 3) return;
-  hardReset(n);
-  n.fleeing = null;
-  knockBack(n, PLAYER, 0.6);
-  if ((G.traits[n.id] || {}).temper === 'aggressive') return hitBack(n); // they hit back
-  enqueue(
-    n,
-    waitAct({
-      label: 'Down',
-      dur: 2,
-      anim: 'stare',
-      interruptible: false,
-      onStart: (c) => (c.pose = 'floorlie'),
-      onEnd: (c) => {
-        c.pose = 'stand';
-        if (!G.over) flee(c);
-      },
-    }),
-  );
+  struck(n); // anyone else (combat/brawl)
 }
 // people in earshot of you: the same room, or within 6 tiles
 function earshot(except) {
@@ -18980,6 +18976,168 @@ function privateKill(n) {
   setTimeout(() => {
     if (!G.over) ui.note('eye', 'Nobody saw. THEY will want to know who did it.', 'bad');
   }, 2400);
+}
+// ───────────── hitting people. Anyone can be hit, and a scuffle most of the town lets go. Keep at it and it's a
+// beating: BRAWL.hard blows on the same person and somebody calls the police, BRAWL.ko and they're out cold.
+// Onlookers make up their own minds, once a fight: some egg you on, some back off, a few call it in anyway.
+// One of THEM in its own skin mostly keeps it on: it hits back or runs, and drops the face only when it's alone with
+// you or knows you've got it pinned.
+
+// your fight with n: a fresh one once nobody has hit them for a while. Not saved: a loaded game starts every count again.
+function brawlOf(n) {
+  if (!n.brawl || G.t - n.brawl.t > BRAWL.forget) n.brawl = { hits: 0, t: G.t, called: false, react: null, seen: {} };
+  return n.brawl;
+}
+// your swing landed on someone in their own skin (never a true form: fightOutcome deals with those)
+function struck(n) {
+  const F = brawlOf(n),
+    ear = earshot(n),
+    first = !F.hits;
+  F.hits++;
+  F.t = G.t;
+  gesture(n, 'flinch', 0.5);
+  audio.hx('thud', hxPan(n.x, n.z), 0.6);
+  ui.float(n, F.hits + '', '');
+  addSus(n, first ? 40 : 10);
+  n.rel -= first ? 25 : 8;
+  if (first || F.hits === BRAWL.hard) echo('fight', { x: n.x, z: n.z, who: n.id });
+  if (first && ear.length) protectAfter(n);
+  for (const w of ear) onlook(w, n, F);
+  if (F.hits >= BRAWL.ko) {
+    if (!F.called) policeFor(n, F, ear, true);
+    return knockCold(n);
+  }
+  if (n.isThem && (first || F.hits === BRAWL.hard) && themSheds(n, ear)) return;
+  victimReacts(n, F, first);
+  if (F.hits >= BRAWL.hard && !F.called) policeFor(n, F, ear);
+}
+// someone who saw it: the first blow they see, they decide what they make of it; after that it only adds up
+function onlook(w, n, F) {
+  if (F.seen[w.id]) return addSus(w, 3);
+  F.seen[w.id] = 1;
+  if (w.def.officer) return policeSaw(w);
+  if (w.def.fbi || w.surrendered || w.trueForm || w.fleeing) return;
+  const T = w.isThem ? 'them' : w.def.stranger || !temper(w) ? 'stranger' : temper(w);
+  const run = { timid: 0.6, stranger: 0.35, mocker: 0.15, aggressive: 0.05, them: 0.2 }[T],
+    cheer = { timid: 0.05, stranger: 0.3, mocker: 0.5, aggressive: 0.55, them: 0.15 }[T];
+  const r = Math.random();
+  if (r < run) {
+    addSus(w, 12);
+    ui.say(w, pick(BRAWL_SCARED), 2.2);
+    flee(w);
+  } else if (r < run + cheer) {
+    addSus(w, 5);
+    ui.say(w, pick(BRAWL_CHEER), 2.2);
+    ui.bubble(w, 'laugh', 'speech', 2);
+  } else {
+    addSus(w, 12);
+    ui.bubble(w, 'exclaim', 'speech', 1.8);
+  }
+  // nine in ten let a scuffle go
+  if (!F.called && F.hits < BRAWL.hard && chance(BRAWL.callSoft)) callPolice(w, n, F);
+}
+// it's gone hard: the victim calls it in, unless they're the brave sort or one of THEM; else whoever saw
+function policeFor(n, F, ear, out) {
+  if (!out && !n.isThem && !n.def.officer && temper(n) !== 'aggressive') return callPolice(n, n, F);
+  const by = ear.filter((w) => w !== n && !w.def.officer && !w.def.fbi && !w.trueForm && !w.surrendered);
+  if (by.length) callPolice(pick(by), n, F);
+}
+function callPolice(by, n, F) {
+  F.called = true;
+  ui.bubble(by, 'exclaim', 'speech', 2.5);
+  ui.say(by, pick(BRAWL_CALL), 3);
+  if (by !== n && !by.fleeing) {
+    hardReset(by);
+    enqueue(
+      by,
+      waitAct({
+        label: 'Calling the police',
+        dur: 4,
+        anim: 'phone',
+        interruptible: false,
+        onStart: (c) => (c.tdir = Math.atan2(c.x - PLAYER.x, c.z - PLAYER.z)), // turned away, a hand over the phone
+      }),
+    );
+  }
+  setTimeout(() => {
+    if (!G.over) ui.note('badge', (by.def.stranger ? 'Someone' : by.short) + ' called the police', 'bad');
+  }, 600);
+  if (!G.policeAt) G.policeAt = G.t + rand(BRAWL.copIn[0], BRAWL.copIn[1]);
+  caution(n, 'assault');
+}
+// what the one you hit does: the same as anyone, by temper. They pick once a fight and stick to it.
+function victimReacts(n, F, first) {
+  const a = n.queue[0];
+  if (F.react === 'fight' && a && (a.chase === PLAYER || a.anim === 'punch')) return knockBack(n, PLAYER, 0.4); // still at it
+  if (F.react === 'cower' && a && a.label === 'Cowering') {
+    knockBack(n, PLAYER, 0.3);
+    a.t = 0; // curled up tighter, and longer
+    return;
+  }
+  hardReset(n);
+  n.fleeing = null;
+  knockBack(n, PLAYER, 0.6);
+  if (!F.react) F.react = fightsBack(n) ? 'fight' : 'flee';
+  if (F.react === 'fight') return hitBack(n);
+  if (F.react === 'cower') return giveUp(n);
+  if (n.isThem && first) {
+    // it plays the victim, loudly, and runs somewhere it can be alone
+    for (const w of earshot(n)) if (!w.isThem) addSus(w, EVIDENCE.hit.sus);
+    bookAware(EVIDENCE.aware.hitNoChange);
+  }
+  ui.say(n, pick(BRAWL_HELP), 2.2);
+  flee(n);
+}
+function fightsBack(n) {
+  const T = temper(n);
+  if (T === 'aggressive') return chance(n.isThem ? 0.7 : 0.9);
+  if (T === 'mocker') return chance(0.4);
+  if (T === 'careful') return chance(0.2);
+  if (T === 'timid') return chance(0.05);
+  return chance(BRAWL.strangerFight);
+}
+// one of THEM, hit: the face comes off only alone with you or once it knows you've got it, and rarely even then.
+// Off, it fights you (the brave ones, mostly) or runs off in its true shape.
+function themSheds(n, ear) {
+  if (n.trueForm || n.slain) return false;
+  const alone = !ear.some((w) => w !== n && !w.isThem),
+    pin = pinned(n);
+  if (!n.exposed && !((alone || pin) && chance(alone && pin ? BRAWL.shedBoth : BRAWL.shed))) return false;
+  const fight = n.exposed || chance(temper(n) === 'aggressive' ? 0.75 : 0.4);
+  n.cfOk = G.t;
+  if (!trueForm(n, 'hit', fight ? 'attack' : 'flee')) return false;
+  if (fight) privateFight(n);
+  return true;
+}
+// six blows: on the ground and not getting up for a good while. Then up, and away from you.
+function knockCold(n) {
+  hardReset(n);
+  n.fleeing = null;
+  n.ko = true;
+  teleEnd(n);
+  knockBack(n, PLAYER, 0.5);
+  audio.hx('crack', hxPan(n.x, n.z), 0.8);
+  ui.float(n, 'Out cold', 'bad');
+  if (n.isThem) {
+    bookAware(EVIDENCE.aware.hitNoChange);
+    addDanger(n, 30);
+  }
+  enqueue(
+    n,
+    waitAct({
+      label: 'Out cold',
+      dur: rand(BRAWL.koMins[0], BRAWL.koMins[1]),
+      anim: 'stare',
+      interruptible: false,
+      onStart: (c) => (c.pose = 'floorlie'),
+      onEnd: (c) => {
+        c.pose = 'stand';
+        c.ko = false;
+        c.brawl = null;
+        if (!G.over && c.onMap) flee(c);
+      },
+    }),
+  );
 }
 // ───────────── what THEY do from a few strides off. A lizard tears up the nearest chair or bin, holds it overhead and
 // throws it at where you stood when it let go: a red ring shows where it comes down, so get out of the ring. The dead
@@ -22929,8 +23087,15 @@ function breakInAct(o) {
           continue;
         }
         ui.bubble(n, 'exclaim', 'speech', 2.5);
-        ui.say(n, pick(['That’s not your house!', 'Somebody call the police!', 'Stop!']), 2.6);
-        if (!n.def.stranger) addSus(n, 20);
+        if (n.def.officer) {
+          ui.say(n, pick(COP_CHASE), 2.6);
+          policeSaw(n);
+        } else if (n.def.stranger) {
+          ui.say(n, pick(['Hey!', 'Not my business.', 'Is that your house?']), 2.6); // passing through: they keep walking
+          continue;
+        } else ui.say(n, pick(['That’s not your house!', 'I’m calling the police!', 'Stop!']), 2.6);
+        addSus(n, 20);
+        // anyone who lives here calls it in, THEM included; never a passing stranger
         if (!a.reported) {
           a.reported = true;
           G.policeAt = G.policeAt || G.t + rand(10, 25);
@@ -25253,6 +25418,12 @@ function menuForChar(n) {
       );
     return { title: n.name, sub: moodWord(), img: getPortrait(n), ops };
   }
+  if (n.ko)
+    return {
+      title: n.def.stranger ? 'Stranger' : n.name,
+      icon: 'sick',
+      ops: [opt('Out cold', 'sick', null, 'Not now')],
+    };
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
@@ -28384,15 +28555,22 @@ function vaultFind(c, ux, uz) {
     d0 = d;
     break;
   }
-  if (!o || o.users.some((u) => u)) return null;
+  if (!o) return null;
   if ((o.w >= 2 * o.h && Math.abs(uz) < 0.5) || (o.h >= 2 * o.w && Math.abs(ux) < 0.5)) return null;
   for (let d = d0; d <= V.reach; d += 0.05) {
     const x = c.x + ux * d,
       z = c.z + uz * d;
     if (!airOK(x, z, r * 0.8)) return null;
     if (!standOK(x, z)) continue;
-    const e = d + 0.12; // a touch further when there's room, so you don't come down on its edge
-    return [o, standOK(c.x + ux * e, c.z + uz * e) ? e : d];
+    const e = d + 0.12, // a touch further when there's room, so you don't come down on its edge
+      len = standOK(c.x + ux * e, c.z + uz * e) ? e : d;
+    // someone sitting on it: over the empty end of a bench, never through them
+    for (const u of o.users) {
+      if (!u) continue;
+      const k = clamp((u.x - c.x) * ux + (u.z - c.z) * uz, 0, len);
+      if (Math.hypot(c.x + ux * k - u.x, c.z + uz * k - u.z) < 0.42) return null;
+    }
+    return [o, len];
   }
   return null;
 }

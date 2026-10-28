@@ -169,7 +169,7 @@ function chaseAct(tg, o) {
 }
 // your blow: one key, no panel. You swing at whoever you picked (or whoever's in front of you), and it lands on them if
 // they're still within reach when your arm comes round. Your legs stay free: swing on the move, step back out of the
-// answer. On a frightened person running away it's a grab: they give up.
+// answer. On a frightened person running away it's a grab: they give up (and the next one is a blow).
 function swingAct(n, wind) {
   return mkAct({
     kind: 'wait',
@@ -202,27 +202,29 @@ function swingAct(n, wind) {
       const reach = swingReach(),
         t = n && n.onMap && !n.slain && Math.hypot(n.x - c.x, n.z - c.z) <= reach ? n : swingTarget(c, a.dir, reach);
       if (!t) {
-        ui.float(c, 'Missed', '');
+        if (n) ui.float(c, 'Missed', ''); // swung at someone who got away; at the air, just the whoosh
         audio.hx('whoosh', 0, 0.35);
         return;
       }
-      if (t.fleeing && !t.isThem && !t.trueForm) return giveUp(t);
+      if (t.fleeing && !t.isThem && !t.trueForm && !(t.brawl && t.brawl.react === 'cower')) {
+        brawlOf(t).react = 'cower'; // caught: they give up, and stay down if you keep on
+        return giveUp(t);
+      }
       fightOutcome(t);
     },
   });
 }
 const swingReach = () => CTRL.melee + (G.inv.crowbar ? CTRL.crowbar : 0);
-// who Space swings at: anything out of its skin, anyone coming at you or running from you, one of THEIRS on Friday,
-// one of THEM everyone knows about. Never a bystander who happens to be standing in front of you, nor the police.
+// who Space swings at: anyone at all (combat/brawl has what that costs you), though not someone already out cold, a
+// true form still coming out of its skin, or the FBI.
 const swingable = (n) =>
-  !n.isPlayer &&
-  !n.surrendered &&
-  !n.def.officer &&
-  !n.def.fbi &&
-  (n.trueForm
-    ? n.tell && n.tell.t >= TF_CHANGE
-    : n.exposed || (G.loose && n.thrall) || (n.fleeing && !n.def.stranger) || hostileToYou(n));
-// the one a swing toward `dir` lands on: the nearest fair target in reach, in front of you (or right up against you)
+  !n.isPlayer && !n.surrendered && !n.ko && !n.def.fbi && (!n.trueForm || (n.tell && n.tell.t >= TF_CHANGE));
+// who a swing goes to first, when there's a choice: anything out of its skin, anyone coming at you or running from you,
+// one of THEIRS on Friday, one of THEM everyone knows about. A bystander only when there's nobody else there.
+const swingFirst = (n) =>
+  !!(n.trueForm || n.exposed || (G.loose && n.thrall) || (n.fleeing && !n.def.stranger) || hostileToYou(n));
+// the one a swing toward `dir` lands on: the nearest in reach, in front of you (or right up against you), and not on
+// the other side of a wall. Fair game counts a tile nearer.
 function swingTarget(c, dir, reach) {
   let best = null,
     bd = 1e9;
@@ -230,10 +232,12 @@ function swingTarget(c, dir, reach) {
     if (n === c || !n.onMap || n.slain || !swingable(n)) continue;
     const dx = n.x - c.x,
       dz = n.z - c.z,
-      d = Math.hypot(dx, dz);
-    if (d > reach || d >= bd) continue;
+      d = Math.hypot(dx, dz),
+      s = d - (swingFirst(n) ? 1 : 0);
+    if (d > reach || s >= bd) continue;
     if (d > CTRL.close && Math.abs(angDiff(dir, Math.atan2(dx, dz))) > CTRL.meleeArc * DEG) continue;
-    bd = d;
+    if (!losClear(Math.floor(c.x), Math.floor(c.z), Math.floor(n.x), Math.floor(n.z))) continue;
+    bd = s;
     best = n;
   }
   return best;

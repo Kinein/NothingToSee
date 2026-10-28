@@ -76,6 +76,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |
+| Hitting people: hit count, onlookers, police calls, knockouts | `js/combat/brawl.js` (`struck`, `onlook`, `callPolice`, `knockCold`); numbers in `BRAWL` |
 | Horror events and scenes | `js/horror/director.js` (daily plan), `layer.js` (machinery), `midday.js`, `night.js` |
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |

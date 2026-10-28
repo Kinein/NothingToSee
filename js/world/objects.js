@@ -189,7 +189,7 @@ const PLACE = [
   ['payphone', 32, 21, 3],
   ['parklamp', 32, 27, 0],
   ['parklamp', 41, 25, 0],
-  ['trashcan', 36, 25, 0],
+  ['trashcan', 37, 25, 0], // a step clear of the bench and Lenny's trolley: room to hop it
   ['fence4', 24, 19, 0],
   ['fence4', 28, 19, 0],
   ['fence4', 35, 19, 0],

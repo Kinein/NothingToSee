@@ -40,8 +40,15 @@ function breakInAct(o) {
           continue;
         }
         ui.bubble(n, 'exclaim', 'speech', 2.5);
-        ui.say(n, pick(['That’s not your house!', 'Somebody call the police!', 'Stop!']), 2.6);
-        if (!n.def.stranger) addSus(n, 20);
+        if (n.def.officer) {
+          ui.say(n, pick(COP_CHASE), 2.6);
+          policeSaw(n);
+        } else if (n.def.stranger) {
+          ui.say(n, pick(['Hey!', 'Not my business.', 'Is that your house?']), 2.6); // passing through: they keep walking
+          continue;
+        } else ui.say(n, pick(['That’s not your house!', 'I’m calling the police!', 'Stop!']), 2.6);
+        addSus(n, 20);
+        // anyone who lives here calls it in, THEM included; never a passing stranger
         if (!a.reported) {
           a.reported = true;
           G.policeAt = G.policeAt || G.t + rand(10, 25);
