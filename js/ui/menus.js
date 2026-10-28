@@ -1,6 +1,6 @@
 //@ ui/menus — Interaction menus for objects, people, items
-//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, relWord, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
-//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, player/needs, world/objects, town/cast, …
+//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, relWord, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
+//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, gfx/portraits, play/stashes, player/needs, world/objects, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
 function opt(label, icon, fn, dis) {
@@ -562,13 +562,28 @@ function menuForChar(n) {
       );
     return { title: n.name, sub: moodWord(), img: getPortrait(n), ops };
   }
+  // calling someone out: it needs ears. Alone with them, there's only the other way.
+  const cfOpt = () =>
+    earshot(n).length
+      ? opt(
+          'Confront',
+          'confront',
+          () => openConfront(n),
+          G.cfDay[n.id] === dayNo() ? 'Done today' : n.sus >= 85 ? 'Not listening' : null,
+        )
+      : opt('Attack', 'fist', () => playerMelee(n));
   if (tooShaken())
     return {
       title: n.trueForm ? '???' : n.def.stranger ? 'Stranger' : n.name,
       img: n.trueForm ? null : getPortrait(n),
       icon: 'nerve',
       sub: 'You can’t face anyone like this',
-      ops: [opt('Too shaken', 'nerve', null, 'Calm down')],
+      // you can't talk calmly, but you can still shout it at them
+      ops: [opt('Too shaken', 'nerve', null, 'Calm down')].concat(
+        !n.trueForm && !n.def.stranger && !n.exposed && !n.surrendered && n.id !== 'lenny' && earshot(n).length
+          ? [cfOpt()]
+          : [],
+      ),
     };
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   const hit = (label, icon) => opt(label, icon, () => playerMelee(n));
@@ -578,7 +593,10 @@ function menuForChar(n) {
     return {
       title: '???',
       icon: 'fist',
-      ops: [hit('Attack', 'fist')].map((o) => ((o.dis = n.tell.t < TF_CHANGE ? 'Changing' : null), o)),
+      ops: [hit('Attack', 'fist')]
+        .map((o) => ((o.dis = n.tell.t < TF_CHANGE ? 'Changing' : null), o))
+        // held in your trap: bring people to it, and call it out with the crowd already on your side
+        .concat(n.trueForm.mode === 'trapped' && earshot(n).length ? [cfOpt()] : []),
     };
   if (n.riteBy && G.enc && G.enc.vic.includes(n.id))
     return {
@@ -616,36 +634,21 @@ function menuForChar(n) {
       ops,
     };
   }
-  // slots stay put: A Chat · D Gossip · W Confront (Fight / Catch take its place) · S Watch
+  // slots stay put: A Chat · D Ask… (Gossip, Press, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch
   ops.push(opt('Chat', 'chat', T('chat')));
   if (n.id === 'lenny') {
     ops.push(opt('Theories', 'ear', T('lenny'), G.lennyToday >= 2 ? 'Talked out' : null));
     ops.push(opt('Give meal', 'gift', T('feed'), G.inv.meal > 0 ? null : 'No meal'));
   } else {
-    const st = PLAYER.needs.stress;
-    ops.push(
-      opt(
-        'Gossip',
-        'ear',
-        T('gossip'),
-        st >= 60
-          ? 'Too shaken'
-          : n.sus >= 60
-            ? 'Won’t gossip with you'
-            : n.gossipDay === dayNo() && (n.gossipN || 1) >= 2
-              ? 'Done today'
-              : null,
-      ),
-    );
+    ops.push(opt('Ask…', 'ear', () => openMenu(askMenu(n), UI.menuX, UI.menuY, { char: n })));
     if (n.fleeing) ops.push(hit('Catch', 'walk'));
-    else ops.push(opt('Confront', 'confront', () => openConfront(n), n.sus >= 85 ? 'Not listening' : null));
+    else ops.push(cfOpt());
     ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n)), n.watchDay === dayNo() ? 'Done today' : null));
   }
   return {
     title: n.name,
     rel: n.rel,
     sus: n.id === 'lenny' ? null : n.sus,
-    ev: n.evidence,
     img: getPortrait(n),
     sub: G.cleared[n.id]
       ? 'Cleared'
@@ -654,6 +657,39 @@ function menuForChar(n) {
           .map((q) => QUIRKS[q].short)
           .join(' · '),
     ops,
+  };
+}
+// the second ring: what you ask them. Gossip (what's going round), Press (what they know about THEM), Come with me.
+function askMenu(n) {
+  const T = (k) => () => enqueue(PLAYER, talkAct(n, k)),
+    st = PLAYER.needs.stress,
+    many = G.hintsUntil > G.t ? 3 : 2; // after a public win people tell you more
+  return {
+    title: n.name,
+    rel: n.rel,
+    sus: n.sus,
+    img: getPortrait(n),
+    ops: [
+      opt(
+        'Gossip',
+        'ear',
+        T('gossip'),
+        st >= 60
+          ? 'Too shaken'
+          : n.sus >= 60
+            ? 'Won’t gossip with you'
+            : n.gossipDay === dayNo() && (n.gossipN || 1) >= many
+              ? 'Done today'
+              : null,
+      ),
+      opt('Press', 'search', T('press'), st >= 60 ? 'Too shaken' : n.pressDay === dayNo() ? 'Done today' : null),
+      opt(
+        'Come with me',
+        'walk',
+        T('come'),
+        G.follower && G.follower.id === n.id ? 'With you' : n.rel < EVIDENCE.come.rel ? 'Not close enough' : null,
+      ),
+    ],
   };
 }
 function relWord(r) {
@@ -781,7 +817,7 @@ function menuForItem(it) {
   if (!ops.length) return null;
   return { title: name, icon: it.kind === 'puddle' ? 'mop' : it.kind === 'trap' ? 'trap' : 'bag', ops };
 }
-// bagged, it's out of THEIR hands and in yours: a medium proof, or bait for a trap. THEY hate seeing it on you.
+// bagged, it's out of THEIR hands and in yours: a Home card, or bait for a trap. THEY hate seeing it on you.
 function bagItem(it) {
   const home = itemHome(it),
     saw = itemSeenWith(it);
@@ -790,6 +826,8 @@ function bagItem(it) {
   if (it.by) {
     if (!G.factionKnown) revealFaction();
     takeProofItem({
+      frame: 'home',
+      q: home ? 'clear' : 'fuzzy',
       true: it.by,
       auto: home || saw,
       what: ITEM_NAMES[it.kind],
@@ -860,13 +898,13 @@ const ITEMS_INV = [
     k: 'bait',
     label: 'THEIR things · proof, or bait for your next trap',
     icon: 'bag',
-    has: () => G.proofs.some((p) => p.src === 'item'),
-    count: () => G.proofs.filter((p) => p.src === 'item').length,
+    has: () => G.proofs.some((p) => p.src === 'item' && !p.grey),
+    count: () => G.proofs.filter((p) => p.src === 'item' && !p.grey).length,
     use: () =>
       ui.note(
         'bag',
         G.proofs
-          .filter((p) => p.src === 'item')
+          .filter((p) => p.src === 'item' && !p.grey)
           .map((p) => p.what)
           .join(' · '),
         '',

@@ -46,6 +46,8 @@ const ICON_PATHS = {
   publish: 'M12 16V4M7 9l5-5 5 5M4 20h16',
   dots: 'M6 12h.01M12 12h.01M18 12h.01',
   clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  face: 'M12 21a8 9 0 1 0 0-18 8 9 0 0 0 0 18zM9 10.5h.01M15 10.5h.01M9 15.5c1.8 1.4 4.2 1.4 6 0',
+  mouth: 'M3 12c3.5-4.5 14.5-4.5 18 0-3.5 4.5-14.5 4.5-18 0zM3 12c5 1.2 13 1.2 18 0',
   walk: 'M13 4a1.6 1.6 0 1 0 0-.1M10 21l2-6 3 3v3M9 11l3-3 3 3 3 1M12 8l-1 6',
   paper: 'M5 4h14v16H5zM8 8h8M8 12h8M8 16h5',
   can: 'M8 4h8v16H8zM8 7.5h8M8 16.5h8',
@@ -191,27 +193,23 @@ const ui = {
       (o.strong ? ' strong' : '') +
       (o.gone ? ' gone' : '') +
       (o.cleared ? ' cleared' : '') +
+      (o.q ? ' ' + o.q : '') +
       (o.stamp === 'NOTHING' || o.stamp === 'BLURRED' ? ' nothing' : '') +
       (!o.char ? ' bare' : '');
     el.style.setProperty('--tilt', (Math.random() * 6 - 3).toFixed(1) + 'deg');
     el.innerHTML =
-      '<div class="pol"><img alt=""><span class="stamp"></span></div><div class="pc-meta"><b></b><span class="evb"><i class="was"></i><i class="now"></i></span></div>';
+      '<div class="pol"><img alt=""><span class="stamp"></span></div><div class="pc-meta"><b></b>' +
+      (o.frame ? '<span class="pc-fi">' + svgIcon(FRAME[o.frame].icon) + '</span>' : '') +
+      '</div>';
     el.querySelector('img').src = o.img || getPortrait(o.char);
     el.querySelector('.stamp').textContent = o.stamp || '';
     el.querySelector('b').textContent = o.title || o.char.short + (o.extra > 0 ? ' +' + o.extra : '');
-    el.querySelector('.was').style.width = clamp(o.before || 0, 0, 100) + '%';
-    el.querySelector('.now').style.width = clamp(o.before || 0, 0, 100) + '%';
     el.onclick = () => {
       el.remove();
       openBoard(o.char ? o.char.id : null);
     };
     box.prepend(el);
     while (box.children.length > 2) box.lastChild.remove();
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        el.querySelector('.now').style.width = clamp(o.after || 0, 0, 100) + '%';
-      }),
-    );
     setTimeout(() => {
       el.classList.add('out');
       setTimeout(() => el.remove(), 600);

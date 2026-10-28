@@ -69,7 +69,6 @@ function makeChar(def) {
     sus: 0,
     danger: 0,
     dangerPeak: 0,
-    evidence: 0,
     rumors: 0,
     notes: [],
     snaps: [],

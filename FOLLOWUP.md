@@ -54,6 +54,20 @@ straight away when start and goal are in different regions. Careful: `walkable` 
 - gfx/models.js (one `MODELS` table) and gfx/shaders.js (one shader string) are long but single things.
   Leave them unless you need to work inside.
 
+### 5. Evidence, confrontation and hunts: tuning and loose ends
+The four-frame evidence book, false cards, the confrontation arena and the fights-by-situation rules are in
+(numbers in `EVIDENCE`, js/data/tuning.js). Still to do:
+- **Playtest the numbers.** The spec's target win chances (private lizard/dead 35–45%, alien 45–55%, public with
+  crowd help 70–80%, trapped 85%+) and the "roughly how it plays" table for the arena have only been checked by
+  scripted runs, not by hand. Tune `EVIDENCE.move`, `EVIDENCE.start` and `EVIDENCE.fight` after real games.
+- **CLEARED needs two grey frames, not three.** An ordinary person has two truths to find (their daily secret on film,
+  and their oddity), so three was out of reach for most. If more ways to see a frame explained are added, raise
+  `EVIDENCE.clearedGrey` back to 3.
+- **Contact frames never go dashed.** Pressing someone who knows nothing just says so; there's no suspect to dash.
+- **Tails by day only report.** THEIR people follow you when you're hunted and book awareness; they don't block
+  doors or stand in your way yet.
+- **"THEY are stronger after dark" in the arena** isn't modelled (crowds are just thinner at night).
+
 ### Not now
 Real ES modules (`import`/`export`) would mean untangling ~1,400 shared top-level names and the circular calls
 between town/, them/ and horror/. Don't start it unless asked.

@@ -1,6 +1,6 @@
 //@ play/stashes — Stashes and rummaging
-//@ Defines: SHAKE_TYPES, STASH_KINDS, BUG, junkIn, ownerOf, stashPool, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_DIG, rummageAct, pryAct, openUp, closeUp, takeStash, …
-//@ Uses:    sim/core, core/util, town/cast, world/objects, ui/interface, town/suspicion, play/verbs, world/grid, them/proofs, play/photos, …
+//@ Defines: SHAKE_TYPES, STASH_KINDS, BUG, PLANT_DEAD, junkIn, ownerOf, stashPool, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_DIG, rummageAct, pryAct, openUp, closeUp, …
+//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, town/suspicion, them/proofs, world/grid, play/verbs, data/lines, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── stashes: what THEY keep inside ordinary things
 // Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. Only a photo
@@ -54,10 +54,21 @@ const STASH_KINDS = {
   ],
 };
 const BUG = { k: 'bug', what: 'A bug', icon: 'glyph', desc: 'a bug, wired into your TV' };
+// the dead keep nothing worth hiding, but THEY can still leave something of THEIRS in an innocent's home
+const PLANT_DEAD = {
+  k: 'remains',
+  what: 'Something in newspaper',
+  icon: 'bag',
+  desc: 'a finger, wrapped in newspaper',
+};
 const stashDef = (st) =>
   st.k === 'bug'
     ? BUG
-    : (STASH_KINDS[G.faction] || STASH_KINDS.aliens).find((s) => s.k === st.k) || STASH_KINDS.aliens[0];
+    : st.innocent
+      ? ODDITY_HOME[st.k] || ODDITY_HOME.envelope
+      : st.k === 'remains'
+        ? PLANT_DEAD
+        : (STASH_KINDS[G.faction] || STASH_KINDS.aliens).find((s) => s.k === st.k) || STASH_KINDS.aliens[0];
 const stashIn = (o) => G.stashes && G.stashes.find((s) => s.obj === o.idx && !s.bagged);
 // some things just rattle: a spoon down the back, coins in the works. It changes every few days.
 function junkIn(o) {
@@ -261,6 +272,7 @@ function rummageAct(o) {
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
+      searchedHome(o);
     },
   });
 }
@@ -316,6 +328,7 @@ function openUp(o) {
       z: f.z - f.az * 0.12,
       rot: f.rot + 0.4,
       by: st.by,
+      innocent: st.innocent ? 1 : undefined,
       obj: o.idx,
       room: (roomAt(o.cx, o.cz) || {}).key || null,
       at: G.t,
@@ -325,6 +338,7 @@ function openUp(o) {
     audio.sting('whisper');
   } else {
     const j = junkIn(o);
+    searchedHome(o);
     ui.note(
       'box',
       j
@@ -352,27 +366,46 @@ function takeStash(it) {
   const st = G.stashes.find((s) => s.id === it.stash);
   if (!st) return;
   const S = stashDef(st);
+  const o = OBJ[it.obj],
+    own = o ? ownerOf(o) : null;
+  if (st.innocent) return readOddity(st, it); // somebody's own business: you read it, and you know what it is
   st.bagged = true;
   st.out = false;
   st.lostAt = G.t;
-  const o = OBJ[it.obj],
-    own = o ? ownerOf(o) : null;
   removeItem(it);
   addStress(5);
-  takeProofItem({
+  takeProofItem(stashCard(st, o, own));
+  setTimeout(() => ui.note('bag', S.what + ' · in your pocket. Someone will miss it.', 'onto'), 900);
+}
+// a stash as a card: THEIR thing in its owner's own things is clear; planted in an innocent's home it looks just as clear.
+// Anywhere else it's fuzzy, on whoever of THEM was seen in that room lately, or nobody's yet.
+function stashCard(st, o, own) {
+  const S = stashDef(st),
+    mine = !!(own && NPC[own] && (own === st.by || own === st.planted)),
+    room = o && (roomAt(o.cx, o.cz) || {}).key,
+    m = NPC[st.by],
+    saw = !mine && !!(m && room && m.seenRoom[room] && G.t - m.seenRoom[room] < 180);
+  return {
+    frame: 'home',
+    q: mine ? 'clear' : 'fuzzy',
     true: st.by,
-    auto: own === st.by,
-    what: S.what,
-    where: o ? 'In the ' + o.name.toLowerCase() : placeName(it.x, it.z),
+    pin: mine ? own : saw ? st.by : null,
+    auto: mine || saw,
+    planted: mine && own === st.planted ? true : undefined,
+    what: S.what + (mine ? ', in their own ' + o.name.toLowerCase() : ''),
+    where: o ? 'In the ' + o.name.toLowerCase() : 'Outside',
     k: st.k,
     icon: S.icon,
     pr: { kind: 'item', what: S.what, icon: S.icon },
-  });
-  setTimeout(() => ui.note('bag', S.what + ' · in your pocket. Someone will miss it.', 'onto'), 900);
+  };
 }
 // THEY come back for it: to put it away again, or to move it somewhere new. That trip is your best photo.
 function stashTick() {
   if (!G.stashes || !G.started) return;
+  framingTick();
+  arenaTalkTick();
+  witnessTick();
+  tailTick();
   for (const st of G.stashes) {
     const n = NPC[st.by];
     if (!n || n.slain || n.gone) continue;
@@ -396,7 +429,8 @@ function stashTick() {
       }
       continue;
     }
-    if (st.bug) continue;
+    if (st.bug || st.innocent || st.planted) continue; // nobody comes back for these
+    if (!st.out && G.aware >= EVIDENCE.cleanAt && st.moveAt - G.t > 1440) st.moveAt = G.t + rand(0.4, 1) * 1440; // THEY know you: THEY move it more often
     const due = st.out ? G.t >= st.rehideAt : G.t >= st.moveAt;
     if (due) startStashTrip(n, st);
   }
@@ -419,6 +453,7 @@ function stashFree(n) {
   )
     return false;
   if (['sleep', 'gather', 'watch', 'gone', 'off'].includes(b.a)) return false;
+  if (watchedNow(n)) return false; // the town's eyes on it today
   if (!n.exposed && (h < 8 || h > 21.5)) return false;
   const cur = n.queue[0];
   return !cur || (cur.interruptible !== false && !cur.habit && cur.kind !== 'talk');
@@ -501,34 +536,31 @@ function startStashTrip(n, st) {
   });
   enqueue(n, dest === o ? [take] : [take, put]);
 }
-// a photo of a stash: proof of something, and of someone only if it sits in their own things
+// a photo of a stash: a Home card
 function photoStash(it) {
   const st = G.stashes.find((s) => s.id === it.stash);
   if (!st || it.photo) return false;
   it.photo = true;
   const S = stashDef(st),
     o = OBJ[it.obj],
-    own = o ? ownerOf(o) : null,
-    n = own && NPC[own];
+    own = o ? ownerOf(o) : null;
+  if (st.innocent) {
+    const p = innocentCard(NPC[st.by], {
+      what: S.what + (o ? ', in their own ' + o.name.toLowerCase() : ''),
+      where: o ? 'In the ' + o.name.toLowerCase() : 'Outside',
+      pr: { kind: 'item', what: S.what, icon: S.icon },
+    });
+    proofCard(p);
+    return true;
+  }
   if (!G.factionKnown && !st.bug) revealFaction();
-  const where = o ? 'In the ' + o.name.toLowerCase() : placeName(it.x, it.z);
-  const mine = !!(n && own === st.by),
-    before = mine ? n.evidence : 0;
-  const p = addProof({
-    cat: mine ? 'strong' : 'weak',
-    true: st.by,
-    auto: mine,
-    what: S.what + (mine ? ', in their own ' + o.name.toLowerCase() : ''),
-    where,
-    pr: { kind: 'item', what: S.what, icon: S.icon },
-  });
-  if (mine)
-    addNote(n, 'Photo: ' + S.what.toLowerCase() + ', hidden in their own ' + o.name.toLowerCase() + '.', { by: 'you' });
+  const p = addProof(stashCard(st, o, own));
+  if (p.pin) addNote(NPC[p.pin], 'Photo: ' + S.what.toLowerCase() + ', ' + p.where.toLowerCase() + '.', { by: 'you' });
   else {
     G.leads.push(S.what + ' in the ' + (o ? o.name.toLowerCase() : 'street') + ' — whose?');
     if (G.leads.length > 6) G.leads.shift();
   }
-  proofCard(p, before);
+  proofCard(p);
   audio.sting('onto');
   return true;
 }
@@ -537,10 +569,10 @@ function photoOdd(n) {
   const o = n.odd;
   o.photo = true;
   if (n.isThem) {
-    const b = n.evidence,
-      strong = ODD_STRONG.has(o.k);
+    const strong = ODD_STRONG.has(o.k);
     const p = addProof({
-      cat: strong ? 'strong' : 'weak',
+      frame: 'habit',
+      q: strong ? 'clear' : 'fuzzy',
       true: n.id,
       auto: true,
       what: o.note.replace(/\.$/, ''),
@@ -549,7 +581,7 @@ function photoOdd(n) {
     });
     addNote(n, 'Photo: ' + o.note, { by: 'you' });
     n.clues.photo = (n.clues.photo || 0) + 1;
-    proofCard(p, b);
+    proofCard(p);
     bookPhoto(n);
     addDanger(n, strong ? 25 : 15);
     n.pinnedDay = dayNo();
@@ -558,4 +590,10 @@ function photoOdd(n) {
     audio.sting('onto');
   } else addPrint({ kind: 'plain', who: n.id, what: n.short, icon: 'people', where: placeName(n.x, n.z), t: n.animT });
   if (o.control && G.control === o.control) catchControl(n, o.control);
+}
+// a search of someone's own things that turns up nothing: their Home frame is searched. It tells you nothing.
+function searchedHome(o) {
+  const own = ownerOf(o),
+    n = own && NPC[own];
+  if (n && !n.isPlayer && dashFrame(n, 'home')) ui.note('home', n.short + ' · nothing at home', '');
 }

@@ -5,6 +5,7 @@
 // ───────────── night attacks. Most nights nothing happens; on an attack night one of THEM picks one target.
 function planNight() {
   G.attack = null;
+  witnessNight(); // THEY know who saw
   if (!theyStir()) return; // the first night: nothing
   if (G.attackFoe && alive().length) {
     G.attack = {
@@ -293,6 +294,7 @@ function endAttack(A, tg, broken) {
   }
   const next = dayNo(G.t + 6 * 60);
   tg.frightUntil = G.t + 2 * 1440;
+  markVictim(tg, A.by);
   if (F === 'aliens') {
     tg.lostDay = next;
     if (chance(0.3)) tg.dawnStand = next;

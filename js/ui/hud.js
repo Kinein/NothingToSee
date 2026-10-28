@@ -32,13 +32,15 @@ const BARS = [
   { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => PLAYER.needs.stress >= 75 },
 ];
 // THEIR eye: how much THEY know about you, in four steps
+// THEIR eye: nothing aimed at you · watching you · framing people, tearing your cards · coming for you every night
 const EYE_STATES = [
-  [25, 'THEY DON’T KNOW YOU'],
-  [50, 'THEY WATCH YOU'],
+  [10, 'THEY DON’T KNOW YOU'],
+  [40, 'THEY NOTICE YOU'],
   [70, 'THEY KNOW YOU'],
   [Infinity, 'THEY HUNT YOU'],
 ];
-const eyeState = (a = G.aware) => EYE_STATES.findIndex(([lim]) => a < lim);
+const eyeState = (a = G.aware) => (G.huntNights > 0 || theirDay() >= 5 ? 3 : EYE_STATES.findIndex(([lim]) => a < lim));
+const eyeLine = () => (theirDay() >= 5 && G.started ? 'THEY COME' : EYE_STATES[eyeState()][1]);
 function buildHud() {
   const rs = document.documentElement.style;
   rs.setProperty('--ex-red', 'url("' + HUD_IMG.exRed + '")');
@@ -371,7 +373,6 @@ function updateHud(dtReal) {
     eye.querySelector('img').src = HUD_IMG['eye' + es];
     eye.className = 's' + es;
     const tx = $('#eyeTx');
-    tx.textContent = EYE_STATES[es][1];
     tx.className = 's' + es;
     if (turned) {
       eye.classList.add('turn');
@@ -380,17 +381,19 @@ function updateHud(dtReal) {
       tx.classList.add('turn');
     }
   }
+  {
+    const tx = $('#eyeTx'),
+      line = eyeLine();
+    if (tx.textContent !== line) tx.textContent = line;
+  }
   eye.classList.toggle('pulse', UI.heatPulse > 0);
-  // the evidence: one mark for each of THEM, filled in as you catch THEM
+  // the evidence: one mark for each of THEM, filled in as you catch THEM. Nothing here says a case is enough.
   const slots = $('#boardBtn .slots').children;
-  const proof = suspects().filter((n) => n.evidence >= 100 && !n.exposed).length,
-    unm = them().filter((n) => n.exposed && !n.slain).length,
+  const unm = them().filter((n) => n.exposed && !n.slain).length,
     dead = G.slain.length;
-  for (let i = 0; i < 3; i++)
-    slots[i].className = i < dead ? 'done' : i < dead + unm ? 'unm' : i < dead + unm + proof ? 'proof' : '';
+  for (let i = 0; i < 3; i++) slots[i].className = i < dead ? 'done' : i < dead + unm ? 'unm' : '';
   $('#boardBtn').dataset.tip =
     'Evidence · Tab' + (dead ? ' · ' + dead + ' caught' : '') + (unm ? ' · ' + unm + ' unmasked, still out there' : '');
-  $('#boardBtn').classList.toggle('alert', proof > 0);
   document.body.classList.toggle('jumpy', N.stress >= 60);
   document.body.classList.toggle('breaking', N.stress >= 80);
   const zz = $('#zz');

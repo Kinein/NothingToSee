@@ -70,6 +70,50 @@ const FOE_HP = { aliens: 2, lizards: 3, zombies: 3 };
 // miss. clean: the middle share of the green that lands a clean hit. down: game minutes a clean hit leaves it on the ground.
 const FIGHT = { grace: 0.35, timeout: 6, clean: 0.34, down: 3.2 };
 
+// ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
+// Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
+// A clear card pushes a fuzzy one out of its frame. Enough grey (explained) frames and they're CLEARED.
+const EVIDENCE = {
+  frames: ['home', 'habit', 'body', 'contact'],
+  oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one fuzzy card, in one frame
+  frameAt: [40, 70],            // awareness at which THEY frame one human, then a second
+  cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
+  clearedGrey: 2,               // grey frames that stamp a suspect CLEARED (an ordinary person has two to find: their secret, their oddity)
+  witnessDays: 2,               // someone who saw it change remembers it this long
+  halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
+  // the arena: the crowd's lean runs −5 (with THEM) … +5 (with you), and starts from the room, held to −3 … +3
+  lean: { min: -5, max: 5, startMin: -3, startMax: 3 },
+  start: { friend: 1, friendRel: 40, close: -1, closeRel: 40, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2, grudge: -1 },
+  rant: { stress: 80, p: 0.4 }, // Psychic 20 or less: this chance you rant before it starts. Instant Fail
+  statements: 5,                // the testimony: one lie per frame, and one true line
+  statementSecs: 6,             // real seconds each statement waits for a card
+  move: { clear: 2, fuzzyBacked: 1, fuzzyAlone: -1, wrongLie: -1, pass: -1, onTruth: -2 },
+  rebuttalSecs: 6,
+  know: { claims: [1, 2], right: 1, wrong: -1, secs: 8 },
+  counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
+  escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
+  bands: { total: 4, partial: 1, pfail: -1 },   // final lean: +4 up total success · +1…+3 partial · −1…0 partial fail · below: fail
+  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, rel: -30 },
+  fail: { sus: 15, rel: -10, madDays: 2 },
+  pfail: { watchMins: 1440, sus: 5 },
+  success: { rel: 10, fearMins: 1440 },
+  aware: { pfail: 15, fail: 25, wrong: 20, success: 15, privateKill: 30, hitNoChange: 10, lostFight: 10 },
+  huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
+  fbiDelay: 25,                 // game minutes from giving up to the grey cars
+  come: { rel: 20, mins: 60 },  // "Come with me": anyone who likes you this much follows you for this long
+  saved: 25,                    // liking from a witness you stood guard for
+  tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
+  // the private way: hitting one of THEM
+  hit: { day: 3, sus: 15, aware: 10 },
+  // fights by situation (multipliers on FIGHT_DIFF and HURT): alone with it, it's far worse
+  fight: {
+    privateHp: { lizards: 4, aliens: 3, zombies: 4 }, privateBlow: 1.25, privateWindow: 0.85,
+    trapHp: -1, trapWindow: 1.5, trapSpeed: 0.8,
+    crowdSaw: 3, crowdSave: 0.3,  // three who saw it change land a free blow; then each miss, this chance someone pulls it off you
+    loseSight: 6,                 // seconds out of its sight, at night, to lose it
+  },
+};
+
 // ── Doors left ajar (town/doors)
 // Someone stepping into a room can forget to pull the door to. It stays half open and you can see in through the gap.
 // Rarely at midday, more in the morning and evening, most at night; twice as likely when they're up to something.

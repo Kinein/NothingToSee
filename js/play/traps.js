@@ -66,8 +66,7 @@ function liftTrap(it) {
   if (tr) {
     G.traps.splice(G.traps.indexOf(tr), 1);
     if (tr.baitProof) {
-      G.proofs.push(tr.baitProof);
-      refreshEvidence();
+      returnBait(tr.baitProof);
     }
   }
   G.inv.trap++;

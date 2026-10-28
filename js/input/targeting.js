@@ -1,6 +1,6 @@
 //@ input/targeting — What E acts on; keyboard handling
 //@ Defines: DEG, wallBetween, menuForFocus, pickFocus, updateFocus, anchorXY, interact, initInput
-//@ Uses:    input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, chase/hunt, ui/case-board, world/grid, …
+//@ Uses:    input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what E would act on: the nearest thing you're roughly facing. Forgiving, and sticky once picked.
 const DEG = Math.PI / 180;
@@ -160,7 +160,7 @@ function interact() {
   UI.focus = f;
   UI.focusT = 0.1;
   if (!f) return;
-  if (f.char && f.char.trueForm) return runOpt(f.menu.ops[0]); // its true form: the key is the blow
+  if (f.char && f.char.trueForm && f.menu.ops.length === 1) return runOpt(f.menu.ops[0]); // its true form: the key is the blow
   if (f.char && f.char.thrall && G.loose) return playerMelee(f.char); // one of THEIRS today: the key is the blow
   if (f.char && f.char.fleeing && !f.char.def.stranger && !tooShaken()) return playerMelee(f.char); // running from you: the key is the tackle
   const an = { char: f.char, obj: f.obj, item: f.item },
@@ -272,13 +272,12 @@ function initInput() {
     if (UI.scene) return;
     if (UI.cf) {
       e.preventDefault();
-      if (k === 'escape') closeConfront(false);
-      else if ((k === 'e' || k === 'enter' || k === ' ') && !e.repeat) closeConfront(true);
+      if (!e.repeat) arenaKey(k); // the confrontation: no way out but through
       return;
     }
     if (k === 'escape') {
       if (UI.menuOpen) closeMenu();
-      else if (!$('#bd-detail').hidden && UI.caseOpen) $('#bd-detail').hidden = true;
+      else if (!$('#bd-detail').hidden && UI.caseOpen) closeSuspect();
       else if (UI.caseOpen) closeBoard();
       else if (!$('#help').hidden) toggleHelp();
       return;
@@ -310,7 +309,10 @@ function initInput() {
       toggleHelp();
       return;
     }
-    if (UI.caseOpen) return;
+    if (UI.caseOpen) {
+      if (!e.repeat && boardKey(k)) e.preventDefault();
+      return;
+    }
     if (k === 'e' || k === ' ') {
       if (!e.repeat) interact();
       return;

@@ -24,7 +24,6 @@ function openMenu(m, x, y, anchor) {
       : '<span class="pcf"><span class="pci">' + artIcon(m.icon || 'dots') + '</span></span>') +
     '<b></b>' +
     (m.rel != null ? hearts(m.rel) : '') +
-    (m.ev > 0 ? '<span class="pev"><i style="width:' + Math.round(m.ev) + '%"></i></span>' : '') +
     (m.sus != null && m.sus >= 5
       ? '<span class="psus' +
         (m.sus >= 60 ? ' hi' : '') +
@@ -69,6 +68,8 @@ function openMenu(m, x, y, anchor) {
   pie.hidden = false;
   UI.menuOpen = true;
   UI.menuAnchor = anchor || null;
+  UI.menuX = x;
+  UI.menuY = y;
   if (anchor && anchor.char && !anchor.char.isPlayer) holdForMenu(anchor.char);
   placeMenu(x, y);
 }

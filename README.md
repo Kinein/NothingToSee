@@ -50,8 +50,8 @@ other module, exactly as in the original single file:
 | Engine | `core/` `world/` `gfx/` `audio/` `input/` | Math, the grid and rooms, light and sight, A* paths, the WebGL2 renderer, models, people and creature drawing, synthesised sound, keyboard and camera |
 | Simulation | `sim/` `player/` | Shared state (`G`, `PLAYER`, `NPC`, `CHARS`), the body in motion, the action queue every character runs, your needs and work |
 | Town | `town/` | The cast, plans, habits, quirks, NPC update, suspicion, fleeing, police, talk and gossip, echoes, doors, traffic |
-| THEM | `them/` `combat/` `horror/` | THEIR week, tells, proofs, awareness, true forms, night attacks, the office at night; bolts, hits, the timing bar; the horror director, scenes, half and tenth forms, encounters |
-| Player verbs | `play/` | Items, stashes, traps, raids, snooping, confronting, photos, advice |
+| THEM | `them/` `combat/` `horror/` | THEIR week, tells, evidence cards, awareness, true forms, night attacks, the office at night; bolts, hits, the timing bar; the horror director, scenes, half and tenth forms, encounters |
+| Player verbs | `play/` | Items, stashes, traps, raids, snooping, false cards, the confrontation arena, photos, advice |
 | Set pieces | `taken/` `chase/` | Being taken to THEIR lair and getting out; THEY come for you, chases, the FBI, Friday |
 | Shell | `ui/` `game/` | Menus, notes, HUD, pie menu, case board; game state, saving, endings, the main loop and `boot()` |
 
@@ -63,7 +63,7 @@ other module, exactly as in the original single file:
 | Anything people say, headlines, endings | js/data/lines.js |
 | The cast and factions | `CAST`, `FACTIONS` in town/cast.js |
 | THEIR week | `PHASES` in them/plan.js (tuning: `TIP`, `ATTACK_ODDS`, `HORROR_MIX`, `AWARE_STEPS`) |
-| Proof and confronting | them/proofs.js (`addProof`), play/confront.js (`openConfront`, `resolveConfront`) |
+| Evidence and confronting | them/proofs.js (`addProof`, four frames), play/oddities.js (false cards), play/arena.js (`openConfront`), ui/arena-view.js |
 | Talking | town/talk.js (`talkAct`, `talkTick`) |
 | Photos | play/photos.js (`playerPhoto`) |
 | What E does | input/targeting.js (`interact`), then ui/menus.js |

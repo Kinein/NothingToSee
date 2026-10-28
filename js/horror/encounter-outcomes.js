@@ -395,6 +395,7 @@ function encAftermath(E, v, kneel, then) {
 function encMark(E, v, n, seen, kneel) {
   const next = dayNo(G.t + 6 * 60);
   v.frightUntil = G.t + 1440;
+  markVictim(v, n.id);
   if (E.fac === 'aliens') {
     G.chipped[v.id] = 1;
     v.lostDay = next;

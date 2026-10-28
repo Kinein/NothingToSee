@@ -402,5 +402,6 @@ function resolveGossip(n) {
     hear(null, line, 'vic');
     return;
   }
+  if (tellRumour(n)) return; // what's going round
   gossip(n);
 }

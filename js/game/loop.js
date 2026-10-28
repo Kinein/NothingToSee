@@ -137,10 +137,8 @@ function simStep(dtReal, spdOver) {
       roomWatch(c);
     }
   for (const n of suspects())
-    if (n.onMap && !n.trueForm && n.shown > 0.5 && visAt(n.x, n.z) > 0.5 && !(n.tell && n.tell.type === 'true')) {
+    if (n.onMap && !n.trueForm && n.shown > 0.5 && visAt(n.x, n.z) > 0.5 && !(n.tell && n.tell.type === 'true'))
       n.seenAt = G.t;
-      alibiTick(n);
-    }
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && n.shown > 0.5) {
       const r = roomAt(n.x, n.z);
@@ -280,6 +278,7 @@ function frame(now) {
       simStep(dtReal);
     }
     if (UI.fight) fightTick(dtReal);
+    if (UI.cf) arenaTick(dtReal);
     styleStep(dtReal);
     worldStep(dtReal, preview);
     try {
@@ -327,8 +326,8 @@ function showTitle() {
   $('#title').hidden = false;
   $('#hud').hidden = true;
   const s = readSave();
-  $('#continue').hidden = !s || s.v !== 8;
-  if (s && s.v === 8)
+  $('#continue').hidden = !s || s.v !== 9;
+  if (s && s.v === 9)
     $('#continue-sub').textContent = s.player.name + ' · ' + DOW_LONG[dow(dayNo(s.G.t))] + ' · ' + fmtTime(s.G.t);
 }
 function startPlaying() {
@@ -389,11 +388,6 @@ function boot() {
     if (e.target.id === 'board') closeBoard();
   });
   $('#help-close').onclick = toggleHelp;
-  $('#cf-go').onclick = () => closeConfront(true);
-  $('#cf-no').onclick = $('#cf-x').onclick = () => closeConfront(false);
-  $('#confront').addEventListener('pointerdown', (e) => {
-    if (e.target.id === 'confront') closeConfront(false);
-  });
   $('#help').addEventListener('pointerdown', (e) => {
     if (e.target.id === 'help') toggleHelp();
   });

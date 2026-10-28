@@ -174,6 +174,20 @@ const audio = (() => {
       } else if (kind === 'whisper') {
         for (let k = 0; k < 3; k++)
           setTimeout(() => ctx && noise(0.15, 0.06, 0.5, rand(1800, 3200), 6, rand(-0.9, 0.9)), k * 260);
+      } else if (kind === 'murmur') {
+        // the crowd: low voices all round, nobody saying anything you can catch
+        for (let k = 0; k < 6; k++)
+          setTimeout(() => ctx && noise(0.18, 0.035, 0.7, rand(320, 720), 3, rand(-0.9, 0.9)), k * 110);
+      } else if (kind === 'gasp') {
+        for (let k = 0; k < 4; k++)
+          setTimeout(() => ctx && noise(0.02, 0.07, 0.4, rand(1300, 2100), 1.6, rand(-0.8, 0.8)), k * 45);
+      } else if (kind === 'crowdlaugh') {
+        for (let k = 0; k < 5; k++)
+          setTimeout(() => ctx && tone('triangle', rand(240, 330), 0.01, 0.045, 0.14, rand(200, 260)), k * 130);
+      } else if (kind === 'slip') {
+        // a wet click: the mask, slipping
+        tone('sine', 1500, 0.002, 0.08, 0.07, 260);
+        noise(0.002, 0.06, 0.09, 3200, 4);
       }
     },
     // the horror layer's sounds: all synthesised, all for the ears only

@@ -147,6 +147,8 @@ function makePlan(n) {
   } else if (k === 'lenny') add(0, 24, 'lenny');
   quirkPlan(n, P);
   if (n.isThem && d === G.gatherDay) overlay(P, 90, 180, 'gather');
+  // after one of THEM changed in public, people are frightened: home early, and the streets thin out
+  if (!n.isThem && n.id !== 'lenny' && G.fearUntil > (d - 1) * 1440 + 17 * 60) overlay(P, 17.5 * 60, 21.5 * 60, off);
   n.plan = P;
 }
 function curBlock(n) {

@@ -103,6 +103,7 @@ function sayTalk(n, r) {
     r.subj.rumors++;
   }
   if (r.place || r.loud) hear(null, r.text, n.id);
+  if (r.loud && r.subj) rumourCard(r.subj, r.text, n); // said loud and sure: a fuzzy Contact card on whoever it's about
 }
 // what this person could pass on: things they saw done, or heard about from somebody who did
 function quirkTalk(n) {

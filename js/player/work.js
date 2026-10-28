@@ -1,6 +1,6 @@
 //@ player/work — The work bar, shifts, getting fired
 //@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, onTimeCross, newDay
-//@ Uses:    sim/core, data/tuning, ui/interface, them/plan, core/util, them/night-attacks, game/state, world/grid, player/needs, audio/sound, …
+//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
 function playerAtDesk() {
@@ -55,7 +55,9 @@ function onTimeCross(t0, t1) {
   if (cross(5 * 60 + 30)) dawnTick();
   if (cross(20 * 60)) planNight();
   if (cross(6 * 60)) {
+    if (G.huntNights > 0) G.huntNights--; // one night of being hunted gone by
     applyAwareness();
+    framingMorning();
     morningResist();
     morningPaper();
     planDay();
@@ -78,6 +80,11 @@ function newDay() {
   advanceWeek();
   if (G.over) return;
   marks();
+  if (G.tearTonight > 0) {
+    // after a failed confrontation THEY come into your flat and take a card
+    G.tearTonight = 0;
+    if (tearCard(pick(covert()))) setTimeout(() => !G.over && ui.note('print', 'A card is gone. Torn.', 'bad'), 2600);
+  }
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;

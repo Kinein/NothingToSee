@@ -12,14 +12,14 @@ function sleepTakeCheck(fresh) {
     G.takeNight = night;
     G.takeAt = 0;
     const ph = theirDay(),
-      a = G.aware;
+      a = G.aware,
+      forced = G.huntNights > 0 || G.huntNight === night;
     if (
-      theyStir() &&
-      (ph >= 3 || a >= 50) &&
-      G.t - (G.takenAt || -1e9) >= 2 * 1440 &&
+      (forced || (theyStir() && (ph >= 3 || a >= 50) && G.t - (G.takenAt || -1e9) >= 2 * 1440)) &&
       inRoomSet(PLAYER, (r) => r.home)
     ) {
-      const p = 0.16 + Math.max(0, ph - 2) * 0.14 + Math.max(0, a - 40) / 160;
+      // hunted, or THEY HUNT YOU: every night. Otherwise a chance that grows with THEIR week and with what THEY know.
+      const p = forced || a >= 70 ? 1 : 0.16 + Math.max(0, ph - 2) * 0.14 + Math.max(0, a - 40) / 160;
       if (chance(p)) {
         const base = (night - 1) * 1440 + 24 * 60; // midnight that ends this night's day
         G.takeAt = Math.max(G.t + 45, base + irand(40, 270));
@@ -55,6 +55,7 @@ function sleepTake() {
     return;
   }
   G.dayShown = dayNo(); // waking into it: no day card over the top of it
+  tearCard(pick(covert())); // on a hunt night THEY take a card from your flat, whatever happens next
   if (!huntStart('sleep', { why: reason })) capture('sleep', { reason });
 }
 // THEIR ground: the light over the park, the cover at the back of the alley, the dark corner under the park's trees.

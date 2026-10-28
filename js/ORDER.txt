@@ -60,15 +60,18 @@ town/doors.js                    # Broken restroom lock, doors left ajar
 town/talk.js                     # Talk: what people say, and the talking action itself
 town/echoes.js                   # Echoes: what happened, where, who saw
 them/night-attacks.js            # Night attacks
+town/company.js                  # Come with me; the witnesses THEY go after at night, and standing guard for one
 horror/director.js               # Horror director: daily events by THEIR phase
 them/office-night.js             # The office after dark
 play/items.js                    # Items left behind
 play/stashes.js                  # Stashes and rummaging
+play/oddities.js                 # False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
 play/traps.js                    # Traps
 play/raids.js                    # Raids: kicking in a door
 horror/visions.js                # Visions
 play/verbs.js                    # What you can do: snooping, eating, Lenny, chat
-play/confront.js                 # Confronting with proof
+play/confront.js                 # Giving up, the FBI, the talk options
+play/arena.js                    # The confrontation: an arena battle in front of the town, and what it leaves on the map
 play/photos.js                   # Photos: reading what is in frame
 ui/menus.js                      # Interaction menus for objects, people, items
 play/advice.js                   # Needs to the right thing to do, here; inventory hooks
@@ -76,7 +79,8 @@ ui/interface.js                  # Notes, bubbles, tooltips, overlays
 ui/hud-images.js                 # Embedded HUD pictures (base64 PNG): data only
 ui/hud.js                        # The corner HUD: bars, days, clock, THEIR eye, evidence
 ui/pie-menu.js                   # The directional pie menu
-ui/case-board.js                 # The evidence board (case file)
+ui/case-board.js                 # The evidence book: four frames on every suspect, the suspect page, the Whose? tray
+ui/arena-view.js                 # How the confrontation looks: the spotlit ring, the crowd, the speech, your cards
 input/camera.js                  # Input and camera control
 input/walking.js                 # WASD walking relative to the camera
 input/targeting.js               # What E acts on; keyboard handling
