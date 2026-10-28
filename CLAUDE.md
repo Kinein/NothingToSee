@@ -40,7 +40,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 
 | To change… | Go to |
 | --- | --- |
-| Speeds, controls, damage, need drain, odds, any "feel" number | `js/data/tuning.js` |
+| Speeds, controls, damage, need drain, odds, any "feel" number | `js/data/tuning.js` (evidence, arena and fight-by-situation numbers: `EVIDENCE`) |
 | Anything people say or read: gossip, Lenny, rumours, headlines, endings | `js/data/lines.js` |
 | The cast (names, looks, roles) and the three factions | `js/town/cast.js` (`CAST`, `FACTIONS`, `CREATURE_LOOK`) |
 | The town map, houses, rooms, THEIR lairs | `js/world/grid.js` |
@@ -60,7 +60,9 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Talking and gossip | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
 | Police, arrest, the cell | `js/town/arrest.js`, `js/town/cell.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
-| Tells, proofs, THEIR awareness of you | `js/them/tells.js`, `js/them/proofs.js` (`addProof`), `js/them/awareness.js` |
+| Tells, THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
+| Evidence: four frames per suspect, clear/fuzzy/grey/dashed cards | `js/them/proofs.js` (`addProof`, `cardIn`, `frameState`, `greyFrame`) |
+| False cards: innocent oddities, rumours, THEIR frame-ups, Press | `js/play/oddities.js` |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`openFight`, `hurt`, `fireBolt`) |
@@ -68,12 +70,15 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |
 | Stashes, traps, raids, items on the floor | `js/play/stashes.js`, `traps.js`, `raids.js`, `items.js` |
-| Photos, confronting with proof | `js/play/photos.js` (`playerPhoto`), `js/play/confront.js` (`openConfront`) |
+| Photos | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
+| The confrontation (arena battle) and its outcomes | `js/play/arena.js` (`openConfront`, `arenaOutcome`), `js/ui/arena-view.js` |
+| Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
+| "Come with me", witnesses THEY visit at night | `js/town/company.js` |
 | Autopilot / "what should I do" advice | `js/play/advice.js` |
 | What E does, keyboard handling | `js/input/targeting.js` (`interact`, `initInput`), then `js/ui/menus.js` |
 | WASD walking, collisions | `js/input/walking.js` |
 | Mouse, camera | `js/input/camera.js`, camera state in `js/gfx/renderer.js` |
-| Menus, HUD, pie menu, case board, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
+| Menus, HUD, pie menu, the evidence book, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
 | HUD markup and all CSS | `shell/page.html`, `shell/styles.css` |
 | Sound | `js/audio/sound.js` (all synthesised with Web Audio) |
 | Being taken to the lair and escaping | `js/taken/` (`taken.js` capture → `coming.js` → `down-there.js` → `way-out*.js` → `back-up.js`) |

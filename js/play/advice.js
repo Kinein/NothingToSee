@@ -1,6 +1,6 @@
 //@ play/advice — Needs to the right thing to do, here; inventory hooks
-//@ Defines: playerWhere, pathLen, nearestObj, needTarget, doNeed, autonomy, currentGoal, computeGoal, confrontReady, goalAct
-//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, player/needs, ui/interface, world/grid, town/cast, town/suspicion, data/tuning, …
+//@ Defines: playerWhere, pathLen, nearestObj, needTarget, doNeed, autonomy, currentGoal, computeGoal, goalAct
+//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, player/needs, ui/interface, world/grid, data/tuning, town/cast, town/talk, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── needs → the right thing to do, here
 function playerWhere() {
@@ -255,37 +255,7 @@ function computeGoal() {
   // 5. bed after 22:30
   if ((m >= 22 * 60 + 30 || m < 5 * 60) && !busy((a) => a.sleep))
     return { obj: OBJ_BY_ID.homeBed, icon: 'moon', sleep: true };
-  // 6. someone you have proof on, with witnesses near to confront them in front of
-  const ready = confrontReady();
-  if (ready && !busy((a) => a.target === ready))
-    return { obj: null, char: ready, icon: 'confront', confront: true, urgent: true };
-  return null;
-}
-function confrontReady() {
-  for (const n of suspects()) {
-    if (
-      n.exposed ||
-      n.slain ||
-      !n.onMap ||
-      n.shown < 0.5 ||
-      n.tell ||
-      asleep(n) ||
-      !G.proofs.some((p) => p.pin === n.id && proofShownStrong(p))
-    )
-      continue;
-    const r = roomAt(n.x, n.z);
-    const wit = CHARS.some(
-      (w) =>
-        w !== n &&
-        !w.isPlayer &&
-        w.onMap &&
-        !asleep(w) &&
-        heedsYou(w) &&
-        ((r && roomAt(w.x, w.z) === r) || Math.hypot(w.x - n.x, w.z - n.z) <= 6),
-    );
-    if (wit) return n;
-  }
-  return null;
+  return null; // nothing says when a case is enough: that's yours to decide
 }
 // the glow only points: a click acts on it if it's in reach, otherwise it just says so
 function goalAct(g) {
@@ -297,6 +267,5 @@ function goalAct(g) {
   if (g.need) return () => doNeed(g.need);
   if (g.sleep) return () => enqueue(PLAYER, sleepAct(OBJ_BY_ID.homeBed));
   if (g.lenny) return () => enqueue(PLAYER, talkAct(NPC.lenny, 'lenny'));
-  if (g.confront) return () => openConfront(g.char);
   return null;
 }

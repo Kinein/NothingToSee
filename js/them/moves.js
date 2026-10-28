@@ -1,6 +1,6 @@
 //@ them/moves — THEIR morning moves: the Bought, Scatter, Destroy, Protect
 //@ Defines: buy, unbuyBy, tryBribe, tryUnder, tryControl, controlled, catchControl, tryScatter, morningResist, stealPrint, abductCheck, abduct, lodgeTick, destroyTick, protectAfter, policeTick, …
-//@ Uses:    sim/core, core/util, town/npc-update, sim/actions, ui/interface, them/awareness, town/echoes, gfx/world-geometry, them/plan, town/cast, …
+//@ Uses:    sim/core, core/util, town/npc-update, sim/actions, them/awareness, ui/interface, town/echoes, gfx/world-geometry, them/plan, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the Bought (lizards). Slight: they look past things and make your day worse. Heavy: THEIRS to the end.
 const bought = (n) => (G.bought && G.bought[n.id]) || 0;
@@ -19,7 +19,7 @@ function unbuyBy(id) {
 }
 // a bribe handed over: an operation. See it, and it's spoiled.
 function tryBribe(n) {
-  if (G.faction !== 'lizards' || n.bribeDay >= dayNo() - 2 || chance(0.85)) return false;
+  if (G.faction !== 'lizards' || n.bribeDay >= dayNo() - 2 || watchedNow(n) || chance(0.85)) return false;
   const near = suspects().filter(
     (o) =>
       !o.isThem &&
@@ -32,7 +32,8 @@ function tryBribe(n) {
       Math.hypot(o.x - n.x, o.z - n.z) < 12,
   );
   if (!near.length) return false;
-  near.sort((a, b) => b.sus - a.sus); // whoever already distrusts you
+  // whoever already distrusts you; once THEY know you, whoever stands with you: your crowd turns
+  near.sort((a, b) => (G.aware >= EVIDENCE.frameAt[0] ? b.rel - a.rel : b.sus - a.sus));
   const o = near[0];
   n.bribeDay = dayNo();
   const a = npcTalkAct(n, o, rand(4, 6));
@@ -119,6 +120,7 @@ function tryControl(n) {
   n.controlDay = dayNo();
   const dur = rand(20, 40),
     C = (G.control = { by: n.id, who: who.id, until: G.t + dur, seen: 0 });
+  markVictim(who, n.id);
   hardReset(n);
   enqueue(
     n,
@@ -259,15 +261,9 @@ function morningResist() {
     echo('overtime', { who: m.id, x: 4, z: 4, seen: ['hale'], quiet: true });
   }
 }
-// a print vanishes from your flat overnight: −15 evidence, a torn-photo note; the next day their routine shifts
+// a card vanishes from your flat overnight: torn, half of it on the floor; the next day their routine shifts
 function stealPrint(n) {
-  const pf = G.proofs
-    .filter((p) => p.src === 'photo' && (p.true === n.id || p.pin === n.id))
-    .sort((a, b) => PROOF_RANK[b.cat] - PROOF_RANK[a.cat])
-    .shift(); // THEY know which one hurts
-  if (!pf) return;
-  G.proofs.splice(G.proofs.indexOf(pf), 1);
-  refreshEvidence();
+  if (!tearCard(n)) return;
   addNote(n, 'Torn photo on your floor. Half of it gone.', { by: 'you' });
   const hb = G.habits[n.id];
   if (hb) {

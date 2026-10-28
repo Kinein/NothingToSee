@@ -1,6 +1,6 @@
 //@ combat/hits — Taking hits, knockouts, hospital, limbo
 //@ Defines: swing, hurt, knockOut, hospital, goAway, comeBack
-//@ Uses:    sim/core, ui/interface, taken/taken, sim/pose, gfx/renderer, town/fleeing, town/echoes, chase/hunt-step, sim/characters, player/needs, …
+//@ Uses:    sim/core, ui/interface, taken/taken, sim/pose, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the hit, and what it costs. Health stays hidden while full.
 function swing(c, dmg, byThem) {
@@ -50,6 +50,12 @@ function knockOut(byThem) {
   echo('hospital', { x: PLAYER.x, z: PLAYER.z });
   const foe = G.lastHitBy ? NPC[G.lastHitBy] || CHARS.find((c) => c.id === G.lastHitBy) || null : null;
   G.lastHitBy = null;
+  if (byThem && foe && foe.isThem && !G.loose) {
+    // beaten by one of THEM: one card gone from your flat, and THEY know you a little better
+    if (tearCard(foe))
+      setTimeout(() => !G.over && ui.note('print', 'A card is gone from your flat. Torn.', 'bad'), 3000);
+    bookAware(EVIDENCE.aware.lostFight);
+  }
   if (G.loose) {
     if (byThem && foe && foe.isThem && !G.loose.upUsed && huntDown(foe)) {
       G.loose.upUsed = 1;

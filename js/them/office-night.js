@@ -351,6 +351,7 @@ function officeImplant(m) {
           S.done = true;
           G.chipped[v.id] = 1;
           v.lostDay = dayNo(G.t + 6 * 60);
+          markVictim(v, c.id);
         }
       },
       onEnd: () => {

@@ -1,17 +1,37 @@
-//@ ui/case-board — The evidence board (case file)
-//@ Defines: CLUE_ICONS, openBoard, drawPrints, drawSightings, drawHeard, pinPrint, drawStrings, showSuspect, closeBoard, toggleHelp
-//@ Uses:    sim/core, ui/interface, world/grid, them/proofs, input/camera, core/util, town/quirks, town/cast, them/plan, gfx/portraits, …
+//@ ui/case-board — The evidence book: four frames on every suspect, the suspect page, the Whose? tray
+//@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, drawPols, drawPrints, drawHeard, dragFrom, dropOn, pinPrint, refreshBoard, drawStrings, showSuspect, …
+//@ Uses:    ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── the board (case file)
-const CLUE_ICONS = { seen: 'eye', photo: 'camera', item: 'bag', found: 'search', odd: 'question', rumor: 'ear' };
+// ───────────── the board. A cork board that pauses the town. Every suspect shows four frame slots under their polaroid:
+// how many, which ones, clear or fuzzy, at a glance. Nothing on it says a case is enough: that's yours to decide.
+//   empty · faint icon      dashed · searched, nothing      fuzzy · torn soft edge      clear · sharp white border
+//   grey  · seen explained, clean
+const SLOT_TIP = { empty: 'Not searched yet', dashed: 'Searched · nothing', grey: 'Clean' };
+const MARK_STAMP = { them: 'IT’S THEM', cleared: 'CLEARED' };
 function openBoard(focusId) {
   if (!G || !G.started) return;
+  drawTop();
+  drawPols();
+  drawPrints();
+  drawHeard();
+  $('#bd-detail').hidden = true;
+  $('#board .cork').classList.remove('paged');
+  $('#board').hidden = false;
+  UI.caseOpen = true;
+  if (UI.prevSpeed == null) UI.prevSpeed = G.speed;
+  G.speed = 0;
+  requestAnimationFrame(drawStrings);
+  if (focusId && NPC[focusId]) showSuspect(NPC[focusId]);
+  else focusPol(UI.bdSel || suspects()[0].id);
+}
+// the top strip: THEIR card (what THEY are once you know, THEIR five days) and THEIR eye
+function drawTop() {
   const F = FACTIONS[G.faction];
   const fc = $('#bd-faction');
   fc.innerHTML =
     '<span class="pin"></span><span class="fi">' +
     svgIcon(G.factionKnown ? F.icon : 'question') +
-    '</span><b></b><span class="exp"></span><span class="plan" data-tip="THEIR plan"></span>';
+    '</span><b></b><span class="plan" data-tip="THEIR plan"></span><span class="exp"></span>';
   const ph = clamp(G.phase || 1, 1, WEEK);
   fc.querySelector('.plan').innerHTML = Array.from(
     { length: WEEK },
@@ -23,8 +43,7 @@ function openBoard(focusId) {
       (G.factionKnown ? ' · ' + PHASES[G.faction][i] : '') +
       '"></i>',
   ).join('');
-  fc.querySelector('b').textContent = G.factionKnown ? F.label : '';
-  fc.querySelector('b').hidden = !G.factionKnown;
+  fc.querySelector('b').textContent = G.factionKnown ? F.label : 'THEM';
   fc.querySelector('.exp').innerHTML = [0, 1, 2]
     .map(
       (i) =>
@@ -38,116 +57,110 @@ function openBoard(focusId) {
     )
     .join('');
   fc.dataset.tip = G.factionKnown ? 'What THEY are' : 'Catch one in the act';
-  const leads = $('#bd-leads');
-  leads.innerHTML = '';
-  for (const l of G.leads.slice(-3).reverse()) {
-    const p = document.createElement('p');
-    p.className = 'sticky';
-    p.textContent = l;
-    p.style.setProperty('--tilt', (Math.random() * 6 - 3).toFixed(1) + 'deg');
-    leads.appendChild(p);
+  const eye = $('#bd-eye'),
+    es = eyeState();
+  eye.className = 's' + es;
+  eye.innerHTML = svgIcon('eye') + '<b></b>';
+  eye.querySelector('b').textContent = eyeLine();
+}
+function slotHtml(n, f, big) {
+  const st = frameState(n, f),
+    p = cardIn(n, f);
+  const tip = p
+    ? (p.truth ? p.truth : p.what || '') +
+      (p.where ? ' · ' + p.where : '') +
+      ' · ' +
+      DOW[dow(dayNo(p.at))] +
+      ' ' +
+      fmtTime(p.at)
+    : SLOT_TIP[st];
+  return (
+    '<span class="slot ' +
+    st +
+    (big ? ' big' : '') +
+    (p && !p.auto ? ' mine' : '') +
+    '" data-f="' +
+    f +
+    '"' +
+    (p ? ' data-pid="' + p.id + '"' + (!p.auto ? ' draggable="true"' : '') : '') +
+    ' data-tip="' +
+    esc(FRAME[f].name + ' · ' + tip) +
+    '">' +
+    (p ? '<img alt="">' : '') +
+    '<i class="fi">' +
+    svgIcon(FRAME[f].icon) +
+    '</i>' +
+    (big ? '<em>' + FRAME[f].name + '</em>' : '') +
+    '</span>'
+  );
+}
+function fillSlotImgs(el) {
+  for (const s of el.querySelectorAll('.slot[data-pid]')) {
+    const p = G.proofs.find((x) => x.id === +s.dataset.pid),
+      im = s.querySelector('img');
+    if (p && im) im.src = proofImage(p);
   }
-  const eye = $('#bd-eye');
-  eye.innerHTML = svgIcon('eye') + '<span><i style="width:' + Math.round(G.aware) + '%"></i></span>';
-  eye.dataset.tip = 'THEY know · ' + awareWord(G.aware);
+}
+function stampFor(n) {
+  if (n.slain) return ['caught', n.slain === 'mob' ? 'FINISHED' : n.slain === 'fbi' ? 'TAKEN' : 'KILLED'];
+  if (n.exposed) return ['caught', 'UNMASKED'];
+  if (n.gone) return ['gonest', 'GONE'];
+  if (G.mark[n.id]) return [G.mark[n.id], MARK_STAMP[G.mark[n.id]]];
+  if (G.cleared[n.id]) return ['cleared', 'CLEARED'];
+  return null;
+}
+function drawPols() {
   const list = $('#bd-pols');
   list.innerHTML = '';
   for (const n of suspects()) {
-    const card = document.createElement('button');
+    const card = document.createElement('button'),
+      sp = stampFor(n);
     card.className =
       'pol2' +
       (n.slain || n.gone ? ' gone' : '') +
       (n.exposed && !n.slain ? ' unmasked' : '') +
-      (n.evidence >= 100 && !n.exposed ? ' proof' : '') +
-      (G.cleared[n.id] ? ' cleared' : '');
+      (G.cleared[n.id] || G.mark[n.id] === 'cleared' ? ' cleared' : '') +
+      (UI.bdSel === n.id ? ' sel' : '');
     card.dataset.id = n.id;
     card.style.setProperty('--tilt', (hash2(n.id.length, n.id.charCodeAt(0), 3) * 7 - 3.5).toFixed(1) + 'deg');
-    const pins = Math.round(n.evidence / 20);
-    let clues = '';
-    for (const k in CLUE_ICONS)
-      if (n.clues[k])
-        clues +=
-          '<span data-tip="' +
-          k +
-          '">' +
-          svgIcon(CLUE_ICONS[k]) +
-          (n.clues[k] > 1 ? '<em>' + n.clues[k] + '</em>' : '') +
-          '</span>';
-    const held = G.proofs.filter((p) => p.pin === n.id),
-      strong = held.filter(proofShownStrong).length;
-    if (held.length)
-      clues +=
-        '<span data-tip="' +
-        held.length +
-        (held.length === 1 ? ' proof' : ' proofs') +
-        (strong ? ' · ' + strong + ' strong' : '') +
-        '">' +
-        svgIcon('clip') +
-        '<em>' +
-        held.length +
-        '</em></span>';
     card.innerHTML =
-      '<span class="pin"></span><img alt=""><b></b><span class="pips">' +
-      [0, 1, 2, 3, 4].map((i) => '<i class="' + (i < pins ? 'on' : '') + '"></i>').join('') +
-      '</span><span class="clues">' +
-      clues +
-      '</span><span class="hab">' +
-      (!G.cleared[n.id] && !n.exposed
-        ? knownQ(n)
-            .map((q) => '<span data-tip="' + esc(QUIRKS[q].short) + '">' + svgIcon(QUIRKS[q].icon) + '</span>')
-            .join('')
-        : '') +
+      '<span class="pin"></span><img alt=""><b></b><span class="slots">' +
+      FRAMES.map((f) => slotHtml(n, f)).join('') +
       '</span>' +
       (n.slain ? '<span class="xx"></span>' : '') +
-      (G.cleared[n.id] ? '<span class="okst">CLEARED</span>' : '') +
-      (n.slain
-        ? '<span class="okst caught">' + (n.slain === 'mob' ? 'FINISHED' : 'KILLED') + '</span>'
-        : n.exposed
-          ? '<span class="okst caught">UNMASKED</span>'
-          : '') +
-      (n.gone ? '<span class="okst gonest">GONE</span>' : '');
+      (sp ? '<span class="okst ' + sp[0] + '">' + sp[1] + '</span>' : '');
     card.querySelector('img').src = getPortrait(n);
     card.querySelector('b').textContent = n.short;
+    fillSlotImgs(card);
     card.onclick = () => {
-      if (UI.pinSel) {
-        pinPrint(UI.pinSel, n.id);
-        return;
-      }
+      if (UI.pinSel) return pinPrint(UI.pinSel, n.id);
       showSuspect(n);
     };
+    dropOn(card, (p) => pinPrint(p.id, n.id));
     list.appendChild(card);
   }
-  drawPrints();
-  drawSightings();
-  drawHeard();
-  $('#bd-detail').hidden = true;
-  $('#board').hidden = false;
-  UI.caseOpen = true;
-  UI.prevSpeed = G.speed;
-  G.speed = 0;
-  requestAnimationFrame(drawStrings);
-  if (focusId) showSuspect(NPC[focusId]);
+  dragFrom(list);
 }
-// the Unsorted strip: prints that didn't file themselves. Pick one, then a polaroid, to pin it there.
-// the Whose? strip: proofs with nobody's name on them yet. Pick one, then a polaroid, to pin it there.
-// Pinned on the wrong face, a proof proves nothing.
+// the Whose? tray: cards with no owner yet. Drag one onto a suspect, or pick it and then click a polaroid.
+// A card you placed yourself can be dragged back off again.
 function drawPrints() {
   const box = $('#bd-prints');
   if (!box) return;
   const loose = looseProofs().slice(-12).reverse();
-  box.hidden = !loose.length;
   box.innerHTML =
     '<b class="tape">Whose?</b>' +
-    (UI.pinSel ? '<span class="pinhint">' + svgIcon('clip') + 'Pick a suspect</span>' : '');
+    (UI.pinSel ? '<span class="pinhint">' + svgIcon('drag') + 'Pick a suspect</span>' : '');
+  box.classList.toggle('empty', !loose.length);
   for (const p of loose) {
     const el = document.createElement('button');
-    el.className = 'print' + (UI.pinSel === p.id ? ' sel' : '');
+    el.className = 'print ' + p.q + (UI.pinSel === p.id ? ' sel' : '');
+    el.draggable = true;
+    el.dataset.pid = p.id;
     el.style.setProperty('--tilt', ((p.id * 37) % 7) - 3 + 'deg');
-    el.innerHTML = '<img alt=""><span></span><i class="pq">' + (p.src === 'item' ? svgIcon('bag') : '?') + '</i>';
+    el.innerHTML = '<img alt=""><span></span><i class="pq">' + svgIcon(FRAME[p.frame].icon) + '</i>';
     el.querySelector('img').src = proofImage(p);
-    el.querySelector('span').textContent = p.what + ' · ' + DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
-    el.dataset.tip =
-      (p.where || '') + ' · ' + (p.src === 'item' ? 'in your pocket' : 'a print') + ' · pin it on someone';
+    el.querySelector('span').textContent = DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
+    el.dataset.tip = FRAME[p.frame].name + ' · ' + (p.what || '') + (p.where ? ' · ' + p.where : '');
     el.onclick = (e) => {
       e.stopPropagation();
       UI.pinSel = UI.pinSel === p.id ? null : p.id;
@@ -155,45 +168,17 @@ function drawPrints() {
     };
     box.appendChild(el);
   }
-}
-function drawSightings() {
-  const box = $('#bd-sight');
-  if (!box) return;
-  const list = G.sightings.slice(-8).reverse();
-  box.hidden = !list.length;
-  box.innerHTML = '<b class="tape">Sightings</b>';
-  const F = FACTIONS[G.faction];
-  for (const sg of list) {
-    const el = document.createElement('div');
-    el.className = 'sight' + (sg.linked ? ' linked' : '');
-    el.style.setProperty('--tilt', ((sg.id * 29) % 5) - 2 + 'deg');
-    const names = suspects()
-      .map(
-        (s) =>
-          '<i class="' +
-          (sg.linked ? (sg.linked === s.id ? 'hit' : 'x') : sg.struck[s.id] || s.slain || s.gone ? 'x' : '') +
-          '">' +
-          esc(s.short.replace('Mr. ', '')) +
-          '</i>',
-      )
-      .join('');
-    el.innerHTML =
-      '<span class="sg-ic">' +
-      svgIcon(G.factionKnown ? F.icon : 'question') +
-      '</span><em></em><span class="sg-w"></span><span class="sg-n">' +
-      names +
-      '</span>';
-    el.querySelector('em').textContent = DOW[dow(dayNo(sg.t))] + ' ' + fmtTime(sg.t);
-    el.querySelector('.sg-w').textContent = sg.where;
-    box.appendChild(el);
-  }
+  dragFrom(box);
+  dropOn(box, (p) => {
+    if (unassignCard(p)) refreshBoard();
+  });
 }
 function drawHeard() {
   const box = $('#bd-heard');
   if (!box) return;
-  const list = G.heard.slice(-10).reverse();
-  box.hidden = !list.length;
+  const list = G.heard.slice(-5).reverse();
   box.innerHTML = '<b class="tape">Heard around town</b>';
+  box.classList.toggle('empty', !list.length);
   for (const h of list) {
     const el = document.createElement('p');
     el.className = 'heard';
@@ -215,27 +200,63 @@ function drawHeard() {
     box.appendChild(el);
   }
 }
+// drag and drop: a card carries its id; a polaroid or the tray takes it
+function dragFrom(root) {
+  for (const el of root.querySelectorAll('[draggable="true"][data-pid]'))
+    el.ondragstart = (e) => {
+      e.stopPropagation();
+      e.dataTransfer.setData('text/plain', el.dataset.pid);
+      e.dataTransfer.effectAllowed = 'move';
+      UI.dragPid = +el.dataset.pid;
+      $('#board .cork').classList.add('dragging');
+    };
+  root.ondragend = () => {
+    UI.dragPid = null;
+    $('#board .cork').classList.remove('dragging');
+  };
+}
+function dropOn(el, fn) {
+  el.ondragover = (e) => {
+    if (UI.dragPid == null) return;
+    e.preventDefault();
+    el.classList.add('over');
+  };
+  el.ondragleave = () => el.classList.remove('over');
+  el.ondrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    el.classList.remove('over');
+    const p = G.proofs.find((x) => x.id === +(e.dataTransfer.getData('text/plain') || UI.dragPid));
+    UI.dragPid = null;
+    $('#board .cork').classList.remove('dragging');
+    if (p) fn(p);
+  };
+}
 function pinPrint(id, who) {
   const p = G.proofs.find((x) => x.id === id);
   UI.pinSel = null;
-  if (p && !p.auto) {
-    p.pin = who;
-    refreshEvidence();
-  }
-  openBoard();
+  if (p && !assignCard(p, who)) ui.note(FRAME[p.frame].icon, FRAME[p.frame].name + ' · that frame is taken', '');
+  refreshBoard();
   showSuspect(NPC[who]);
 }
+function refreshBoard() {
+  const open = !$('#bd-detail').hidden && UI.bdSel;
+  drawPols();
+  drawPrints();
+  requestAnimationFrame(drawStrings);
+  if (open) showSuspect(NPC[UI.bdSel]);
+}
+// threads on the cork: who you keep seeing together, and your own red string from THEM to whoever you've marked
 function drawStrings() {
   const svg = $('#bd-strings'),
     board = $('#board .cork');
-  if (!svg || !board) return;
+  if (!svg || !board || board.hidden) return;
   const br = board.getBoundingClientRect();
   svg.setAttribute('viewBox', '0 0 ' + br.width + ' ' + br.height);
   const pin = (el) => {
     const r = el.querySelector('.pin').getBoundingClientRect();
-    return [r.left + r.width / 2 - br.left, r.top + r.height / 2 - br.top];
+    return [r.left + r.width / 2 - br.left + board.scrollLeft, r.top + r.height / 2 - br.top + board.scrollTop];
   };
-  // who you keep seeing together: a thread between their polaroids, thicker the more you've seen
   let talk = '';
   const pol = {};
   for (const el of document.querySelectorAll('.pol2')) pol[el.dataset.id] = el;
@@ -261,47 +282,37 @@ function drawStrings() {
       (y2 + 4) +
       '" stroke-width="' +
       Math.min(4, 0.8 + v / 25).toFixed(1) +
-      '"><title>Seen talking</title></path>';
+      '"><title>Seen together</title></path>';
   }
   const [fx, fy] = pin($('#bd-faction'));
   let paths = '';
   for (const el of document.querySelectorAll('.pol2')) {
     const n = NPC[el.dataset.id];
-    if (!n || n.evidence <= 0) continue;
+    if (!n || (G.mark[n.id] !== 'them' && !n.exposed)) continue;
     const [x, y] = pin(el);
     const sag = 30 + Math.hypot(x - fx, y - fy) * 0.12;
     paths +=
-      '<path d="M' +
-      fx +
-      ' ' +
-      fy +
-      ' Q' +
-      (fx + x) / 2 +
-      ' ' +
-      (Math.max(fy, y) + sag) +
-      ' ' +
-      x +
-      ' ' +
-      y +
-      '" stroke-width="' +
-      (1.2 + n.evidence / 45).toFixed(1) +
-      '" opacity="' +
-      (0.45 + n.evidence / 200).toFixed(2) +
-      '"/>';
+      '<path d="M' + fx + ' ' + fy + ' Q' + (fx + x) / 2 + ' ' + (Math.max(fy, y) + sag) + ' ' + x + ' ' + y + '"/>';
   }
   svg.innerHTML = talk + paths;
 }
+// the suspect page: the four frames at full size, what you know about them, who they're with, notes, your mark
 function showSuspect(n) {
   if (!n) return;
+  UI.bdSel = n.id;
+  UI.bdFrame = UI.bdFrame || 0;
   const d = $('#bd-detail');
+  const with_ = Object.entries(G.pairs)
+    .filter(([k, v]) => v >= 8 && k.split('|').includes(n.id))
+    .sort((a, b) => b[1] - a[1])
+    .map(([k]) => NPC[k.split('|').find((x) => x !== n.id)])
+    .filter(Boolean)
+    .slice(0, 4);
   d.innerHTML =
     '<button class="x" id="bd-dx" aria-label="Back">' +
     svgIcon('x') +
     '</button><div class="sd-head"><img alt=""><div><b></b><span class="sd-role"></span>' +
     hearts(n.rel) +
-    '<span class="pev big" data-tip="Evidence"><i style="width:' +
-    Math.round(n.evidence) +
-    '%"></i></span>' +
     (n.id !== 'lenny'
       ? '<span class="psus big' +
         (n.sus >= 60 ? ' hi' : '') +
@@ -311,56 +322,63 @@ function showSuspect(n) {
         Math.round(n.sus) +
         '%"></i></span></span>'
       : '') +
-    '</div></div><div class="sd-hab"></div><div class="sd-snaps"></div><ul class="sd-notes"></ul>';
+    '<span class="sd-mark"></span></div></div><div class="sd-frames">' +
+    FRAMES.map((f) => slotHtml(n, f, true)).join('') +
+    '</div><div class="sd-zoom" hidden></div><h4>What you know</h4><div class="sd-hab"></div>' +
+    (with_.length ? '<h4>Who they’re with</h4><div class="sd-with"></div>' : '') +
+    '<h4>Notes</h4><ul class="sd-notes"></ul>';
   d.querySelector('.sd-head img').src = getPortrait(n);
   d.querySelector('.sd-head b').textContent = n.name;
   d.querySelector('.sd-role').textContent =
-    n.role +
-    (n.slain
-      ? ' · dead'
-      : n.exposed
-        ? ' · unmasked, still out there · kill it, trap it, or break into its home'
-        : G.cleared[n.id]
-          ? ' · cleared'
-          : n.evidence >= 100
-            ? ' · proof — confront them in public'
-            : '');
+    n.role + (n.slain ? ' · dead' : n.exposed ? ' · unmasked, still out there' : '');
+  // your mark: your conviction only. It changes nothing in the world.
+  const mk = d.querySelector('.sd-mark');
+  for (const [k, label] of [
+    [null, 'No mark'],
+    ['them', 'IT’S THEM'],
+    ['cleared', 'CLEARED'],
+  ]) {
+    const b = document.createElement('button');
+    b.className = 'mk ' + (k || 'none') + ((G.mark[n.id] || null) === k ? ' on' : '');
+    b.textContent = label;
+    b.onclick = () => {
+      if (k) G.mark[n.id] = k;
+      else delete G.mark[n.id];
+      refreshBoard();
+    };
+    mk.appendChild(b);
+  }
+  fillSlotImgs(d);
+  const zoom = d.querySelector('.sd-zoom');
+  d.querySelectorAll('.sd-frames .slot').forEach((s, i) => {
+    s.classList.toggle('foc', i === UI.bdFrame);
+    if (!s.dataset.pid) return;
+    s.onclick = () => {
+      const p = G.proofs.find((x) => x.id === +s.dataset.pid);
+      if (!p) return;
+      UI.bdFrame = i;
+      zoom.hidden = false;
+      zoom.className = 'sd-zoom ' + (p.grey ? 'grey' : p.q);
+      zoom.innerHTML = '<img alt=""><span></span>';
+      zoom.querySelector('img').src = proofImage(p);
+      zoom.querySelector('span').textContent =
+        (p.truth || p.what || '') +
+        (p.where ? ' · ' + p.where : '') +
+        ' · ' +
+        DOW[dow(dayNo(p.at))] +
+        ' ' +
+        fmtTime(p.at);
+      zoom.onclick = () => (zoom.hidden = true);
+    };
+  });
+  dragFrom(d);
   const hab = d.querySelector('.sd-hab'),
     kq = knownQ(n);
-  if (G.cleared[n.id] || n.exposed || !kq.length) hab.hidden = true;
-  else hab.innerHTML = kq.map((q) => '<span>' + svgIcon(QUIRKS[q].icon) + esc(QUIRKS[q].short) + '</span>').join('');
-  const snaps = d.querySelector('.sd-snaps');
-  // the proofs you hold on them: STRONG says so; the rest are "?" until you lay them down
-  const held = G.proofs
-    .filter((p) => p.pin === n.id)
-    .sort((a, b) => proofShownStrong(b) - proofShownStrong(a) || b.at - a.at);
-  for (const p of held) {
-    const f = document.createElement('figure');
-    f.className = 'sdp' + (proofShownStrong(p) ? ' strong' : '') + (p.auto ? '' : ' pinned');
-    f.style.setProperty('--tilt', ((p.id * 53) % 7) - 3 + 'deg');
-    f.innerHTML = '<img alt=""><span class="stamp"></span><figcaption></figcaption>';
-    f.querySelector('img').src = proofImage(p);
-    f.querySelector('.stamp').textContent = proofLabel(p);
-    f.querySelector('figcaption').textContent = p.what;
-    f.dataset.tip =
-      (p.where || '') + ' · ' + DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at) + (p.auto ? '' : ' · click to unpin');
-    if (!p.auto)
-      f.onclick = () => {
-        p.pin = null;
-        refreshEvidence();
-        openBoard();
-        showSuspect(n);
-      };
-    snaps.appendChild(f);
-  }
-  for (const rec of n.snaps.slice().reverse()) {
-    const im = document.createElement('img');
-    im.src = snapImage(n, rec);
-    im.alt = '';
-    im.style.setProperty('--tilt', (Math.random() * 6 - 3).toFixed(1) + 'deg');
-    snaps.appendChild(im);
-  }
-  if (!snaps.children.length) snaps.innerHTML = '<span class="empty">' + svgIcon('camera') + '</span>';
+  hab.innerHTML = kq.length
+    ? kq.map((q) => '<span class="chip">' + svgIcon(QUIRKS[q].icon) + esc(QUIRKS[q].short) + '</span>').join('')
+    : '<span class="none">Nothing yet. Watch them.</span>';
+  const wb = d.querySelector('.sd-with');
+  if (wb) wb.innerHTML = with_.map((w) => '<span class="chip">' + esc(w.short) + '</span>').join('');
   const ul = d.querySelector('.sd-notes');
   for (const note of n.notes.slice(-8).reverse()) {
     const li = document.createElement('li');
@@ -377,9 +395,48 @@ function showSuspect(n) {
     ul.appendChild(li);
   }
   d.hidden = false;
-  $('#bd-dx').onclick = () => {
-    d.hidden = true;
-  };
+  $('#board .cork').classList.add('paged');
+  for (const el of document.querySelectorAll('.pol2')) el.classList.toggle('sel', el.dataset.id === n.id);
+  $('#bd-dx').onclick = closeSuspect;
+  requestAnimationFrame(drawStrings);
+}
+function closeSuspect() {
+  $('#bd-detail').hidden = true;
+  $('#board .cork').classList.remove('paged');
+  requestAnimationFrame(drawStrings);
+}
+function focusPol(id) {
+  UI.bdSel = id;
+  for (const el of document.querySelectorAll('.pol2')) {
+    el.classList.toggle('sel', el.dataset.id === id);
+    if (el.dataset.id === id) el.focus({ preventScroll: false });
+  }
+}
+// keys on the board: arrows move between suspects, E opens the page, A/D move between frames, Esc closes
+function boardKey(k) {
+  const ids = suspects().map((n) => n.id),
+    i = Math.max(0, ids.indexOf(UI.bdSel)),
+    cols = getComputedStyle($('#bd-pols')).gridTemplateColumns.split(' ').length || 5;
+  const step = { arrowleft: -1, arrowright: 1, arrowup: -cols, arrowdown: cols }[k];
+  if (step) {
+    const j = clamp(i + step, 0, ids.length - 1);
+    focusPol(ids[j]);
+    if (!$('#bd-detail').hidden) showSuspect(NPC[ids[j]]);
+    return true;
+  }
+  if (k === 'e' || k === 'enter' || k === ' ') {
+    showSuspect(NPC[ids[i]]);
+    return true;
+  }
+  if ((k === 'a' || k === 'd') && !$('#bd-detail').hidden) {
+    UI.bdFrame = (UI.bdFrame + (k === 'a' ? 3 : 1)) % 4;
+    const s = $('#bd-detail').querySelectorAll('.sd-frames .slot');
+    s.forEach((x, j) => x.classList.toggle('foc', j === UI.bdFrame));
+    if (s[UI.bdFrame] && s[UI.bdFrame].dataset.pid) s[UI.bdFrame].click();
+    else $('#bd-detail .sd-zoom').hidden = true;
+    return true;
+  }
+  return false;
 }
 function closeBoard() {
   UI.pinSel = null;

@@ -1,6 +1,6 @@
 //@ them/true-form — True form: the change, then hunt or flee
-//@ Defines: trueForm, trueFormTick, mayHuntYou, witnessTrue, youSeeTrue, addSighting, alibiTick, revert, exposeMember, killMember, exposedTick
-//@ Uses:    sim/core, ui/interface, core/util, town/suspicion, sim/actions, town/cast, town/fleeing, gfx/portraits, town/npc-update, audio/sound, …
+//@ Defines: trueForm, trueFormTick, mayHuntYou, witnessTrue, youSeeTrue, revert, exposeMember, killMember, exposedTick
+//@ Uses:    sim/core, ui/interface, core/util, town/suspicion, sim/actions, town/cast, town/fleeing, them/plan, gfx/portraits, town/npc-update, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── true form: two game minutes to change, then it hunts you or runs
 function trueForm(n, why, mode) {
@@ -49,6 +49,8 @@ function trueForm(n, why, mode) {
     }),
   );
   if (inView || forYou(n, why)) audio.sting('caught');
+  // a night ambush on you, or THEM coming in your door, with nobody else about: the private numbers
+  if ((why === 'ambush' || why === 'raid') && !bystanders(n).some((w) => !w.isThem)) privateFight(n);
   return true;
 }
 function trueFormTick(n, dt) {
@@ -60,8 +62,8 @@ function trueFormTick(n, dt) {
   if (tf.scan <= 0) {
     tf.scan = 0.5;
     const bs = bystanders(n).filter((w) => w.riteBy !== n.id);
-    if (bs.length && n.tell.t < TF_CHANGE + 0.5) {
-      // somebody watched the face come off: they'll say so, with you in the room
+    if (bs.length && (n.tell.t < TF_CHANGE + 0.5 || tf.mode === 'trapped')) {
+      // somebody watched the face come off (or stood over it in your trap): they'll say so, with you in the room
       tf.witChange = true;
       for (const w of bs) if (!w.def.stranger) (w.sawChange || (w.sawChange = {}))[n.id] = G.t;
     }
@@ -235,7 +237,7 @@ function trueFormTick(n, dt) {
   if (
     !P.onMap ||
     (home && !tf.cornered) ||
-    G.t - tf.lastSeen > 3 ||
+    G.t - tf.lastSeen > (darkNow() ? EVIDENCE.fight.loseSight * SPEEDS[1] : 3) || // at night it takes longer to lose it
     (!tf.cornered && G.t - tf.t0 > (tf.long || 12)) ||
     crowd
   ) {
@@ -304,8 +306,10 @@ function trueFormTick(n, dt) {
 function mayHuntYou() {
   const a = G.aware,
     s = G.stage;
-  return s >= 5 || (s >= 4 && a >= 30) || (s >= 3 && a >= 50) || a >= 70;
+  return s >= 5 || (s >= 4 && a >= 30) || (s >= 3 && a >= 50) || a >= 70 || huntForced();
 }
+// a night THEY come whatever the odds: you killed one where nobody saw, or a confrontation left it doubting you
+const huntForced = () => G.huntNights > 0 || G.huntNight === tonightId();
 function witnessTrue(w, n) {
   if ((w.def && w.def.fbi) || w.thrall) return; // they've seen worse
   const tf = n.trueForm;
@@ -360,20 +364,6 @@ function youSeeTrue(n) {
   R.pulse = 1;
   audio.sting('caught');
 }
-// a dated card for every true form you see without seeing whose it is; alibis strike names off
-function addSighting(n, where) {
-  const sg = { id: ++G.sightId, t: G.t, where, who: n.id, until: G.t + 3, struck: {} };
-  for (const s of suspects()) if (s !== n && s.seenAt != null && Math.abs(G.t - s.seenAt) <= 2) sg.struck[s.id] = 1;
-  G.sightings.push(sg);
-  if (G.sightings.length > 12) G.sightings.shift();
-  if (n.trueForm) n.trueForm.sighting = sg;
-  return sg;
-}
-function alibiTick(n) {
-  for (const sg of G.sightings)
-    if (G.t <= sg.until && sg.who !== n.id && !sg.struck[n.id] && NPC[sg.who] && NPC[sg.who].trueForm)
-      sg.struck[n.id] = 1;
-}
 // back in human shape. If anyone watched the face come off, the whole town knows whose it was.
 function revert(n) {
   const tf = n.trueForm;
@@ -411,8 +401,7 @@ function exposeMember(n, how) {
       : 'Changed in front of witnesses. Everybody knows now.',
     { by: 'you' },
   );
-  cardSoon({ char: n, stamp: 'UNMASKED', before: n.evidence, after: 100 }, () => snapImage(n, rec));
-  n.evidence = 100;
+  cardSoon({ char: n, stamp: 'UNMASKED' }, () => snapImage(n, rec));
   setTimeout(() => {
     if (!G.over) ui.note('confront', n.short + ' is unmasked. Still out there.', 'bad');
   }, 2600);
@@ -479,10 +468,7 @@ function killMember(n, how) {
       : 'Dead. ' + (wasKnown ? 'It won’t come back.' : 'It was ' + n.short + ' all along.'),
     { by: 'you' },
   );
-  cardSoon({ char: n, stamp: how === 'mob' ? 'FINISHED' : 'KILLED', before: n.evidence, after: 100 }, () =>
-    snapImage(n, rec),
-  );
-  n.evidence = 100;
+  cardSoon({ char: n, stamp: how === 'mob' ? 'FINISHED' : 'KILLED' }, () => snapImage(n, rec));
   addStress(how === 'mob' ? 3 : 6);
   echo('killed', { x: n.x, z: n.z, who: n.id });
   audio.sting('onto');

@@ -1,6 +1,6 @@
 //@ town/suspicion — Suspicion and danger per person
 //@ Defines: addSus, addDanger, seesSpot, reactTo, ridicule, hitBack
-//@ Uses:    sim/core, ui/interface, core/util, town/fleeing, world/grid, town/echoes, sim/actions, them/awareness, world/light-map, world/vision, …
+//@ Uses:    sim/core, ui/interface, core/util, town/fleeing, them/proofs, world/grid, town/echoes, sim/actions, them/awareness, world/light-map, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── suspicion
 function addSus(n, v) {
@@ -17,7 +17,7 @@ const asleep = (n) => !!(n.queue[0] && n.queue[0].anim === 'sleep' && n.queue[0]
 
 // ───────────── danger: how cornered someone feels right now. Past 70 they react; below that, everyone looks the same.
 // Pinned down: one of THEM with 70+ evidence, or photographed or walked in on during a tell today.
-const pinned = (n) => !!(n.isThem && (n.evidence >= 70 || n.pinnedDay === dayNo()));
+const pinned = (n) => !!(n.isThem && (caseSize(n) >= 3 || n.pinnedDay === dayNo()));
 const dangerFloor = (n) => (n.isThem ? 10 * G.slain.length : 0); // the last of three sits at 20
 const canPanic = (n) => !!(n && !n.isPlayer && n.def && !n.def.stranger && n.id !== 'lenny' && !n.exposed && n.onMap);
 function addDanger(n, v) {
@@ -55,7 +55,7 @@ function reactTo(n, why) {
     return flee(n);
   }
   if ((n.danger >= 90 || why === 'pinned') && trueForm(n, why)) return; // too early, too light, in the street: it keeps its face and acts it out
-  if (n.evidence < 60) return ridicule(n);
+  if (caseSize(n) < 3) return ridicule(n);
   flee(n);
 }
 function ridicule(n) {

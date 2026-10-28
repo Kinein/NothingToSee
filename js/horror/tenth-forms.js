@@ -1,6 +1,6 @@
 //@ horror/tenth-forms — Tenth forms: barely visible traits
 //@ Defines: TRACE_KINDS, TRACE_NOTE, TRACE_TINT, traceHeadM, EYE_WHITE, SHINE, traceEye, deadWalk, traceTick, startTrace, traceStep, photoTrace
-//@ Uses:    sim/core, core/util, them/plan, them/proofs, town/cast, town/suspicion, play/photos, town/cell
+//@ Uses:    sim/core, core/util, play/oddities, them/plan, them/proofs, play/photos, town/cast, town/suspicion, town/cell
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the tenth part. Nothing happens: somebody just looks a little more like what they are, for an hour or so.
 // Nothing is added to them and nothing moves wrong. Only what's already there, a shade off: the skin a little grey, the head
@@ -62,7 +62,8 @@ const aloneNow = (n) => !CHARS.some((c) => c !== n && !c.isPlayer && c.onMap && 
 function traceTick() {
   if (!G.started || G.over || !theyStir() || !PLAYER.onMap) return;
   const care = clamp(1.2 - G.aware / 100, 0.35, 1.2); // the more THEY watch you, the tighter THEY hold it
-  for (const n of them()) {
+  // and the ordinary ones with a tic of their own: on film it looks just the same
+  for (const n of them().concat(oddPeople('body'))) {
     if (
       !n ||
       n.trace ||
@@ -117,7 +118,7 @@ function photoTrace(n) {
     !tr ||
     tr.photo ||
     tr.k < 0.6 ||
-    !n.isThem ||
+    !(n.isThem || oddityIn(n, 'body')) ||
     n.exposed ||
     n.surrendered ||
     Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) > 4.5
@@ -128,18 +129,23 @@ function photoTrace(n) {
   G.traceShot = G.traceShot || {};
   if (G.traceShot[key]) return false;
   G.traceShot[key] = 1;
-  const before = n.evidence;
-  const p = addProof({
-    cat: 'weak',
-    true: n.id,
-    auto: true,
-    what: n.short + ' · ' + TRACE_NOTE[tr.kind].replace(/\.$/, ''),
-    where: placeName(n.x, n.z),
-    rec: { how: 'photo', at: G.t, t: n.animT, pose: n.pose, trace: { fac: tr.fac, kind: tr.kind, k: 1 } },
-    recWho: n.id,
-  });
+  const what = n.short + ' · ' + TRACE_NOTE[tr.kind].replace(/\.$/, ''),
+    rec = { how: 'photo', at: G.t, t: n.animT, pose: n.pose, trace: { fac: tr.fac, kind: tr.kind, k: 1 } };
+  const p = n.isThem
+    ? addProof({
+        frame: 'body',
+        q: 'fuzzy',
+        true: n.id,
+        auto: true,
+        what,
+        where: placeName(n.x, n.z),
+        rec,
+        recWho: n.id,
+      })
+    : innocentCard(n, { what, where: placeName(n.x, n.z), rec, recWho: n.id });
+  if (!p) return false;
   n.clues.photo = (n.clues.photo || 0) + 1;
   addNote(n, 'Photo: ' + TRACE_NOTE[tr.kind], { by: 'you' });
-  proofCard(p, before);
+  proofCard(p);
   return true;
 }

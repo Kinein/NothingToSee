@@ -1,6 +1,6 @@
 //@ taken/back-up — Back up top
 //@ Defines: capDropSpot, capDrop, capOutcome
-//@ Uses:    taken/taken, sim/core, taken/coming, core/util, player/needs, horror/layer, them/proofs, world/objects, audio/sound, sim/pose, …
+//@ Uses:    taken/taken, sim/core, taken/coming, core/util, player/needs, horror/layer, world/objects, audio/sound, sim/pose, world/paths, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── back up top, as if nothing had happened
 function capDropSpot() {
@@ -148,12 +148,8 @@ function capOutcome(sp) {
       P.lostDay = dayNo();
       echo('abduct', { x: CAP.at[0], z: CAP.at[1], quiet: true });
     } else if (fac === 'lizards') {
-      // THEY go through your pockets: the best photo you had of THEM, and whatever else you were carrying
-      const pf = G.proofs.filter((p) => p.src === 'photo').sort((a, b) => PROOF_RANK[b.cat] - PROOF_RANK[a.cat])[0];
-      if (pf) {
-        G.proofs.splice(G.proofs.indexOf(pf), 1);
-        refreshEvidence();
-      }
+      // THEY go through your pockets: the card that hurt THEM most, and whatever else you were carrying
+      const pf = tearCard(null);
       const had = G.inv.trap > 0 || G.inv.pills > 0 || G.inv.flashlight;
       G.inv.trap = 0;
       G.inv.pills = 0;

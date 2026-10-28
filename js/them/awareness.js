@@ -1,5 +1,5 @@
 //@ them/awareness — THEIR awareness of you, settled at 06:00
-//@ Defines: bookPhoto, bookNight, bookRemoval, applyAwareness
+//@ Defines: bookPhoto, bookNight, bookRemoval, bookAware, applyAwareness
 //@ Uses:    sim/core, town/cast, core/util, ui/interface, town/echoes, data/tuning
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── THEIR awareness. Each member books what they noticed today; it all lands at 06:00.
@@ -15,6 +15,12 @@ function bookNight(n) {
 function bookRemoval() {
   G.awareRemoved = (G.awareRemoved || 0) + 1;
 }
+// a flat booking for something you did in front of THEM: a confrontation gone wrong, a kill nobody saw, a fight lost
+function bookAware(v) {
+  G.awareExtra = (G.awareExtra || 0) + v;
+}
+// the night that's coming (or the one you're in): the day it started on
+const tonightId = () => (hourF() < 6 ? dayNo(G.t - 12 * 60) : dayNo());
 function applyAwareness() {
   let add = 0;
   for (const n of them()) {
@@ -26,10 +32,11 @@ function applyAwareness() {
     }
     n.dangerPeak = n.danger;
   }
-  add += 15 * (G.awareRemoved || 0);
+  add += 15 * (G.awareRemoved || 0) + (G.awareExtra || 0);
   if (G.playerChip && G.faction === 'aliens') add += 5;
   G.awareBook = {};
   G.awareRemoved = 0;
+  G.awareExtra = 0;
   const before = G.aware;
   G.aware = add > 0 ? clamp(G.aware + Math.round(add), 0, 100) : Math.max(0, G.aware - 1);
   if (G.aware > before) {
@@ -54,5 +61,6 @@ const awareWord = (a) =>
             ? 'Hunted'
             : 'Ready for you';
 const temper = (n) => (G.traits[n.id] || {}).temper;
+const watchedNow = (n) => !!(G.watchedUntil && G.watchedUntil[n.id] > G.t); // after a partial fail: no business in public
 const alive = () => them().filter((n) => !n.slain); // still breathing, unmasked or not
 const covert = () => alive().filter((n) => !n.exposed); // still hiding

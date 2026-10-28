@@ -1,6 +1,6 @@
 //@ them/tells — Tells: the small signs THEY give
-//@ Defines: npcSeesPlayer, roomHasOthers, tryTell, beginTell, notifyPing, endTell, tellTick, applyTellAnim, awardTell, caughtWatching, ritualCaught, revealFaction, addEvidence
-//@ Uses:    sim/core, core/util, town/cast, world/grid, ui/interface, audio/sound, world/objects, sim/actions, town/npc-update, world/vision, …
+//@ Defines: npcSeesPlayer, roomHasOthers, tryTell, beginTell, notifyPing, endTell, tellTick, applyTellAnim, awardTell, caughtWatching, ritualCaught, revealFaction
+//@ Uses:    sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the tells
 function npcSeesPlayer(n, maxD = 9) {
@@ -90,6 +90,11 @@ function tryTell(n, b) {
   return true;
 }
 function beginTell(n, a, typeHint) {
+  if (watchedNow(n) && !atHome(n)) {
+    a.dur = Math.min(a.dur || 1, 1);
+    n.urge = n.urgeTh * 0.6;
+    return;
+  } // doubted in public: the whole town is watching it today
   if (!theyStir() && darkNow()) {
     a.dur = Math.min(a.dur || 1, 1);
     n.urge = n.urgeTh * 0.6;
@@ -430,7 +435,8 @@ function applyTellAnim(c, T, tl) {
   }
   if (F.slit && fx.eye) fx.slit = true;
 }
-// a tell caught on film: a proof in your hand. Mid-change, the face is half gone: whose it was is for you to say.
+// a tell caught on film: a card in your hand. The body slipping is Body, THEIR business at THEIR spot is Habit.
+// Mid-change the face is still there: a clear Body card on whoever it is.
 function awardTell(n) {
   const tl = n.tell;
   if (tl) tl.awarded = true;
@@ -438,8 +444,7 @@ function awardTell(n) {
     change = type === 'true';
   addStress(change ? 10 : 4);
   if (!G.factionKnown) revealFaction();
-  const before = n.evidence,
-    where = placeName(n.x, n.z);
+  const where = placeName(n.x, n.z);
   const rec = change
     ? { type: 'true', how: 'photo', at: G.t, t: n.animT, pose: 'stand', tt: 2.2 }
     : {
@@ -452,24 +457,19 @@ function awardTell(n) {
         side: tl && tl.side,
         fac: tl && tl.fac,
       };
-  const known = change && n.exposed;
   const p = addProof({
-    cat: change ? 'medium' : PROOF_TELL[type] || 'weak',
+    frame: TELL_FRAME[type] || 'body',
+    q: change || slipClear(type) ? 'clear' : 'fuzzy',
     true: n.id,
-    auto: !change || !!known,
-    what: change ? 'Something changing' : n.short + ' · ' + TELL_NOTE[type].replace(/\.$/, ''),
+    auto: true,
+    what: n.short + ' · ' + TELL_NOTE[type].replace(/\.$/, ''),
     where,
     rec,
     recWho: n.id,
   });
-  if (!change) {
-    n.clues.photo = (n.clues.photo || 0) + 1;
-    addNote(n, 'Photo: ' + TELL_NOTE[type], { by: 'you' });
-  } else if (!known) {
-    G.leads.push('Caught one changing · ' + where.toLowerCase() + ' · whose?');
-    if (G.leads.length > 6) G.leads.shift();
-  }
-  proofCard(p, before);
+  n.clues.photo = (n.clues.photo || 0) + 1;
+  addNote(n, 'Photo: ' + TELL_NOTE[type], { by: 'you' });
+  proofCard(p);
   audio.sting('onto');
 }
 // THEY notice you watching. You learn nothing from it; THEY learn about you.
@@ -519,12 +519,4 @@ function ritualCaught() {
 function revealFaction() {
   G.factionKnown = true;
   ui.reveal(FACTIONS[G.faction]);
-}
-function addEvidence(n, amt, note, clue, by) {
-  const before = n.evidence;
-  n.evidence = Math.min(100, n.evidence + amt);
-  if (note) addNote(n, note, by ? { by } : null);
-  if (clue && n.clues) n.clues[clue] = (n.clues[clue] || 0) + 1;
-  if (before < 100 && n.evidence >= 100)
-    setTimeout(() => ui.note('confront', n.short + ' · proof. Say it in public.', 'good'), 1800);
 }

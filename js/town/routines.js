@@ -1,5 +1,5 @@
 //@ town/routines — Habits and secrets: everyone sneaks off once a day
-//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, doHabit, secretTick, clearSuspect
+//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, doHabit, secretTick
 //@ Uses:    sim/core, ui/interface, town/cast, them/tells, core/util, world/grid, town/npc-update, world/objects, world/vision, town/quirks, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── routines: everyone sneaks off once a day. The guilty do it to be themselves.
@@ -239,25 +239,4 @@ function secretTick(n, dt) {
     ui.say(n, pick(['You didn’t see this.', 'Don’t tell anyone.', '…Hi.']), 2.6);
     audio.sting('awkward');
   }
-}
-function clearSuspect(n, spot, img) {
-  if (G.cleared[n.id]) return;
-  G.cleared[n.id] = 1;
-  const A = secretFor(n, spot);
-  addNote(n, 'Photo: just ' + A.note + '. Only human.', { by: 'you' });
-  addStress(-4);
-  ui.card({ char: n, img: img || getPortrait(n), stamp: 'CLEARED', before: 0, after: 0, cleared: true });
-  ui.note('camera', n.short + ': just ' + A.note, 'good');
-  audio.sting('clear');
-  const left = suspects().filter((x) => !x.exposed && !G.cleared[x.id]);
-  if (left.length && left.every((x) => x.isThem))
-    setTimeout(
-      () =>
-        ui.note(
-          G.factionKnown ? FACTIONS[G.faction].icon : 'question',
-          'It’s ' + left.map((x) => x.short).join(', '),
-          'onto',
-        ),
-      2600,
-    );
 }

@@ -1,6 +1,6 @@
 //@ combat/timing-bar — THEIR attack: the timing bar
-//@ Defines: openFight, fightTick, strike, closeFight, knockBack, fightOutcome, earshot, viewLine, perceptionTick, clinicCheck
-//@ Uses:    sim/core, ui/interface, town/suspicion, core/util, audio/sound, town/fleeing, data/tuning, world/grid, gfx/renderer, player/needs, …
+//@ Defines: privateFight, openFight, fightTick, strike, closeFight, knockBack, fightOutcome, earshot, viewLine, perceptionTick, clinicCheck, privateKill
+//@ Uses:    sim/core, ui/interface, core/util, town/suspicion, data/tuning, world/grid, audio/sound, town/fleeing, them/awareness, gfx/renderer, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the one hit: a tracker sweeps a red bar; land it in the green
 // the picture on the fight panel: one of THEM in its true form. The picture is the same every time (a witness
@@ -8,17 +8,40 @@
 // cached under this same key: `at: 0` instead of the change's start time, so the second fight with the same
 // one doesn't redraw it either.
 const fightSnapRec = () => ({ type: 'true', how: 'witness', at: 0, t: 2, pose: 'stand' });
-function openFight(n, lunge) {
-  if (UI.fight || G.over || !n.onMap || !PLAYER.onMap || ARREST.on) return;
+// alone with it (you attacked it, a night ambush, guarding a witness), it's far tougher than in front of a crowd
+function privateFight(n) {
   const tf = n.trueForm;
+  if (!tf || tf.private || tf.public || G.loose) return;
+  tf.private = true;
+  tf.hp = tf.maxHp = EVIDENCE.fight.privateHp[G.faction] || tf.hp;
+}
+// three or more who saw it change, standing round: they land a blow when it starts, and pull it off you after
+const crowdHelp = (n) =>
+  earshot(n).filter((w) => w !== n && !w.isThem && !w.def.stranger && sawRecently(w, n)).length >=
+  EVIDENCE.fight.crowdSaw;
+function openFight(n, lunge) {
+  if (UI.fight || G.over || !n.onMap || !PLAYER.onMap || ARREST.on || UI.cf) return;
+  const tf = n.trueForm,
+    F = EVIDENCE.fight;
   let [g, sp] = FIGHT_DIFF[tf ? G.faction : n.isThem ? 'them' : 'normal'];
   if (PLAYER.needs.stress >= 80) g *= 2 / 3; // breaking: fight power −30%
   if (PLAYER.needs.energy < 30) sp *= 1.2;
   if (G.inv.crowbar) g *= 1.3; // something heavy in your hand
   if (tf && tf.mode === 'trapped') {
-    g *= 1.5;
-    sp *= 0.8;
+    g *= F.trapWindow;
+    sp *= F.trapSpeed;
+    if (!tf.trapHit) {
+      tf.trapHit = true;
+      tf.hp = Math.max(1, tf.hp + F.trapHp); // caught fast: it's already hurt
+    }
   } else if (tf && tf.wounded) g *= 1.12;
+  if (tf && tf.private && !G.loose) g *= F.privateWindow;
+  if (tf && !tf.private && !G.loose && !tf.crowdHit && tf.mode !== 'trapped' && crowdHelp(n)) {
+    tf.crowdHit = true; // the crowd gets one in first
+    tf.hp = Math.max(1, tf.hp - 1);
+    const w = pick(earshot(n).filter((x) => x !== n && !x.isThem && !x.def.stranger));
+    if (w) ui.say(w, pick(['Get it!', 'NOW!', 'Hold it down!']), 2);
+  }
   if (tf && G.loose) {
     // Friday: the rest of THEM close in, and every one you put down makes the rest worse
     const pack = CHARS.filter(
@@ -130,7 +153,12 @@ function fightOutcome(n, hit) {
     if (hit) {
       tf.hp--;
       gesture(n, 'flinch', 0.5);
-      if (tf.hp <= 0) return G.loose ? looseKill(n) : surrender(n, 'beaten'); // nobody gives up on Friday
+      if (tf.hp <= 0) {
+        if (G.loose) return looseKill(n); // nobody gives up on Friday
+        if (tf.guard) witnessSaved(tf.guard);
+        if (tf.private && !tf.witChange && !tf.public) return privateKill(n);
+        return surrender(n, 'beaten');
+      }
       if (tf.mode === 'flee' && n.fleeing) {
         hardReset(n);
         n.fleeing = null;
@@ -157,7 +185,15 @@ function fightOutcome(n, hit) {
         tf.t0 = Math.max(tf.t0, G.t - 6);
       }
     } else {
-      swing(n, Math.round((HURT[G.faction] || 18) * (G.loose ? 1.2 : 1)), true); // it gets you
+      if (!tf.private && !G.loose && crowdHelp(n) && chance(EVIDENCE.fight.crowdSave)) {
+        // somebody pulls it off you
+        const w = pick(earshot(n).filter((x) => x !== n && !x.isThem && !x.def.stranger));
+        if (w) ui.say(w, pick(['Get OFF them!', 'Not on my street!', 'Leave them ALONE!']), 2.2);
+        knockBack(n, PLAYER, 1.2);
+        return;
+      }
+      const blow = (HURT[G.faction] || 18) * (G.loose ? 1.2 : tf.private ? EVIDENCE.fight.privateBlow : 1);
+      swing(n, Math.round(blow), true); // it gets you
       if (!G.over) knockBack(PLAYER, n, 0.9);
     }
     return;
@@ -166,15 +202,26 @@ function fightOutcome(n, hit) {
   if (ear.length) protectAfter(n);
   echo('fight', { x: n.x, z: n.z, who: n.id });
   if (n.isThem) {
-    if (hit && trueForm(n, 'hit', 'attack')) return; // the disguise drops, and it fights back (only when it may: see mayShed)
+    // a hit is a test. At night, alone with you, or late in THEIR week, it drops the mask and fights you for real.
+    const H = EVIDENCE.hit;
+    if (hit && (darkNow() || !ear.length || theirDay() >= H.day)) {
+      n.cfOk = G.t;
+      if (trueForm(n, 'hit', 'attack')) {
+        privateFight(n);
+        return;
+      }
+    }
     if (hit) {
-      for (const w of ear) addSus(w, 15);
-      ui.say(n, pick(['Get OFF me!', 'Are you insane?', 'Somebody help!']), 2.2);
+      // by day, with people about, early on: it plays the victim
+      for (const w of ear) addSus(w, H.sus);
+      ui.say(n, pick(['Somebody help!', 'Get OFF me!', 'Are you insane?']), 2.2);
+      if (ear.some((w) => !w.def.stranger || w.def.officer)) caution(n, 'assault');
+      bookAware(EVIDENCE.aware.hitNoChange);
       flee(n);
       return;
-    } // too early, too light: it takes it like a person would
+    }
     for (const w of ear) addSus(w, 10);
-    if (n.exposed || n.evidence >= 60 || chance(0.5)) {
+    if (n.exposed || caseSize(n) >= 3 || chance(0.5)) {
       ui.say(n, pick(['Get OFF me.', 'Out of my way.']), 2);
       flee(n);
     } else ridicule(n);
@@ -307,4 +354,13 @@ function clinicCheck() {
     audio.blip('ring');
   }, 900);
   setTimeout(() => ui.note('mail', 'A letter from Wexley Clinic', 'bad'), 3200);
+}
+// a kill nobody saw: nothing is proven, nobody thanks you, and THEY come for you for the next two nights
+function privateKill(n) {
+  killMember(n, 'killed');
+  bookAware(EVIDENCE.aware.privateKill);
+  G.huntNights = Math.max(G.huntNights || 0, EVIDENCE.huntedNights);
+  setTimeout(() => {
+    if (!G.over) ui.note('eye', 'Nobody saw. THEY will want to know who did it.', 'bad');
+  }, 2400);
 }

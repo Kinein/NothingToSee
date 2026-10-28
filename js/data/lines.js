@@ -71,6 +71,67 @@ const FAKE_LINES = ['{s} was in the closet again. In the dark.', '{s} came out o
 // ── Junk found rummaging (play/stashes)
 const JUNK = ['a lost spoon and two buttons', 'loose change and a hairgrip', 'a dead battery', 'a folded love note, not to you', 'a dried-out sandwich crust', 'a key to nothing', 'a loose fuse', 'three dice and a bottle cap', 'a broken watch'];
 
+// ── Innocent oddities and THEIR frame-ups (play/oddities)
+// what an ordinary person keeps in their own things that looks like THEIRS, and what it really is
+const ODDITY_HOME = {
+  envelope: { k: 'envelope', what: 'A cash envelope', icon: 'coin', desc: 'a fat envelope of cash, no name on it', truth: 'a gambling debt. The letter’s in with the cash' },
+  pills: { k: 'pills', what: 'Unlabelled pills', icon: 'paper', desc: 'a jar of pills, the label scratched off', truth: 'heart pills. Nobody’s meant to know' },
+  letters: { k: 'letters', what: 'A bundle of letters', icon: 'paper', desc: 'letters, tied with string, a strange crest on each', truth: 'love letters. Not from who you’d think' },
+  mask: { k: 'mask', what: 'A spare face', icon: 'paper', desc: 'a rubber face, folded flat', truth: 'a Halloween mask. Still in its bag' },
+  scanner: { k: 'scanner', what: 'A box with a light', icon: 'glyph', desc: 'a small black box, one light blinking', truth: 'a police scanner. They listen in at night' },
+};
+const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
+const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];
+const ODDITY_HEARD = ['Heard it at the diner. Everyone’s saying it.', 'I don’t know. Somebody said it. Forget I did.', 'That’s just talk. Nobody actually saw anything.'];
+
+// ── Pressing someone about THEM (play/oddities)
+const PRESS_SAW = ['I saw it. I SAW its face come off. {s}.', 'It was {s}. I watched it change. I’ll say it again.', 'You want to know? It was {s}. I was there.'];
+const PRESS_BOUGHT = ['{s} helped me out. That’s all.', 'I don’t know anything about {s}. Leave it.', '{s}’s been good to me. Why?'];
+const PRESS_VICTIM = ['I don’t remember. {s} was there, I think. Then nothing.', 'There’s a gap. An hour. {s} was the last face.', 'It’s all fog. {s}. Something about {s}.'];
+const PRESS_NONE = ['I don’t know anything.', 'About what?', 'You’re asking the wrong person.', 'Nothing. I’ve seen nothing.'];
+const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
+
+// ── The confrontation (play/arena): THEY lie, a human tells the truth, and it all sounds the same
+const ARENA_OPEN = ['What is this?', 'You want to do this here? Fine.', 'Go on, then. Say it.', 'Everybody look. Here we go.', 'Is this about me?'];
+const ARENA_SAY = {
+  home: ['There’s nothing in my desk but pens.', 'Nobody keeps anything at mine. Look all you like.', 'My things are my things. Nothing in them.'],
+  habit: ['I was never there. Not once.', 'At that hour? I was in bed.', 'I go straight home after work. Every day.'],
+  body: ['Look at me. Do I look strange to you?', 'My face is my face.', 'That’s not me in any picture.'],
+  contact: ['Nobody can say a word against me.', 'Who says? Name one person.', 'I hardly know anyone here.'],
+};
+const ARENA_FILLER = ['I’ve lived in this town twenty years.', 'I take my coffee black. Always have.', 'I was born two streets from here.', 'I pay my taxes. Mostly.', 'I’ve never missed a day of work.'];
+const ARENA_LIE_BOUGHT = ['And {w} will tell you I was with them.', 'Ask {w}. {w} knows me.'];
+const ARENA_REBUT = ['That could be anyone in a coat.', 'A blur. You’ve got a blur.', 'That’s a shadow. That’s all that is.', 'Anyone can say anything.'];
+const ARENA_BACKED = { card: ['And this.', 'Then explain this one.'], habit: ['Every day, at that hour. I watched you.', 'I know where you go.'], witness: ['I saw it too.', 'It’s true. I was there.'] };
+const ARENA_CLEAR = ['…', 'Where did you get that?', 'That— that proves nothing.', 'Put that away.'];
+const ARENA_WRONG = ['What has that got to do with anything?', 'That’s not what I said.', 'You’re not even listening.'];
+const ARENA_PASS = ['See? Nothing.', 'Nothing to say to that?', 'Thought not.'];
+const ARENA_TRUTH = ['…Yes? That’s true. Everyone knows that.', 'And? It’s true.', 'That’s the one thing nobody doubts.'];
+const ARENA_KNOW = { lie: ['{q}? Not me. Never.', 'Me? {q}? Don’t be silly.'], open: ['How well do you even know me?', 'You don’t know the first thing about me.'] };
+const ARENA_COUNTER = ['They’ve been following me for days. Look at them.', 'Ask yourselves who’s been sneaking round people’s homes.', 'Look at the state of them. Look.', 'Who takes pictures of people’s faces? Who does that?'];
+const ARENA_HOLD = ['I’m fine. I’m not the one on trial.', 'Don’t change the subject.', 'Answer the question.'];
+const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We’re done here.'];
+const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
+const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
+const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
+const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
+const ARENA_END = {
+  total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },
+  partial: ['Enough of this face.', 'You want to SEE?', 'FINE.'],
+  pfail: ['Are we done? Good.', 'You’ll regret this.', 'I’ll be seeing you.'],
+  fail: ['Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'],
+  wrong: ['How could you.', 'I’ll never forget this.', 'Get away from me.'],
+};
+const ARENA_CROWD = { up: ['Oh my God.', 'It’s true…', 'Look at its face!'], down: ['Ha!', 'Get a grip.', 'Not this again.'], still: ['…', 'Hm.'] };
+// what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
+const ARENA_TALK = {
+  total: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
+  partial: ['{s} changed. Right there in front of us.', 'Don’t go out tonight. {s}’s still out there.'],
+  pfail: ['Strange business with {s} and {p}.', 'Did you see {s}’s face? Something wasn’t right.'],
+  fail: ['{p}’s lost it. Shouting at {s} like that.', 'Keep away from {p}. Seriously.'],
+  wrong: ['What {p} said to {s}. Shameful.', 'Poor {s}. {p} told everyone their business.'],
+};
+
 // ── Endings (game/state)
 const ENDINGS = {
   fired: ['You’re fired!', 'Mr. Hale’s patience is over. Next time, don’t forget your work.'],

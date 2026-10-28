@@ -55,7 +55,6 @@ function freshG(start) {
     policeAt: 0,
     ambushNight: 0,
     health: 100,
-    sightId: 0,
     binFood: [],
     tvBugged: null,
     control: null,
@@ -92,7 +91,6 @@ function freshG(start) {
     away: null,
     assaulted: [],
     fights: 0,
-    sightings: [],
     events: [],
     heard: [],
     headline: null,
@@ -147,6 +145,26 @@ function freshG(start) {
     proofs: [],
     proofId: 0,
     pinShots: {},
+    dashed: {}, // suspect id → { frame: when you searched it and found nothing }
+    mark: {}, // suspect id → 'them' | 'cleared': your own stamp on the board
+    odd: {}, // human id → their innocent oddity: { frame, k, given, flipped }
+    framed: [], // humans THEY have framed: { id, by, at, obj, done }
+    rumours: [], // what's going round: { about, line, from, innocent | by, told }
+    victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
+    recant: {}, // witnesses THEY got to: bribed, wiped or killed
+    cfDay: {}, // suspect id → the day you last confronted them
+    madUntil: 0, // the town called you mad: −1 lean until then
+    grudge: {}, // suspect id → the accused you wronged: their friends lean against you
+    watchedUntil: {}, // member id → doubted in public: no business in public places until then
+    fearUntil: 0, // after a public change: people go home early
+    huntNights: 0, // nights THEY still hunt you after a private kill
+    huntNight: 0, // a night THEY come for you whatever the odds
+    follower: null, // { id, until }: someone who came with you
+    awareExtra: 0, // awareness booked for the next 06:00 by what you did (see EVIDENCE.aware)
+    tearTonight: 0, // cards THEY tear from your flat tonight
+    hintsUntil: 0, // after a total success people share more
+    witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
+    arenaTalk: [], // what the town says after a confrontation, still to be heard: { at, text, by }
     ritualBroke: 0,
     gatherKnown: false,
     enc: null,
@@ -241,6 +259,7 @@ function newGame(name, preview) {
   makeCover();
   makeQuirks();
   makeStashes();
+  makeOddities();
   for (const n of CHARS) if (n.def.plan) makePlan(n);
   placeChar(PLAYER, 9, 29);
   PLAYER.dir = PLAYER.tdir = Math.PI;
@@ -330,7 +349,7 @@ function syncNPCs() {
 function saveGame() {
   if (!G || !G.started || G.over || CAP.on) return;
   const data = {
-    v: 8,
+    v: 9,
     G,
     explored: Array.from(explored),
     player: { name: PLAYER.name, x: PLAYER.x, z: PLAYER.z, needs: PLAYER.needs },
@@ -340,7 +359,6 @@ function saveGame() {
         {
           rel: n.rel,
           sus: n.sus,
-          evidence: n.evidence,
           rumors: n.rumors,
           notes: n.notes,
           snaps: n.snaps,
@@ -392,7 +410,7 @@ function readSave() {
   }
 }
 function loadGame(data) {
-  if (!data || data.v !== 8) return false;
+  if (!data || data.v !== 9) return false; // older saves kept the evidence bar: they start over
   resetWorld();
   G = Object.assign(freshG(0), data.G, {
     started: true,
@@ -439,7 +457,6 @@ function loadGame(data) {
       }
     } // the grey cars came while you were away
   G.phase = phaseNow();
-  refreshEvidence();
   for (const n of CHARS) if (n.def.plan) makePlan(n);
   for (let i = 0; i < explored.length; i++) explored[i] = data.explored[i] || 0;
   if (!G.stashes) makeStashes();
