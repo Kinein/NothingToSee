@@ -1,8 +1,9 @@
 //@ combat/timing-bar — THEIR attack: the timing bar
 //@ Defines: openFight, fightTick, strike, closeFight, knockBack, fightOutcome, earshot, viewLine, perceptionTick, clinicCheck
-//@ Uses:    sim/core, ui/interface, town/suspicion, core/util, audio/sound, town/fleeing, data/tuning, world/grid, gfx/renderer, player/needs, …
+//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, core/util, audio/sound, town/fleeing, world/grid, gfx/renderer, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── the one hit: a tracker sweeps a red bar; land it in the green
+// ───────────── the one hit: a tracker sweeps a red bar; land it in the green. Dead center of the green is a clean
+// hit: it goes down for a moment, long enough to get another blow in. A fuse under the bar burns down to the miss.
 // the picture on the fight panel: one of THEM in its true form. The picture is the same every time (a witness
 // snapshot carries no date), so it's drawn once per person per game, ahead of time (warmLater in trueForm), and
 // cached under this same key: `at: 0` instead of the change's start time, so the second fight with the same
@@ -29,20 +30,34 @@ function openFight(n, lunge) {
     sp *= 1 + 0.14 * k + 0.1 * pack;
   }
   g = clamp(g, 0.06, 0.6);
-  const a = rand(0.06, 0.94 - g);
-  UI.fight = { n, a, b: a + g, sp, pos: 0, dir: 1, t: 0, res: null, rt: 0 };
+  const a = rand(0.06, 0.94 - g),
+    c = tf ? (g * FIGHT.clean) / 2 : 0, // half the clean core: only a true form can be knocked flat
+    el = $('#fight');
+  UI.fight = {
+    n,
+    a,
+    b: a + g,
+    c0: a + g / 2 - c,
+    c1: a + g / 2 + c,
+    sp,
+    pos: 0,
+    dir: 1,
+    t: 0,
+    go: false,
+    late: false,
+    res: null,
+    clean: false,
+    rt: 0,
+    ft: el.querySelector('.ft'),
+    fuse: el.querySelector('.ffuse i'),
+  };
   closeMenu();
-  const el = $('#fight');
-  el.className = 'overlay';
+  el.className = 'overlay ready' + (lunge ? ' lunge' : '');
   el.hidden = false;
   el.querySelector('img').src = tf ? snapImage(n, fightSnapRec(n)) : getPortrait(n);
-  el.querySelector('.fres').textContent = lunge ? 'It lunges' : '';
-  let hp = el.querySelector('.fhp');
-  if (!hp) {
-    hp = document.createElement('span');
-    hp.className = 'fhp';
-    el.querySelector('.fhead').appendChild(hp);
-  }
+  el.querySelector('.fres').textContent = lunge ? 'It lunges' : tf && tf.mode === 'trapped' ? 'It’s held' : 'Strike';
+  el.querySelector('.fsub').textContent = c ? 'Dead center knocks it down' : '';
+  const hp = el.querySelector('.fhp');
   hp.innerHTML = tf
     ? Array.from(
         { length: Math.max(tf.maxHp || 0, FOE_HP[G.faction] || 3) },
@@ -50,9 +65,16 @@ function openFight(n, lunge) {
       ).join('')
     : '';
   hp.dataset.tip = tf ? 'How much fight it has left' : '';
-  const fg = el.querySelector('.fg');
+  const fg = el.querySelector('.fg'),
+    fc = el.querySelector('.fc');
   fg.style.left = (a * 100).toFixed(1) + '%';
   fg.style.width = (g * 100).toFixed(1) + '%';
+  fc.hidden = !c;
+  fc.style.left = ((1 - FIGHT.clean) * 50).toFixed(1) + '%';
+  fc.style.width = (FIGHT.clean * 100).toFixed(1) + '%';
+  UI.fight.ft.style.left = '0%';
+  UI.fight.ft.classList.remove('back');
+  UI.fight.fuse.style.transform = '';
   if (G.speed > 1) G.speed = 1;
   audio.blip('click');
 }
@@ -65,41 +87,72 @@ function fightTick(dtReal) {
     return;
   }
   f.t += dtReal;
+  if (!f.go) {
+    if (f.t < FIGHT.grace) return; // the tracker holds still while the panel comes up
+    f.go = true;
+    $('#fight').classList.remove('ready');
+  }
   f.pos += f.dir * f.sp * dtReal;
   if (f.pos > 1) {
     f.pos = 2 - f.pos;
     f.dir = -1;
+    f.ft.classList.add('back');
   } else if (f.pos < 0) {
     f.pos = -f.pos;
     f.dir = 1;
+    f.ft.classList.remove('back');
   }
-  $('#fight .ft').style.left = (f.pos * 100).toFixed(2) + '%';
-  if (f.t > 6) strike(); // freezing up counts as a miss
+  f.ft.style.left = (f.pos * 100).toFixed(2) + '%';
+  const left = 1 - (f.t - FIGHT.grace) / FIGHT.timeout; // the fuse under the bar
+  f.fuse.style.transform = 'scaleX(' + Math.max(0, left).toFixed(3) + ')';
+  if (left < 0.3 && !f.late) {
+    f.late = true;
+    $('#fight').classList.add('late');
+  }
+  if (left <= 0) strike(true); // freezing up counts as a miss
 }
-function strike() {
+function strike(froze) {
   const f = UI.fight;
-  if (!f || f.res) return;
-  f.res = f.pos >= f.a && f.pos <= f.b ? 'hit' : 'miss';
-  f.rt = 0.75;
-  const el = $('#fight');
+  if (!f || f.res || (!f.go && !froze)) return; // too soon: the panel is still coming up
+  const on = !froze && f.pos >= f.a && f.pos <= f.b;
+  f.res = on ? 'hit' : 'miss';
+  f.clean = on && f.pos >= f.c0 && f.pos <= f.c1 && f.c1 > f.c0;
+  f.rt = f.clean ? 0.95 : 0.8;
+  const el = $('#fight'),
+    tf = f.n.trueForm;
+  el.classList.remove('ready', 'late', 'lunge');
   el.classList.add(f.res);
-  el.querySelector('.fres').textContent = f.res === 'hit' ? 'Hit' : 'Miss';
-  const tf = f.n.trueForm,
-    hp = el.querySelector('.fhp');
-  if (f.res === 'hit' && tf && hp) {
+  if (f.clean) el.classList.add('clean');
+  const fm = el.querySelector('.fm');
+  fm.style.left = (f.pos * 100).toFixed(2) + '%';
+  el.querySelector('.fres').textContent = f.clean ? 'Clean hit' : on ? 'Hit' : 'Miss';
+  // why it went wide, so the next one can be better: still coming up to the green, or already past it
+  const early = f.dir > 0 ? f.pos < f.a : f.pos > f.b;
+  el.querySelector('.fsub').textContent = on
+    ? f.clean && tf && tf.hp > 1
+      ? 'It’s down · hit it again'
+      : ''
+    : froze
+      ? 'You froze'
+      : early
+        ? 'Too early'
+        : 'Too late';
+  const hp = el.querySelector('.fhp');
+  if (on && tf && hp) {
     const pips = hp.querySelectorAll('i:not(.off)');
-    if (pips.length) pips[pips.length - 1].classList.add('off');
+    if (pips.length) pips[pips.length - 1].classList.add('off', 'gone');
   }
-  if (f.res === 'hit') {
-    R.pulse = 0.6;
-    audio.sting('caught');
+  if (on) {
+    R.pulse = f.clean ? 0.9 : 0.6;
+    audio.hx('thud', 0, f.clean ? 1 : 0.8);
+    if (f.clean) audio.hx('crack', 0, 0.9);
   } else audio.sting('awkward');
 }
 function closeFight() {
   const f = UI.fight;
   UI.fight = null;
   $('#fight').hidden = true;
-  if (f) fightOutcome(f.n, f.res === 'hit');
+  if (f) fightOutcome(f.n, f.res === 'hit', f.clean);
 }
 // push someone a step away from someone else
 function knockBack(c, from, dist) {
@@ -118,7 +171,7 @@ function knockBack(c, from, dist) {
   c.path = null;
   c.moving = false;
 }
-function fightOutcome(n, hit) {
+function fightOutcome(n, hit, clean) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, hit);
   addStress(hit ? 2 : 5);
@@ -146,6 +199,14 @@ function fightOutcome(n, hit) {
       n.tell.lunge = false;
       if (tf.mode !== 'trapped') knockBack(n, PLAYER, 1.4);
       ui.float(n, '−1', 'good');
+      if (clean && tf.mode !== 'trapped') {
+        // dead center: it goes down where it lands, and it isn't running anywhere. Get to it before it gets up.
+        tf.mode = 'attack';
+        tf.lastSeen = G.t;
+        tf.t0 = Math.max(tf.t0, G.t - 6);
+        tf.stunUntil = G.t + FIGHT.down;
+        return;
+      }
       // hurt and not cornered: it may break and run. Chase it down.
       if (tf.mode !== 'trapped' && !tf.cornered && tf.hp === 1 && chance(G.faction === 'lizards' ? 0.7 : 0.55)) {
         tf.mode = 'flee';

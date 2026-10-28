@@ -567,22 +567,77 @@ body.capturing #view{cursor:default}
 #cap .cp-bub::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:#efe9d8;border-bottom:0}
 body.capturing #hunt{display:none}
 
-#fight{display:grid;place-items:center;padding:16px;background:radial-gradient(circle at 50% 50%,rgba(60,8,4,.35),rgba(3,4,6,.7));z-index:9;cursor:crosshair}
-#fight .fbox{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:18px 22px 16px;border-radius:14px;background:rgba(16,10,10,.94);border:1px solid rgba(208,81,60,.55);box-shadow:0 24px 70px rgba(0,0,0,.7);animation:pop .18s ease-out}
-#fight .fhead{display:flex;align-items:center;gap:16px;min-height:72px}
-#fight img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:50% 25%;border:2px solid rgba(208,81,60,.7);background:#0d0d0d}
-#fight .fres{font:italic 700 40px/1 var(--f-disp);color:#f2e6cc;min-width:90px}
-#fight .fbar{position:relative;width:100%;height:30px;border-radius:7px;background:linear-gradient(#6a1d15,#3a0d09);border:1px solid rgba(255,255,255,.14);overflow:hidden}
-#fight .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#8fd27a,#4f8a44);box-shadow:0 0 16px rgba(140,220,120,.55)}
-#fight .ft{position:absolute;top:-2px;bottom:-2px;left:0;width:5px;margin-left:-2.5px;border-radius:2px;background:#fbf2dc;box-shadow:0 0 10px #fff}
-#fight .fkey{font:14px var(--f-type);letter-spacing:.1em;color:var(--dim)}
-#fight .fhp{display:flex;gap:6px;margin-left:auto}
-#fight .fhp i{width:13px;height:13px;border-radius:50%;background:#d0513c;box-shadow:0 0 8px rgba(208,81,60,.6);transition:all .3s}
-#fight .fhp i.off{background:transparent;box-shadow:none;border:1.5px solid rgba(208,81,60,.45)}
-#fight .fhead{width:100%}
+#fight{display:grid;place-items:center;padding:16px;background:radial-gradient(ellipse at 50% 50%,rgba(70,10,6,.22),rgba(30,3,2,.62) 62%,rgba(3,2,3,.86));z-index:9;cursor:crosshair;--fr:208,81,60}
+#fight::before,#fight::after{content:'';position:absolute;inset:0;pointer-events:none}
+#fight::before{box-shadow:inset 0 0 120px 30px rgba(120,10,6,.55);animation:fbeat 1.1s ease-in-out infinite}
+#fight::after{opacity:0;background:radial-gradient(circle at 50% 50%,transparent 30%,rgba(200,20,10,.5))}
+#fight.late::before{animation-duration:.55s}
+#fight.miss::after{animation:fblood .6s ease-out}
+#fight.hit::after{background:radial-gradient(circle at 50% 50%,rgba(255,244,220,.16),transparent 60%);animation:fblood .35s ease-out}
+#fight .fbox{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:12px;width:min(460px,calc(100vw - 32px));box-sizing:border-box;padding:18px 22px 14px;background:linear-gradient(#22100e,#0c0809);border:1px solid rgba(var(--fr),.5);box-shadow:0 0 0 1px rgba(0,0,0,.6),0 24px 70px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,220,190,.06);animation:pop .18s ease-out}
+#fight .fbox::after{content:'';position:absolute;inset:-7px;pointer-events:none;--c:rgba(var(--fr),.85);
+  background:linear-gradient(var(--c),var(--c)) 0 0/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 0 0/2px 12px no-repeat,
+  linear-gradient(var(--c),var(--c)) 100% 0/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 0/2px 12px no-repeat,
+  linear-gradient(var(--c),var(--c)) 0 100%/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 0 100%/2px 12px no-repeat,
+  linear-gradient(var(--c),var(--c)) 100% 100%/12px 2px no-repeat,linear-gradient(var(--c),var(--c)) 100% 100%/2px 12px no-repeat}
+#fight .fhead{display:flex;align-items:center;gap:16px}
+#fight .fside{flex:none;display:flex;flex-direction:column;gap:7px;width:84px}
+#fight .fpic{position:relative;box-sizing:border-box;height:84px;padding:3px;border:1px solid rgba(var(--fr),.7);background:#0a0606;box-shadow:0 0 18px rgba(var(--fr),.35),0 8px 18px rgba(0,0,0,.6);overflow:hidden}
+#fight .fpic img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 25%;filter:contrast(1.12) saturate(.85)}
+#fight .fpic::after{content:'';position:absolute;inset:3px;pointer-events:none;background:radial-gradient(circle at 50% 40%,transparent 45%,rgba(60,0,0,.55));mix-blend-mode:multiply}
+#fight .fslash{position:absolute;left:-30%;top:50%;width:160%;height:3px;margin-top:-1.5px;background:linear-gradient(90deg,transparent,#fff6e2 30%,#fff 50%,#fff6e2 70%,transparent);box-shadow:0 0 10px #fff,0 0 22px rgba(255,220,170,.8);transform:rotate(-38deg) scaleX(0);opacity:0;pointer-events:none}
+#fight .ftxt{display:flex;flex-direction:column;gap:5px;min-width:0;padding-bottom:12px}
+#fight .fres{font:italic 700 40px/1 var(--f-disp);color:#f2e6cc;text-shadow:0 2px 14px rgba(0,0,0,.8);white-space:nowrap}
+#fight .fsub{min-height:1.2em;font:13.5px/1.2 var(--f-type);letter-spacing:.06em;color:var(--dim)}
+#fight .fhp{display:flex;gap:3px;height:7px;padding:0 2px}
+#fight .fhp i{flex:1;background:linear-gradient(#ef6a52,#a8301f);transform:skewX(-14deg);box-shadow:0 0 8px rgba(var(--fr),.6);transition:background .3s,box-shadow .3s,border-color .3s}
+#fight .fhp i.off{background:transparent;box-shadow:none;border:1.5px solid rgba(var(--fr),.4)}
+#fight .fhp i.gone{animation:fpip .5s ease-out}
+#fight .fbar{position:relative;height:34px;overflow-x:clip;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,230,200,.09) calc(10% - 1px) 10%),repeating-linear-gradient(-45deg,rgba(0,0,0,.18) 0 4px,transparent 4px 9px),linear-gradient(#6e1f16,#3b0e0a 55%,#2a0806);border:1px solid rgba(255,220,190,.16);box-shadow:inset 0 2px 8px rgba(0,0,0,.7),inset 0 -1px 0 rgba(255,255,255,.05);transition:box-shadow .2s,filter .2s}
+#fight .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#93d77c,#4e8b43 60%,#3e7536);box-shadow:0 0 16px rgba(140,220,120,.55),inset 1px 0 0 rgba(220,255,200,.5),inset -1px 0 0 rgba(220,255,200,.5)}
+#fight .fc{position:absolute;top:0;bottom:0;background:linear-gradient(#f4ffd8,#b6eb8c 55%,#8fd27a);box-shadow:0 0 12px rgba(230,255,190,.75)}
+#fight .fc::before,#fight .fc::after{content:'';position:absolute;left:50%;margin-left:-5px;border:5px solid transparent}
+#fight .fc::before{top:-1px;border-top-color:#fffbe8}
+#fight .fc::after{bottom:-1px;border-bottom-color:#fffbe8}
+#fight .ft{position:absolute;top:-5px;bottom:-5px;left:0;width:4px;margin-left:-2px;background:#fffaf0;box-shadow:0 0 6px #fff,0 0 16px rgba(255,236,200,.9)}
+#fight .ft::before{content:'';position:absolute;top:5px;bottom:5px;right:100%;width:46px;background:linear-gradient(to left,rgba(255,240,215,.42),transparent)}
+#fight .ft.back::before{right:auto;left:100%;background:linear-gradient(to right,rgba(255,240,215,.42),transparent)}
+#fight .fm{position:absolute;top:-7px;bottom:-7px;left:0;width:2px;margin-left:-1px;display:none;background:currentColor;color:#fff;box-shadow:0 0 10px currentColor}
+#fight .ffuse{height:3px;margin-top:-4px;background:rgba(255,220,190,.08)}
+#fight .ffuse i{display:block;height:100%;background:linear-gradient(90deg,rgba(228,162,74,.55),var(--sodium));box-shadow:0 0 8px rgba(228,162,74,.6);transform-origin:0 50%}
+#fight.late .ffuse i{background:var(--blood);box-shadow:0 0 10px rgba(var(--fr),.9);animation:flate .3s steps(2) infinite}
+#fight .fkey{align-self:center;font:14px var(--f-type);letter-spacing:.1em;color:var(--dim)}
 #fight .fkey kbd{font:inherit;color:var(--sodium)}
-#fight.hit .fbar{box-shadow:0 0 0 3px var(--ok),0 0 24px rgba(147,180,131,.6)} #fight.hit .fres{color:#bfe3ae}
-#fight.miss .fbar{box-shadow:0 0 0 3px var(--blood)} #fight.miss .fres{color:#f08a74}
+#fight.ready .ft{animation:fready .35s ease-out}
+#fight.ready .fbar{filter:brightness(.8)}
+#fight.lunge .fpic{animation:flunge .35s cubic-bezier(.2,1.4,.4,1)}
+#fight.hit .fbox{animation:fshake .28s ease-out}
+#fight.hit .fbar{box-shadow:0 0 0 2px var(--ok),0 0 24px rgba(147,180,131,.6),inset 0 2px 8px rgba(0,0,0,.7)}
+#fight.hit .fres{color:#c6eab4}
+#fight.hit .fslash{animation:fslash .32s ease-out forwards}
+#fight.hit .fpic img{animation:fhurt .45s ease-out}
+#fight.hit .fm,#fight.miss .fm{display:block}
+#fight.hit .ft,#fight.miss .ft{opacity:0}
+#fight.clean .fres{color:#fff1c2;text-shadow:0 0 18px rgba(255,214,120,.7),0 2px 14px rgba(0,0,0,.8)}
+#fight.clean .fbar{box-shadow:0 0 0 2px #f5e3a0,0 0 30px rgba(255,220,140,.7),inset 0 2px 8px rgba(0,0,0,.7)}
+#fight.clean .fm{color:#fff3c4}
+#fight.clean .fbox{animation:fshake .4s ease-out}
+#fight.miss .fbox{animation:fshake .45s ease-out;border-color:rgba(var(--fr),.9)}
+#fight.miss .fbar{box-shadow:0 0 0 2px var(--blood),0 0 24px rgba(var(--fr),.55),inset 0 2px 8px rgba(0,0,0,.7)}
+#fight.miss .fres{color:#f08a74}
+#fight.miss .fsub{color:#e4a090}
+#fight.miss .fm{color:#ff8a6e}
+#fight.miss .fpic{animation:flunge .4s cubic-bezier(.2,1.4,.4,1);box-shadow:0 0 30px rgba(var(--fr),.8),0 8px 18px rgba(0,0,0,.6)}
+@keyframes fbeat{0%,100%{opacity:.7}14%{opacity:1}28%{opacity:.75}42%{opacity:.95}}
+@keyframes fblood{0%{opacity:1}100%{opacity:0}}
+@keyframes fshake{0%{transform:none}15%{transform:translate(-7px,2px)}30%{transform:translate(6px,-2px)}45%{transform:translate(-4px,1px)}60%{transform:translate(3px,0)}80%{transform:translate(-1px,0)}100%{transform:none}}
+@keyframes flunge{0%{transform:scale(1.28)}100%{transform:none}}
+@keyframes fslash{0%{transform:rotate(-38deg) scaleX(0);opacity:1}55%{transform:rotate(-38deg) scaleX(1);opacity:1}100%{transform:rotate(-38deg) scaleX(1);opacity:0}}
+@keyframes fhurt{0%{filter:brightness(2.4) contrast(1.4)}100%{filter:contrast(1.12) saturate(.85)}}
+@keyframes fpip{0%{transform:skewX(-14deg) scale(1.7);background:#fff;box-shadow:0 0 16px #fff}100%{transform:skewX(-14deg)}}
+@keyframes fready{0%{opacity:0;transform:scaleY(.2)}100%{opacity:1;transform:none}}
+@keyframes flate{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){#fight::before,#fight .fbox,#fight .fpic,#fight.ready .ft{animation:none!important}}
 .aim{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
 .aim i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ff2a1a;box-shadow:0 0 12px 4px rgba(255,40,20,.7);animation:aimp .35s ease-in-out infinite}
 @keyframes aimp{50%{transform:scale(1.5)}}
@@ -730,7 +785,7 @@ svg.na{fill:#cbbdaa;stroke:none}
 </div>
 <div id="pie" hidden></div>
 <div id="scene" class="overlay" hidden aria-hidden="true"><div class="beam"></div><div class="table"></div><i class="g g1"></i><i class="g g2"></i><i class="g g3"></i><b class="cap"></b></div>
-<div id="fight" class="overlay" hidden><div class="fbox" role="dialog" aria-label="Fight"><div class="fhead"><img alt=""><b class="fres"></b></div><div class="fbar"><i class="fg"></i><i class="ft"></i></div><span class="fkey"><kbd>E</kbd> · <em class="tapword">Click</em> in the green</span></div></div>
+<div id="fight" class="overlay" hidden><div class="fbox" role="dialog" aria-label="Fight"><div class="fhead"><div class="fside"><div class="fpic"><img alt=""><i class="fslash"></i></div><span class="fhp"></span></div><div class="ftxt"><b class="fres"></b><span class="fsub"></span></div></div><div class="fbar"><i class="fg"><i class="fc"></i></i><i class="fm"></i><i class="ft"></i></div><div class="ffuse"><i></i></div><span class="fkey"><kbd>E</kbd> · <em class="tapword">Click</em> in the green</span></div></div>
 
 <div id="title" class="overlay">
   <div class="t-inner">
@@ -788,7 +843,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: proof, or trap bait. THEY hate seeing them on you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>Lays down your 4 best proofs, for good · 1 STRONG or 4 medium, in front of people, and it gives up</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Fight</kbd><span>Swing up close. When IT lunges: E in the green</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Fight</kbd><span>Swing up close. When IT lunges: E in the green · dead center knocks it down for a free hit</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down and it gives up · the FBI comes for it</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Half-changed</kbd><span>Real only at night, late in THEIR week, with a clear head · shaken, it’s in your head and the camera shows nothing</span></div>
@@ -1138,6 +1193,10 @@ const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY a
 // a fight is rounds of the timing bar. A true form takes several hits to put down; every miss, it gets you.
 const FIGHT_DIFF = { normal: [0.4, 0.55], them: [0.25, 0.85], aliens: [0.2, 0.9], lizards: [0.15, 1.15], zombies: [0.18, 1.0] };
 const FOE_HP = { aliens: 2, lizards: 3, zombies: 3 };
+// the timing bar itself (combat/timing-bar). grace: real seconds the tracker holds still as the panel opens, so a key
+// already on its way for something else doesn't waste the swing. timeout: real seconds before freezing up counts as a
+// miss. clean: the middle share of the green that lands a clean hit. down: game minutes a clean hit leaves it on the ground.
+const FIGHT = { grace: 0.35, timeout: 6, clean: 0.34, down: 3.2 };
 
 // ── Doors left ajar (town/doors)
 // Someone stepping into a room can forget to pull the door to. It stays half open and you can see in through the gap.
@@ -17940,7 +17999,8 @@ function comeBack() {
   cam.follow = true;
   if (!G.speed) G.speed = 1;
 }
-// ───────────── the one hit: a tracker sweeps a red bar; land it in the green
+// ───────────── the one hit: a tracker sweeps a red bar; land it in the green. Dead center of the green is a clean
+// hit: it goes down for a moment, long enough to get another blow in. A fuse under the bar burns down to the miss.
 // the picture on the fight panel: one of THEM in its true form. The picture is the same every time (a witness
 // snapshot carries no date), so it's drawn once per person per game, ahead of time (warmLater in trueForm), and
 // cached under this same key: `at: 0` instead of the change's start time, so the second fight with the same
@@ -17967,20 +18027,34 @@ function openFight(n, lunge) {
     sp *= 1 + 0.14 * k + 0.1 * pack;
   }
   g = clamp(g, 0.06, 0.6);
-  const a = rand(0.06, 0.94 - g);
-  UI.fight = { n, a, b: a + g, sp, pos: 0, dir: 1, t: 0, res: null, rt: 0 };
+  const a = rand(0.06, 0.94 - g),
+    c = tf ? (g * FIGHT.clean) / 2 : 0, // half the clean core: only a true form can be knocked flat
+    el = $('#fight');
+  UI.fight = {
+    n,
+    a,
+    b: a + g,
+    c0: a + g / 2 - c,
+    c1: a + g / 2 + c,
+    sp,
+    pos: 0,
+    dir: 1,
+    t: 0,
+    go: false,
+    late: false,
+    res: null,
+    clean: false,
+    rt: 0,
+    ft: el.querySelector('.ft'),
+    fuse: el.querySelector('.ffuse i'),
+  };
   closeMenu();
-  const el = $('#fight');
-  el.className = 'overlay';
+  el.className = 'overlay ready' + (lunge ? ' lunge' : '');
   el.hidden = false;
   el.querySelector('img').src = tf ? snapImage(n, fightSnapRec(n)) : getPortrait(n);
-  el.querySelector('.fres').textContent = lunge ? 'It lunges' : '';
-  let hp = el.querySelector('.fhp');
-  if (!hp) {
-    hp = document.createElement('span');
-    hp.className = 'fhp';
-    el.querySelector('.fhead').appendChild(hp);
-  }
+  el.querySelector('.fres').textContent = lunge ? 'It lunges' : tf && tf.mode === 'trapped' ? 'It’s held' : 'Strike';
+  el.querySelector('.fsub').textContent = c ? 'Dead center knocks it down' : '';
+  const hp = el.querySelector('.fhp');
   hp.innerHTML = tf
     ? Array.from(
         { length: Math.max(tf.maxHp || 0, FOE_HP[G.faction] || 3) },
@@ -17988,9 +18062,16 @@ function openFight(n, lunge) {
       ).join('')
     : '';
   hp.dataset.tip = tf ? 'How much fight it has left' : '';
-  const fg = el.querySelector('.fg');
+  const fg = el.querySelector('.fg'),
+    fc = el.querySelector('.fc');
   fg.style.left = (a * 100).toFixed(1) + '%';
   fg.style.width = (g * 100).toFixed(1) + '%';
+  fc.hidden = !c;
+  fc.style.left = ((1 - FIGHT.clean) * 50).toFixed(1) + '%';
+  fc.style.width = (FIGHT.clean * 100).toFixed(1) + '%';
+  UI.fight.ft.style.left = '0%';
+  UI.fight.ft.classList.remove('back');
+  UI.fight.fuse.style.transform = '';
   if (G.speed > 1) G.speed = 1;
   audio.blip('click');
 }
@@ -18003,41 +18084,72 @@ function fightTick(dtReal) {
     return;
   }
   f.t += dtReal;
+  if (!f.go) {
+    if (f.t < FIGHT.grace) return; // the tracker holds still while the panel comes up
+    f.go = true;
+    $('#fight').classList.remove('ready');
+  }
   f.pos += f.dir * f.sp * dtReal;
   if (f.pos > 1) {
     f.pos = 2 - f.pos;
     f.dir = -1;
+    f.ft.classList.add('back');
   } else if (f.pos < 0) {
     f.pos = -f.pos;
     f.dir = 1;
+    f.ft.classList.remove('back');
   }
-  $('#fight .ft').style.left = (f.pos * 100).toFixed(2) + '%';
-  if (f.t > 6) strike(); // freezing up counts as a miss
+  f.ft.style.left = (f.pos * 100).toFixed(2) + '%';
+  const left = 1 - (f.t - FIGHT.grace) / FIGHT.timeout; // the fuse under the bar
+  f.fuse.style.transform = 'scaleX(' + Math.max(0, left).toFixed(3) + ')';
+  if (left < 0.3 && !f.late) {
+    f.late = true;
+    $('#fight').classList.add('late');
+  }
+  if (left <= 0) strike(true); // freezing up counts as a miss
 }
-function strike() {
+function strike(froze) {
   const f = UI.fight;
-  if (!f || f.res) return;
-  f.res = f.pos >= f.a && f.pos <= f.b ? 'hit' : 'miss';
-  f.rt = 0.75;
-  const el = $('#fight');
+  if (!f || f.res || (!f.go && !froze)) return; // too soon: the panel is still coming up
+  const on = !froze && f.pos >= f.a && f.pos <= f.b;
+  f.res = on ? 'hit' : 'miss';
+  f.clean = on && f.pos >= f.c0 && f.pos <= f.c1 && f.c1 > f.c0;
+  f.rt = f.clean ? 0.95 : 0.8;
+  const el = $('#fight'),
+    tf = f.n.trueForm;
+  el.classList.remove('ready', 'late', 'lunge');
   el.classList.add(f.res);
-  el.querySelector('.fres').textContent = f.res === 'hit' ? 'Hit' : 'Miss';
-  const tf = f.n.trueForm,
-    hp = el.querySelector('.fhp');
-  if (f.res === 'hit' && tf && hp) {
+  if (f.clean) el.classList.add('clean');
+  const fm = el.querySelector('.fm');
+  fm.style.left = (f.pos * 100).toFixed(2) + '%';
+  el.querySelector('.fres').textContent = f.clean ? 'Clean hit' : on ? 'Hit' : 'Miss';
+  // why it went wide, so the next one can be better: still coming up to the green, or already past it
+  const early = f.dir > 0 ? f.pos < f.a : f.pos > f.b;
+  el.querySelector('.fsub').textContent = on
+    ? f.clean && tf && tf.hp > 1
+      ? 'It’s down · hit it again'
+      : ''
+    : froze
+      ? 'You froze'
+      : early
+        ? 'Too early'
+        : 'Too late';
+  const hp = el.querySelector('.fhp');
+  if (on && tf && hp) {
     const pips = hp.querySelectorAll('i:not(.off)');
-    if (pips.length) pips[pips.length - 1].classList.add('off');
+    if (pips.length) pips[pips.length - 1].classList.add('off', 'gone');
   }
-  if (f.res === 'hit') {
-    R.pulse = 0.6;
-    audio.sting('caught');
+  if (on) {
+    R.pulse = f.clean ? 0.9 : 0.6;
+    audio.hx('thud', 0, f.clean ? 1 : 0.8);
+    if (f.clean) audio.hx('crack', 0, 0.9);
   } else audio.sting('awkward');
 }
 function closeFight() {
   const f = UI.fight;
   UI.fight = null;
   $('#fight').hidden = true;
-  if (f) fightOutcome(f.n, f.res === 'hit');
+  if (f) fightOutcome(f.n, f.res === 'hit', f.clean);
 }
 // push someone a step away from someone else
 function knockBack(c, from, dist) {
@@ -18056,7 +18168,7 @@ function knockBack(c, from, dist) {
   c.path = null;
   c.moving = false;
 }
-function fightOutcome(n, hit) {
+function fightOutcome(n, hit, clean) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, hit);
   addStress(hit ? 2 : 5);
@@ -18084,6 +18196,14 @@ function fightOutcome(n, hit) {
       n.tell.lunge = false;
       if (tf.mode !== 'trapped') knockBack(n, PLAYER, 1.4);
       ui.float(n, '−1', 'good');
+      if (clean && tf.mode !== 'trapped') {
+        // dead center: it goes down where it lands, and it isn't running anywhere. Get to it before it gets up.
+        tf.mode = 'attack';
+        tf.lastSeen = G.t;
+        tf.t0 = Math.max(tf.t0, G.t - 6);
+        tf.stunUntil = G.t + FIGHT.down;
+        return;
+      }
       // hurt and not cornered: it may break and run. Chase it down.
       if (tf.mode !== 'trapped' && !tf.cornered && tf.hp === 1 && chance(G.faction === 'lizards' ? 0.7 : 0.55)) {
         tf.mode = 'flee';
