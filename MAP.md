@@ -20,11 +20,11 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  69 lines
+### data/tuning  ·  #2  ·  73 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
-- **Defines (17):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `AJAR`
+- **Defines (18):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `FIGHT` `AJAR`
 - **→ uses:** —
 - **← used by:** 30
 
@@ -498,12 +498,12 @@ Taking hits, knockouts, hospital, limbo
 - **→ uses:** sim/core, ui/interface, taken/taken, sim/pose, gfx/renderer, town/fleeing, town/echoes, chase/hunt-step, sim/characters, player/needs, audio/sound, ui/pie-menu, combat/bolts, game/state … +5
 - **← used by:** 9
 
-### combat/timing-bar  ·  #53  ·  306 lines
+### combat/timing-bar  ·  #53  ·  367 lines
 
 THEIR attack: the timing bar
 
 - **Defines (11):** `fightSnapRec` `openFight` `fightTick` `strike` `closeFight` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `clinicCheck`
-- **→ uses:** sim/core, ui/interface, town/suspicion, core/util, audio/sound, town/fleeing, data/tuning, world/grid, gfx/renderer, player/needs, sim/actions, town/cast, gfx/portraits, game/last-day … +16
+- **→ uses:** sim/core, ui/interface, town/suspicion, data/tuning, core/util, audio/sound, town/fleeing, world/grid, gfx/renderer, player/needs, sim/actions, town/cast, gfx/portraits, game/last-day … +16
 - **← used by:** 12
 
 ## horror/
