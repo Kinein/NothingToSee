@@ -31,6 +31,16 @@ npx prettier@3 --write js tools   # formatting (config in .prettierrc.json; js/d
 check goes red: play the game, then record a new baseline with
 `python3 tools/regress.py --save tools/regress-baseline.json` and say so in the commit.
 
+## Version number: bump it with every change
+
+The title screen shows the version and the date of the last update, so the player can tell a new build has
+arrived: `<p id="version">` in `shell/page.html`, e.g. `v1.1 · updated Oct 28, 2026`.
+
+**Every change that alters `dist/` (gameplay, graphics, text, build changes) bumps it:** raise the last number by
+one (`v1.1` → `v1.2`, `v1.9` → `v1.10`) and set the date to today. Bump once per pull request (or per push to
+`main`), not for every commit along the way, and name the new version in the commit message that bumps it.
+Changes that leave `dist/` untouched (docs, tools, CLAUDE.md) don't bump it.
+
 ## Generated files: never edit by hand
 
 `dist/`, `MAP.md`, `SYMBOLS.tsv`, `docs/STATE.md` and the `//@` header lines at the top of each module are
