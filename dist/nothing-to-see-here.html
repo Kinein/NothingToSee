@@ -831,7 +831,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.9 · updated Oct 29, 2026</p>
+  <p id="version">v1.10 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1246,6 +1246,9 @@ const BRAWL = {
   strangerFight: 0.3,           // a stranger you hit swings back this often (townspeople: by temper)
   shed: 0.3, shedBoth: 0.6,
 };
+// THEIR mark (them/servants): from day `from` on, THEY and everyone THEY own wear it. A gold pin (lizards), a feeler
+// out of one ear (aliens), `flies` flies and the dead walk (zombies). It narrows the search; it doesn't say who's THEM.
+const MARK = { from: 4, flies: 7 };
 // what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
 // laser (in them/true-form). A throw lands where you stood when it left the hands.
 const RANGED = {
@@ -1441,8 +1444,26 @@ const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
+// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in (play/arena,
+// play/confront): the same words either way
+const CONFESS = {
+  innocent: ['I’m innocent, man! STOP!', 'I didn’t DO anything! Stop!', 'I’m nobody! I’m just me! Please!'],
+  bribed: ['I was bribed! It’s my fault!', 'They PAID me! I’m sorry, I’m sorry!', 'It was only money! I just looked away!'],
+  bitten: ['I was bitten! I’ve been hiding it!', 'It BIT me! I didn’t tell anyone!', 'Look at my arm… I was bitten, OK?!'],
+  chipped: ['THEY control my mind!', 'There’s something in my head! THEY put it there!', 'THEY took me… THEY’re in my HEAD!'],
+  them: {
+    lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.', 'You have no idea what’s under this town.'],
+    aliens: ['Take me, then. Take me to your… whoever you have.', 'The signal is already sent.', 'We were so close.'],
+    zombies: ['…hhhh. Fine.', 'It was so warm in there.', 'Not so loud. We give up.'],
+  },
+};
+// the morning THEIR mark first shows (them/servants)
+const MARK_NEWS = {
+  lizards: 'Gold pins on some chests today',
+  aliens: 'Something grows out of some people’s ears',
+  zombies: 'Flies follow some people today. And that walk',
+};
 const ARENA_END = {
-  total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },
   partial: ['Enough of this face.', 'You want to SEE?', 'FINE.'],
   pfail: ['Are we done? Good.', 'You’ll regret this.', 'I’ll be seeing you.'],
   fail: ['Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'],
@@ -8335,6 +8356,13 @@ function partR(M, cx, cy, cz, rx, ry, rz, sx, sy, sz, prim, col, emit) {
 // ───────────── people
 // Long and thin, a little stooped, the head carried forward. Faces are mostly socket. Nobody in Wexley has slept well in years.
 const WHITE_SHIRT = [0.76, 0.75, 0.7];
+// THEIR mark (them/servants): the gold badge, the feeler and its bead
+const MARK_GOLD = [0.92, 0.72, 0.22],
+  MARK_GOLD_E = [0.45, 0.33, 0.06],
+  MARK_GOLD_D = [0.55, 0.4, 0.1],
+  MARK_STALK = [0.36, 0.4, 0.34],
+  MARK_BEAD = [0.45, 1, 0.55],
+  MARK_FLY = [0.04, 0.045, 0.03];
 // the town wears its skin a little grey: whatever tone it is, the blood is a long way under it
 function pallor(c) {
   const l = c[0] * 0.3 + c[1] * 0.59 + c[2] * 0.11;
@@ -8540,16 +8568,7 @@ function drawPerson(c) {
   part(P, 0, 0.0, -0.01, 0.31 * w, 0.21, 0.22, 'rbox', bot);
   if (dress && L.outfit === 'apron') part(P, 0, -0.2, 0.1, 0.3 * w, 0.44, 0.012, 'box', mul3(acc, 0.92));
   if (dress && L.skirt) part(P, 0, 0.07, -0.01, 0.36 * w, 0.5 * h, 0.32, 'skirt', bot);
-  if (
-    G &&
-    G.faction === 'lizards' &&
-    G.stage >= 3 &&
-    G.bought &&
-    (G.bought[c.id] || c.isThem || c.thrall === 'lizards') &&
-    !c.isPlayer
-  )
-    c.pin = true;
-  else c.pin = false;
+  const mk = markOf(c);
   const T = M4.joint(P, 0, 0.06, 0, J.torso, J.twist || 0, 0);
   const TY = 0.25 * h,
     TSX = 0.4 * w,
@@ -8600,7 +8619,11 @@ function drawPerson(c) {
   );
   if (dress) dressDetail(c, L, T, P, h, w, TY, TSX, TSY, TSZ, top, acc, skin);
   if (fx.half) halfBody(T, P, fx.half, h, w, t, TP, top);
-  if (c.pin && dress) part(T, 0.09 * w, 0.42 * h, 0.15, 0.035, 0.035, 0.01, 'box', [0.85, 0.7, 0.25], [0.5, 0.4, 0.1]);
+  if (mk === 'lizards' && dress) {
+    // THEIR badge: a gold disc on the chest, the scales pressed into it
+    partR(T, 0.1 * w, 0.43 * h, 0.165, Math.PI / 2, 0, 0, 0.065, 0.012, 0.065, 'cyl', MARK_GOLD, MARK_GOLD_E);
+    part(T, 0.1 * w, 0.43 * h, 0.172, 0.036, 0.006, 0.004, 'box', MARK_GOLD_D);
+  }
   // the head, carried a little forward and down
   let Hd = M4.joint(
     T,
@@ -8633,6 +8656,30 @@ function drawPerson(c) {
         L.earrings === 'pearl' ? [0.86, 0.84, 0.78] : [0.78, 0.6, 0.22],
       );
   }
+  if (mk === 'aliens' && ck < 0.5) {
+    // THEIR feeler: out of the left ear, a thin stalk bending up, a green bead that never quite stops moving
+    const sw = Math.sin(t * 2.3 + c.x) * 0.06;
+    partR(Hd, 0.13, 0.15, -0.01, 0, 0, -0.55 + sw, 0.008, 0.11, 0.008, 'cyl', MARK_STALK);
+    partR(Hd, 0.166, 0.231, -0.01, 0, 0, -0.2 + sw * 1.5, 0.006, 0.07, 0.006, 'cyl', MARK_STALK);
+    part(Hd, 0.174, 0.268, -0.01, 0.022, 0.022, 0.022, 'sph', MARK_BEAD, MARK_BEAD);
+  }
+  if (mk === 'zombies')
+    // THEIR flies: a few, round the head, never settling
+    for (let i = 0; i < MARK.flies; i++) {
+      const a = R.time * (2.1 + i * 0.43) + i * 2.3 + c.x,
+        r = 0.2 + (i % 3) * 0.09;
+      part(
+        Rm,
+        Math.sin(a) * r,
+        1.68 * h + Math.sin(a * 1.7 + i) * 0.2,
+        Math.cos(a * 1.3) * r,
+        0.034,
+        0.024,
+        0.034,
+        'sph',
+        MARK_FLY,
+      );
+    }
   if (ck > 0.04) changeCracks(T, Hd, h, ck, t);
   const eg = fx.eye || (fx.glaze ? [0.5, 0.62, 0.6] : null),
     TE = tkd ? traceEye(tkd, tk, L.eyeC) : null;
@@ -11812,6 +11859,7 @@ function animTargets(c, dt) {
       fx.prop = 'torch';
     }
     if ((c.isThem || c.thrall === 'zombies') && G && G.faction === 'zombies') deadWalk(c, T);
+    if (G && G.faction === 'zombies' && markOf(c)) markWalk(c, T);
     if (c.tell && (c.tell.type === 'true' || c.tell.type === 'half')) applyTellAnim(c, T, c.tell);
     else if (c.vis && c.vis.type === 'half') {
       if (R.time > c.vis.until) c.vis = null;
@@ -17043,6 +17091,52 @@ function arrest() {
   CELL.book = true;
   goAway('held', heldUntil());
 }
+// ───────────── THEIR people. Whoever THEY own: the bribed (lizards), the chipped and the controlled (aliens), the bitten
+// (the dead). From day MARK.from on, THEY and all of them wear THEIR mark, which narrows the search but never says which
+// ones are THEM. Beaten to the edge of passing out, or giving in, anyone tells the truth.
+// what someone is to THEM: 'them', 'chipped', 'bitten', 'bribed', or '' for nobody's
+function servantKind(n) {
+  if (!n || n.isPlayer) return '';
+  if (n.isThem) return 'them';
+  if (G.chipped[n.id] || (G.control && G.control.who === n.id) || n.thrall === 'aliens') return 'chipped';
+  if (G.bitten[n.id] || n.thrall === 'zombies') return 'bitten';
+  if (bought(n) || n.thrall === 'lizards') return 'bribed';
+  return '';
+}
+// the mark someone wears today: THEIR faction, or '' (a moment's control leaves none)
+function markOf(c) {
+  if (!G || G.stage < MARK.from || c.isPlayer || c.slain || !c.def || c.def.stranger) return '';
+  return c.isThem || c.thrall || G.chipped[c.id] || G.bitten[c.id] || bought(c) ? G.faction : '';
+}
+// the morning it first shows
+STAGE_HOOKS.push((s) => {
+  if (s === MARK.from) setTimeout(() => ui.note('eye', MARK_NEWS[G.faction], 'onto'), 6000);
+});
+// the dead walk, more of it: the lurch, the arms hanging forward, the head down
+function markWalk(c, T) {
+  if (!c.moving) return;
+  const p = c.vph != null ? c.vph : c.walkPh;
+  T.roll = (T.roll || 0) + Math.sin(p) * 0.05;
+  T.uaL = -0.75 + Math.sin(c.animT * 3) * 0.08;
+  T.uaR = -0.85 + Math.cos(c.animT * 2.6) * 0.08;
+  T.faL = T.faR = -0.2;
+  T.hp += 0.18;
+}
+// the truth, in their own words. Beaten: said out loud, and you'll remember it.
+function confess(n, beaten) {
+  const k = servantKind(n) || 'innocent',
+    said = pick(k === 'them' ? CONFESS.them[G.faction] : CONFESS[k]);
+  if (!G.confessed[n.id]) {
+    G.confessed[n.id] = k;
+    G.leads.push(n.short + ': “' + said + '”');
+    if (G.leads.length > 6) G.leads.shift();
+  }
+  if (beaten) {
+    ui.say(n, said, 4);
+    ui.bubble(n, k === 'innocent' ? 'exclaim' : 'flag', 'speech', 3);
+  }
+  return said;
+}
 // ───────────── arrested, start to finish, out where you can see it: hands behind your back, the cuffs, a squad car
 // pulling up on Main street with its lights going, the walk to it in front of the officer, the door, the car pulling
 // away. The hours inside go by in the cell (see CELL). Then the car brings you back and lets you out on the kerb.
@@ -19368,6 +19462,7 @@ function struck(n) {
   if (n.isThem && (first || F.hits === BRAWL.hard) && themSheds(n, ear)) return;
   victimReacts(n, F, first);
   if (F.hits >= BRAWL.hard && !F.called) policeFor(n, F, ear);
+  if (F.hits === BRAWL.ko - 1) confess(n, true); // one more and they're out: what comes out now is the truth
 }
 // someone who saw it: the first blow they see, they decide what they make of it; after that it only adds up
 function onlook(w, n, F) {
@@ -21157,6 +21252,7 @@ function endAttack(A, tg, broken) {
   } else {
     tg.limpDay = next;
     if (F === 'lizards') for (const f of STAGE_HOOKS_BEATEN) f(tg, A.by);
+    else G.bitten[tg.id] = 1; // the dead leave teeth in what they don't finish
     opDone('attack');
   }
   echo('attack', { x: spot[0], z: spot[1], who: tg.id, victim: true });
@@ -24108,11 +24204,7 @@ function resolveGossip(n) {
 }
 // ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
 // it drops the act for good: true form, on its knees, and the FBI on the way
-const GIVE_UP = {
-  lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.', 'You have no idea what’s under this town.'],
-  aliens: ['Take me, then. Take me to your… whoever you have.', 'The signal is already sent.', 'We were so close.'],
-  zombies: ['…hhhh. Fine.', 'It was so warm in there.', 'Not so loud. We give up.'],
-};
+const GIVE_UP = CONFESS.them;
 function surrender(n, why) {
   if (!n || n.slain || n.surrendered || G.over) return;
   {
@@ -24697,8 +24789,9 @@ function arenaEnd(A, forced) {
             : A.lean >= B.pfail
               ? 'pfail'
               : 'fail');
-  const E = ARENA_END[A.res];
-  arenaSay(A, 'them', pick(A.res === 'total' ? E[G.faction] || E.lizards : E));
+  // giving in, THEY say what they'd say with your fist in their face; so does one of THEIR people found out
+  const own = A.res === 'total' || (A.res === 'wrong' && servantKind(A.n));
+  arenaSay(A, 'them', own ? confess(A.n) : pick(ARENA_END[A.res]));
   arenaDraw(A);
   if (A.res === 'total' || A.res === 'partial') audio.sting('slip');
   after(A, 2.6, () => closeArena(A));
@@ -34106,6 +34199,7 @@ function encMark(E, v, n, seen, kneel) {
     v.limpDay = next;
     if (!G.attackFoe && G.victims.length < 2 && v.id !== 'lenny') G.attackFoe = v.id;
     v.marked = G.t;
+    G.bitten[v.id] = 1;
   }
   encAftermath(E, v, kneel);
   if (seen) {
@@ -41183,6 +41277,8 @@ function freshG(start) {
     victims: [],
     found: null,
     chipped: {},
+    bitten: {},
+    confessed: {},
     movedNote: null,
     chalk: 0,
     murmur: null,

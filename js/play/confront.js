@@ -4,11 +4,7 @@
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
 // it drops the act for good: true form, on its knees, and the FBI on the way
-const GIVE_UP = {
-  lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.', 'You have no idea what’s under this town.'],
-  aliens: ['Take me, then. Take me to your… whoever you have.', 'The signal is already sent.', 'We were so close.'],
-  zombies: ['…hhhh. Fine.', 'It was so warm in there.', 'Not so loud. We give up.'],
-};
+const GIVE_UP = CONFESS.them;
 function surrender(n, why) {
   if (!n || n.slain || n.surrendered || G.over) return;
   {

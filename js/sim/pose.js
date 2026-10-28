@@ -1,6 +1,6 @@
 //@ sim/pose — Each frame's pose: targets, gestures, door reach, blending, turning, animate
 //@ Defines: animTargets, gesture, applyGestures, doorReach, blendJoints, turnBody, rootSlide, animate, updateShown
-//@ Uses:    core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, sim/characters, sim/seat-moves, data/tuning, gfx/reach-rig, …
+//@ Uses:    core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, sim/characters, sim/seat-moves, them/servants, data/tuning, …
 //@ (header made by tools/map.js; stripped by build.py)
 function animTargets(c, dt) {
   if (c.tell && c.tell.type === 'true' && c.tell.t >= TF_CHANGE * 0.72) return creatureTargets(c);
@@ -97,6 +97,7 @@ function animTargets(c, dt) {
       fx.prop = 'torch';
     }
     if ((c.isThem || c.thrall === 'zombies') && G && G.faction === 'zombies') deadWalk(c, T);
+    if (G && G.faction === 'zombies' && markOf(c)) markWalk(c, T);
     if (c.tell && (c.tell.type === 'true' || c.tell.type === 'half')) applyTellAnim(c, T, c.tell);
     else if (c.vis && c.vis.type === 'half') {
       if (R.time > c.vis.until) c.vis = null;

@@ -402,8 +402,9 @@ function arenaEnd(A, forced) {
             : A.lean >= B.pfail
               ? 'pfail'
               : 'fail');
-  const E = ARENA_END[A.res];
-  arenaSay(A, 'them', pick(A.res === 'total' ? E[G.faction] || E.lizards : E));
+  // giving in, THEY say what they'd say with your fist in their face; so does one of THEIR people found out
+  const own = A.res === 'total' || (A.res === 'wrong' && servantKind(A.n));
+  arenaSay(A, 'them', own ? confess(A.n) : pick(ARENA_END[A.res]));
   arenaDraw(A);
   if (A.res === 'total' || A.res === 'partial') audio.sting('slip');
   after(A, 2.6, () => closeArena(A));

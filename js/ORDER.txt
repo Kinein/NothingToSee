@@ -49,6 +49,7 @@ them/tells.js                    # Tells: the small signs THEY give
 them/proofs.js                   # Proofs: photos and THEIR things in your hands
 them/awareness.js                # THEIR awareness of you, settled at 06:00
 them/moves.js                    # THEIR morning moves: the Bought, Scatter, Destroy, Protect
+them/servants.js                 # THEIR people: who THEY own, THEIR mark from day 4, the truth beaten out
 town/arrest.js                   # Being arrested, shown on the map
 town/cell.js                     # Held in a cell
 town/suspicion.js                # Suspicion and danger per person

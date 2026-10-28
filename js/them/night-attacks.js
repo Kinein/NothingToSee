@@ -303,6 +303,7 @@ function endAttack(A, tg, broken) {
   } else {
     tg.limpDay = next;
     if (F === 'lizards') for (const f of STAGE_HOOKS_BEATEN) f(tg, A.by);
+    else G.bitten[tg.id] = 1; // the dead leave teeth in what they don't finish
     opDone('attack');
   }
   echo('attack', { x: spot[0], z: spot[1], who: tg.id, victim: true });

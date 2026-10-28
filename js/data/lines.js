@@ -127,8 +127,26 @@ const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
 const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
+// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in (play/arena,
+// play/confront): the same words either way
+const CONFESS = {
+  innocent: ['I’m innocent, man! STOP!', 'I didn’t DO anything! Stop!', 'I’m nobody! I’m just me! Please!'],
+  bribed: ['I was bribed! It’s my fault!', 'They PAID me! I’m sorry, I’m sorry!', 'It was only money! I just looked away!'],
+  bitten: ['I was bitten! I’ve been hiding it!', 'It BIT me! I didn’t tell anyone!', 'Look at my arm… I was bitten, OK?!'],
+  chipped: ['THEY control my mind!', 'There’s something in my head! THEY put it there!', 'THEY took me… THEY’re in my HEAD!'],
+  them: {
+    lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.', 'You have no idea what’s under this town.'],
+    aliens: ['Take me, then. Take me to your… whoever you have.', 'The signal is already sent.', 'We were so close.'],
+    zombies: ['…hhhh. Fine.', 'It was so warm in there.', 'Not so loud. We give up.'],
+  },
+};
+// the morning THEIR mark first shows (them/servants)
+const MARK_NEWS = {
+  lizards: 'Gold pins on some chests today',
+  aliens: 'Something grows out of some people’s ears',
+  zombies: 'Flies follow some people today. And that walk',
+};
 const ARENA_END = {
-  total: { lizards: ['Fine. FINE. Call your men.', 'We were so CLOSE.'], aliens: ['Take me, then.', 'The signal is already sent.'], zombies: ['…hhhh. Fine.', 'Not so loud. We give up.'] },
   partial: ['Enough of this face.', 'You want to SEE?', 'FINE.'],
   pfail: ['Are we done? Good.', 'You’ll regret this.', 'I’ll be seeing you.'],
   fail: ['Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'],

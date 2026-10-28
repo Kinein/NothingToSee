@@ -62,7 +62,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `health` | `100` | player/needs, combat/hits, combat/throws, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
 | `tvBugged` | `null` | — | — |
-| `control` | `null` | them/moves, game/state | sim/actions, town/doors, town/company, play/stashes, play/arena, horror/encounters |
+| `control` | `null` | them/moves, game/state | sim/actions, them/servants, town/doors, town/company, play/stashes, play/arena, horror/encounters |
 | `pickAt` | `-999` | — | — |
 | `hotRooms` | `null` | them/plan | player/needs |
 | `takenAt` | `-1e9` | them/moves, taken/taken, chase/they-come, chase/hunt-end | — |
@@ -70,7 +70,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `playerChip` | `false` | them/moves, taken/back-up | them/awareness |
 | `landing` | `0` | them/plan | them/true-form, them/office-night, horror/encounters, chase/they-come, game/last-day, game/loop |
 | `pairs` | `{}` | — | town/npc-update, play/arena, ui/case-board |
-| `bought` | `{}` | — | gfx/people, them/plan, town/npc-update, them/proofs, them/moves, town/suspicion, taken/down-there |
+| `bought` | `{}` | — | them/plan, town/npc-update, them/proofs, them/moves, town/suspicion, taken/down-there |
 | `boughtBy` | `{}` | — | them/moves, them/true-form, play/oddities |
 | `policeBought` | `false` | them/plan | — |
 | `skimAt` | `0` | them/moves | — |
@@ -84,7 +84,9 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `horror` | `[]` | horror/director | town/talk, them/office-night |
 | `victims` | `[]` | — | them/plan, town/talk, them/night-attacks, horror/encounter-outcomes, taken/taken, taken/down-there, taken/lair-life |
 | `found` | `null` | them/night-attacks | — |
-| `chipped` | `{}` | — | them/moves, them/night-attacks, town/company, them/office-night, play/arena, horror/encounter-outcomes, game/last-day |
+| `chipped` | `{}` | — | them/moves, them/servants, them/night-attacks, town/company, them/office-night, play/arena, horror/encounter-outcomes, game/last-day |
+| `bitten` | `{}` | — | them/servants, them/night-attacks, horror/encounter-outcomes |
+| `confessed` | `{}` | — | them/servants |
 | `movedNote` | `null` | them/office-night | — |
 | `chalk` | `0` | them/office-night | — |
 | `murmur` | `null` | them/office-night, game/state | — |
@@ -104,7 +106,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `exposed` | `[]` | — | them/true-form, horror/visions, play/confront |
 | `factionKnown` | `false` | them/tells | them/plan, them/proofs, them/true-form, play/stashes, horror/visions, play/confront, play/photos, ui/menus, … |
 | `items` | `[]` | play/items, game/state | them/proofs, them/moves, them/night-attacks, them/office-night, play/stashes, play/traps, play/photos, ui/menus, … |
-| `leads` | `[]` | — | town/talk, them/office-night, play/stashes, play/verbs, play/photos, ui/menus, horror/encounter-outcomes |
+| `leads` | `[]` | — | them/servants, town/talk, them/office-night, play/stashes, play/verbs, play/photos, ui/menus, horror/encounter-outcomes |
 | `lennyHint` | `0` | town/talk | — |
 | `lennyToday` | `0` | player/work, play/confront | ui/menus |
 | `momToday` | `false` | player/work, play/verbs | — |
@@ -140,7 +142,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `nightPlan` | `0` | horror/director | town/talk, them/night-attacks |
 | `nightYes` | `false` | horror/director | town/talk, them/night-attacks |
 | `plan` | `0` | — | — |
-| `stage` | `1` | them/plan | gfx/people, them/tells, them/proofs, them/moves, town/cell, them/true-form, combat/bolts, them/night-attacks, … |
+| `stage` | `1` | them/plan | them/tells, them/proofs, them/moves, them/servants, town/cell, them/true-form, combat/bolts, them/night-attacks, … |
 | `stagePts` | `0` | them/plan | — |
 | `phase` | `1` | them/plan, game/state | town/talk, them/office-night, ui/case-board, horror/layer, horror/half-forms-real, horror/tenth-forms, horror/encounters |
 | `weekStart` | `1` | — | them/plan |

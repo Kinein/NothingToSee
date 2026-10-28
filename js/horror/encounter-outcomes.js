@@ -404,6 +404,7 @@ function encMark(E, v, n, seen, kneel) {
     v.limpDay = next;
     if (!G.attackFoe && G.victims.length < 2 && v.id !== 'lenny') G.attackFoe = v.id;
     v.marked = G.t;
+    G.bitten[v.id] = 1;
   }
   encAftermath(E, v, kneel);
   if (seen) {

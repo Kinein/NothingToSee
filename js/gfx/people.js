@@ -1,10 +1,17 @@
 //@ gfx/people — Drawing a person: body, face, hair, clothes and the small details
-//@ Defines: WHITE_SHIRT, pallor, HEAD_C, HEAD_S, FACE_T, faceZ, dressDetail, drawChar, drawPerson
-//@ Uses:    gfx/renderer, core/util, sim/core, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, gfx/body-parts, sim/pose
+//@ Defines: WHITE_SHIRT, MARK_GOLD, MARK_GOLD_E, MARK_GOLD_D, MARK_STALK, MARK_BEAD, MARK_FLY, pallor, HEAD_C, HEAD_S, FACE_T, faceZ, dressDetail, drawChar, drawPerson
+//@ Uses:    gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, gfx/body-parts, sim/pose, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── people
 // Long and thin, a little stooped, the head carried forward. Faces are mostly socket. Nobody in Wexley has slept well in years.
 const WHITE_SHIRT = [0.76, 0.75, 0.7];
+// THEIR mark (them/servants): the gold badge, the feeler and its bead
+const MARK_GOLD = [0.92, 0.72, 0.22],
+  MARK_GOLD_E = [0.45, 0.33, 0.06],
+  MARK_GOLD_D = [0.55, 0.4, 0.1],
+  MARK_STALK = [0.36, 0.4, 0.34],
+  MARK_BEAD = [0.45, 1, 0.55],
+  MARK_FLY = [0.04, 0.045, 0.03];
 // the town wears its skin a little grey: whatever tone it is, the blood is a long way under it
 function pallor(c) {
   const l = c[0] * 0.3 + c[1] * 0.59 + c[2] * 0.11;
@@ -210,16 +217,7 @@ function drawPerson(c) {
   part(P, 0, 0.0, -0.01, 0.31 * w, 0.21, 0.22, 'rbox', bot);
   if (dress && L.outfit === 'apron') part(P, 0, -0.2, 0.1, 0.3 * w, 0.44, 0.012, 'box', mul3(acc, 0.92));
   if (dress && L.skirt) part(P, 0, 0.07, -0.01, 0.36 * w, 0.5 * h, 0.32, 'skirt', bot);
-  if (
-    G &&
-    G.faction === 'lizards' &&
-    G.stage >= 3 &&
-    G.bought &&
-    (G.bought[c.id] || c.isThem || c.thrall === 'lizards') &&
-    !c.isPlayer
-  )
-    c.pin = true;
-  else c.pin = false;
+  const mk = markOf(c);
   const T = M4.joint(P, 0, 0.06, 0, J.torso, J.twist || 0, 0);
   const TY = 0.25 * h,
     TSX = 0.4 * w,
@@ -270,7 +268,11 @@ function drawPerson(c) {
   );
   if (dress) dressDetail(c, L, T, P, h, w, TY, TSX, TSY, TSZ, top, acc, skin);
   if (fx.half) halfBody(T, P, fx.half, h, w, t, TP, top);
-  if (c.pin && dress) part(T, 0.09 * w, 0.42 * h, 0.15, 0.035, 0.035, 0.01, 'box', [0.85, 0.7, 0.25], [0.5, 0.4, 0.1]);
+  if (mk === 'lizards' && dress) {
+    // THEIR badge: a gold disc on the chest, the scales pressed into it
+    partR(T, 0.1 * w, 0.43 * h, 0.165, Math.PI / 2, 0, 0, 0.065, 0.012, 0.065, 'cyl', MARK_GOLD, MARK_GOLD_E);
+    part(T, 0.1 * w, 0.43 * h, 0.172, 0.036, 0.006, 0.004, 'box', MARK_GOLD_D);
+  }
   // the head, carried a little forward and down
   let Hd = M4.joint(
     T,
@@ -303,6 +305,30 @@ function drawPerson(c) {
         L.earrings === 'pearl' ? [0.86, 0.84, 0.78] : [0.78, 0.6, 0.22],
       );
   }
+  if (mk === 'aliens' && ck < 0.5) {
+    // THEIR feeler: out of the left ear, a thin stalk bending up, a green bead that never quite stops moving
+    const sw = Math.sin(t * 2.3 + c.x) * 0.06;
+    partR(Hd, 0.13, 0.15, -0.01, 0, 0, -0.55 + sw, 0.008, 0.11, 0.008, 'cyl', MARK_STALK);
+    partR(Hd, 0.166, 0.231, -0.01, 0, 0, -0.2 + sw * 1.5, 0.006, 0.07, 0.006, 'cyl', MARK_STALK);
+    part(Hd, 0.174, 0.268, -0.01, 0.022, 0.022, 0.022, 'sph', MARK_BEAD, MARK_BEAD);
+  }
+  if (mk === 'zombies')
+    // THEIR flies: a few, round the head, never settling
+    for (let i = 0; i < MARK.flies; i++) {
+      const a = R.time * (2.1 + i * 0.43) + i * 2.3 + c.x,
+        r = 0.2 + (i % 3) * 0.09;
+      part(
+        Rm,
+        Math.sin(a) * r,
+        1.68 * h + Math.sin(a * 1.7 + i) * 0.2,
+        Math.cos(a * 1.3) * r,
+        0.034,
+        0.024,
+        0.034,
+        'sph',
+        MARK_FLY,
+      );
+    }
   if (ck > 0.04) changeCracks(T, Hd, h, ck, t);
   const eg = fx.eye || (fx.glaze ? [0.5, 0.62, 0.6] : null),
     TE = tkd ? traceEye(tkd, tk, L.eyeC) : null;

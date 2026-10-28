@@ -35,6 +35,7 @@ function struck(n) {
   if (n.isThem && (first || F.hits === BRAWL.hard) && themSheds(n, ear)) return;
   victimReacts(n, F, first);
   if (F.hits >= BRAWL.hard && !F.called) policeFor(n, F, ear);
+  if (F.hits === BRAWL.ko - 1) confess(n, true); // one more and they're out: what comes out now is the truth
 }
 // someone who saw it: the first blow they see, they decide what they make of it; after that it only adds up
 function onlook(w, n, F) {

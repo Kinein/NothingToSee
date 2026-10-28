@@ -102,6 +102,9 @@ const BRAWL = {
   strangerFight: 0.3,           // a stranger you hit swings back this often (townspeople: by temper)
   shed: 0.3, shedBoth: 0.6,
 };
+// THEIR mark (them/servants): from day `from` on, THEY and everyone THEY own wear it. A gold pin (lizards), a feeler
+// out of one ear (aliens), `flies` flies and the dead walk (zombies). It narrows the search; it doesn't say who's THEM.
+const MARK = { from: 4, flies: 7 };
 // what THEY do from further off. Lizards tear up the furniture and throw it; the dead let out a swarm; aliens have the
 // laser (in them/true-form). A throw lands where you stood when it left the hands.
 const RANGED = {

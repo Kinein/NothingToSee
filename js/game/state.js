@@ -81,6 +81,8 @@ function freshG(start) {
     victims: [],
     found: null,
     chipped: {},
+    bitten: {},
+    confessed: {},
     movedNote: null,
     chalk: 0,
     murmur: null,
