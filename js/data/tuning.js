@@ -89,6 +89,7 @@ const EVIDENCE = {
   statementSecs: 6,             // real seconds each statement waits for a card
   move: { clear: 2, fuzzyBacked: 1, fuzzyAlone: -1, wrongLie: -1, pass: -1, onTruth: -2 },
   rebuttalSecs: 6,
+  idleSecs: 1.8,                // ...but with nothing left to play, only this long: no standing there waiting
   know: { claims: [1, 2], right: 1, wrong: -1, secs: 8 },
   counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
   escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1

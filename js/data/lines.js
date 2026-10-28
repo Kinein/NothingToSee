@@ -123,6 +123,37 @@ const ARENA_END = {
   wrong: ['How could you.', 'I’ll never forget this.', 'Get away from me.'],
 };
 const ARENA_CROWD = { up: ['Oh my God.', 'It’s true…', 'Look at its face!'], down: ['Ha!', 'Get a grip.', 'Not this again.'], still: ['…', 'Hm.'] };
+// the banner over the ring: which part of it this is, and what you can do ({n}: the accused, {i} of {k}: the statement)
+const ARENA_BEAT = {
+  open:      ['Confronting {n}', 'Everyone in earshot is listening'],
+  stmt:      ['Testimony · {i} of {k}', 'A lie? Show the card from the same frame. Or let it pass'],
+  stmtEmpty: ['Testimony · {i} of {k}', 'No cards left to show'],
+  rebut:     ['It explains it away', 'Back it up: another card, a habit you watched, or a witness'],
+  rebutNone: ['It explains it away', 'Nothing to back it up with'],
+  know:      ['How well do you know me?', 'True, or a lie?'],
+  counter:   ['It turns it on you', 'Hold your nerve'],
+  escape:    ['It’s making a run for it', 'Block the way: E (or tap) in the green'],
+};
+// the verdict, big, when it's over
+const ARENA_VERDICT = {
+  total:   ['It gives up', 'The crowd holds it down. The FBI is on the way'],
+  partial: ['Its face comes off', 'Right in front of everyone'],
+  escaped: ['It breaks and runs', 'Everyone saw what it is. Go after it'],
+  pfail:   ['Doubt', 'The town will watch it. Tonight, it comes for you'],
+  fail:    ['They laugh at you', 'Nobody believes a word. People will talk'],
+  wrong:   ['Wrong person', 'You told the whole room their business'],
+};
+// why the crowd just moved, beside the number
+const ARENA_WHY = {
+  clear: 'caught in a lie', backed: 'backed up', alone: 'just a blur', wrongLie: 'wrong card for that', pass: 'a lie let go',
+  truth: 'that one was true', notMine: 'not theirs', innocent: 'only their own secret', planted: 'planted on them',
+  knowRight: 'you know them', knowWrong: 'you don’t', counter: 'you cracked', faced: 'that camera in their face', block: 'blocked the way',
+};
+// under the crowd meter: why it started where it did ({w}: someone in the room)
+const ARENA_ROOM = {
+  witness: '{w} saw it', friend: '{w} likes you', close: '{w} is close to them', grudge: '{w} holds a grudge',
+  unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
+};
 // what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
 const ARENA_TALK = {
   total: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],

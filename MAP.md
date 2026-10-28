@@ -20,19 +20,19 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  117 lines
+### data/tuning  ·  #2  ·  118 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
 - **Defines (19):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FIGHT_DIFF` `FOE_HP` `FIGHT` `EVIDENCE` `AJAR`
 - **→ uses:** —
-- **← used by:** 36
+- **← used by:** 37
 
-### data/lines  ·  #3  ·  154 lines
+### data/lines  ·  #3  ·  185 lines
 
 What people say and read: gossip, Lenny, rumours, news, endings. Change the words here
 
-- **Defines (54):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `ODDITY_HEARD` `PRESS_SAW` `PRESS_BOUGHT` `PRESS_VICTIM` `PRESS_NONE` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `ARENA_RANT` `ARENA_END` `ARENA_CROWD` `ARENA_TALK` `ENDINGS`
+- **Defines (58):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `ODDITY_HEARD` `PRESS_SAW` `PRESS_BOUGHT` `PRESS_VICTIM` `PRESS_NONE` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `ARENA_RANT` `ARENA_END` `ARENA_CROWD` `ARENA_BEAT` `ARENA_VERDICT` `ARENA_WHY` `ARENA_ROOM` `ARENA_TALK` `ENDINGS`
 - **→ uses:** —
 - **← used by:** 14
 
@@ -662,7 +662,7 @@ Giving up, the FBI, the talk options
 - **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, play/verbs, chase/fbi, them/tells, audio/sound, them/awareness … +13
 - **← used by:** 6 (them/true-form, combat/timing-bar, town/talk, play/arena, ui/menus, chase/fbi)
 
-### play/arena  ·  #69  ·  525 lines
+### play/arena  ·  #69  ·  528 lines
 
 The confrontation: an arena battle in front of the town, and what it leaves on the map
 
@@ -736,12 +736,12 @@ The evidence book: four frames on every suspect, the suspect page, the Whose? tr
 - **→ uses:** ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, ui/pie-menu
 - **← used by:** 4 (ui/interface, ui/hud, input/targeting, game/loop)
 
-### ui/arena-view  ·  #78  ·  181 lines
+### ui/arena-view  ·  #78  ·  289 lines
 
 How the confrontation looks: the spotlit ring, the crowd, the speech, your cards
 
-- **Defines (8):** `arenaOpen` `arenaSay` `arenaCrowd` `arenaTimer` `arenaShow` `arenaDraw` `arenaBarDraw` `arenaClose`
-- **→ uses:** ui/interface, play/arena, them/proofs, gfx/portraits, game/loop, core/util, data/lines, town/quirks, sim/core, combat/timing-bar
+- **Defines (10):** `leanBand` `arenaOpen` `arenaSay` `arenaCrowd` `arenaTimer` `arenaShow` `arenaBeat` `arenaDraw` `arenaBarDraw` `arenaClose`
+- **→ uses:** ui/interface, play/arena, data/lines, them/proofs, gfx/portraits, game/loop, core/util, data/tuning, sim/core, town/quirks, combat/timing-bar
 - **← used by:** 1 (play/arena)
 
 ## input/

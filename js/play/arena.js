@@ -1,5 +1,5 @@
 //@ play/arena — The confrontation: an arena battle in front of the town, and what it leaves on the map
-//@ Defines: witnessOf, arenaRoom, openConfront, after, arenaTick, makeTestimony, testimony, letPass, spend, showCard, wrongPerson, backUp, makeClaims, knowBeat, callClaim, counterBeat, …
+//@ Defines: witnessOf, arenaRoom, openConfront, after, arenaTick, makeTestimony, testimony, nextStatement, letPass, spend, showCard, wrongPerson, backUp, makeClaims, knowBeat, callClaim, …
 //@ Uses:    sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the confrontation. A short battle, 45 to 75 seconds: THEY lie, you show the card that breaks the lie, and
@@ -172,14 +172,17 @@ function testimony(A, i) {
   A.si = i;
   const s = A.stmts[i];
   arenaSay(A, 'them', s.text, s.f);
-  A.t = A.tMax = EVIDENCE.statementSecs;
+  A.t = A.tMax = A.hand.length ? EVIDENCE.statementSecs : EVIDENCE.idleSecs; // empty-handed: it goes by quickly
   arenaDraw(A);
 }
-const nextStatement = (A) => after(A, 1.7, () => checkEscape(A, () => testimony(A, A.si + 1)));
+function nextStatement(A) {
+  A.beat = 'wait'; // an answer given: nothing more to press until the next line (a second card would land on this one)
+  after(A, 1.7, () => checkEscape(A, () => testimony(A, A.si + 1)));
+}
 function letPass(A) {
   const s = A.stmts[A.si];
   if (s.lie) {
-    move(A, EVIDENCE.move.pass);
+    move(A, EVIDENCE.move.pass, null, 'pass');
     arenaSay(A, 'them', pick(ARENA_PASS));
   }
   nextStatement(A);
@@ -204,23 +207,23 @@ function showCard(A, p) {
   arenaShow(A, p);
   if (!A.isThem) return wrongPerson(A, p);
   if (!s.lie) {
-    move(A, EVIDENCE.move.onTruth, 'laugh');
+    move(A, EVIDENCE.move.onTruth, 'laugh', 'truth');
     arenaSay(A, 'them', pick(ARENA_TRUTH));
   } else if (p.frame !== s.f) {
-    move(A, EVIDENCE.move.wrongLie);
+    move(A, EVIDENCE.move.wrongLie, null, 'wrongLie');
     arenaSay(A, 'them', pick(ARENA_WRONG));
   } else if (!realOn(p, n)) {
-    move(A, EVIDENCE.wrong.other);
+    move(A, EVIDENCE.wrong.other, null, 'notMine');
     arenaSay(A, 'them', pick(ARENA_NOTMINE));
   } else if (p.q === 'clear') {
-    move(A, EVIDENCE.move.clear, 'gasp');
+    move(A, EVIDENCE.move.clear, 'gasp', 'clear');
     arenaSay(A, 'them', pick(ARENA_CLEAR));
   } else {
     // fuzzy: THEY explain it away, unless you can back it up
     A.beat = 'rebut';
     A.rebut = p;
     arenaSay(A, 'them', pick(ARENA_REBUT));
-    A.t = A.tMax = EVIDENCE.rebuttalSecs;
+    A.t = A.tMax = A.hand.length || habitFits(A) || A.wits.length ? EVIDENCE.rebuttalSecs : EVIDENCE.idleSecs;
     arenaDraw(A);
     return;
   }
@@ -230,18 +233,18 @@ function showCard(A, p) {
 function wrongPerson(A, p) {
   const n = A.n;
   if (p.innocent && p.innocent === n.id) {
-    move(A, EVIDENCE.wrong.innocent);
+    move(A, EVIDENCE.wrong.innocent, null, 'innocent');
     arenaSay(A, 'them', pick(ARENA_INNOCENT).replace('{t}', oddTruth(n) || 'nothing'));
     if (G.odd[n.id]) G.odd[n.id].public = true;
   } else if (p.planted) {
-    move(A, EVIDENCE.wrong.planted);
+    move(A, EVIDENCE.wrong.planted, null, 'planted');
     arenaSay(A, 'them', pick(ARENA_PLANTED));
     A.framed = true;
     const F = (G.framed || []).find((f) => f.id === n.id);
     if (F) F.known = true;
     for (const c of G.proofs.filter((x) => x.pin === n.id && x.planted)) flipCard(c, { what: 'planted' });
   } else {
-    move(A, EVIDENCE.wrong.other);
+    move(A, EVIDENCE.wrong.other, null, 'notMine');
     arenaSay(A, 'them', pick(ARENA_NOTMINE));
   }
   nextStatement(A);
@@ -266,7 +269,7 @@ function backUp(A, how, p) {
   }
   A.rebut = null;
   A.beat = 'stmt';
-  move(A, ok ? EVIDENCE.move.fuzzyBacked : EVIDENCE.move.fuzzyAlone, ok ? 'gasp' : null);
+  move(A, ok ? EVIDENCE.move.fuzzyBacked : EVIDENCE.move.fuzzyAlone, ok ? 'gasp' : null, ok ? 'backed' : 'alone');
   nextStatement(A);
 }
 // ── 3. "How well do you know me?": a claim about their routine, true or a lie. Watched it, and you know.
@@ -299,7 +302,7 @@ function callClaim(A, saysLie) {
   A.tMax = 0;
   const c = A.claims[A.ki],
     right = saysLie != null && saysLie === c.lie;
-  move(A, right ? EVIDENCE.know.right : EVIDENCE.know.wrong, right ? null : 'laugh');
+  move(A, right ? EVIDENCE.know.right : EVIDENCE.know.wrong, right ? null : 'laugh', right ? 'knowRight' : 'knowWrong');
   arenaSay(A, 'you', saysLie == null ? '…' : saysLie ? 'That’s a lie.' : 'That’s true.');
   A.beat = 'wait';
   after(A, 1.6, () => checkEscape(A, () => knowBeat(A, A.ki + 1)));
@@ -314,11 +317,11 @@ function counterBeat(A) {
     if (A.wits.length) arenaSay(A, A.wits[0], pick(ARENA_BACKED.witness));
     else if (100 - PLAYER.needs.stress >= C.psy) arenaSay(A, 'you', pick(ARENA_HOLD));
     else {
-      move(A, C.lose, 'laugh');
+      move(A, C.lose, 'laugh', 'counter');
       addStress(C.stress);
       arenaSay(A, 'you', '…');
     }
-    if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced); // you had a lens in their face only yesterday
+    if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced, null, 'faced'); // you had a lens in their face only yesterday
     after(A, 2, () => checkEscape(A, () => arenaEnd(A)));
   });
 }
@@ -343,7 +346,7 @@ function arenaBarTick(A, dt) {
     if (f.rt > 0) return;
     A.bar = null;
     if (f.res === 'hit') {
-      move(A, EVIDENCE.escapeBlock, 'gasp');
+      move(A, EVIDENCE.escapeBlock, 'gasp', 'block');
       arenaSay(A, 'you', 'You’re not going anywhere.');
       return after(A, 1.4, A.cont);
     }
@@ -373,10 +376,10 @@ function arenaStrike(froze) {
   arenaBarDraw(A);
 }
 // ── the crowd's lean
-function move(A, v, fx) {
+function move(A, v, fx, why) {
   if (!v) return;
   A.lean = clamp(A.lean + v, EVIDENCE.lean.min, EVIDENCE.lean.max);
-  arenaCrowd(A, v);
+  arenaCrowd(A, v, why);
   audio.sting(fx === 'gasp' ? 'gasp' : fx === 'laugh' || v < 0 ? 'crowdlaugh' : 'murmur');
   if (A.isThem && A.lean >= 3 && fx === 'gasp') audio.sting('slip'); // the mask, slipping
 }
