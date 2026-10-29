@@ -257,6 +257,7 @@ function newGame(name, preview) {
   makeQuirks();
   makeStashes();
   makeOddities();
+  makeBios();
   for (const n of CHARS) if (n.def.plan) makePlan(n);
   placeChar(PLAYER, 9, 29);
   PLAYER.dir = PLAYER.tdir = Math.PI;

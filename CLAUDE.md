@@ -71,7 +71,8 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
 | Tells (every slip heard from close by: `slipHeard`), the slipping-off cue (`slipCue`, town/routines), THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
-| Evidence: four frames per suspect, one plain card each (✓/✗ only in a confrontation) | `js/them/proofs.js` (`addProof`, `cardIn`, `caseCards`) |
+| Evidence: four frames per suspect (Home, Habit, Body, Biography), one plain card each (✓/✗ only in a confrontation) | `js/them/proofs.js` (`addProof`, `cardIn`, `caseCards`) |
+| Biography: six facts a suspect, where they turn up (chat, rummaging, the paper, Mom), your odd mark | `js/play/biography.js` (`makeBios`, `markFact`); the facts: `BIO_*` in data/lines.js |
 | Innocent oddities (lookalikes, habits, tics), rumours (talk only, never cards) | `js/play/oddities.js`; the lookalikes: `ODDITY_HOME` in data/lines.js |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |

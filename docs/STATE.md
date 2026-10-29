@@ -146,14 +146,14 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `stageNews` | `null` | them/plan, town/echoes | — |
 | `gatherDay` | `irand(3, 4)` | player/work, them/plan | town/daily-plans, town/talk, horror/director, them/office-night |
 | `gatherTip` | `0` | town/talk, them/office-night | them/plan |
-| `proofs` | `[]` | — | town/npc-update, them/proofs, play/stashes, play/plants, ui/menus, ui/case-board |
+| `proofs` | `[]` | — | town/npc-update, them/proofs, play/stashes, play/plants, play/biography, ui/menus, ui/case-board |
 | `proofId` | `0` | — | them/proofs, play/stashes |
 | `mark` | `{}` | — | ui/menus, ui/case-board |
 | `plants` | `{}` | play/plants | — |
 | `homePlant` | `null` | play/plants | — |
 | `safeNight` | `{}` | play/stashes | play/plants |
 | `missing` | `[]` | play/stashes, play/plants | — |
-| `odd` | `{}` | play/oddities | town/talk |
+| `odd` | `{}` | play/oddities | town/talk, play/biography |
 | `rumours` | `[]` | play/oddities | — |
 | `victimOf` | `{}` | play/oddities | town/talk |
 | `recant` | `{}` | — | them/proofs, town/company |
@@ -194,6 +194,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | Field | Written in |
 | --- | --- |
 | `accidentLock` | player/needs |
+| `bio` | play/biography |
 | `cfLog` | play/confrontation |
 | `downAt` | chase/hunt-step |
 | `encId` | horror/encounters |
@@ -209,6 +210,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | `onNight` | them/office-night |
 | `overCd` | town/npc-update |
 | `overtimeBy` | them/moves |
+| `paperRead` | ui/menus |
 | `percT` | combat/melee |
 | `pingRitual` | town/npc-update |
 | `shakenFrom` | them/true-form, combat/hits |

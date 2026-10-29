@@ -6,7 +6,7 @@
 //   Home    · a thing found at their place (their desk, their home; the shop's back room for the trader)  you take it
 //   Habit   · something a person could do, done wrong                                                    you photograph it
 //   Body    · the body doing something a body can't                                                      you photograph it
-//   Contact · a human tied to them
+//   Biography · an odd fact about their life                                                       you mark it in the book
 // A card says plainly what it shows, where and when, and THEIRS looks just like an innocent's. There's no clear or fuzzy:
 // whether a card holds up is decided only in a confrontation, ✓ or ✗ (play/confrontation). A thing with no owner (the
 // street, a shared place) is a clue and trap bait, never a card. Cards are never used up: only THEY take one, from your
@@ -15,7 +15,7 @@ const FRAME = {
   home: { icon: 'home', name: 'Home' },
   habit: { icon: 'clock', name: 'Habit' },
   body: { icon: 'face', name: 'Body' },
-  contact: { icon: 'mouth', name: 'Contact' },
+  biography: { icon: 'paper', name: 'Biography' },
 };
 const FRAMES = EVIDENCE.frames;
 // a tell on film: the body slipping is Body; THEIR business, done wrong, is Habit (swaying in a corner included)

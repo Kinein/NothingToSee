@@ -307,6 +307,7 @@ function rummageAct(o) {
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
+      if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
       searchedHome(o);
     },
@@ -388,6 +389,7 @@ function openUp(o, quiet) {
   } else {
     const j = junkIn(o);
     searchedHome(o);
+    homeFact(o);
     ui.note(
       'box',
       j

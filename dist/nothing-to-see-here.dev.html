@@ -699,6 +699,17 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 #cam-mark{position:absolute;left:0;top:0;z-index:5;margin:-12px 0 0 16px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(10,9,8,.82);border:1px solid rgba(246,227,180,.55);color:#f6e3b4;animation:fadein .2s}
 #cam-mark .ic{width:15px;height:15px}
 #cam-mark[hidden]{display:none}
+
+/* the biography page: found facts, your one mark, blank lines for the rest */
+.sd-bio{margin:4px 0 10px;padding-left:20px;font:15px/1.35 var(--f-type);color:#2b261d}
+.sd-bio li{display:flex;align-items:baseline;gap:8px;padding:3px 0;border-bottom:1px solid rgba(60,48,34,.18)}
+.sd-bio li span{flex:1}
+.sd-bio li em{font:12px var(--f-ui);color:#7a6e5a;font-style:normal;white-space:nowrap}
+.sd-bio li.blank span{height:1em;border-bottom:1px dashed rgba(60,48,34,.35);margin-bottom:4px}
+.sd-bio li.odd span{background:rgba(232,190,90,.35);box-shadow:0 0 0 2px rgba(232,190,90,.35)}
+.sd-bio .mk-odd{padding:1px 8px;border-radius:4px;border:1px solid rgba(60,48,34,.45);background:transparent;color:#4a4032;font:600 11.5px var(--f-ui);cursor:pointer;white-space:nowrap}
+.sd-bio li.odd .mk-odd{background:#c8402f;border-color:#c8402f;color:#fff}
+.sd-bio .mk-odd:disabled{opacity:.55;cursor:default}
 </style>
 
 
@@ -753,7 +764,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.15 · updated Oct 29, 2026</p>
+  <p id="version">v1.16 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -785,7 +796,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 7h18v12H3zM8 7V4h8v3M3 12h18"/></svg><kbd>Work bar</kbd><span>Fills at your desk, drains away from it · empty, and you’re let go</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Bars</kbd><span>Click to handle · arrows: what’s pushing it up or down · a pulsing mark is danger</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 10a5 5 0 1 1 10 0c0 3-2.5 4-3 6.5A3 3 0 0 1 9 18M10 10a2 2 0 1 1 4 0c0 1.2-1 1.8-1.8 2.4"/></svg><kbd>Ear</kbd><span>Something happened there</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 4h18v14H3zM8 21l4-3 4 3M8 9l7 3M8 9h.01M15 12h.01"/></svg><kbd>Tab</kbd><span>The evidence book · Home, Habit, Body, Contact: one card each, the newest · nothing on a card says if it holds up: calling them out does · arrows, E, A/D</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 4h18v14H3zM8 21l4-3 4 3M8 9l7 3M8 9h.01M15 12h.01"/></svg><kbd>Tab</kbd><span>The evidence book · Home, Habit, Body, Biography: one card each, the newest · Biography: mark one of their facts odd (chat, rummaging, the paper and Mom find facts) · nothing on a card says if it holds up: calling them out does · arrows, E, A/D</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 10a5 5 0 1 1 10 0c0 3-2.5 4-3 6.5A3 3 0 0 1 9 18M10 10a2 2 0 1 1 4 0c0 1.2-1 1.8-1.8 2.4"/></svg><kbd>Gossip</kbd><span>Clues, never cards: a note under whoever it’s about, often the wrong one · ask as often as you like, till they’ve nothing new · each time, they find you a bit weirder</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Weird</kbd><span>All anyone holds about you · Chat, a good day’s work and being proven right bring it down · the book counts who thinks you’re mad: three at 06:00 and the clinic writes</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Rummage</kbd><span>Feel something in there? Open it up before it settles · back shelves hide a trap, a flashlight, pills</span></div>
@@ -1198,10 +1209,10 @@ const RANGED = {
 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/confrontation, ui/case-board)
-// Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, the newest. Whether a card holds up is
+// Every suspect has four frames: Home, Habit, Body, Biography. Each holds one card, the newest. Whether a card holds up is
 // decided only in a confrontation: ✓ or ✗.
 const EVIDENCE = {
-  frames: ['home', 'habit', 'body', 'contact'],
+  frames: ['home', 'habit', 'body', 'biography'],
   oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one card, in one frame, and it holds up
   cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
   witnessDays: 2,               // someone who saw it change remembers it this long
@@ -1320,6 +1331,57 @@ const ODDITY_HOME = {
   bare: { k: 'bare', look: 'aliens', fridge: 1, empty: 1, what: 'An empty fridge', icon: 'bag', desc: 'empty, and spotless', truth: 'payday’s Friday' },
   butcher: { k: 'butcher', look: 'zombies', what: 'A butcher’s order', icon: 'bag', desc: 'ten pounds of raw meat in newspaper', truth: 'a butcher’s order. My sister’s wedding' },
 };
+// ── Biography (play/biography): facts are always true. t: the line in the book · say: how they'd tell you themselves
+const BIO_PLAIN = [
+  { t: 'Moved to Wexley in March.', say: 'I only moved here in March, you know.' },
+  { t: 'Grew up two towns over, in Millbrook.', say: 'I grew up in Millbrook. Two towns over.' },
+  { t: 'Has a sister in Dayton.', say: 'My sister’s in Dayton. We don’t talk much.' },
+  { t: 'Was a lifeguard as a teenager.', say: 'I was a lifeguard, years ago. Can you believe it?' },
+  { t: 'Used to play the trumpet. Badly.', say: 'I played the trumpet once. Badly.' },
+  { t: 'Married once. It didn’t take.', say: 'I was married once. It didn’t take.' },
+  { t: 'Allergic to cats.', say: 'Cats. I swell up like a balloon.' },
+  { t: 'Worked at the cannery for six years.', say: 'Six years at the cannery. Never again.' },
+  { t: 'Went to Wexley High.' },
+  { t: 'Bowls on Thursdays.', say: 'Thursdays I bowl. Don’t ask me on a Thursday.' },
+  { t: 'Their father ran the hardware store.' },
+  { t: 'Born in Ohio.', say: 'I’m from Ohio originally.' },
+  { t: 'Never learned to swim.', say: 'Never learned to swim. Never needed to.' },
+  { t: 'Collects stamps.' },
+  { t: 'Did two years in the army.', say: 'Two years in the army. That was enough.' },
+  { t: 'Volunteers at the church fete.' },
+  { t: 'Won a pie contest in 2019.' },
+  { t: 'Owes money on a boat.' },
+];
+// one of THEM: what doesn't add up. The lizards: nothing old, and blue blood or the elite somewhere it shouldn't be.
+// The dead: very old, and they'll tell you so. (The aliens' are pairs that disagree: BIO_ALIEN_PAIRS.)
+const BIO_THEM = {
+  lizards: [
+    { t: 'Royal bloodline. A real one. Never mentions it.', say: 'My family? Royalty, technically. Long story.' },
+    { t: 'Was at the governor’s ball last spring.', say: 'The governor’s ball was so dull this year.' },
+    { t: 'A member of the country club. Doesn’t look the type.' },
+    { t: 'Nothing they own is more than a year old.' },
+    { t: 'Their oldest photograph is from last Christmas.', src: 'home' },
+  ],
+  zombies: [
+    { t: 'Was friends with the man who invented the radio.', say: 'I knew the fellow who invented the radio. Nice man.' },
+    { t: 'Remembers the flood of 1913. In detail.', say: 'Worse than the flood of ’13, this rain.' },
+    { t: 'Their driver’s licence was issued in 1931.' },
+    { t: 'Was already old when Mom was a girl.', src: 'mom' },
+  ],
+};
+const BIO_ALIEN_PAIRS = [
+  [{ t: 'Born in Ohio. Says so themselves.', say: 'I’m an Ohio kid, born and raised.' }, { t: 'Their birth certificate says Toronto.' }],
+  [{ t: 'Forty-one, by their own account.', say: 'Forty-one next month. Don’t remind me.' }, { t: 'Their library card says twenty-nine.' }],
+  [{ t: 'Went to school in Dayton.', say: 'School in Dayton. Go Comets.' }, { t: 'Dayton High has never heard of them.' }],
+];
+// an ordinary person's one odd-looking fact: true, odd, and nothing to do with THEM (truth: what they'll say)
+const BIO_HUMAN_ODD = [
+  { t: 'Changed their name in 2009.', truth: 'I changed my name after the divorce' },
+  { t: 'Has no photographs from before they were twenty.', truth: 'there was a fire. Everything went' },
+  { t: 'Was at the governor’s ball last year.', truth: 'I waited tables at it' },
+  { t: 'Has been dead once. Four minutes, in 1998.', truth: 'I drowned, once. They brought me back' },
+  { t: 'Their passport is in another name.', truth: 'my maiden name. I never got round to it' },
+];
 const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
 const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];
 
@@ -1340,15 +1402,14 @@ const CF_YES_THEM = {
   habit: ['Everyone has their little ways.', 'So I like it warm. So what?', 'I was… resting.'],
   body: ['A trick of the light.', 'That’s… you can’t prove that’s me.', 'Put that away.'],
   biography: ['Is that a crime now?', 'Who told you that?', 'I don’t see what that has to do with anything.'],
-  contact: ['People will say anything.', 'Who told you that?', 'That’s my business.'],
 };
 const CF_NO = {
   home: ['That’s not mine. Never seen it.', 'Somebody put that there.', 'That isn’t anything to do with me.'],
   habit: ['That’s not me.', 'I was never there.', 'Somebody else. Not me.'],
   body: ['That’s not me in that picture.', 'That’s a blur. Could be anyone.', 'Not me.'],
   biography: ['So? Lots of people moved here in March.', 'So? That’s just my life.', 'And? Half this town could say the same.'],
-  contact: ['Who says? Nobody.', 'People talk.', 'That’s just talk.'],
 };
+const CF_PLANTED = ['That’s not mine. How did that get in there?', 'I’ve never seen it in my life. Who put that there?', 'That— somebody put that there.'];
 const CF_EMPTY = ['Well? Nothing? I thought so.', 'You’ve got nothing on me.', 'Go on, then. Show them.'];
 const CF_SHRUG = ['Are we done? Good.', 'Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'];
 // the verdict, big, when it's over
@@ -16240,7 +16301,7 @@ function revealFaction() {
 //   Home    · a thing found at their place (their desk, their home; the shop's back room for the trader)  you take it
 //   Habit   · something a person could do, done wrong                                                    you photograph it
 //   Body    · the body doing something a body can't                                                      you photograph it
-//   Contact · a human tied to them
+//   Biography · an odd fact about their life                                                       you mark it in the book
 // A card says plainly what it shows, where and when, and THEIRS looks just like an innocent's. There's no clear or fuzzy:
 // whether a card holds up is decided only in a confrontation, ✓ or ✗ (play/confrontation). A thing with no owner (the
 // street, a shared place) is a clue and trap bait, never a card. Cards are never used up: only THEY take one, from your
@@ -16249,7 +16310,7 @@ const FRAME = {
   home: { icon: 'home', name: 'Home' },
   habit: { icon: 'clock', name: 'Habit' },
   body: { icon: 'face', name: 'Body' },
-  contact: { icon: 'mouth', name: 'Contact' },
+  biography: { icon: 'paper', name: 'Biography' },
 };
 const FRAMES = EVIDENCE.frames;
 // a tell on film: the body slipping is Body; THEIR business, done wrong, is Habit (swaying in a corner included)
@@ -20159,6 +20220,9 @@ function chatPick(n) {
       },
     ]);
   for (const q of G.quirks[n.id] || []) opts.push([n.isThem ? 2.2 : 2, () => ({ text: selfLine(n, q) })]);
+  // a fact about themselves, for their page in the book (not at 60+: they find you too weird). One of THEM lets an odd
+  // one slip just the same way, without noticing.
+  if (n.sus < 60 && unfound(n, 'chat').length) opts.push([2.4, () => ({ text: chatFact(n), keep: false })]);
   if (n.isThem) {
     if (theyStir()) opts.push([1.3, () => ({ text: slipLine(n) })]);
     if (tonightBusy()) opts.push([1.5, () => ({ text: pick(TONIGHT.attack) })]);
@@ -22651,6 +22715,7 @@ function rummageAct(o) {
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
+      if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
       searchedHome(o);
     },
@@ -22732,6 +22797,7 @@ function openUp(o, quiet) {
   } else {
     const j = junkIn(o);
     searchedHome(o);
+    homeFact(o);
     ui.note(
       'box',
       j
@@ -23119,7 +23185,7 @@ const safeTonight = (n) => !!(G.safeNight && G.safeNight[n.id] === tonightId() &
 // It makes one card, in one frame, and in a confrontation it holds up (✓): "Yes, I like fish. So?" A human never has
 // more than two odd true things: this one, and at most THEIR plant (play/stashes). Talk is never a card: a rumour going
 // round is only a note under the face it's about.
-const ODD_FRAMES = ['home', 'habit', 'body'];
+const ODD_FRAMES = ['home', 'habit', 'body', 'biography'];
 // the things in a person's own place you could put your hands in (their fridge is its own case)
 const ownThings = (n) =>
   OBJ.filter(
@@ -23158,6 +23224,10 @@ function makeOddities() {
         moveAt: 1e12,
       });
     } else if (f === 'body') od.k = pick(ODDITY_TIC);
+    else if (f === 'biography') {
+      od.i = irand(0, BIO_HUMAN_ODD.length - 1);
+      od.k = BIO_HUMAN_ODD[od.i].truth;
+    }
     // people talk about whoever looks odd: half of them have a rumour going round from THEIR day 2
     if (chance(0.5)) G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
     G.odd[n.id] = od;
@@ -23181,7 +23251,7 @@ function oddTruth(n) {
     const hb = G.habits[n.id];
     return 'just ' + secretFor(n, hb ? hb.spot : 'alley').note;
   }
-  return od.k; // body: the tic
+  return od.k; // body: the tic; biography: what they'll say about the odd fact
 }
 // a normal person's private secret, caught on film: the print shows exactly what they were up to. If that habit is
 // their one oddity, it's a Habit card on them (and it holds up); otherwise it's only a note.
@@ -23212,6 +23282,109 @@ function tellRumour(n) {
 function markVictim(v, by) {
   if (v && by) (G.victimOf || (G.victimOf = {}))[v.id] = { by, at: G.t };
 }
+// ───────────── biography: a page of about six facts on every suspect in the evidence book, blank lines for the ones you
+// haven't found. Facts come from chatting with the person themselves, rummaging at their place, the newspaper and Mom's
+// calls (never from gossip, which stays clues). Facts are always true; what they mean is up to you. Mark one fact per
+// person as odd and that fact is their Biography card. You can move the mark until you confront them. In a
+// confrontation a fact that really is odd holds up (✓); an ordinary one doesn't (✗).
+// What's odd about THEIR facts: the lizards don't live long, so nothing about them is old, but there's a royal bloodline,
+// or the country club and the governor's ball for someone who doesn't look the type; the aliens' data is faked, so two
+// facts don't agree (most of the rest look normal); the dead's data is very old, and they'll say so themselves.
+// A human can have one odd-looking fact. It's true, it's odd, and it counts toward their two odd true things.
+const BIO_N = 6;
+// each fact: t, the line in the book · say, how they'd tell you themselves (if it's the kind of thing a person says)
+function makeBios() {
+  G.bio = {};
+  for (const n of suspects()) {
+    if (n.id === 'lenny') continue;
+    const facts = [],
+      pool = shuffle(BIO_PLAIN.slice()),
+      add = (f, odd, src) =>
+        facts.push({ t: f.t, say: f.say || null, odd: !!odd, src: src || f.src || null, found: false });
+    if (n.isThem) {
+      if (G.faction === 'aliens') {
+        // faked papers: two facts that can't both be true
+        const [a, b] = pick(BIO_ALIEN_PAIRS);
+        add(a, true, 'chat');
+        add(b, true, pick(['home', 'paper']));
+      } else for (const f of shuffle(BIO_THEM[G.faction].slice()).slice(0, 2)) add(f, true);
+    } else if (G.odd[n.id] && G.odd[n.id].frame === 'biography') add(BIO_HUMAN_ODD[G.odd[n.id].i], true);
+    while (facts.length < BIO_N && pool.length) add(pool.pop());
+    // where each one turns up: what a person would say, mostly in a chat; papers in their things; the rest, the paper
+    // or Mom, dealt out so every source has something
+    const docs = shuffle(['home', 'paper', 'mom', 'home', 'paper', 'mom']);
+    let k = 0;
+    for (const f of facts) if (!f.src) f.src = f.say && chance(0.75) ? 'chat' : docs[k++ % docs.length];
+    G.bio[n.id] = shuffle(facts);
+  }
+}
+const bioOf = (n) => (G.bio && n && G.bio[n.id]) || [];
+// found a fact: it's on their page now
+function findFact(n, f, how) {
+  if (!f || f.found) return false;
+  f.found = true;
+  f.at = G.t;
+  setTimeout(() => !G.over && ui.note('paper', n.short + ' · ' + f.t, 'onto'), how === 'chat' ? 4800 : 600);
+  return true;
+}
+const unfound = (n, src) => bioOf(n).filter((f) => !f.found && f.src === src);
+// chat: they tell you a fact about themselves, if they don't find you too weird (at 60+, nothing). One of THEM lets an
+// odd one slip without noticing, the same way.
+function chatFact(n) {
+  if (n.sus >= 60) return null;
+  const f = pick(unfound(n, 'chat'));
+  if (!f) return null;
+  findFact(n, f, 'chat');
+  return f.say || f.t;
+}
+// rummaging at their place: a document in a drawer, a photo in a frame
+function homeFact(o) {
+  const id = ownerOf(o),
+    n = id && NPC[id];
+  if (!n || n.isPlayer) return false;
+  const f = pick(unfound(n, 'home'));
+  if (!f || !chance(0.6)) return false;
+  return findFact(n, f, 'home');
+}
+// the morning paper: a line about somebody, in among the small print
+function paperFact() {
+  const opts = suspects().filter((n) => unfound(n, 'paper').length);
+  const n = pick(opts);
+  return n ? findFact(n, pick(unfound(n, 'paper')), 'paper') && n : null;
+}
+// Mom: she knows everybody's mother
+function momFact() {
+  const opts = suspects().filter((n) => unfound(n, 'mom').length);
+  const n = pick(opts);
+  if (!n) return null;
+  const f = pick(unfound(n, 'mom'));
+  findFact(n, f, 'mom');
+  return 'Mom: “' + n.short + '? ' + f.t + '”';
+}
+// your mark: one fact per person, odd. It's their Biography card. It moves freely until you've called them out.
+function markFact(n, i) {
+  const f = bioOf(n)[i];
+  if (!f || !f.found || n.confronted) return false;
+  const old = cardIn(n, 'biography');
+  if (old && old.bio === i) {
+    G.proofs.splice(G.proofs.indexOf(old), 1); // unmarked
+    return true;
+  }
+  addProof({
+    frame: 'biography',
+    pin: n.id,
+    true: f.odd ? n.id : null,
+    odd: f.odd,
+    bio: i,
+    src: 'fact',
+    what: f.t,
+    where: BIO_SRC[f.src],
+    at: f.at || G.t,
+    pr: { kind: 'item', what: f.t, icon: 'paper' },
+  });
+  return true;
+}
+const BIO_SRC = { chat: 'they told you', home: 'in their things', paper: 'the paper', mom: 'Mom' };
 // ───────────── traps: steel jaws from Pell's. Whatever steps in stays put, for a while.
 // Bait it with something THEY lost and its owner comes looking. Unbaited, it takes whoever walks by.
 function setTrapAct() {
@@ -23922,12 +24095,15 @@ function momAct(o) {
     onEnd: (c, a, ok) => {
       if (!ok) return;
       addStress(G.momToday ? -3 : -10);
+      // Mom knows everybody's mother: once a day, something true about someone in town
+      const mf = !G.momToday && momFact();
       ui.note(
         'phone',
-        G.momToday
-          ? 'Mom sounds worried'
-          : pick(['Mom: “Eat something green.”', 'Mom: “You sound tired.”', 'Mom talked about hedges']),
-        '',
+        mf ||
+          (G.momToday
+            ? 'Mom sounds worried'
+            : pick(['Mom: “Eat something green.”', 'Mom: “You sound tired.”', 'Mom talked about hedges'])),
+        mf ? 'onto' : '',
       );
       G.momToday = true;
       G.momWeek = true;
@@ -24316,6 +24492,7 @@ const cardHolds = (p, n) => p.innocent === n.id || p.planted === n.id || (p.true
 // what IT says as each card turns
 function cardLine(p, n, ok) {
   if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);
+  if (p.planted === n.id) return pick(CF_PLANTED); // it's true: it was at their place. They don't know why
   if (!n.isThem) return pick(CF_YES_HUMAN).replace('{t}', oddTruth(n) || 'nothing');
   return pick(CF_YES_THEM[p.frame] || CF_YES_THEM.home);
 }
@@ -25260,6 +25437,10 @@ function objMenu(o) {
                 const t = hd ? hd.text : pick(NEWS.general);
                 ui.note('paper', t, hd && hd.echo ? 'onto' : '');
                 if (hd && hd.echo) hear(null, '“' + t + '”', 'paper');
+                if (G.paperRead !== dayNo()) {
+                  G.paperRead = dayNo(); // in the small print: a line about somebody you know
+                  paperFact();
+                }
               },
             }),
           ),
@@ -27554,6 +27735,7 @@ function showSuspect(n) {
     '<span class="sd-mark"></span></div></div><div class="sd-frames">' +
     FRAMES.map((f) => slotHtml(n, f, true)).join('') +
     '</div><div class="sd-zoom" hidden></div><h4>What you know</h4><div class="sd-hab"></div>' +
+    (bioOf(n).length ? '<h4>Biography</h4><ol class="sd-bio"></ol>' : '') +
     (with_.length ? '<h4>Who they’re with</h4><div class="sd-with"></div>' : '') +
     '<h4>Notes</h4><ul class="sd-notes"></ul>';
   d.querySelector('.sd-head img').src = getPortrait(n);
@@ -27599,6 +27781,36 @@ function showSuspect(n) {
   hab.innerHTML = kq.length
     ? kq.map((q) => '<span class="chip">' + svgIcon(QUIRKS[q].icon) + esc(QUIRKS[q].short) + '</span>').join('')
     : '<span class="none">Nothing yet. Watch them.</span>';
+  // the facts: found ones, with where they came from and your mark; blank lines for the rest
+  const bio = d.querySelector('.sd-bio'),
+    marked = cardIn(n, 'biography');
+  if (bio)
+    bioOf(n).forEach((f, i) => {
+      const li = document.createElement('li');
+      if (!f.found) {
+        li.className = 'blank';
+        li.innerHTML = '<span></span>';
+        return bio.appendChild(li);
+      }
+      const on = !!(marked && marked.bio === i);
+      li.className = on ? 'odd' : '';
+      li.innerHTML = '<span></span><em></em><button class="mk-odd"></button>';
+      li.querySelector('span').textContent = f.t;
+      li.querySelector('em').textContent = BIO_SRC[f.src];
+      const b = li.querySelector('button');
+      b.textContent = on ? 'Odd' : 'Mark odd';
+      b.disabled = !!n.confronted;
+      b.dataset.tip = n.confronted
+        ? 'You’ve called them out: the mark stays'
+        : on
+          ? 'Their Biography card. Click to take the mark off'
+          : 'Make this fact their Biography card';
+      b.onclick = (e) => {
+        e.stopPropagation();
+        if (markFact(n, i)) refreshBoard();
+      };
+      bio.appendChild(li);
+    });
   const wb = d.querySelector('.sd-with');
   if (wb) wb.innerHTML = with_.map((w) => '<span class="chip">' + esc(w.short) + '</span>').join('');
   const ul = d.querySelector('.sd-notes');
@@ -40731,6 +40943,7 @@ function newGame(name, preview) {
   makeQuirks();
   makeStashes();
   makeOddities();
+  makeBios();
   for (const n of CHARS) if (n.def.plan) makePlan(n);
   placeChar(PLAYER, 9, 29);
   PLAYER.dir = PLAYER.tdir = Math.PI;

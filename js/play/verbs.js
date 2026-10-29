@@ -225,12 +225,15 @@ function momAct(o) {
     onEnd: (c, a, ok) => {
       if (!ok) return;
       addStress(G.momToday ? -3 : -10);
+      // Mom knows everybody's mother: once a day, something true about someone in town
+      const mf = !G.momToday && momFact();
       ui.note(
         'phone',
-        G.momToday
-          ? 'Mom sounds worried'
-          : pick(['Mom: “Eat something green.”', 'Mom: “You sound tired.”', 'Mom talked about hedges']),
-        '',
+        mf ||
+          (G.momToday
+            ? 'Mom sounds worried'
+            : pick(['Mom: “Eat something green.”', 'Mom: “You sound tired.”', 'Mom talked about hedges'])),
+        mf ? 'onto' : '',
       );
       G.momToday = true;
       G.momWeek = true;

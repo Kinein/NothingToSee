@@ -308,6 +308,9 @@ function chatPick(n) {
       },
     ]);
   for (const q of G.quirks[n.id] || []) opts.push([n.isThem ? 2.2 : 2, () => ({ text: selfLine(n, q) })]);
+  // a fact about themselves, for their page in the book (not at 60+: they find you too weird). One of THEM lets an odd
+  // one slip just the same way, without noticing.
+  if (n.sus < 60 && unfound(n, 'chat').length) opts.push([2.4, () => ({ text: chatFact(n), keep: false })]);
   if (n.isThem) {
     if (theyStir()) opts.push([1.3, () => ({ text: slipLine(n) })]);
     if (tonightBusy()) opts.push([1.5, () => ({ text: pick(TONIGHT.attack) })]);

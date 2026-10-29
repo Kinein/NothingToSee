@@ -131,10 +131,10 @@ const RANGED = {
 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/confrontation, ui/case-board)
-// Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, the newest. Whether a card holds up is
+// Every suspect has four frames: Home, Habit, Body, Biography. Each holds one card, the newest. Whether a card holds up is
 // decided only in a confrontation: ✓ or ✗.
 const EVIDENCE = {
-  frames: ['home', 'habit', 'body', 'contact'],
+  frames: ['home', 'habit', 'body', 'biography'],
   oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one card, in one frame, and it holds up
   cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
   witnessDays: 2,               // someone who saw it change remembers it this long

@@ -22,6 +22,7 @@ const cardHolds = (p, n) => p.innocent === n.id || p.planted === n.id || (p.true
 // what IT says as each card turns
 function cardLine(p, n, ok) {
   if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);
+  if (p.planted === n.id) return pick(CF_PLANTED); // it's true: it was at their place. They don't know why
   if (!n.isThem) return pick(CF_YES_HUMAN).replace('{t}', oddTruth(n) || 'nothing');
   return pick(CF_YES_THEM[p.frame] || CF_YES_THEM.home);
 }

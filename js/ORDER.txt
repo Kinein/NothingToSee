@@ -70,7 +70,8 @@ them/office-night.js             # The office after dark
 play/items.js                    # Items left behind
 play/stashes.js                  # Stashes and rummaging: THEIR things, lookalikes, the fridge, taking and the place rule
 play/plants.js                   # THEIR plant at a victim's place and in your home; THEY take things back; signs for a gut feeling
-play/oddities.js                 # False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
+play/oddities.js                 # Innocent oddities: lookalikes, habits, tics, odd-looking facts; rumours (talk only)
+play/biography.js                # Biography: six facts a suspect, found by chat, rummaging, the paper and Mom; you mark one odd
 play/traps.js                    # Traps
 play/raids.js                    # Raids: kicking in a door
 horror/visions.js                # Visions

@@ -1,6 +1,6 @@
 //@ ui/case-board — The evidence book: four frames on every suspect, the suspect page, the Whose? tray
 //@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, drawPols, drawHeard, refreshBoard, drawStrings, showSuspect, closeSuspect, focusPol, boardKey, closeBoard, …
-//@ Uses:    ui/interface, sim/core, them/proofs, core/util, town/cast, world/grid, them/plan, town/quirks, ui/hud, gfx/portraits, …
+//@ Uses:    ui/interface, sim/core, them/proofs, core/util, town/cast, world/grid, play/biography, them/plan, town/quirks, ui/hud, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the board. A cork board that pauses the town. Every suspect shows four frame slots under their polaroid,
 // empty or holding a card. A card says plainly what it shows, where and when; nothing on it says whether it holds up.
@@ -251,6 +251,7 @@ function showSuspect(n) {
     '<span class="sd-mark"></span></div></div><div class="sd-frames">' +
     FRAMES.map((f) => slotHtml(n, f, true)).join('') +
     '</div><div class="sd-zoom" hidden></div><h4>What you know</h4><div class="sd-hab"></div>' +
+    (bioOf(n).length ? '<h4>Biography</h4><ol class="sd-bio"></ol>' : '') +
     (with_.length ? '<h4>Who they’re with</h4><div class="sd-with"></div>' : '') +
     '<h4>Notes</h4><ul class="sd-notes"></ul>';
   d.querySelector('.sd-head img').src = getPortrait(n);
@@ -296,6 +297,36 @@ function showSuspect(n) {
   hab.innerHTML = kq.length
     ? kq.map((q) => '<span class="chip">' + svgIcon(QUIRKS[q].icon) + esc(QUIRKS[q].short) + '</span>').join('')
     : '<span class="none">Nothing yet. Watch them.</span>';
+  // the facts: found ones, with where they came from and your mark; blank lines for the rest
+  const bio = d.querySelector('.sd-bio'),
+    marked = cardIn(n, 'biography');
+  if (bio)
+    bioOf(n).forEach((f, i) => {
+      const li = document.createElement('li');
+      if (!f.found) {
+        li.className = 'blank';
+        li.innerHTML = '<span></span>';
+        return bio.appendChild(li);
+      }
+      const on = !!(marked && marked.bio === i);
+      li.className = on ? 'odd' : '';
+      li.innerHTML = '<span></span><em></em><button class="mk-odd"></button>';
+      li.querySelector('span').textContent = f.t;
+      li.querySelector('em').textContent = BIO_SRC[f.src];
+      const b = li.querySelector('button');
+      b.textContent = on ? 'Odd' : 'Mark odd';
+      b.disabled = !!n.confronted;
+      b.dataset.tip = n.confronted
+        ? 'You’ve called them out: the mark stays'
+        : on
+          ? 'Their Biography card. Click to take the mark off'
+          : 'Make this fact their Biography card';
+      b.onclick = (e) => {
+        e.stopPropagation();
+        if (markFact(n, i)) refreshBoard();
+      };
+      bio.appendChild(li);
+    });
   const wb = d.querySelector('.sd-with');
   if (wb) wb.innerHTML = with_.map((w) => '<span class="chip">' + esc(w.short) + '</span>').join('');
   const ul = d.querySelector('.sd-notes');

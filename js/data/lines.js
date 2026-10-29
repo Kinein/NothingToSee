@@ -92,6 +92,57 @@ const ODDITY_HOME = {
   bare: { k: 'bare', look: 'aliens', fridge: 1, empty: 1, what: 'An empty fridge', icon: 'bag', desc: 'empty, and spotless', truth: 'payday’s Friday' },
   butcher: { k: 'butcher', look: 'zombies', what: 'A butcher’s order', icon: 'bag', desc: 'ten pounds of raw meat in newspaper', truth: 'a butcher’s order. My sister’s wedding' },
 };
+// ── Biography (play/biography): facts are always true. t: the line in the book · say: how they'd tell you themselves
+const BIO_PLAIN = [
+  { t: 'Moved to Wexley in March.', say: 'I only moved here in March, you know.' },
+  { t: 'Grew up two towns over, in Millbrook.', say: 'I grew up in Millbrook. Two towns over.' },
+  { t: 'Has a sister in Dayton.', say: 'My sister’s in Dayton. We don’t talk much.' },
+  { t: 'Was a lifeguard as a teenager.', say: 'I was a lifeguard, years ago. Can you believe it?' },
+  { t: 'Used to play the trumpet. Badly.', say: 'I played the trumpet once. Badly.' },
+  { t: 'Married once. It didn’t take.', say: 'I was married once. It didn’t take.' },
+  { t: 'Allergic to cats.', say: 'Cats. I swell up like a balloon.' },
+  { t: 'Worked at the cannery for six years.', say: 'Six years at the cannery. Never again.' },
+  { t: 'Went to Wexley High.' },
+  { t: 'Bowls on Thursdays.', say: 'Thursdays I bowl. Don’t ask me on a Thursday.' },
+  { t: 'Their father ran the hardware store.' },
+  { t: 'Born in Ohio.', say: 'I’m from Ohio originally.' },
+  { t: 'Never learned to swim.', say: 'Never learned to swim. Never needed to.' },
+  { t: 'Collects stamps.' },
+  { t: 'Did two years in the army.', say: 'Two years in the army. That was enough.' },
+  { t: 'Volunteers at the church fete.' },
+  { t: 'Won a pie contest in 2019.' },
+  { t: 'Owes money on a boat.' },
+];
+// one of THEM: what doesn't add up. The lizards: nothing old, and blue blood or the elite somewhere it shouldn't be.
+// The dead: very old, and they'll tell you so. (The aliens' are pairs that disagree: BIO_ALIEN_PAIRS.)
+const BIO_THEM = {
+  lizards: [
+    { t: 'Royal bloodline. A real one. Never mentions it.', say: 'My family? Royalty, technically. Long story.' },
+    { t: 'Was at the governor’s ball last spring.', say: 'The governor’s ball was so dull this year.' },
+    { t: 'A member of the country club. Doesn’t look the type.' },
+    { t: 'Nothing they own is more than a year old.' },
+    { t: 'Their oldest photograph is from last Christmas.', src: 'home' },
+  ],
+  zombies: [
+    { t: 'Was friends with the man who invented the radio.', say: 'I knew the fellow who invented the radio. Nice man.' },
+    { t: 'Remembers the flood of 1913. In detail.', say: 'Worse than the flood of ’13, this rain.' },
+    { t: 'Their driver’s licence was issued in 1931.' },
+    { t: 'Was already old when Mom was a girl.', src: 'mom' },
+  ],
+};
+const BIO_ALIEN_PAIRS = [
+  [{ t: 'Born in Ohio. Says so themselves.', say: 'I’m an Ohio kid, born and raised.' }, { t: 'Their birth certificate says Toronto.' }],
+  [{ t: 'Forty-one, by their own account.', say: 'Forty-one next month. Don’t remind me.' }, { t: 'Their library card says twenty-nine.' }],
+  [{ t: 'Went to school in Dayton.', say: 'School in Dayton. Go Comets.' }, { t: 'Dayton High has never heard of them.' }],
+];
+// an ordinary person's one odd-looking fact: true, odd, and nothing to do with THEM (truth: what they'll say)
+const BIO_HUMAN_ODD = [
+  { t: 'Changed their name in 2009.', truth: 'I changed my name after the divorce' },
+  { t: 'Has no photographs from before they were twenty.', truth: 'there was a fire. Everything went' },
+  { t: 'Was at the governor’s ball last year.', truth: 'I waited tables at it' },
+  { t: 'Has been dead once. Four minutes, in 1998.', truth: 'I drowned, once. They brought me back' },
+  { t: 'Their passport is in another name.', truth: 'my maiden name. I never got round to it' },
+];
 const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
 const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];
 
@@ -112,15 +163,14 @@ const CF_YES_THEM = {
   habit: ['Everyone has their little ways.', 'So I like it warm. So what?', 'I was… resting.'],
   body: ['A trick of the light.', 'That’s… you can’t prove that’s me.', 'Put that away.'],
   biography: ['Is that a crime now?', 'Who told you that?', 'I don’t see what that has to do with anything.'],
-  contact: ['People will say anything.', 'Who told you that?', 'That’s my business.'],
 };
 const CF_NO = {
   home: ['That’s not mine. Never seen it.', 'Somebody put that there.', 'That isn’t anything to do with me.'],
   habit: ['That’s not me.', 'I was never there.', 'Somebody else. Not me.'],
   body: ['That’s not me in that picture.', 'That’s a blur. Could be anyone.', 'Not me.'],
   biography: ['So? Lots of people moved here in March.', 'So? That’s just my life.', 'And? Half this town could say the same.'],
-  contact: ['Who says? Nobody.', 'People talk.', 'That’s just talk.'],
 };
+const CF_PLANTED = ['That’s not mine. How did that get in there?', 'I’ve never seen it in my life. Who put that there?', 'That— somebody put that there.'];
 const CF_EMPTY = ['Well? Nothing? I thought so.', 'You’ve got nothing on me.', 'Go on, then. Show them.'];
 const CF_SHRUG = ['Are we done? Good.', 'Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'];
 // the verdict, big, when it's over

@@ -693,3 +693,14 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 #cam-mark{position:absolute;left:0;top:0;z-index:5;margin:-12px 0 0 16px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(10,9,8,.82);border:1px solid rgba(246,227,180,.55);color:#f6e3b4;animation:fadein .2s}
 #cam-mark .ic{width:15px;height:15px}
 #cam-mark[hidden]{display:none}
+
+/* the biography page: found facts, your one mark, blank lines for the rest */
+.sd-bio{margin:4px 0 10px;padding-left:20px;font:15px/1.35 var(--f-type);color:#2b261d}
+.sd-bio li{display:flex;align-items:baseline;gap:8px;padding:3px 0;border-bottom:1px solid rgba(60,48,34,.18)}
+.sd-bio li span{flex:1}
+.sd-bio li em{font:12px var(--f-ui);color:#7a6e5a;font-style:normal;white-space:nowrap}
+.sd-bio li.blank span{height:1em;border-bottom:1px dashed rgba(60,48,34,.35);margin-bottom:4px}
+.sd-bio li.odd span{background:rgba(232,190,90,.35);box-shadow:0 0 0 2px rgba(232,190,90,.35)}
+.sd-bio .mk-odd{padding:1px 8px;border-radius:4px;border:1px solid rgba(60,48,34,.45);background:transparent;color:#4a4032;font:600 11.5px var(--f-ui);cursor:pointer;white-space:nowrap}
+.sd-bio li.odd .mk-odd{background:#c8402f;border-color:#c8402f;color:#fff}
+.sd-bio .mk-odd:disabled{opacity:.55;cursor:default}

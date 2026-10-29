@@ -353,6 +353,10 @@ function objMenu(o) {
                 const t = hd ? hd.text : pick(NEWS.general);
                 ui.note('paper', t, hd && hd.echo ? 'onto' : '');
                 if (hd && hd.echo) hear(null, '“' + t + '”', 'paper');
+                if (G.paperRead !== dayNo()) {
+                  G.paperRead = dayNo(); // in the small print: a line about somebody you know
+                  paperFact();
+                }
               },
             }),
           ),

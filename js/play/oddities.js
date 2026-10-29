@@ -1,13 +1,13 @@
-//@ play/oddities — False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
+//@ play/oddities — Innocent oddities: lookalikes, habits, tics, odd-looking facts; rumours (talk only)
 //@ Defines: ODD_FRAMES, lookalikeFor, makeOddities, innocentCard, oddTruth, secretSeen, watchedHuman, tellRumour, markVictim
-//@ Uses:    sim/core, core/util, play/stashes, data/lines, town/cast, them/proofs, town/routines, world/objects, town/quirks, data/tuning, …
+//@ Uses:    sim/core, core/util, data/lines, play/stashes, town/cast, them/proofs, town/routines, world/objects, town/quirks, data/tuning, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── innocent oddities. Most ordinary people carry one odd true thing, and it looks just like THEIRS: a
 // lookalike at their place (a cash envelope, a bucket of trout, a fridge full of fish), a habit at a strange hour, a tic.
 // It makes one card, in one frame, and in a confrontation it holds up (✓): "Yes, I like fish. So?" A human never has
 // more than two odd true things: this one, and at most THEIR plant (play/stashes). Talk is never a card: a rumour going
 // round is only a note under the face it's about.
-const ODD_FRAMES = ['home', 'habit', 'body'];
+const ODD_FRAMES = ['home', 'habit', 'body', 'biography'];
 // the things in a person's own place you could put your hands in (their fridge is its own case)
 const ownThings = (n) =>
   OBJ.filter(
@@ -46,6 +46,10 @@ function makeOddities() {
         moveAt: 1e12,
       });
     } else if (f === 'body') od.k = pick(ODDITY_TIC);
+    else if (f === 'biography') {
+      od.i = irand(0, BIO_HUMAN_ODD.length - 1);
+      od.k = BIO_HUMAN_ODD[od.i].truth;
+    }
     // people talk about whoever looks odd: half of them have a rumour going round from THEIR day 2
     if (chance(0.5)) G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
     G.odd[n.id] = od;
@@ -69,7 +73,7 @@ function oddTruth(n) {
     const hb = G.habits[n.id];
     return 'just ' + secretFor(n, hb ? hb.spot : 'alley').note;
   }
-  return od.k; // body: the tic
+  return od.k; // body: the tic; biography: what they'll say about the odd fact
 }
 // a normal person's private secret, caught on film: the print shows exactly what they were up to. If that habit is
 // their one oddity, it's a Habit card on them (and it holds up); otherwise it's only a note.
