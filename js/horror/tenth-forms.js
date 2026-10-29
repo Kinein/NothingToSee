@@ -134,9 +134,8 @@ function photoTrace(n) {
   const p = n.isThem
     ? addProof({
         frame: 'body',
-        q: 'fuzzy',
         true: n.id,
-        auto: true,
+        pin: n.id,
         what,
         where: placeName(n.x, n.z),
         rec,

@@ -1,8 +1,70 @@
 //@ gfx/props — Evidence props, dynamic bits and cars
-//@ Defines: buildItemMesh, carGeo, buildCarMesh
-//@ Uses:    gfx/world-geometry, core/util, gfx/gl, gfx/post
+//@ Defines: STASH_SHAPE, LOOK_COL, stashShape, buildItemMesh, carGeo, buildCarMesh
+//@ Uses:    gfx/world-geometry, core/util, gfx/gl, gfx/post, sim/core
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── evidence props & dynamic bits
+// a thing hidden in somebody's things, by rough shape. What colours it is the look (whose faction it resembles), never
+// what it means: a plant and a lookalike look just as alien as THEIR own things.
+const STASH_SHAPE = {
+  till: 'bundle',
+  skin: 'bundle',
+  envelope: 'bundle',
+  letters: 'paper',
+  obit: 'paper',
+  fish: 'cooler',
+  fishes: 'cooler',
+  trout: 'cooler',
+  fishy: 'cooler',
+  laser: 'tube',
+  sunlamp: 'tube',
+  radio: 'box',
+  scanner: 'box',
+  device: 'device',
+  teeth: 'jar',
+  pills: 'jar',
+  finger: 'parcel',
+  meat: 'parcel',
+  butcher: 'parcel',
+  mask: 'parcel',
+};
+const LOOK_COL = {
+  lizards: { base: 0x7fa066, trim: 0xc9a043, glow: 0.35 },
+  aliens: { base: 0x9aa0a6, trim: 0x50ffa0, glow: 1 },
+  zombies: { base: 0xd8cfb0, trim: 0x5a4a2a, glow: 0 },
+};
+function stashShape(g, shape, look) {
+  const L = LOOK_COL[look] || LOOK_COL.aliens,
+    base = C(L.base),
+    trim = C(L.trim),
+    em = L.glow ? EMIT(L.glow) : E0;
+  if (shape === 'bundle') {
+    g.bx(0, 0.03, 0, 0.22, 0.06, 0.12, base);
+    g.bx(0, 0.035, 0, 0.05, 0.07, 0.13, trim, em);
+  } else if (shape === 'paper') {
+    g.bx(0, 0, 0, 0.3, 0.008, 0.38, base);
+    for (let i = 0; i < 5; i++) g.bx(0, 0.009, -0.13 + i * 0.065, 0.22, 0.002, 0.012, trim, em);
+  } else if (shape === 'cooler') {
+    g.bx(0, 0.09, 0, 0.36, 0.18, 0.24, base);
+    g.bx(0, 0.19, 0, 0.38, 0.03, 0.26, trim, em);
+  } else if (shape === 'tube') {
+    g.xf(M4.mul(M4.trans(0, 0.05, 0), M4.rotZ(Math.PI / 2)), () => g.cyl(0, -0.12, 0, 0.05, 0.05, 0.24, 12, base));
+    g.xf(M4.mul(M4.trans(0, 0.05, 0), M4.rotZ(Math.PI / 2)), () =>
+      g.cyl(0, -0.02, 0, 0.056, 0.056, 0.03, 12, trim, em),
+    );
+  } else if (shape === 'box') {
+    g.bx(0, 0.06, 0, 0.26, 0.12, 0.16, base);
+    g.bx(0.08, 0.125, 0.05, 0.03, 0.01, 0.03, trim, em);
+  } else if (shape === 'jar') {
+    g.cyl(0, 0, 0, 0.07, 0.07, 0.16, 10, base, GLASS);
+    g.cyl(0, 0.16, 0, 0.075, 0.075, 0.025, 10, trim, em);
+  } else if (shape === 'parcel') {
+    g.sphere(0, 0.05, 0, 0.16, 0.06, 0.11, 8, 4, base);
+    g.bx(0, 0.05, 0, 0.02, 0.07, 0.12, trim, em);
+  } else {
+    g.bx(0, 0.0, 0, 0.16, 0.06, 0.1, C(0x2a2c30));
+    g.bx(0.05, 0.065, 0.03, 0.025, 0.01, 0.025, trim, em);
+  }
+}
 function buildItemMesh(it) {
   const g = new Geo();
   if (it.kind === 'skin') {
@@ -98,11 +160,21 @@ function buildItemMesh(it) {
           C(0x60ff90),
           EMIT(0.4 + (i % 2) * 0.6),
         );
-    } else {
-      g.bx(0, 0.0, 0, 0.16, 0.06, 0.1, C(0x2a2c30));
-      g.bx(0.05, 0.065, 0.03, 0.025, 0.01, 0.025, C(0x60ff90), EMIT(1));
-    }
+    } else stashShape(g, STASH_SHAPE[k] || 'device', it.look || G.faction);
     g.mat = null;
+  } else if (it.kind === 'mark') {
+    // scratched into the door frame at chest height: three gouges and a crossbar, old newspaper-brown at the edges
+    g.xf(M4.rotY(it.rot || 0), () => {
+      for (let i = 0; i < 3; i++) g.bx(-0.08 + i * 0.08, 1.25, 0.06, 0.018, 0.34, 0.01, C(0x2a2018));
+      g.bx(0, 1.3, 0.06, 0.3, 0.018, 0.01, C(0x2a2018));
+      g.bx(0, 1.25, 0.055, 0.42, 0.46, 0.004, C(0x6a5a3a));
+    });
+  } else if (it.kind === 'goldart') {
+    // brand new, leaning on the wall: a gold frame round something nobody here would buy
+    g.xf(M4.mul(M4.rotY(it.rot || 0), M4.rotX(-0.18)), () => {
+      g.bx(0, 0.45, 0, 0.7, 0.86, 0.05, C(0xc9a043), EMIT(0.25));
+      g.bx(0, 0.45, 0.03, 0.56, 0.7, 0.01, C(0x2a3a2c));
+    });
   } else if (it.kind === 'trap') {
     // steel jaws, open, and whatever you baited it with
     const steel = C(0x6d6f72),

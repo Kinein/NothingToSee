@@ -69,9 +69,9 @@ const SNOOP_MUNDANE = ['Pens. Old mint.', 'Rejection letter', 'Abandoned diet', 
 const FAKE_LINES = ['{s} was in the closet again. In the dark.', '{s} came out of the restroom wet to the elbows.', '{s} stood by the dumpster at 3. Not moving.', 'Heard {s} humming through the wall. One note.', '{s} asked what you eat.'];
 
 // ── Junk found rummaging (play/stashes)
-const JUNK = ['a lost spoon and two buttons', 'loose change and a hairgrip', 'a dead battery', 'a folded love note, not to you', 'a dried-out sandwich crust', 'a key to nothing', 'a loose fuse', 'three dice and a bottle cap', 'a broken watch'];
+const JUNK = ['a receipt for milk', 'an odd sock', 'a broken watch', 'a lost spoon and two buttons', 'loose change and a hairgrip', 'a dead battery', 'a folded love note, not to you', 'a dried-out sandwich crust', 'a key to nothing', 'a loose fuse', 'three dice and a bottle cap', 'a broken watch'];
 
-// ── Innocent oddities and THEIR frame-ups (play/oddities)
+// ── Innocent oddities (play/oddities)
 // what an ordinary person keeps in their own things that looks like THEIRS, and what it really is
 const ODDITY_HOME = {
   envelope: { k: 'envelope', what: 'A cash envelope', icon: 'coin', desc: 'a fat envelope of cash, no name on it', truth: 'a gambling debt. The letter’s in with the cash' },
@@ -79,6 +79,13 @@ const ODDITY_HOME = {
   letters: { k: 'letters', what: 'A bundle of letters', icon: 'paper', desc: 'letters, tied with string, a strange crest on each', truth: 'love letters. Not from who you’d think' },
   mask: { k: 'mask', what: 'A spare face', icon: 'paper', desc: 'a rubber face, folded flat', truth: 'a Halloween mask. Still in its bag' },
   scanner: { k: 'scanner', what: 'A box with a light', icon: 'glyph', desc: 'a small black box, one light blinking', truth: 'a police scanner. They listen in at night' },
+  // the ones that look like a particular THEM (look): kept twice as often in a week it's that THEM
+  trout: { k: 'trout', look: 'lizards', what: 'A bucket of trout', icon: 'bag', desc: 'a bucket of trout, some of them eaten', truth: 'I fish. Every weekend. So?' },
+  sunlamp: { k: 'sunlamp', look: 'lizards', what: 'A sunlamp', icon: 'glyph', desc: 'a heat lamp, still warm, by the bed', truth: 'a sunlamp. The winters here get to me' },
+  fishy: { k: 'fishy', look: 'lizards', fridge: 1, what: 'A fridge of fish', icon: 'bag', desc: 'a fridge packed with fish', truth: 'I love fish. Is that a crime?' },
+  radio: { k: 'radio', look: 'aliens', what: 'A ham radio', icon: 'glyph', desc: 'a radio set, tuned to nothing, humming', truth: 'a ham radio. I talk to Norway' },
+  bare: { k: 'bare', look: 'aliens', fridge: 1, empty: 1, what: 'An empty fridge', icon: 'bag', desc: 'empty, and spotless', truth: 'payday’s Friday' },
+  butcher: { k: 'butcher', look: 'zombies', what: 'A butcher’s order', icon: 'bag', desc: 'ten pounds of raw meat in newspaper', truth: 'a butcher’s order. My sister’s wedding' },
 };
 const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
 const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];

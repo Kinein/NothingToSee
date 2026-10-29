@@ -161,7 +161,7 @@ function quirkTalk(n) {
   const best = {};
   for (const e of G.qlog || []) {
     const s = NPC[e.id];
-    if (!fairGame(s, n) || G.t - e.t > 4 * 1440 || (G.cleared[s.id] && e.q === 'sneak')) continue;
+    if (!fairGame(s, n) || G.t - e.t > 4 * 1440) continue;
     const mine = e.by.includes(n.id);
     if (!mine && !e.by.length) continue;
     if (e.q === 'pair' && (!fairGame(NPC[e.other], n) || pairCount(e.id, e.other) < 2)) continue;
@@ -315,7 +315,7 @@ function chatPick(n) {
     opts.push([0.4, () => ({ text: pick(WEIRD_THEM) })]);
   } else if (T.odd) opts.push([1.2, () => ({ text: pick(WEIRD) })]);
   const hb = G.habits[n.id];
-  if (hb && !G.cleared[n.id]) {
+  if (hb) {
     const sp = (n.isThem && G.cover[n.id] ? G.cover[n.id] : hb).spot;
     if (PLACE_SELF[sp])
       opts.push([

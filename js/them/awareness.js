@@ -1,6 +1,6 @@
 //@ them/awareness — THEIR awareness of you, settled at 06:00
 //@ Defines: bookPhoto, bookNight, bookRemoval, bookAware, applyAwareness
-//@ Uses:    sim/core, town/cast, core/util, ui/interface, town/echoes, data/tuning
+//@ Uses:    sim/core, town/cast, core/util, ui/interface, play/plants, town/echoes, data/tuning
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── THEIR awareness. Each member books what they noticed today; it all lands at 06:00.
 // Suspicion of you crossing 60 (+10, once), photographed mid-tell (+8), peak danger above 50 (half the excess),
@@ -34,6 +34,7 @@ function applyAwareness() {
   }
   add += 15 * (G.awareRemoved || 0) + (G.awareExtra || 0);
   if (G.playerChip && G.faction === 'aliens') add += 5;
+  if (add > 0 && homePlanted('device')) add *= 1.5; // THEIR device in your home: THEY listen, and learn about you faster
   G.awareBook = {};
   G.awareRemoved = 0;
   G.awareExtra = 0;

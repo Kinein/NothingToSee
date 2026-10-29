@@ -244,6 +244,8 @@ for (const h of HOUSE_DEFS) {
 }
 
 for (const h of HOUSE_DEFS) PLACE.push(['rug_house', h.x0 + 1, h.row === 'N' ? 7 : 22, 0]); // last, so every older object keeps its index (saves point at them)
+// a fridge in every home: one more place to search (after the rugs, for the same reason)
+for (const h of HOUSE_DEFS) PLACE.push(['fridge', h.x0 + 1, h.row === 'N' ? 10 : 21, 3, { id: 'fridge_' + h.id }]);
 
 // what stands in THEIR places. Appended last, so every object up top keeps its index (saves point at them).
 Object.assign(OT, {

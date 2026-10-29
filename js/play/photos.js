@@ -1,6 +1,6 @@
 //@ play/photos — Photos: reading what is in frame
-//@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, itemHome, itemSeenWith, photoItem, PHOTO_FACE, photoSeen, toggleCam
-//@ Uses:    sim/core, ui/interface, them/proofs, town/suspicion, ui/menus, them/tells, sim/actions, data/tuning, world/vision, core/util, …
+//@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, toggleCam
+//@ Uses:    sim/core, ui/interface, town/suspicion, them/tells, sim/actions, data/tuning, world/vision, core/util, gfx/portraits, play/stashes, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -185,28 +185,18 @@ function takePhoto(tg) {
     filed = true;
     got.add(n);
     if (tl.type === 'true' && tl.t >= TF_CHANGE + 0.2) {
-      // a true form after the change: a fuzzy Body card with no face to it. Whose it was is yours to say.
+      // a true form after the change, with no face to it: a scary photo, not a card
       if (!G.factionKnown) revealFaction();
-      const known = n.exposed,
-        where = placeName(n.x, n.z);
       setTimeout(() => {
         if (tl) tl.photo = false;
       }, 4000);
-      if (known || (n.trueForm && n.trueForm.proofShot)) {
-        ui.note('camera', 'Another shot of it · nothing new', '');
-        continue;
-      }
-      if (n.trueForm) n.trueForm.proofShot = true;
-      const p = addProof({
-        frame: 'body',
-        q: 'fuzzy',
-        true: n.id,
-        what: 'A true form',
-        where,
-        rec: { type: 'true', how: 'photo', at: G.t, t: n.animT, pose: 'stand' },
-        recWho: n.id,
+      const pr = addPrint({ kind: 'scary', what: 'Something', where: placeName(n.x, n.z) });
+      ui.card({
+        title: 'Something',
+        img: snapImage(n, { type: 'true', how: 'photo', at: G.t, t: n.animT, pose: 'stand' }),
+        stamp: 'NO FACE',
       });
-      proofCard(p);
+      pr.who = n.id;
       continue;
     }
     n.pinnedDay = dayNo();
@@ -246,9 +236,8 @@ function takePhoto(tg) {
       got.add(x);
       const p = addProof({
         frame: 'habit',
-        q: 'clear',
         true: x.id,
-        auto: true,
+        pin: x.id,
         what: x.short + ' at THEIR gathering',
         where: placeName(x.x, x.z),
         rec: Object.assign({}, rec, { at: G.t + i * 0.001 }),
@@ -275,39 +264,24 @@ function takePhoto(tg) {
       filed = true;
     }
   }
-  // anyone else in the frame, standing by one of THEIR marks
-  const nm = got.size;
-  photoMarks(chars, got);
-  if (got.size > nm) filed = true;
-  // a normal person's private secret: the print shows exactly what they were up to. That frame is clean.
+  // a normal person's private secret: the print shows exactly what they were up to
   for (const n of chars)
     if (n.secret && !n.secret.done && !n.isThem) {
       n.secret.done = true;
       secretSeen(n, n.secret.spot);
       filed = true;
     }
-  // somebody slipping off at their hour, and nothing odd on the film: Habit is searched. It tells you nothing.
+  // somebody slipping off at their hour, and nothing odd on the film: a note for you
   for (const n of chars) {
     const cur = n.queue[0];
-    if (!got.has(n) && cur && cur.habit && !n.secret && !n.def.never && dashFrame(n, 'habit')) {
+    if (!got.has(n) && cur && cur.habit && !n.secret && !n.def.never) {
+      noteOnce(n, 'Photographed at their hour: nothing odd.', { by: 'you' });
       ui.note('clock', n.short + ' · nothing at their hour', '');
       got.add(n);
       filed = true;
     }
   }
-  // a face up close and nothing in it: that frame is searched. It tells you nothing.
   const subj = tg.char;
-  if (
-    subj &&
-    !got.has(subj) &&
-    !subj.def.never &&
-    !subj.def.stranger &&
-    Math.hypot(subj.x - PLAYER.x, subj.z - PLAYER.z) <= PHOTO_FACE &&
-    dashFrame(subj, 'body')
-  ) {
-    ui.note('face', subj.short + ' · nothing in the face', '');
-    filed = true;
-  }
   if (!filed) {
     // the camera never lies: a vision comes out empty
     const vision = (SHADE.on && SHADE.c && inFrame(SHADE.c.x, SHADE.c.z)) || chars.some((n) => n.vis && !n.tell);
@@ -331,37 +305,10 @@ function takePhoto(tg) {
 }
 // something THEY left lying about: in their own home it's a clear Home card. Anywhere else it's fuzzy, and it's
 // whoever was seen in that room lately, or nobody's yet.
-function itemHome(it) {
-  const r = roomAt(it.x, it.z);
-  return !!(r && it.by && (r.house === it.by || (it.by === 'agnes' && r.agnes)));
-}
-function itemSeenWith(it) {
-  const n = NPC[it.by];
-  return !!(n && it.room && n.seenRoom[it.room] && G.t - n.seenRoom[it.room] < 180);
-}
+// a photo of something on the floor: a print. You take things.
 function photoItem(it) {
-  const n = NPC[it.by],
-    home = itemHome(it),
-    saw = itemSeenWith(it);
-  if (!G.factionKnown) revealFaction();
-  const where = placeName(it.x, it.z);
-  const p = addProof({
-    frame: 'home',
-    q: home ? 'clear' : 'fuzzy',
-    true: it.by,
-    auto: home || saw,
-    what: ITEM_NAMES[it.kind] + (home ? ', in their own home' : ''),
-    where,
-    pr: { kind: 'item', what: ITEM_NAMES[it.kind], icon: FACTIONS[G.faction].icon },
-  });
-  if (p.pin && n)
-    addNote(n, 'Photo: ' + ITEM_NAMES[it.kind].toLowerCase() + ', ' + where.toLowerCase() + '.', { by: 'you' });
-  else {
-    G.leads.push(ITEM_NAMES[it.kind] + ' — whose?');
-    if (G.leads.length > 6) G.leads.shift();
-  }
-  proofCard(p);
-  audio.sting('onto');
+  if (!G.factionKnown && it.by && !it.innocent) revealFaction();
+  thingPrint(ITEM_NAMES[it.kind] || 'Something', it);
 }
 // being seen with the camera. The film is free; the looks aren't. Pictures of things and places are nobody's business.
 // A lens in someone's face is: the one you shot minds (a lot up close, a little from across the room, not at all if they

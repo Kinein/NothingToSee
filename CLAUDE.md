@@ -71,8 +71,8 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
 | Tells, THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
-| Evidence: four frames per suspect, clear/fuzzy/grey/dashed cards | `js/them/proofs.js` (`addProof`, `cardIn`, `frameState`, `greyFrame`) |
-| False cards: innocent oddities, rumours (talk only, never cards), THEIR frame-ups | `js/play/oddities.js` |
+| Evidence: four frames per suspect, one plain card each (✓/✗ only in a confrontation) | `js/them/proofs.js` (`addProof`, `cardIn`, `caseCards`) |
+| Innocent oddities (lookalikes, habits, tics), rumours (talk only, never cards) | `js/play/oddities.js`; the lookalikes: `ODDITY_HOME` in data/lines.js |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |
@@ -80,7 +80,9 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Horror events and scenes | `js/horror/director.js` (daily plan), `layer.js` (machinery), `midday.js`, `night.js` |
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |
-| Stashes, traps, raids, items on the floor | `js/play/stashes.js`, `traps.js`, `raids.js`, `items.js` |
+| Hidden things, the fridge, taking and the place rule (`takeThing`, `placeOwner`) | `js/play/stashes.js` (`STASH_KINDS`, `PLANTS`) |
+| THEIR plant at a victim's place and in your home, THEY take things back, signs for a gut feeling | `js/play/plants.js` (`morningThings`) |
+| Traps, raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
 | Photos | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |

@@ -1,6 +1,6 @@
 //@ ui/menus — Interaction menus for objects, people, items
 //@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
-//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, world/objects, player/needs, town/cast, …
+//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, world/objects, player/needs, data/tuning, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
 function opt(label, icon, fn, dis) {
@@ -650,12 +650,13 @@ function menuForChar(n) {
   return {
     title: n.name,
     img: getPortrait(n),
-    sub: G.cleared[n.id]
-      ? 'Cleared'
-      : knownQ(n)
-          .slice(0, 2)
-          .map((q) => QUIRKS[q].short)
-          .join(' · '),
+    sub:
+      G.mark[n.id] === 'cleared'
+        ? 'Cleared'
+        : knownQ(n)
+            .slice(0, 2)
+            .map((q) => QUIRKS[q].short)
+            .join(' · '),
     ops,
   };
 }
@@ -684,6 +685,8 @@ const ITEM_NAMES = {
   stain: 'A stain',
   tape: 'Police tape',
   device: 'A small device',
+  mark: 'A mark on the door frame',
+  goldart: 'A gold-framed picture',
   opened: 'Taken apart',
   trap: 'Your trap',
 };
@@ -757,13 +760,25 @@ function menuForItem(it) {
       ),
     );
   else if (it.kind === 'stash') {
-    ops.push(
-      opt(
-        'Take it',
-        'bag',
-        go('Take it', () => takeStash(it), 1),
-      ),
-    );
+    const st = G.stashes.find((x) => x.id === it.stash);
+    // THEIR plant in your own home: get rid of it. Anywhere else you take it (at a victim's place there's no Destroy:
+    // offering one would tell you it isn't evidence).
+    if (st && st.plant && ownerOf(OBJ[it.obj]) === 'you')
+      ops.push(
+        opt(
+          'Destroy',
+          'fist',
+          go('Destroy it', () => destroyPlant(it), 2),
+        ),
+      );
+    else
+      ops.push(
+        opt(
+          'Take it',
+          'bag',
+          go('Take it', () => takeStash(it), 1),
+        ),
+      );
     ops.push(
       opt(
         'Put it back',
@@ -787,37 +802,48 @@ function menuForItem(it) {
         go('Pick it up', () => liftTrap(it), 2),
       ),
     );
+  else if (it.kind === 'mark' && it.place === 'you')
+    ops.push(
+      opt(
+        'Destroy',
+        'fist',
+        go('Scrub it off', () => destroyPlant(it), 3),
+      ),
+    );
+  else if (it.kind === 'goldart')
+    return { title: name, icon: 'bag', sub: 'New. Brand new.', ops: [opt('Look', 'eye', null, 'Not yours')] };
   else if (it.kind !== 'tape' && it.kind !== 'scorch')
     ops.push(
       opt(
-        'Bag it',
+        it.kind === 'mark' ? 'Take it' : 'Bag it',
         'bag',
-        go('Bag it', () => bagItem(it), 2),
+        go(it.kind === 'mark' ? 'Copy it down' : 'Bag it', () => bagItem(it), 2),
       ),
     );
   if (!ops.length) return null;
   return { title: name, icon: it.kind === 'puddle' ? 'mop' : it.kind === 'trap' ? 'trap' : 'bag', ops };
 }
 // bagged, it's out of THEIR hands and in yours: a Home card, or bait for a trap. THEY hate seeing it on you.
+// off the floor: THEIR thing (or THEIR plant) goes on whoever's place it lay in; out in the street it's a clue, and bait
 function bagItem(it) {
-  const home = itemHome(it),
-    saw = itemSeenWith(it);
   removeItem(it);
   if (it.by && !it.innocent) psyMark('sign');
-  if (it.by) {
-    if (!G.factionKnown) revealFaction();
-    takeProofItem({
-      frame: 'home',
-      q: home ? 'clear' : 'fuzzy',
-      true: it.by,
-      auto: home || saw,
+  if (!it.by) return ui.note('bag', ITEM_NAMES[it.kind] + ' · in a bag, in your pocket', '');
+  if (!G.factionKnown && !it.plant) revealFaction();
+  takeThing(
+    {
       what: ITEM_NAMES[it.kind],
-      where: placeName(it.x, it.z),
-      k: it.kind,
       icon: FACTIONS[G.faction].icon,
-      pr: { kind: 'item', what: ITEM_NAMES[it.kind], icon: FACTIONS[G.faction].icon },
-    });
-  } else ui.note('bag', ITEM_NAMES[it.kind] + ' · in a bag, in your pocket', '');
+      k: it.kind,
+      look: G.faction,
+      by: it.by,
+      plant: it.plant || null,
+      place: it.place,
+    },
+    null,
+    it.x,
+    it.z,
+  );
 }
 // the inventory: what you carry. It has no place on screen yet; the self menu (E on yourself) reaches the three you find.
 const ITEMS_INV = [
@@ -879,13 +905,13 @@ const ITEMS_INV = [
     k: 'bait',
     label: 'THEIR things · proof, or bait for your next trap',
     icon: 'bag',
-    has: () => G.proofs.some((p) => p.src === 'item' && !p.grey),
-    count: () => G.proofs.filter((p) => p.src === 'item' && !p.grey).length,
+    has: () => G.proofs.some((p) => p.src === 'item'),
+    count: () => G.proofs.filter((p) => p.src === 'item').length,
     use: () =>
       ui.note(
         'bag',
         G.proofs
-          .filter((p) => p.src === 'item' && !p.grey)
+          .filter((p) => p.src === 'item')
           .map((p) => p.what)
           .join(' · '),
         '',

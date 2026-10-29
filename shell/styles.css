@@ -380,14 +380,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .slot .fi{position:absolute;inset:0;display:grid;place-items:center;font-style:normal}
 .slot .fi .ic{width:62%;height:62%;stroke-width:1.8}
 .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
-.slot.dashed{border:1.5px dashed rgba(60,48,34,.55);background:transparent}
-.slot.fuzzy{border:none;border-radius:6px 2px 7px 3px;box-shadow:0 0 0 1.5px rgba(232,226,210,.7);clip-path:polygon(0 4%,12% 0,30% 5%,48% 0,70% 4%,88% 0,100% 6%,97% 30%,100% 52%,96% 74%,100% 96%,80% 100%,58% 95%,38% 100%,18% 96%,0 100%,4% 76%,0 52%,3% 28%)}
-.slot.fuzzy img{filter:blur(.6px) saturate(.8) contrast(.9)}
-.slot.clear{border:3px solid #fffdf6;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35)}
-.slot.grey img{filter:grayscale(1) brightness(1.1) contrast(.7);opacity:.75}
-.slot.grey::after{content:'';position:absolute;left:8%;right:8%;top:50%;height:2px;background:#5a5448;transform:rotate(-40deg)}
-.slot.fuzzy .fi,.slot.clear .fi,.slot.grey .fi{inset:auto 1px 1px auto;width:38%;height:38%;border-radius:3px;background:rgba(239,232,212,.92);color:#3a3024}
-.slot.mine{cursor:grab;outline:1px dashed rgba(0,0,0,.4);outline-offset:1px}
+.slot.card{border:3px solid #fffdf6;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35)}
+.slot.card .fi{inset:auto 1px 1px auto;width:38%;height:38%;border-radius:3px;background:rgba(239,232,212,.92);color:#3a3024}
 .slot.big{border-radius:4px}
 .slot.big em{position:absolute;left:0;right:0;bottom:-20px;font:12.5px/1 var(--f-type);font-style:normal;color:#5a5244;text-align:center}
 .slot.big.foc{box-shadow:0 0 0 3px var(--sodium)}
@@ -408,23 +402,16 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .sd-zoom{display:flex;gap:12px;align-items:flex-start;margin:-6px 0 6px;padding:8px;background:#fff8e6;box-shadow:0 6px 14px rgba(0,0,0,.3);cursor:zoom-out}
 .sd-zoom img{width:130px;aspect-ratio:180/230;object-fit:cover;object-position:50% 30%;background:#111}
 .sd-zoom span{font:13.5px/1.35 var(--f-type);color:#3a3024}
-.sd-zoom.fuzzy img{filter:blur(.8px)}
-.sd-zoom.grey img{filter:grayscale(1)}
 .sd-hab,.sd-with{display:flex;flex-wrap:wrap;gap:6px;font:14px var(--f-type);color:#3a3024}
 .sd-hab .chip,.sd-with .chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;border:1px solid rgba(60,48,34,.35);background:rgba(255,248,230,.6);color:#3a3024}
 .sd-hab .chip .ic{width:14px;height:14px}
 .sd-hab .none{color:#8a7a62}
 .bd-trays{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;margin-top:18px}
-#bd-prints,#bd-heard{position:relative;z-index:3;display:flex;gap:14px;align-items:flex-start;overflow-x:auto;min-height:150px;padding:40px 8px 12px;border-top:1px dashed rgba(232,220,192,.18)}
-#bd-prints .tape,#bd-heard .tape{position:absolute;left:10px;top:8px;padding:2px 12px;font:400 14px/1.4 var(--f-type);letter-spacing:.14em;text-transform:uppercase;transform:rotate(-2deg)}
-#bd-prints .tape{background:rgba(232,211,106,.85);color:#2a2410}
 #bd-heard .tape{background:rgba(214,226,232,.85);color:#1d242a}
-#bd-prints.empty::after{content:'';position:absolute;left:10px;right:10px;top:44px;height:92px;border:2px dashed rgba(232,220,192,.12);border-radius:6px}
-#bd-prints.over,.cork.dragging #bd-prints{background:rgba(232,211,106,.06)}
+#bd-heard{position:relative;z-index:3;display:flex;gap:14px;align-items:flex-start;overflow-x:auto;min-height:150px;padding:40px 8px 12px;border-top:1px dashed rgba(232,220,192,.18)}
+#bd-heard .tape{position:absolute;left:10px;top:8px;padding:2px 12px;font:400 14px/1.4 var(--f-type);letter-spacing:.14em;text-transform:uppercase;transform:rotate(-2deg)}
 #bd-heard{flex-direction:column}
 #bd-heard .heard{width:auto}
-#bd-prints .pinhint{position:absolute;left:120px;top:9px;display:flex;align-items:center;gap:5px;padding:2px 9px;border-radius:6px;background:rgba(10,8,6,.75);color:#e8dcc0;font-size:13.5px}
-#bd-prints .pinhint .ic{width:14px;height:14px}
 .print{position:relative;flex:none;display:flex;flex-direction:column;gap:5px;width:92px;padding:5px 5px 7px;background:#f3ecd8;color:#2a241a;transform:rotate(var(--tilt,0deg));box-shadow:0 8px 16px rgba(0,0,0,.5);transition:transform .15s;cursor:grab}
 .print:hover{transform:rotate(0deg) scale(1.05)}
 .print img{width:100%;aspect-ratio:180/230;object-fit:cover;background:#111}

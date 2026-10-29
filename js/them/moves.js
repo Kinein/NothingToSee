@@ -33,7 +33,7 @@ function tryBribe(n) {
   );
   if (!near.length) return false;
   // whoever already finds you weird; once THEY know you, whoever still trusts you: your crowd turns
-  near.sort((a, b) => (G.aware >= EVIDENCE.frameAt[0] ? a.sus - b.sus : b.sus - a.sus));
+  near.sort((a, b) => (G.aware >= KNOWN_AT ? a.sus - b.sus : b.sus - a.sus));
   const o = near[0];
   n.bribeDay = dayNo();
   const a = npcTalkAct(n, o, rand(4, 6));

@@ -129,16 +129,13 @@ const RANGED = {
 };
 
 // ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/confrontation, ui/case-board)
-// Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
-// A clear card pushes a fuzzy one out of its frame. Enough grey (explained) frames and they're CLEARED.
+// Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, the newest. Whether a card holds up is
+// decided only in a confrontation: ✓ or ✗.
 const EVIDENCE = {
   frames: ['home', 'habit', 'body', 'contact'],
-  oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one fuzzy card, in one frame
-  frameAt: [40, 70],            // awareness at which THEY frame one human, then a second
+  oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one card, in one frame, and it holds up
   cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
-  clearedGrey: 2,               // grey frames that stamp a suspect CLEARED (an ordinary person has two to find: their secret, their oddity)
   witnessDays: 2,               // someone who saw it change remembers it this long
-  halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
   // the confrontation (play/confrontation): a fail makes everyone listening `failSus` warier of you; after IT changes in
   // public, people go home early for `fearMins`
   cf: { failSus: 15, fearMins: 1440 },

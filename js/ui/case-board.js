@@ -1,18 +1,16 @@
 //@ ui/case-board — The evidence book: four frames on every suspect, the suspect page, the Whose? tray
-//@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, drawPols, drawPrints, drawHeard, dragFrom, dropOn, pinPrint, refreshBoard, drawStrings, showSuspect, …
-//@ Uses:    ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, …
+//@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, drawPols, drawHeard, refreshBoard, drawStrings, showSuspect, closeSuspect, focusPol, boardKey, closeBoard, …
+//@ Uses:    ui/interface, sim/core, them/proofs, core/util, town/cast, world/grid, them/plan, town/quirks, ui/hud, gfx/portraits, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── the board. A cork board that pauses the town. Every suspect shows four frame slots under their polaroid:
-// how many, which ones, clear or fuzzy, at a glance. Nothing on it says a case is enough: that's yours to decide.
-//   empty · faint icon      dashed · searched, nothing      fuzzy · torn soft edge      clear · sharp white border
-//   grey  · seen explained, clean
-const SLOT_TIP = { empty: 'Not searched yet', dashed: 'Searched · nothing', grey: 'Clean' };
+// ───────────── the board. A cork board that pauses the town. Every suspect shows four frame slots under their polaroid,
+// empty or holding a card. A card says plainly what it shows, where and when; nothing on it says whether it holds up.
+// That's decided only when you confront them (✓ or ✗), and whether a case is enough is yours to judge.
+const SLOT_TIP = { empty: 'Nothing yet' };
 const MARK_STAMP = { them: 'IT’S THEM', cleared: 'CLEARED' };
 function openBoard(focusId) {
   if (!G || !G.started) return;
   drawTop();
   drawPols();
-  drawPrints();
   drawHeard();
   $('#bd-detail').hidden = true;
   $('#board .cork').classList.remove('paged');
@@ -75,13 +73,9 @@ function drawTop() {
   eye.innerHTML = svgIcon('eye') + '<b></b>';
   eye.querySelector('b').textContent = eyeLine();
 }
-// a card says where and when, nothing else: THEIRS and an innocent's look the same. A grey one says what it really was.
+// a card says what, where and when, nothing else: THEIRS and an innocent's look the same
 const cardWhen = (p) =>
-  (p.grey && p.truth ? p.truth + ' · ' : '') +
-  (p.where ? p.where + ' · ' : '') +
-  DOW[dow(dayNo(p.at))] +
-  ' ' +
-  fmtTime(p.at);
+  (p.what ? p.what + ' · ' : '') + (p.where ? p.where + ' · ' : '') + DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
 function slotHtml(n, f, big) {
   const st = frameState(n, f),
     p = cardIn(n, f);
@@ -90,11 +84,10 @@ function slotHtml(n, f, big) {
     '<span class="slot ' +
     st +
     (big ? ' big' : '') +
-    (p && !p.auto ? ' mine' : '') +
     '" data-f="' +
     f +
     '"' +
-    (p ? ' data-pid="' + p.id + '"' + (!p.auto ? ' draggable="true"' : '') : '') +
+    (p ? ' data-pid="' + p.id + '"' : '') +
     ' data-tip="' +
     esc(FRAME[f].name + ' · ' + tip) +
     '">' +
@@ -118,7 +111,6 @@ function stampFor(n) {
   if (n.exposed) return ['caught', 'UNMASKED'];
   if (n.gone) return ['gonest', 'GONE'];
   if (G.mark[n.id]) return [G.mark[n.id], MARK_STAMP[G.mark[n.id]]];
-  if (G.cleared[n.id]) return ['cleared', 'CLEARED'];
   return null;
 }
 function drawPols() {
@@ -131,7 +123,7 @@ function drawPols() {
       'pol2' +
       (n.slain || n.gone ? ' gone' : '') +
       (n.exposed && !n.slain ? ' unmasked' : '') +
-      (G.cleared[n.id] || G.mark[n.id] === 'cleared' ? ' cleared' : '') +
+      (G.mark[n.id] === 'cleared' ? ' cleared' : '') +
       (UI.bdSel === n.id ? ' sel' : '');
     card.dataset.id = n.id;
     card.style.setProperty('--tilt', (hash2(n.id.length, n.id.charCodeAt(0), 3) * 7 - 3.5).toFixed(1) + 'deg');
@@ -144,46 +136,9 @@ function drawPols() {
     card.querySelector('img').src = getPortrait(n);
     card.querySelector('b').textContent = n.short;
     fillSlotImgs(card);
-    card.onclick = () => {
-      if (UI.pinSel) return pinPrint(UI.pinSel, n.id);
-      showSuspect(n);
-    };
-    dropOn(card, (p) => pinPrint(p.id, n.id));
+    card.onclick = () => showSuspect(n);
     list.appendChild(card);
   }
-  dragFrom(list);
-}
-// the Whose? tray: cards with no owner yet. Drag one onto a suspect, or pick it and then click a polaroid.
-// A card you placed yourself can be dragged back off again.
-function drawPrints() {
-  const box = $('#bd-prints');
-  if (!box) return;
-  const loose = looseProofs().slice(-12).reverse();
-  box.innerHTML =
-    '<b class="tape">Whose?</b>' +
-    (UI.pinSel ? '<span class="pinhint">' + svgIcon('drag') + 'Pick a suspect</span>' : '');
-  box.classList.toggle('empty', !loose.length);
-  for (const p of loose) {
-    const el = document.createElement('button');
-    el.className = 'print ' + p.q + (UI.pinSel === p.id ? ' sel' : '');
-    el.draggable = true;
-    el.dataset.pid = p.id;
-    el.style.setProperty('--tilt', ((p.id * 37) % 7) - 3 + 'deg');
-    el.innerHTML = '<img alt=""><span></span><i class="pq">' + svgIcon(FRAME[p.frame].icon) + '</i>';
-    el.querySelector('img').src = proofImage(p);
-    el.querySelector('span').textContent = DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at);
-    el.dataset.tip = FRAME[p.frame].name + ' · ' + cardWhen(p);
-    el.onclick = (e) => {
-      e.stopPropagation();
-      UI.pinSel = UI.pinSel === p.id ? null : p.id;
-      drawPrints();
-    };
-    box.appendChild(el);
-  }
-  dragFrom(box);
-  dropOn(box, (p) => {
-    if (unassignCard(p)) refreshBoard();
-  });
 }
 function drawHeard() {
   const box = $('#bd-heard');
@@ -212,49 +167,9 @@ function drawHeard() {
     box.appendChild(el);
   }
 }
-// drag and drop: a card carries its id; a polaroid or the tray takes it
-function dragFrom(root) {
-  for (const el of root.querySelectorAll('[draggable="true"][data-pid]'))
-    el.ondragstart = (e) => {
-      e.stopPropagation();
-      e.dataTransfer.setData('text/plain', el.dataset.pid);
-      e.dataTransfer.effectAllowed = 'move';
-      UI.dragPid = +el.dataset.pid;
-      $('#board .cork').classList.add('dragging');
-    };
-  root.ondragend = () => {
-    UI.dragPid = null;
-    $('#board .cork').classList.remove('dragging');
-  };
-}
-function dropOn(el, fn) {
-  el.ondragover = (e) => {
-    if (UI.dragPid == null) return;
-    e.preventDefault();
-    el.classList.add('over');
-  };
-  el.ondragleave = () => el.classList.remove('over');
-  el.ondrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    el.classList.remove('over');
-    const p = G.proofs.find((x) => x.id === +(e.dataTransfer.getData('text/plain') || UI.dragPid));
-    UI.dragPid = null;
-    $('#board .cork').classList.remove('dragging');
-    if (p) fn(p);
-  };
-}
-function pinPrint(id, who) {
-  const p = G.proofs.find((x) => x.id === id);
-  UI.pinSel = null;
-  if (p && !assignCard(p, who)) ui.note(FRAME[p.frame].icon, FRAME[p.frame].name + ' · that frame is taken', '');
-  refreshBoard();
-  showSuspect(NPC[who]);
-}
 function refreshBoard() {
   const open = !$('#bd-detail').hidden && UI.bdSel;
   drawPols();
-  drawPrints();
   requestAnimationFrame(drawStrings);
   if (open) showSuspect(NPC[UI.bdSel]);
 }
@@ -369,14 +284,13 @@ function showSuspect(n) {
       if (!p) return;
       UI.bdFrame = i;
       zoom.hidden = false;
-      zoom.className = 'sd-zoom ' + (p.grey ? 'grey' : p.q);
+      zoom.className = 'sd-zoom card';
       zoom.innerHTML = '<img alt=""><span></span>';
       zoom.querySelector('img').src = proofImage(p);
       zoom.querySelector('span').textContent = cardWhen(p);
       zoom.onclick = () => (zoom.hidden = true);
     };
   });
-  dragFrom(d);
   const hab = d.querySelector('.sd-hab'),
     kq = knownQ(n);
   hab.innerHTML = kq.length
@@ -444,7 +358,6 @@ function boardKey(k) {
   return false;
 }
 function closeBoard() {
-  UI.pinSel = null;
   $('#board').hidden = true;
   UI.caseOpen = false;
   if (UI.prevSpeed != null) G.speed = UI.prevSpeed || 1;

@@ -121,7 +121,6 @@ function freshG(start) {
     slackCaught: false,
     haleSaw: false,
     habits: {},
-    cleared: {},
     habitDone: {},
     quirks: null,
     qlog: [],
@@ -145,11 +144,12 @@ function freshG(start) {
     gatherTip: 0,
     proofs: [],
     proofId: 0,
-    pinShots: {},
-    dashed: {}, // suspect id → { frame: when you searched it and found nothing }
     mark: {}, // suspect id → 'them' | 'cleared': your own stamp on the board
+    plants: {}, // human id → THEIR plant put at their place: { by, at }
+    homePlant: null, // THEIR plant in your home: { k, at, gone }
+    safeNight: {}, // human id → the night none of THEM comes for them (you took THEIR plant)
+    missing: [], // { id, at }: something you took from their place, not noticed yet
     odd: {}, // human id → their innocent oddity: { frame, k, given, flipped }
-    framed: [], // humans THEY have framed: { id, by, at, obj, done }
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed

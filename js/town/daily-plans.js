@@ -1,6 +1,6 @@
 //@ town/daily-plans — Daily plans per role
 //@ Defines: overlay, makePlan, curBlock
-//@ Uses:    core/util, sim/core, world/grid, town/quirks
+//@ Uses:    core/util, sim/core, world/grid, town/quirks, them/moves
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── daily plans
 function overlay(P, s, e, a) {
@@ -147,6 +147,16 @@ function makePlan(n) {
   } else if (k === 'lenny') add(0, 24, 'lenny');
   quirkPlan(n, P);
   if (n.isThem && d === G.gatherDay) overlay(P, 90, 180, 'gather');
+  // signs THEY leave on someone, for a gut feeling: bitten, ill at home the day after (their desk empty); taken in the
+  // night, the morning slept off and in after lunch, dazed; bought, money to spend: more trips to the shop
+  if (!n.isThem && n.id !== 'lenny' && wd) {
+    if (n.limpDay === d && G.bitten[n.id]) overlay(P, 7 * 60, 22 * 60, off);
+    else if (n.lostDay === d) overlay(P, 6 * 60, 12.75 * 60, 'sleep');
+  }
+  if (!n.isThem && bought(n)) {
+    overlay(P, 12.4 * 60, 12.9 * 60, 'shop');
+    overlay(P, 17.6 * 60, 18.2 * 60, 'shop');
+  }
   // after one of THEM changed in public, people are frightened: home early, and the streets thin out
   if (!n.isThem && n.id !== 'lenny' && G.fearUntil > (d - 1) * 1440 + 17 * 60) overlay(P, 17.5 * 60, 21.5 * 60, off);
   n.plan = P;

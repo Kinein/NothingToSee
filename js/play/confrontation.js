@@ -16,9 +16,9 @@
 const cfListeners = (n) => earshot(n).filter((w) => w !== n && !w.trueForm && !w.fleeing && !w.hunter);
 // a listener who takes you seriously
 const takesSeriously = (w) => !servantKind(w) && !(w.sus >= 85);
-// ✓: the card really is about them. Their own oddity, or something of THEIRS on one of THEM. Something THEY left at
-// someone else's place lands on whoever lives there, and there it's a ✗.
-const cardHolds = (p, n) => (p.true === n.id && !p.planted) || p.innocent === n.id;
+// ✓: the card really is about them. Their own oddity; THEIR plant on the person THEY got to; or something of THEIRS
+// on one of THEM. Something THEY left at someone else's place lands on whoever lives there, and there it's a ✗.
+const cardHolds = (p, n) => p.innocent === n.id || p.planted === n.id || (p.true === n.id && !p.planted);
 // what IT says as each card turns
 function cardLine(p, n, ok) {
   if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);

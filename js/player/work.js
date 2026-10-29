@@ -1,6 +1,6 @@
 //@ player/work — The work bar, shifts, getting fired
 //@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, goodDay, onTimeCross, newDay
-//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, …
+//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, play/plants, them/awareness, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
 function playerAtDesk() {
@@ -59,11 +59,14 @@ function onTimeCross(t0, t1) {
   const cross = (m) => Math.floor((t1 - m) / 1440) > Math.floor((t0 - m) / 1440);
   if (cross(0)) newDay();
   if (cross(5 * 60 + 30)) dawnTick();
-  if (cross(20 * 60)) planNight();
+  if (cross(20 * 60)) {
+    eveningThings();
+    planNight();
+  }
   if (cross(6 * 60)) {
     if (G.huntNights > 0) G.huntNights--; // one night of being hunted gone by
     applyAwareness();
-    framingMorning();
+    morningThings();
     morningResist();
     morningPaper();
     planDay();

@@ -465,9 +465,8 @@ function awardTell(n) {
       };
   const p = addProof({
     frame: TELL_FRAME[type] || 'body',
-    q: change || slipClear(type) ? 'clear' : 'fuzzy',
     true: n.id,
-    auto: true,
+    pin: n.id,
     what: n.short + ' · ' + TELL_NOTE[type].replace(/\.$/, ''),
     where,
     rec,

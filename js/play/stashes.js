@@ -1,6 +1,6 @@
-//@ play/stashes — Stashes and rummaging
-//@ Defines: SHAKE_TYPES, STASH_KINDS, BUG, PLANT_DEAD, junkIn, ownerOf, stashPool, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_DIG, rummageAct, pryAct, openUp, closeUp, …
-//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, town/suspicion, them/proofs, world/grid, play/verbs, data/lines, …
+//@ play/stashes — Stashes and rummaging: THEIR things, lookalikes, the fridge, taking and the place rule
+//@ Defines: SHAKE_TYPES, STASH_KINDS, FRIDGE_THEM, FRIDGE_PLAIN, PLANTS, junkIn, ownerOf, stashPool, placeOwner, placeLabel, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_DIG, rummageAct, …
+//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, world/grid, town/suspicion, data/lines, play/verbs, play/photos, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── stashes: what THEY keep inside ordinary things
 // Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. Only a photo
@@ -41,41 +41,65 @@ const SHAKE_TYPES = new Set([
   'shelf_snack',
   'birdcage',
 ]);
+// THEIR own things: one at each of THEIR places (it's them), and one in a shared place THEY come back for. Coloured by
+// the faction's look (scales and gold; chrome and green light; rot and old newspaper), never by what they mean.
 const STASH_KINDS = {
   lizards: [
-    { k: 'cash', what: 'A roll of cash', icon: 'coin', desc: 'cash, rolled tight. Scales on the band' },
+    { k: 'skin', what: 'Shed skin', icon: 'bag', desc: 'a whole shed skin, folded in with the laundry' },
     { k: 'token', what: 'Brass tokens', icon: 'coin', desc: 'brass tokens, each stamped with scales' },
-    { k: 'ledger', what: 'A ledger page', icon: 'paper', desc: 'a ledger page. Names, sums, scales' },
+    { k: 'fish', what: 'A cooler of eaten fish', icon: 'bag', desc: 'a cooler of fish, eaten to the bones', stink: 1 },
   ],
   aliens: [
+    { k: 'laser', what: 'A laser pistol', icon: 'glyph', desc: 'a pistol with no trigger, warm, a green light inside' },
     { k: 'gadget', what: 'A humming cylinder', icon: 'glyph', desc: 'a warm metal cylinder. It hums' },
-    { k: 'chips', what: 'A tray of chips', icon: 'glyph', desc: 'a tray of tiny chips, still blinking' },
     { k: 'chart', what: 'A star chart', icon: 'paper', desc: 'a star chart. Wexley circled' },
   ],
+  zombies: [
+    { k: 'obit', what: 'An obituary', icon: 'paper', desc: 'an obituary, decades old. The face in it is theirs' },
+    { k: 'teeth', what: 'A jar of teeth', icon: 'bag', desc: 'a jam jar of teeth. Human ones' },
+    { k: 'finger', what: 'Something in newspaper', icon: 'bag', desc: 'a finger, wrapped in old newspaper' },
+  ],
 };
-const BUG = { k: 'bug', what: 'A bug', icon: 'glyph', desc: 'a bug, wired into your TV' };
-// the dead keep nothing worth hiding, but THEY can still leave something of THEIRS in an innocent's home
-const PLANT_DEAD = {
-  k: 'remains',
-  what: 'Something in newspaper',
-  icon: 'bag',
-  desc: 'a finger, wrapped in newspaper',
+// what's in THEIR fridge (the aliens' is empty and spotless: nothing to take)
+const FRIDGE_THEM = {
+  lizards: { k: 'fishes', what: 'A fridge of fish', icon: 'bag', desc: 'nothing but fish. Raw, to the top', fridge: 1 },
+  zombies: { k: 'meat', what: 'Raw meat', icon: 'bag', desc: 'raw meat going off, and nothing else', fridge: 1 },
+};
+const FRIDGE_PLAIN = ['milk, eggs, half a cake', 'leftovers in tubs', 'beer and a sad lettuce', 'cheese, jam, a lemon'];
+// THEIR plant: one object per faction, the same wherever it's found. At a human's place it means THEY got to them (the
+// device: watched, maybe taken soon · the till cash: bought · the mark: bitten). In your own home it's aimed at you.
+const PLANTS = {
+  aliens: {
+    k: 'device',
+    what: 'A listening device',
+    icon: 'glyph',
+    desc: 'a listening device, no bigger than a button',
+  },
+  lizards: {
+    k: 'till',
+    what: 'Cash from Pell’s till',
+    icon: 'coin',
+    desc: 'cash from Pell’s till, scales on the band',
+  },
+  zombies: { k: 'mark', what: 'A mark on the door frame', icon: 'paper', desc: 'a mark scratched into the door frame' },
 };
 const stashDef = (st) =>
-  st.k === 'bug'
-    ? BUG
+  st.plant
+    ? PLANTS[G.faction]
     : st.innocent
       ? ODDITY_HOME[st.k] || ODDITY_HOME.envelope
-      : st.k === 'remains'
-        ? PLANT_DEAD
-        : (STASH_KINDS[G.faction] || STASH_KINDS.aliens).find((s) => s.k === st.k) || STASH_KINDS.aliens[0];
+      : st.fridge
+        ? FRIDGE_THEM[G.faction]
+        : (STASH_KINDS[G.faction] || STASH_KINDS.aliens).find((s) => s.k === st.k) || STASH_KINDS[G.faction][0];
+// the look a thing is drawn in: a lookalike borrows the faction it looks like; the rest look like this week's THEM
+const thingLook = (st) => (st.innocent && ODDITY_HOME[st.k] && ODDITY_HOME[st.k].look) || G.faction;
 const stashIn = (o) => G.stashes && G.stashes.find((s) => s.obj === o.idx && !s.bagged);
 // some things just rattle: a spoon down the back, coins in the works. It changes every few days.
 function junkIn(o) {
   const h = hash2(o.idx, Math.floor(dayNo() / 3), 7);
   return h < 0.22 ? JUNK[Math.floor(hash2(o.idx, 3, Math.floor(dayNo() / 3)) * JUNK.length)] : null;
 }
-// whose thing is this: a desk, a home, Agnes's flat, your flat
+// whose place is this: a desk, a home, Agnes's flat, your flat, the shop's back room (Vic's). Nobody's: a shared place.
 function ownerOf(o) {
   if (DESK_OWNER[o.id]) return DESK_OWNER[o.id];
   const r = roomAt(o.cx, o.cz);
@@ -129,39 +153,52 @@ function stashPool(n) {
   if (HOUSE_OF[n.id]) add(OBJ_BY_ID['lamp_' + n.id]);
   return out;
 }
+// the place rule: a thing found at someone's place goes on their board. Off the floor, it's the room it lies in.
+function placeOwner(x, z, o) {
+  if (o) return ownerOf(o);
+  const r = roomAt(x, z);
+  if (r && r.house) return r.house;
+  if (r && r.agnes) return 'agnes';
+  if (r && r.home) return 'you';
+  if (r && r.key === 'store') return 'vic';
+  return null;
+}
+// where it was, in two words: "Earl’s desk", "Pell’s back room"
+function placeLabel(id, o, x, z) {
+  const n = NPC[id],
+    r = o ? roomAt(o.cx, o.cz) : roomAt(x, z),
+    nm = n ? n.short + '’s ' : '';
+  if (o && DESK_OWNER[o.id]) return nm + 'desk';
+  if (o && o.type === 'fridge') return nm + 'fridge';
+  if (r && (r.key === 'store' || r.bld === 'shop')) return 'Pell’s back room';
+  if (r && r.agnes) return 'Agnes’s flat';
+  return nm + 'home';
+}
 function makeStashes() {
   G.stashes = [];
   G.stashId = G.stashId || 0;
-  if (!STASH_KINDS[G.faction]) return; // the dead keep nothing worth hiding
-  const used = new Set(),
-    kinds = shuffle(STASH_KINDS[G.faction].slice());
-  them().forEach((n, i) => {
-    const pool = stashPool(n).filter((o) => !used.has(o.idx));
-    if (!pool.length) return;
-    const o = pick(pool);
+  const kinds = shuffle(STASH_KINDS[G.faction].slice()),
+    used = new Set();
+  const put = (n, o, k, extra) => {
     used.add(o.idx);
-    G.stashes.push({
-      id: ++G.stashId,
-      by: n.id,
-      obj: o.idx,
-      k: kinds[i % kinds.length].k,
-      out: false,
-      moveAt: G.t + rand(0.6, 2.2) * 1440,
-    });
+    G.stashes.push(
+      Object.assign(
+        { id: ++G.stashId, by: n.id, obj: o.idx, k, out: false, moveAt: G.t + rand(0.6, 2.2) * 1440 },
+        extra,
+      ),
+    );
+  };
+  them().forEach((n, i) => {
+    const pool = stashPool(n).filter((o) => !used.has(o.idx) && o.type !== 'fridge');
+    const own = pool.filter((o) => ownerOf(o) === n.id),
+      shared = pool.filter((o) => !ownerOf(o));
+    if (own.length) put(n, pick(own), kinds[i % kinds.length].k, { home: true, moveAt: 1e12 }); // it lives with them
+    if (shared.length) put(n, pick(shared), kinds[(i + 1) % kinds.length].k); // THEY come back for this one
+    const fr = fridgeOf(n);
+    if (fr && FRIDGE_THEM[G.faction]) put(n, fr, FRIDGE_THEM[G.faction].k, { fridge: true, moveAt: 1e12 });
   });
-  if (G.faction === 'aliens') {
-    const m = pick(them());
-    G.stashes.push({
-      id: ++G.stashId,
-      by: m.id,
-      obj: OBJ_BY_ID.homeTV.idx,
-      k: 'bug',
-      bug: true,
-      out: false,
-      moveAt: 1e12,
-    });
-  }
 }
+const fridgeOf = (n) => OBJ_BY_ID['fridge_' + n.id] || (n.id === 'agnes' ? OBJ_BY_ID.agnesFridge : null);
 // in front of a thing: where its insides end up when you take it apart
 function frontOf(o) {
   const s = objSlots(o)[0],
@@ -242,7 +279,7 @@ function rummageAct(o) {
     },
     onTick: (c, a) => {
       tamperSeen(o, a, 1);
-      if (a.hit || a.t < a.dur * 0.45) return;
+      if (o.type === 'fridge' || a.hit || a.t < a.dur * 0.45) return; // a fridge you just open and look in
       const st = stashIn(o),
         loose = (st && !st.out) || junkIn(o);
       if (!loose) return;
@@ -266,6 +303,7 @@ function rummageAct(o) {
     },
     onEnd: (c, a, ok) => {
       if (!ok || a.hit) return;
+      if (o.type === 'fridge') return fridgeLook(o);
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
@@ -273,6 +311,18 @@ function rummageAct(o) {
       searchedHome(o);
     },
   });
+}
+// the fridge: one more place to search. What's in it is a note under its owner; something odd in there you can take.
+// A human's can look odd too: a broke person's is empty, someone who loves fish has a lot of it.
+function fridgeLook(o) {
+  const own = ownerOf(o),
+    n = own && own !== 'you' ? NPC[own] : null,
+    st = stashIn(o),
+    S = st && stashDef(st);
+  const what = S ? S.desc : n && n.isThem && G.faction === 'aliens' ? 'empty, and spotless' : pick(FRIDGE_PLAIN);
+  ui.note('fridge', (n ? n.short + '’s fridge: ' : 'The fridge: ') + what, S ? 'onto' : '');
+  if (n) noteOnce(n, 'Their fridge: ' + what + '.', { by: 'you' });
+  if (st && !S.empty) openUp(o, true);
 }
 // taking a thing apart: slow, loud, and everyone who sees you remembers it
 function pryAct(o) {
@@ -295,7 +345,7 @@ function pryAct(o) {
     },
   });
 }
-function openUp(o) {
+function openUp(o, quiet) {
   const f = frontOf(o),
     st = stashIn(o),
     desk = o.type === 'desk' || o.type === 'bossdesk';
@@ -327,11 +377,12 @@ function openUp(o) {
       rot: f.rot + 0.4,
       by: st.by,
       innocent: st.innocent ? 1 : undefined,
+      look: thingLook(st),
       obj: o.idx,
       room: (roomAt(o.cx, o.cz) || {}).key || null,
       at: G.t,
     });
-    ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
+    if (!quiet) ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
     if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
@@ -360,47 +411,78 @@ function closeUp(o, quiet) {
   o.data.openUntil = 0;
   if (!quiet) ui.note('box', 'Back together. Almost like you were never here.', '');
 }
+// you take it. At someone's place it goes on their board under Home, whoever's thing it really is; THEIR plant taken
+// from a victim keeps THEM away from that person tonight. Nobody's place: a clue, and bait. The owner will miss it.
 function takeStash(it) {
   const st = G.stashes.find((s) => s.id === it.stash);
   if (!st) return;
-  const S = stashDef(st);
-  const o = OBJ[it.obj],
-    own = o ? ownerOf(o) : null;
-  if (st.innocent) return readOddity(st, it); // somebody's own business: you read it, and you know what it is
+  const S = stashDef(st),
+    o = OBJ[it.obj];
   st.bagged = true;
   st.out = false;
   st.lostAt = G.t;
   removeItem(it);
   if (!st.innocent) psyMark('sign');
-  takeProofItem(stashCard(st, o, own));
-  setTimeout(() => ui.note('bag', S.what + ' · in your pocket. Someone will miss it.', 'onto'), 900);
+  if (S.stink) {
+    G.smelly = true; // take it and you stink
+    setTimeout(() => !G.over && ui.note('shower', 'It reeks. So do you, now. Shower', 'warn'), 1600);
+  }
+  takeThing(
+    {
+      what: S.what,
+      icon: S.icon,
+      k: st.k,
+      look: thingLook(st),
+      by: st.by,
+      innocent: st.innocent,
+      plant: st.plant ? st.on : null,
+    },
+    o,
+  );
 }
-// a stash as a card: THEIR thing in its owner's own things is clear; planted in an innocent's home it looks just as clear.
-// Anywhere else it's fuzzy, on whoever of THEM was seen in that room lately, or nobody's yet.
-function stashCard(st, o, own) {
-  const S = stashDef(st),
-    mine = !!(own && NPC[own] && (own === st.by || own === st.planted)),
-    room = o && (roomAt(o.cx, o.cz) || {}).key,
-    m = NPC[st.by],
-    saw = !mine && !!(m && room && m.seenRoom[room] && G.t - m.seenRoom[room] < 180);
-  return {
+// anything you take: a stash, or something off the floor. The card is on whoever's place it was.
+function takeThing(T, o, x, z) {
+  const own = T.place !== undefined ? T.place : placeOwner(x, z, o),
+    n = own && own !== 'you' ? NPC[own] : null,
+    where = n ? placeLabel(own, o, x, z) : o ? 'the ' + o.name.toLowerCase() : placeName(x, z);
+  const card = {
     frame: 'home',
-    q: mine ? 'clear' : 'fuzzy',
-    true: st.by,
-    pin: mine ? own : saw ? st.by : null,
-    auto: mine || saw,
-    planted: mine && own === st.planted ? true : undefined,
-    what: S.what + (mine ? ', in their own ' + o.name.toLowerCase() : ''),
-    where: o ? 'In the ' + o.name.toLowerCase() : 'Outside',
-    k: st.k,
-    icon: S.icon,
-    pr: { kind: 'item', what: S.what, icon: S.icon },
+    src: 'item',
+    k: T.k,
+    icon: T.icon,
+    what: T.what,
+    where,
+    true: T.by,
+    innocent: T.innocent ? T.by : undefined,
+    planted: T.plant || undefined,
+    pr: { kind: 'item', what: T.what, icon: T.icon, look: T.look, place: o ? o.type : 'floor' },
   };
+  if (n) {
+    const p = addProof(Object.assign({ pin: n.id }, card));
+    proofCard(p);
+    (G.missing = G.missing || []).push({ id: n.id, at: G.t }); // they'll notice it's gone
+    if (T.plant && n.id === T.plant) protectTonight(n);
+    setTimeout(
+      () => !G.over && ui.note('bag', T.what + ' · on ' + n.short + '’s board. Someone will miss it.', 'onto'),
+      900,
+    );
+    return p;
+  }
+  // nobody's: not evidence. A clue (who was just in here?), and something for a trap.
+  G.proofs.push(Object.assign({ id: ++G.proofId, at: G.t, pin: null, spare: true }, card));
+  G.leads.push(T.what + ' in ' + where + ' · who was just in here?');
+  if (G.leads.length > 6) G.leads.shift();
+  ui.note('bag', T.what + ' · in your pocket. Nobody’s place: a clue, not evidence. Bait, maybe', 'onto');
+  return null;
+}
+// THEIR plant, taken from the person THEY got to: none of THEM comes for them tonight (but on THEIR nights 4 and 5,
+// hell is let loose and nothing keeps THEM away)
+function protectTonight(n) {
+  (G.safeNight = G.safeNight || {})[n.id] = tonightId();
 }
 // THEY come back for it: to put it away again, or to move it somewhere new. That trip is your best photo.
 function stashTick() {
   if (!G.stashes || !G.started) return;
-  framingTick();
   arenaTalkTick();
   witnessTick();
   tailTick();
@@ -427,7 +509,7 @@ function stashTick() {
       }
       continue;
     }
-    if (st.bug || st.innocent || st.planted) continue; // nobody comes back for these
+    if (st.home || st.fridge || st.plant || st.innocent) continue; // nobody comes back for these: they live there
     if (!st.out && G.aware >= EVIDENCE.cleanAt && st.moveAt - G.t > 1440) st.moveAt = G.t + rand(0.4, 1) * 1440; // THEY know you: THEY move it more often
     const due = st.out ? G.t >= st.rehideAt : G.t >= st.moveAt;
     if (due) startStashTrip(n, st);
@@ -534,45 +616,32 @@ function startStashTrip(n, st) {
   });
   enqueue(n, dest === o ? [take] : [take, put]);
 }
-// a photo of a stash: a Home card
+// a photo of a thing is just a print: you take things, you photograph people
 function photoStash(it) {
   const st = G.stashes.find((s) => s.id === it.stash);
   if (!st || it.photo) return false;
   it.photo = true;
-  const S = stashDef(st),
-    o = OBJ[it.obj],
-    own = o ? ownerOf(o) : null;
-  if (st.innocent) {
-    const p = innocentCard(NPC[st.by], {
-      what: S.what + (o ? ', in their own ' + o.name.toLowerCase() : ''),
-      where: o ? 'In the ' + o.name.toLowerCase() : 'Outside',
-      pr: { kind: 'item', what: S.what, icon: S.icon },
-    });
-    proofCard(p);
-    return true;
-  }
-  if (!G.factionKnown && !st.bug) revealFaction();
-  const p = addProof(stashCard(st, o, own));
-  if (p.pin) addNote(NPC[p.pin], 'Photo: ' + S.what.toLowerCase() + ', ' + p.where.toLowerCase() + '.', { by: 'you' });
-  else {
-    G.leads.push(S.what + ' in the ' + (o ? o.name.toLowerCase() : 'street') + ' — whose?');
-    if (G.leads.length > 6) G.leads.shift();
-  }
-  proofCard(p);
-  audio.sting('onto');
+  const S = stashDef(st);
+  thingPrint(S.what, it);
   return true;
 }
+function thingPrint(what, it) {
+  const pr = addPrint({ kind: 'item', what, icon: 'bag', where: placeName(it.x, it.z) });
+  ui.card({ title: what, img: printImage(pr), stamp: 'PRINT' });
+  setTimeout(() => !G.over && ui.note('bag', 'Take it to use as evidence', ''), 1200);
+}
 // a photo of one of THEM caught in the middle of something odd
+// THEIR business, plainly: handing over an envelope, fetching a hidden thing, working THEIR gear
+const ODD_BUSINESS = new Set(['stash', 'envelope', 'control', 'drain', 'lure', 'rack', 'copier', 'ledger', 'implant']);
 function photoOdd(n) {
   const o = n.odd;
   o.photo = true;
   if (n.isThem) {
-    const strong = ODD_STRONG.has(o.k);
+    const strong = ODD_BUSINESS.has(o.k);
     const p = addProof({
       frame: 'habit',
-      q: strong ? 'clear' : 'fuzzy',
       true: n.id,
-      auto: true,
+      pin: n.id,
       what: o.note.replace(/\.$/, ''),
       where: placeName(n.x, n.z),
       pr: { kind: 'plain', who: n.id, what: n.short, icon: 'people', t: n.animT },
@@ -589,9 +658,10 @@ function photoOdd(n) {
   } else addPrint({ kind: 'plain', who: n.id, what: n.short, icon: 'people', where: placeName(n.x, n.z), t: n.animT });
   if (o.control && G.control === o.control) catchControl(n, o.control);
 }
-// a search of someone's own things that turns up nothing: their Home frame is searched. It tells you nothing.
+// a search of someone's own things that turns up nothing: a note for you, and nothing more
 function searchedHome(o) {
   const own = ownerOf(o),
     n = own && NPC[own];
-  if (n && !n.isPlayer && dashFrame(n, 'home')) ui.note('home', n.short + ' · nothing at home', '');
+  if (n && !n.isPlayer && !n.def.never)
+    noteOnce(n, 'Searched their ' + o.name.toLowerCase() + ': nothing.', { by: 'you' });
 }
