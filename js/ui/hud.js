@@ -32,7 +32,7 @@ const BARS = [
   { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
-// THEIR eye: nothing aimed at you · watching you · framing people, tearing your cards · coming for you every night
+// THEIR eye: nothing aimed at you · watching you · in your flat, taking your cards · coming for you every night
 const EYE_STATES = [
   [10, 'THEY DON’T KNOW YOU'],
   [40, 'THEY NOTICE YOU'],

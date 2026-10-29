@@ -177,7 +177,7 @@ function takePhoto(tg) {
   const items = G.items.filter((it) => it.kind !== 'puddle' && (it === tg.item || inFrame(it.x, it.z)));
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
-  // THEM in a tell: a weak proof, or a slipping face (medium). Mid-change it's a medium with no name on it.
+  // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.
   for (const n of chars) {
     const tl = n.tell;
     if (!n.isThem || n.surrendered || !tl || tl.ritual || tl.unmask || tl.type === 'glare' || tl.photo) continue;
@@ -303,8 +303,6 @@ function takePhoto(tg) {
   }
   photoSeen(tg.char);
 }
-// something THEY left lying about: in their own home it's a clear Home card. Anywhere else it's fuzzy, and it's
-// whoever was seen in that room lately, or nobody's yet.
 // a photo of something on the floor: a print. You take things.
 function photoItem(it) {
   if (!G.factionKnown && it.by && !it.innocent) revealFaction();
@@ -312,7 +310,7 @@ function photoItem(it) {
 }
 // being seen with the camera. The film is free; the looks aren't. Pictures of things and places are nobody's business.
 // A lens in someone's face is: the one you shot minds (a lot up close, a little from across the room, not at all if they
-// never saw you do it), and anyone watching minds that you're pointing it at a person. At night the flash turns every head.
+// never saw you do it), and anyone watching minds that you're pointing it at a person.
 const PHOTO_FACE = 4.5;
 function photoSeen(subj) {
   // the flash rule: within about three steps, from any side, they notice the photo. Further off, only someone facing

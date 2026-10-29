@@ -329,8 +329,8 @@ function showTitle() {
   $('#title').hidden = false;
   $('#hud').hidden = true;
   const s = readSave();
-  $('#continue').hidden = !s || s.v !== 9;
-  if (s && s.v === 9)
+  $('#continue').hidden = !s || s.v !== 10;
+  if (s && s.v === 10)
     $('#continue-sub').textContent = s.player.name + ' · ' + DOW_LONG[dow(dayNo(s.G.t))] + ' · ' + fmtTime(s.G.t);
 }
 function startPlaying() {

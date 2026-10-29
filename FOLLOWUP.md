@@ -63,6 +63,12 @@ The four-frame evidence book, false cards, the confrontation (✓/✗, replacing
 - **Tails by day only report.** THEIR people follow you when you're hunted and book awareness; they don't block
   doors or stand in your way yet.
 - **"THEY are stronger after dark"** isn't modelled in fights (crowds are just thinner at night).
+- **The rest of the Habit table in the design.** Not built yet: THEIR raw fish at lunch (lizards) and taking a phone
+  apart and staring at it (aliens), and the human lookalikes beside them (a cold by the radiator, a fisherman's sushi,
+  Martin fixing the server rack, a raw-food diet, someone asleep on their feet after a night shift). Lenny already
+  mentions the raw fish. Today's radiator, wall-clicking, raw-meat and corner tells cover Habit.
+- **Signs for a gut feeling, the small half.** A bought person gets gold art at home but no new PC; someone taken in
+  the night comes in after lunch but doesn't walk dazed.
 
 ### Not now
 Real ES modules (`import`/`export`) would mean untangling ~1,400 shared top-level names and the circular calls

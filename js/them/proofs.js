@@ -61,7 +61,7 @@ const caseSize = (n) => caseCards(n).length;
 function dropCardsOn(n) {
   for (const p of G.proofs.slice()) if (p.true === n.id || p.pin === n.id) dropCard(p);
 }
-// THEY take one from your flat: THEY know which one hurts. A clear card on one of THEM first, the one on the thief first of all.
+// THEY take one from your flat: THEY know which one hurts. A card on one of THEM first, the one on the thief first of all.
 function tearCard(by) {
   const real = (p) => p.pin && NPC[p.pin] && NPC[p.pin].isThem && p.src !== 'item';
   const pf = G.proofs

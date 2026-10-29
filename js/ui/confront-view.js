@@ -48,8 +48,11 @@ function cfDraw(C) {
   const el = $('#arena');
   if (!el || el.hidden || !cam.VP) return; // nothing drawn yet: nowhere to put it
   const n = C.n,
-    [x, y] = project(n.x, 1.95, n.z),
+    [x, y0] = project(n.x, 1.95, n.z),
     fan = el.querySelector('.cf-fan');
+  // the cards stand about 230px above their foot: never up into the banner at the top
+  C.topB = C.topB || el.querySelector('.cf-top').getBoundingClientRect().bottom;
+  const y = Math.max(y0, C.topB + 232);
   fan.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px)';
   C.cards.forEach((c, i) => {
     c.el.classList.toggle('dealt', i <= C.i);

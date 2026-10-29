@@ -21,6 +21,11 @@ const takesSeriously = (w) => !servantKind(w) && !(w.sus >= 85);
 const cardHolds = (p, n) => p.innocent === n.id || p.planted === n.id || (p.true === n.id && !p.planted);
 // what IT says as each card turns
 function cardLine(p, n, ok) {
+  if (!ok && p.frame === 'biography') {
+    // an ordinary fact: "So? Lots of people moved here in March." Only said of the March move; anything else, a plain so?
+    const L = CF_NO.biography.filter((l) => /March/.test(l) === /March/.test(p.what || ''));
+    return pick(L.length ? L : CF_NO.biography);
+  }
   if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);
   if (p.planted === n.id) return pick(CF_PLANTED); // it's true: it was at their place. They don't know why
   if (!n.isThem) return pick(CF_YES_HUMAN).replace('{t}', oddTruth(n) || 'nothing');

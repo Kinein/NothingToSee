@@ -2,7 +2,7 @@
 //@ Defines: GIVE_UP, surrender, fbiTake, SOC, observeAct
 //@ Uses:    sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
+// ───────────── what follows a confrontation (play/confrontation): giving up, the FBI, and the talk options that go with it
 // it drops the act for good: true form, on its knees, and the FBI on the way
 const GIVE_UP = CONFESS.them;
 function surrender(n, why) {

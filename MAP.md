@@ -445,7 +445,7 @@ THEIR five-day plan: phases, stages, how it moves on each midnight
 Tells: the small signs THEY give
 
 - **Defines (12):** `npcSeesPlayer` `roomHasOthers` `tryTell` `beginTell` `notifyPing` `endTell` `tellTick` `applyTellAnim` `awardTell` `caughtWatching` `ritualCaught` `revealFaction`
-- **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, player/needs, world/vision, town/suspicion, them/awareness, them/plan … +11
+- **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, player/needs, world/vision, gfx/renderer, town/suspicion, them/awareness … +11
 - **← used by:** 21
 
 ### them/proofs  ·  #44  ·  100 lines
@@ -670,7 +670,7 @@ Innocent oddities: lookalikes, habits, tics, odd-looking facts; rumours (talk on
 - **→ uses:** sim/core, core/util, data/lines, play/stashes, town/cast, them/proofs, town/routines, world/objects, town/quirks, data/tuning, town/cell, play/photos, ui/interface, town/talk
 - **← used by:** 11
 
-### play/biography  ·  #69  ·  103 lines
+### play/biography  ·  #69  ·  108 lines
 
 Biography: six facts a suspect, found by chat, rummaging, the paper and Mom; you mark one odd
 
@@ -710,7 +710,7 @@ Giving up, the FBI, the talk options
 - **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, them/tells, audio/sound, them/awareness, gfx/portraits … +14
 - **← used by:** 6 (them/true-form, combat/melee, town/talk, play/confrontation, ui/menus, chase/fbi)
 
-### play/confrontation  ·  #75  ·  216 lines
+### play/confrontation  ·  #75  ·  221 lines
 
 The confrontation: your cards on IT, ✓ or ✗, and what it leaves in the street
 
@@ -718,7 +718,7 @@ The confrontation: your cards on IT, ✓ or ✗, and what it leaves in the stree
 - **→ uses:** gfx/world-geometry, sim/core, gfx/renderer, core/util, data/lines, ui/interface, ui/confront-view, audio/sound, town/echoes, player/needs, them/awareness, them/true-form, data/tuning, town/cast … +10
 - **← used by:** 5 (town/suspicion, play/stashes, ui/menus, input/targeting, game/loop)
 
-### play/photos  ·  #76  ·  398 lines
+### play/photos  ·  #76  ·  396 lines
 
 Photos: reading what is in frame
 
@@ -736,7 +736,7 @@ Needs to the right thing to do, here; inventory hooks
 
 ## ui/
 
-### ui/menus  ·  #77  ·  971 lines
+### ui/menus  ·  #77  ·  966 lines
 
 Interaction menus for objects, people, items
 
@@ -778,13 +778,13 @@ The directional pie menu
 
 ### ui/case-board  ·  #83  ·  397 lines
 
-The evidence book: four frames on every suspect, the suspect page, the Whose? tray
+The evidence book: four frames on every suspect, the suspect page, Biography, the mad counter
 
 - **Defines (18):** `SLOT_TIP` `MARK_STAMP` `openBoard` `drawTop` `cardWhen` `slotHtml` `fillSlotImgs` `stampFor` `drawPols` `drawHeard` `refreshBoard` `drawStrings` `showSuspect` `closeSuspect` `focusPol` `boardKey` `closeBoard` `toggleHelp`
 - **→ uses:** ui/interface, sim/core, them/proofs, core/util, town/cast, world/grid, play/biography, them/plan, town/quirks, ui/hud, gfx/portraits, combat/melee
 - **← used by:** 4 (ui/interface, ui/hud, input/targeting, game/loop)
 
-### ui/confront-view  ·  #84  ·  86 lines
+### ui/confront-view  ·  #84  ·  89 lines
 
 How the confrontation looks: the stage light, the cards fanned over IT, the verdict
 

@@ -3,9 +3,9 @@
 //@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, world/grid, town/suspicion, data/lines, play/verbs, play/photos, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── stashes: what THEY keep inside ordinary things
-// Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. Only a photo
-// of it counts, and it counts for less than a photo of one of THEM doing something. THEY tidy up after you,
-// and every couple of days each of THEM moves their stash somewhere else, in broad daylight.
+// Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. You take it: found
+// at someone's place it's a Home card on them (the place rule); a photo of it is only a print. THEY tidy up after you,
+// and every couple of days each of THEM moves the one in a shared place somewhere else, in broad daylight.
 const SHAKE_TYPES = new Set([
   'microwave',
   'coffee',
@@ -644,7 +644,7 @@ function photoOdd(n) {
       frame: 'habit',
       true: n.id,
       pin: n.id,
-      what: o.note.replace(/\.$/, ''),
+      what: n.short + ' · ' + o.note.replace(/\.$/, ''),
       where: placeName(n.x, n.z),
       pr: { kind: 'plain', who: n.id, what: n.short, icon: 'people', t: n.animT },
     });

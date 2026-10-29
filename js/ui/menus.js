@@ -582,12 +582,7 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt(
-          'Confront',
-          'confront',
-          () => openConfront(n),
-          tooShaken() ? 'Too shaken' : n.sus >= 85 ? 'Not listening' : null,
-        )
+      ? opt('Confront', 'confront', () => openConfront(n), tooShaken() ? 'Too shaken' : null)
       : opt('Attack', 'fist', () => playerMelee(n));
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   const hit = (label, icon) => opt(label, icon, () => playerMelee(n));
@@ -819,9 +814,9 @@ function menuForItem(it) {
   else if (it.kind !== 'tape' && it.kind !== 'scorch')
     ops.push(
       opt(
-        it.kind === 'mark' ? 'Take it' : 'Bag it',
+        'Take it',
         'bag',
-        go(it.kind === 'mark' ? 'Copy it down' : 'Bag it', () => bagItem(it), 2),
+        go(it.kind === 'mark' ? 'Copy it down' : 'Take it', () => bagItem(it), 2),
       ),
     );
   if (!ops.length) return null;
@@ -832,7 +827,7 @@ function menuForItem(it) {
 function bagItem(it) {
   removeItem(it);
   if (it.by && !it.innocent) psyMark('sign');
-  if (!it.by) return ui.note('bag', ITEM_NAMES[it.kind] + ' · in a bag, in your pocket', '');
+  if (!it.by) return ui.note('bag', ITEM_NAMES[it.kind] + ' · in your pocket', '');
   if (!G.factionKnown && !it.plant) revealFaction();
   takeThing(
     {

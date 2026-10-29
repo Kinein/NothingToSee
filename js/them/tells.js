@@ -122,7 +122,7 @@ function beginTell(n, a, typeHint) {
 }
 function notifyPing(x, z) {
   ui.ping(x, z);
-  const [sx] = project(x, 1, z);
+  const [sx] = cam.VP ? project(x, 1, z) : [window.innerWidth / 2]; // nothing drawn yet: straight ahead
   audio.ping(
     clamp((sx / Math.max(1, window.innerWidth)) * 2 - 1, -1, 1),
     clamp(1 - Math.hypot(PLAYER.x - x, PLAYER.z - z) / 18, 0.2, 1),

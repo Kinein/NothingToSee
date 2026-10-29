@@ -115,7 +115,7 @@ function gossip(n) {
   } else sayTalk(n, r);
   return true;
 }
-// what Press used to dig out, said of its own accord. Someone who saw one of THEM change says so, while it's fresh;
+// the things people tell you of their own accord. Someone who saw one of THEM change says so, while it's fresh;
 // someone bought speaks well of whoever paid; someone THEY got to doesn't remember last night.
 function sawTalk(n) {
   const m = backs(n) && them().find((x) => !x.slain && !x.exposed && sawRecently(n, x));

@@ -29,7 +29,12 @@ function makeBios() {
         add(b, true, pick(['home', 'paper']));
       } else for (const f of shuffle(BIO_THEM[G.faction].slice()).slice(0, 2)) add(f, true);
     } else if (G.odd[n.id] && G.odd[n.id].frame === 'biography') add(BIO_HUMAN_ODD[G.odd[n.id].i], true);
-    while (facts.length < BIO_N && pool.length) add(pool.pop());
+    // plain facts that don't say the same as one already on the page (an alien born in Ohio, twice)
+    const same = (f) => facts.some((x) => x.t.slice(0, 12) === f.t.slice(0, 12));
+    while (facts.length < BIO_N && pool.length) {
+      const f = pool.pop();
+      if (!same(f)) add(f);
+    }
     // where each one turns up: what a person would say, mostly in a chat; papers in their things; the rest, the paper
     // or Mom, dealt out so every source has something
     const docs = shuffle(['home', 'paper', 'mom', 'home', 'paper', 'mom']);

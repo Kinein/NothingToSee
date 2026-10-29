@@ -85,7 +85,7 @@ ui/interface.js                  # Notes, bubbles, tooltips, overlays
 ui/hud-images.js                 # Embedded HUD pictures (base64 PNG): data only
 ui/hud.js                        # The corner HUD: bars, days, clock, THEIR eye, evidence
 ui/pie-menu.js                   # The directional pie menu
-ui/case-board.js                 # The evidence book: four frames on every suspect, the suspect page, the Whose? tray
+ui/case-board.js                 # The evidence book: four frames on every suspect, the suspect page, Biography, the mad counter
 ui/confront-view.js              # How the confrontation looks: the stage light, the cards fanned over IT, the verdict
 input/camera.js                  # Input and camera control
 input/walking.js                 # WASD walking relative to the camera

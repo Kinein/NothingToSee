@@ -149,7 +149,7 @@ function freshG(start) {
     homePlant: null, // THEIR plant in your home: { k, at, gone }
     safeNight: {}, // human id → the night none of THEM comes for them (you took THEIR plant)
     missing: [], // { id, at }: something you took from their place, not noticed yet
-    odd: {}, // human id → their innocent oddity: { frame, k, given, flipped }
+    odd: {}, // human id → their innocent oddity: { frame, k, given, i (Biography: which odd fact) }
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
@@ -347,7 +347,7 @@ function syncNPCs() {
 function saveGame() {
   if (!G || !G.started || G.over || CAP.on) return;
   const data = {
-    v: 9,
+    v: 10,
     G,
     explored: Array.from(explored),
     player: { name: PLAYER.name, x: PLAYER.x, z: PLAYER.z, needs: PLAYER.needs },
@@ -405,7 +405,7 @@ function readSave() {
   }
 }
 function loadGame(data) {
-  if (!data || data.v !== 9) return false; // older saves kept the evidence bar: they start over
+  if (!data || data.v !== 10) return false; // older saves keep Contact cards, liking and the arena: they start over
   resetWorld();
   G = Object.assign(freshG(0), data.G, {
     started: true,

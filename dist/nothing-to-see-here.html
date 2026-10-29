@@ -422,8 +422,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .print{position:relative;flex:none;display:flex;flex-direction:column;gap:5px;width:92px;padding:5px 5px 7px;background:#f3ecd8;color:#2a241a;transform:rotate(var(--tilt,0deg));box-shadow:0 8px 16px rgba(0,0,0,.5);transition:transform .15s;cursor:grab}
 .print:hover{transform:rotate(0deg) scale(1.05)}
 .print img{width:100%;aspect-ratio:180/230;object-fit:cover;background:#111}
-.print.fuzzy img{filter:blur(.6px)}
-.print.clear img{outline:3px solid #fffdf6}
 .print span{font:11.5px/1.2 var(--f-type);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .print.sel{outline:3px solid var(--stamp);outline-offset:2px}
 .print .pq{position:absolute;right:-6px;top:-8px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1d1a16;color:#e8dcc0;font-style:normal}
@@ -432,8 +430,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .pcard .pol{position:relative}
 .pcard .pc-fi{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#1d1a16;color:#e8dcc0}
 .pcard .pc-fi .ic{width:13px;height:13px}
-.pcard.fuzzy .pol img{filter:blur(.7px) saturate(.85)}
-.pcard.clear .pol{outline:4px solid #fffdf6}
 .pcard.grey .pol img{filter:grayscale(1)}
 .pcard.grey .stamp{color:#6b6760;border-color:#6b6760}
 @media (max-width:760px){#bd-pols{grid-template-columns:repeat(3,minmax(0,1fr))}.cork.paged .bd-grid{grid-template-columns:1fr}.bd-trays{grid-template-columns:1fr}}
@@ -665,7 +661,7 @@ svg.na{fill:#cbbdaa;stroke:none}
 
 /* the confrontation: the world stays, under a stage light; the cards fan out over IT and turn */
 #arena{position:fixed;inset:0;z-index:30;pointer-events:none}
-.cf-top{position:absolute;left:50%;top:124px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:8px;background:rgba(8,7,6,.78);text-align:center;animation:fadein .4s ease-out}
+.cf-top{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:8px;background:rgba(8,7,6,.78);text-align:center;animation:fadein .4s ease-out}
 .cf-top b{font:600 22px/1.1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:#f3e2bd}
 .cf-top span{font:500 14px/1.2 var(--f-ui);color:var(--dim);letter-spacing:.04em}
 .cf-fan{position:absolute;left:0;top:0;width:0;height:0}
@@ -764,7 +760,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.16 · updated Oct 29, 2026</p>
+  <p id="version">v1.17 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -15898,7 +15894,7 @@ function beginTell(n, a, typeHint) {
 }
 function notifyPing(x, z) {
   ui.ping(x, z);
-  const [sx] = project(x, 1, z);
+  const [sx] = cam.VP ? project(x, 1, z) : [window.innerWidth / 2]; // nothing drawn yet: straight ahead
   audio.ping(
     clamp((sx / Math.max(1, window.innerWidth)) * 2 - 1, -1, 1),
     clamp(1 - Math.hypot(PLAYER.x - x, PLAYER.z - z) / 18, 0.2, 1),
@@ -16356,7 +16352,7 @@ const caseSize = (n) => caseCards(n).length;
 function dropCardsOn(n) {
   for (const p of G.proofs.slice()) if (p.true === n.id || p.pin === n.id) dropCard(p);
 }
-// THEY take one from your flat: THEY know which one hurts. A clear card on one of THEM first, the one on the thief first of all.
+// THEY take one from your flat: THEY know which one hurts. A card on one of THEM first, the one on the thief first of all.
 function tearCard(by) {
   const real = (p) => p.pin && NPC[p.pin] && NPC[p.pin].isThem && p.src !== 'item';
   const pf = G.proofs
@@ -20027,7 +20023,7 @@ function gossip(n) {
   } else sayTalk(n, r);
   return true;
 }
-// what Press used to dig out, said of its own accord. Someone who saw one of THEM change says so, while it's fresh;
+// the things people tell you of their own accord. Someone who saw one of THEM change says so, while it's fresh;
 // someone bought speaks well of whoever paid; someone THEY got to doesn't remember last night.
 function sawTalk(n) {
   const m = backs(n) && them().find((x) => !x.slain && !x.exposed && sawRecently(n, x));
@@ -22411,9 +22407,9 @@ function removeItem(it) {
   R.itemMeshes.delete(it.id);
 }
 // ───────────── stashes: what THEY keep inside ordinary things
-// Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. Only a photo
-// of it counts, and it counts for less than a photo of one of THEM doing something. THEY tidy up after you,
-// and every couple of days each of THEM moves their stash somewhere else, in broad daylight.
+// Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. You take it: found
+// at someone's place it's a Home card on them (the place rule); a photo of it is only a print. THEY tidy up after you,
+// and every couple of days each of THEM moves the one in a shared place somewhere else, in broad daylight.
 const SHAKE_TYPES = new Set([
   'microwave',
   'coffee',
@@ -23052,7 +23048,7 @@ function photoOdd(n) {
       frame: 'habit',
       true: n.id,
       pin: n.id,
-      what: o.note.replace(/\.$/, ''),
+      what: n.short + ' · ' + o.note.replace(/\.$/, ''),
       where: placeName(n.x, n.z),
       pr: { kind: 'plain', who: n.id, what: n.short, icon: 'people', t: n.animT },
     });
@@ -23267,8 +23263,8 @@ function secretSeen(n, spot) {
 function watchedHuman(n) {
   if (oddityIn(n, 'body')) noteOnce(n, 'Watched them a while: ' + oddTruth(n) + '.', { by: 'you' });
 }
-// a rumour going round: about someone who looks odd (from THEIR day 2), or the one THEY started about the person THEY
-// framed. Only words: a note under the face it's about, never a card. Each rumour is passed on once.
+// a rumour going round: about someone who looks odd (from THEIR day 2). Only words: a note under the face it's about,
+// never a card. Each rumour is passed on once.
 function tellRumour(n) {
   const r = (G.rumours || []).find(
     (x) => !x.told && x.about !== n.id && dayNo() >= (x.from || 1) && NPC[x.about] && !NPC[x.about].gone,
@@ -23309,7 +23305,12 @@ function makeBios() {
         add(b, true, pick(['home', 'paper']));
       } else for (const f of shuffle(BIO_THEM[G.faction].slice()).slice(0, 2)) add(f, true);
     } else if (G.odd[n.id] && G.odd[n.id].frame === 'biography') add(BIO_HUMAN_ODD[G.odd[n.id].i], true);
-    while (facts.length < BIO_N && pool.length) add(pool.pop());
+    // plain facts that don't say the same as one already on the page (an alien born in Ohio, twice)
+    const same = (f) => facts.some((x) => x.t.slice(0, 12) === f.t.slice(0, 12));
+    while (facts.length < BIO_N && pool.length) {
+      const f = pool.pop();
+      if (!same(f)) add(f);
+    }
     // where each one turns up: what a person would say, mostly in a chat; papers in their things; the rest, the paper
     // or Mom, dealt out so every source has something
     const docs = shuffle(['home', 'paper', 'mom', 'home', 'paper', 'mom']);
@@ -24294,7 +24295,7 @@ function resolveGossip(n) {
   for (const b of earshot(n)) addSus(b, 4);
   gossip(n);
 }
-// ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
+// ───────────── what follows a confrontation (play/confrontation): giving up, the FBI, and the talk options that go with it
 // it drops the act for good: true form, on its knees, and the FBI on the way
 const GIVE_UP = CONFESS.them;
 function surrender(n, why) {
@@ -24491,6 +24492,11 @@ const takesSeriously = (w) => !servantKind(w) && !(w.sus >= 85);
 const cardHolds = (p, n) => p.innocent === n.id || p.planted === n.id || (p.true === n.id && !p.planted);
 // what IT says as each card turns
 function cardLine(p, n, ok) {
+  if (!ok && p.frame === 'biography') {
+    // an ordinary fact: "So? Lots of people moved here in March." Only said of the March move; anything else, a plain so?
+    const L = CF_NO.biography.filter((l) => /March/.test(l) === /March/.test(p.what || ''));
+    return pick(L.length ? L : CF_NO.biography);
+  }
   if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);
   if (p.planted === n.id) return pick(CF_PLANTED); // it's true: it was at their place. They don't know why
   if (!n.isThem) return pick(CF_YES_HUMAN).replace('{t}', oddTruth(n) || 'nothing');
@@ -24863,7 +24869,7 @@ function takePhoto(tg) {
   const items = G.items.filter((it) => it.kind !== 'puddle' && (it === tg.item || inFrame(it.x, it.z)));
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
-  // THEM in a tell: a weak proof, or a slipping face (medium). Mid-change it's a medium with no name on it.
+  // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.
   for (const n of chars) {
     const tl = n.tell;
     if (!n.isThem || n.surrendered || !tl || tl.ritual || tl.unmask || tl.type === 'glare' || tl.photo) continue;
@@ -24989,8 +24995,6 @@ function takePhoto(tg) {
   }
   photoSeen(tg.char);
 }
-// something THEY left lying about: in their own home it's a clear Home card. Anywhere else it's fuzzy, and it's
-// whoever was seen in that room lately, or nobody's yet.
 // a photo of something on the floor: a print. You take things.
 function photoItem(it) {
   if (!G.factionKnown && it.by && !it.innocent) revealFaction();
@@ -24998,7 +25002,7 @@ function photoItem(it) {
 }
 // being seen with the camera. The film is free; the looks aren't. Pictures of things and places are nobody's business.
 // A lens in someone's face is: the one you shot minds (a lot up close, a little from across the room, not at all if they
-// never saw you do it), and anyone watching minds that you're pointing it at a person. At night the flash turns every head.
+// never saw you do it), and anyone watching minds that you're pointing it at a person.
 const PHOTO_FACE = 4.5;
 function photoSeen(subj) {
   // the flash rule: within about three steps, from any side, they notice the photo. Further off, only someone facing
@@ -25666,12 +25670,7 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt(
-          'Confront',
-          'confront',
-          () => openConfront(n),
-          tooShaken() ? 'Too shaken' : n.sus >= 85 ? 'Not listening' : null,
-        )
+      ? opt('Confront', 'confront', () => openConfront(n), tooShaken() ? 'Too shaken' : null)
       : opt('Attack', 'fist', () => playerMelee(n));
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   const hit = (label, icon) => opt(label, icon, () => playerMelee(n));
@@ -25903,9 +25902,9 @@ function menuForItem(it) {
   else if (it.kind !== 'tape' && it.kind !== 'scorch')
     ops.push(
       opt(
-        it.kind === 'mark' ? 'Take it' : 'Bag it',
+        'Take it',
         'bag',
-        go(it.kind === 'mark' ? 'Copy it down' : 'Bag it', () => bagItem(it), 2),
+        go(it.kind === 'mark' ? 'Copy it down' : 'Take it', () => bagItem(it), 2),
       ),
     );
   if (!ops.length) return null;
@@ -25916,7 +25915,7 @@ function menuForItem(it) {
 function bagItem(it) {
   removeItem(it);
   if (it.by && !it.innocent) psyMark('sign');
-  if (!it.by) return ui.note('bag', ITEM_NAMES[it.kind] + ' · in a bag, in your pocket', '');
+  if (!it.by) return ui.note('bag', ITEM_NAMES[it.kind] + ' · in your pocket', '');
   if (!G.factionKnown && !it.plant) revealFaction();
   takeThing(
     {
@@ -27008,7 +27007,7 @@ const BARS = [
   { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
-// THEIR eye: nothing aimed at you · watching you · framing people, tearing your cards · coming for you every night
+// THEIR eye: nothing aimed at you · watching you · in your flat, taking your cards · coming for you every night
 const EYE_STATES = [
   [10, 'THEY DON’T KNOW YOU'],
   [40, 'THEY NOTICE YOU'],
@@ -27929,8 +27928,11 @@ function cfDraw(C) {
   const el = $('#arena');
   if (!el || el.hidden || !cam.VP) return; // nothing drawn yet: nowhere to put it
   const n = C.n,
-    [x, y] = project(n.x, 1.95, n.z),
+    [x, y0] = project(n.x, 1.95, n.z),
     fan = el.querySelector('.cf-fan');
+  // the cards stand about 230px above their foot: never up into the banner at the top
+  C.topB = C.topB || el.querySelector('.cf-top').getBoundingClientRect().bottom;
+  const y = Math.max(y0, C.topB + 232);
   fan.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px)';
   C.cards.forEach((c, i) => {
     c.el.classList.toggle('dealt', i <= C.i);
@@ -40835,7 +40837,7 @@ function freshG(start) {
     homePlant: null, // THEIR plant in your home: { k, at, gone }
     safeNight: {}, // human id → the night none of THEM comes for them (you took THEIR plant)
     missing: [], // { id, at }: something you took from their place, not noticed yet
-    odd: {}, // human id → their innocent oddity: { frame, k, given, flipped }
+    odd: {}, // human id → their innocent oddity: { frame, k, given, i (Biography: which odd fact) }
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
@@ -41033,7 +41035,7 @@ function syncNPCs() {
 function saveGame() {
   if (!G || !G.started || G.over || CAP.on) return;
   const data = {
-    v: 9,
+    v: 10,
     G,
     explored: Array.from(explored),
     player: { name: PLAYER.name, x: PLAYER.x, z: PLAYER.z, needs: PLAYER.needs },
@@ -41091,7 +41093,7 @@ function readSave() {
   }
 }
 function loadGame(data) {
-  if (!data || data.v !== 9) return false; // older saves kept the evidence bar: they start over
+  if (!data || data.v !== 10) return false; // older saves keep Contact cards, liking and the arena: they start over
   resetWorld();
   G = Object.assign(freshG(0), data.G, {
     started: true,
@@ -42099,8 +42101,8 @@ function showTitle() {
   $('#title').hidden = false;
   $('#hud').hidden = true;
   const s = readSave();
-  $('#continue').hidden = !s || s.v !== 9;
-  if (s && s.v === 9)
+  $('#continue').hidden = !s || s.v !== 10;
+  if (s && s.v === 10)
     $('#continue-sub').textContent = s.player.name + ' · ' + DOW_LONG[dow(dayNo(s.G.t))] + ' · ' + fmtTime(s.G.t);
 }
 function startPlaying() {

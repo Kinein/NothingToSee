@@ -416,8 +416,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .print{position:relative;flex:none;display:flex;flex-direction:column;gap:5px;width:92px;padding:5px 5px 7px;background:#f3ecd8;color:#2a241a;transform:rotate(var(--tilt,0deg));box-shadow:0 8px 16px rgba(0,0,0,.5);transition:transform .15s;cursor:grab}
 .print:hover{transform:rotate(0deg) scale(1.05)}
 .print img{width:100%;aspect-ratio:180/230;object-fit:cover;background:#111}
-.print.fuzzy img{filter:blur(.6px)}
-.print.clear img{outline:3px solid #fffdf6}
 .print span{font:11.5px/1.2 var(--f-type);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .print.sel{outline:3px solid var(--stamp);outline-offset:2px}
 .print .pq{position:absolute;right:-6px;top:-8px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1d1a16;color:#e8dcc0;font-style:normal}
@@ -426,8 +424,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .pcard .pol{position:relative}
 .pcard .pc-fi{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#1d1a16;color:#e8dcc0}
 .pcard .pc-fi .ic{width:13px;height:13px}
-.pcard.fuzzy .pol img{filter:blur(.7px) saturate(.85)}
-.pcard.clear .pol{outline:4px solid #fffdf6}
 .pcard.grey .pol img{filter:grayscale(1)}
 .pcard.grey .stamp{color:#6b6760;border-color:#6b6760}
 @media (max-width:760px){#bd-pols{grid-template-columns:repeat(3,minmax(0,1fr))}.cork.paged .bd-grid{grid-template-columns:1fr}.bd-trays{grid-template-columns:1fr}}
@@ -659,7 +655,7 @@ svg.na{fill:#cbbdaa;stroke:none}
 
 /* the confrontation: the world stays, under a stage light; the cards fan out over IT and turn */
 #arena{position:fixed;inset:0;z-index:30;pointer-events:none}
-.cf-top{position:absolute;left:50%;top:124px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:8px;background:rgba(8,7,6,.78);text-align:center;animation:fadein .4s ease-out}
+.cf-top{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:8px;background:rgba(8,7,6,.78);text-align:center;animation:fadein .4s ease-out}
 .cf-top b{font:600 22px/1.1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:#f3e2bd}
 .cf-top span{font:500 14px/1.2 var(--f-ui);color:var(--dim);letter-spacing:.04em}
 .cf-fan{position:absolute;left:0;top:0;width:0;height:0}

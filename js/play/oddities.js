@@ -89,8 +89,8 @@ function secretSeen(n, spot) {
 function watchedHuman(n) {
   if (oddityIn(n, 'body')) noteOnce(n, 'Watched them a while: ' + oddTruth(n) + '.', { by: 'you' });
 }
-// a rumour going round: about someone who looks odd (from THEIR day 2), or the one THEY started about the person THEY
-// framed. Only words: a note under the face it's about, never a card. Each rumour is passed on once.
+// a rumour going round: about someone who looks odd (from THEIR day 2). Only words: a note under the face it's about,
+// never a card. Each rumour is passed on once.
 function tellRumour(n) {
   const r = (G.rumours || []).find(
     (x) => !x.told && x.about !== n.id && dayNo() >= (x.from || 1) && NPC[x.about] && !NPC[x.about].gone,
