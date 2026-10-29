@@ -91,29 +91,39 @@ const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.',
 const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
 const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
-// ── The confrontation (play/arena): THEY lie, a human tells the truth, and it all sounds the same
-const ARENA_OPEN = ['What is this?', 'You want to do this here? Fine.', 'Go on, then. Say it.', 'Everybody look. Here we go.', 'Is this about me?'];
-const ARENA_SAY = {
-  home: ['There’s nothing in my desk but pens.', 'Nobody keeps anything at mine. Look all you like.', 'My things are my things. Nothing in them.'],
-  habit: ['I was never there. Not once.', 'At that hour? I was in bed.', 'I go straight home after work. Every day.'],
-  body: ['Look at me. Do I look strange to you?', 'My face is my face.', 'That’s not me in any picture.'],
-  contact: ['Nobody can say a word against me.', 'Who says? Name one person.', 'I hardly know anyone here.'],
+// ── The confrontation (play/confrontation): each card turns ✓ or ✗ with one line from IT. A human owns up to what's
+// true; one of THEM can't deny what's real, so it squirms; a card that isn't about them, anybody denies.
+const CF_OPEN = ['{s}. Everyone listen.', 'I know what you are, {s}.', 'Look at this. All of you. {s}.', 'Tell them, {s}. Or I will.'];
+const CF_YES_HUMAN = ['Yes. It’s {t}. So?', 'That? That’s {t}. Happy now?', 'Fine. It’s {t}. Now everybody knows.'];
+const CF_YES_THEM = {
+  home: ['Where did you get that?', 'That— lots of people have those.', 'You had no right to go in there.'],
+  habit: ['Everyone has their little ways.', 'So I like it warm. So what?', 'I was… resting.'],
+  body: ['A trick of the light.', 'That’s… you can’t prove that’s me.', 'Put that away.'],
+  biography: ['Is that a crime now?', 'Who told you that?', 'I don’t see what that has to do with anything.'],
+  contact: ['People will say anything.', 'Who told you that?', 'That’s my business.'],
 };
-const ARENA_FILLER = ['I’ve lived in this town twenty years.', 'I take my coffee black. Always have.', 'I was born two streets from here.', 'I pay my taxes. Mostly.', 'I’ve never missed a day of work.'];
-const ARENA_LIE_BOUGHT = ['And {w} will tell you I was with them.', 'Ask {w}. {w} knows me.'];
-const ARENA_REBUT = ['That could be anyone in a coat.', 'A blur. You’ve got a blur.', 'That’s a shadow. That’s all that is.', 'Anyone can say anything.'];
-const ARENA_BACKED = { card: ['And this.', 'Then explain this one.'], habit: ['Every day, at that hour. I watched you.', 'I know where you go.'], witness: ['I saw it too.', 'It’s true. I was there.'] };
-const ARENA_CLEAR = ['…', 'Where did you get that?', 'That— that proves nothing.', 'Put that away.'];
-const ARENA_WRONG = ['What has that got to do with anything?', 'That’s not what I said.', 'You’re not even listening.'];
-const ARENA_PASS = ['See? Nothing.', 'Nothing to say to that?', 'Thought not.'];
-const ARENA_TRUTH = ['…Yes? That’s true. Everyone knows that.', 'And? It’s true.', 'That’s the one thing nobody doubts.'];
-const ARENA_KNOW = { lie: ['{q}? Not me. Never.', 'Me? {q}? Don’t be silly.'], open: ['How well do you even know me?', 'You don’t know the first thing about me.'] };
-const ARENA_COUNTER = ['They’ve been following me for days. Look at them.', 'Ask yourselves who’s been sneaking round people’s homes.', 'Look at the state of them. Look.', 'Who takes pictures of people’s faces? Who does that?'];
-const ARENA_HOLD = ['I’m fine. I’m not the one on trial.', 'Don’t change the subject.', 'Answer the question.'];
-const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We’re done here.'];
-const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
-const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
-const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
+const CF_NO = {
+  home: ['That’s not mine. Never seen it.', 'Somebody put that there.', 'That isn’t anything to do with me.'],
+  habit: ['That’s not me.', 'I was never there.', 'Somebody else. Not me.'],
+  body: ['That’s not me in that picture.', 'That’s a blur. Could be anyone.', 'Not me.'],
+  biography: ['So? Lots of people moved here in March.', 'So? That’s just my life.', 'And? Half this town could say the same.'],
+  contact: ['Who says? Nobody.', 'People talk.', 'That’s just talk.'],
+};
+const CF_EMPTY = ['Well? Nothing? I thought so.', 'You’ve got nothing on me.', 'Go on, then. Show them.'];
+const CF_SHRUG = ['Are we done? Good.', 'Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'];
+// the verdict, big, when it's over
+const CF_VERDICT = {
+  gives: ['It gives up', 'In front of everyone. The FBI is on its way'],
+  ugly: ['It turns ugly', 'Nobody shrugs off two'],
+  shrug: ['They shrug it off', 'And everyone listening thinks you’re mad'],
+  ignored: ['Nobody reacts', 'Nobody here takes you seriously'],
+};
+// what the town says afterwards, in the hours after ({s}: the one you called out, {p}: you)
+const CF_TALK = {
+  gives: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
+  ugly: ['Did you see {s}’s face when {p} said it?', 'Strange business with {s} and {p}. It got ugly.'],
+  shrug: ['{p}’s lost it. Shouting at {s} like that.', 'Keep away from {p}. Seriously.'],
+};
 // the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that; a grab you slip
 // (what he shouts), and when you've slipped him enough, giving up
 const COP_WARN = {
@@ -126,9 +136,8 @@ const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
-const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
-// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in (play/arena,
-// play/confront): the same words either way
+// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in
+// (play/confront): the same words either way
 const CONFESS = {
   innocent: ['I’m innocent, man! STOP!', 'I didn’t DO anything! Stop!', 'I’m nobody! I’m just me! Please!'],
   bribed: ['I was bribed! It’s my fault!', 'They PAID me! I’m sorry, I’m sorry!', 'It was only money! I just looked away!'],
@@ -145,52 +154,6 @@ const MARK_NEWS = {
   lizards: 'Gold pins on some chests today',
   aliens: 'Something grows out of some people’s ears',
   zombies: 'Flies follow some people today. And that walk',
-};
-const ARENA_END = {
-  partial: ['Enough of this face.', 'You want to SEE?', 'FINE.'],
-  pfail: ['Are we done? Good.', 'You’ll regret this.', 'I’ll be seeing you.'],
-  fail: ['Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'],
-  wrong: ['How could you.', 'I’ll never forget this.', 'Get away from me.'],
-};
-const ARENA_CROWD = { up: ['Oh my God.', 'It’s true…', 'Look at its face!'], down: ['Ha!', 'Get a grip.', 'Not this again.'], still: ['…', 'Hm.'] };
-// the banner over the ring: which part of it this is, and what you can do ({n}: the accused, {i} of {k}: the statement)
-const ARENA_BEAT = {
-  open:      ['Confronting {n}', 'Everyone in earshot is listening'],
-  stmt:      ['Testimony · {i} of {k}', 'A lie? Show the card from the same frame. Or let it pass'],
-  stmtEmpty: ['Testimony · {i} of {k}', 'No cards left to show'],
-  rebut:     ['It explains it away', 'Back it up: another card, a habit you watched, or a witness'],
-  rebutNone: ['It explains it away', 'Nothing to back it up with'],
-  know:      ['How well do you know me?', 'True, or a lie?'],
-  counter:   ['It turns it on you', 'Hold your nerve'],
-  escape:    ['It’s making a run for it', 'Block the way: E (or tap) in the green'],
-};
-// the verdict, big, when it's over
-const ARENA_VERDICT = {
-  total:   ['It gives up', 'The crowd holds it down. The FBI is on the way'],
-  partial: ['Its face comes off', 'Right in front of everyone'],
-  escaped: ['It breaks and runs', 'Everyone saw what it is. Go after it'],
-  pfail:   ['Doubt', 'The town will watch it. Tonight, it comes for you'],
-  fail:    ['They laugh at you', 'Nobody believes a word. People will talk'],
-  wrong:   ['Wrong person', 'You told the whole room their business'],
-};
-// why the crowd just moved, beside the number
-const ARENA_WHY = {
-  clear: 'caught in a lie', backed: 'backed up', alone: 'just a blur', wrongLie: 'wrong card for that', pass: 'a lie let go',
-  truth: 'that one was true', notMine: 'not theirs', innocent: 'only their own secret', planted: 'planted on them',
-  knowRight: 'you know them', knowWrong: 'you don’t', counter: 'you cracked', faced: 'that camera in their face', block: 'blocked the way',
-};
-// under the crowd meter: why it started where it did ({w}: someone in the room)
-const ARENA_ROOM = {
-  witness: '{w} saw it', close: '{w} is close to them',
-  unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
-};
-// what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
-const ARENA_TALK = {
-  total: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
-  partial: ['{s} changed. Right there in front of us.', 'Don’t go out tonight. {s}’s still out there.'],
-  pfail: ['Strange business with {s} and {p}.', 'Did you see {s}’s face? Something wasn’t right.'],
-  fail: ['{p}’s lost it. Shouting at {s} like that.', 'Keep away from {p}. Seriously.'],
-  wrong: ['What {p} said to {s}. Shameful.', 'Poor {s}. {p} told everyone their business.'],
 };
 
 // ── Endings (game/state)

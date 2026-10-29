@@ -153,8 +153,7 @@ function freshG(start) {
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
-    madUntil: 0, // the town called you mad: −1 lean until then
-    watchedUntil: {}, // member id → doubted in public: no business in public places until then
+    watchedUntil: {}, // member id → no business in public places until then
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
     huntNight: 0, // a night THEY come for you whatever the odds

@@ -264,7 +264,7 @@ function initInput() {
     if (UI.scene) return;
     if (UI.cf) {
       e.preventDefault();
-      if (!e.repeat) arenaKey(k); // the confrontation: no way out but through
+      if (!e.repeat) cfKey(k); // the confrontation: no way out but through
       return;
     }
     if (k === 'escape') {

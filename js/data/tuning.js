@@ -127,12 +127,8 @@ const RANGED = {
   swarmSpd: 1.75,               // × a walk: faster than your jog, slower than your sprint. Run.
   swarmHit: 0.6, swarmEvery: 1.4, // stings anyone this close, this often
 };
-// the confrontation's own bar (play/arena) still uses these: how wide its green and how quick its tracker; grace:
-// real seconds it holds still as it opens; timeout: real seconds before freezing up counts as a miss
-const FIGHT_DIFF = { them: [0.25, 0.85] };
-const FIGHT = { grace: 0.35, timeout: 6 };
 
-// ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
+// ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/confrontation, ui/case-board)
 // Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
 // A clear card pushes a fuzzy one out of its frame. Enough grey (explained) frames and they're CLEARED.
 const EVIDENCE = {
@@ -143,24 +139,10 @@ const EVIDENCE = {
   clearedGrey: 2,               // grey frames that stamp a suspect CLEARED (an ordinary person has two to find: their secret, their oddity)
   witnessDays: 2,               // someone who saw it change remembers it this long
   halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
-  // the arena: the crowd's lean runs −5 (with THEM) … +5 (with you), and starts from the room, held to −3 … +3
-  lean: { min: -5, max: 5, startMin: -3, startMax: 3 },
-  start: { close: -1, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2 },
-  rant: { stress: 80, p: 0.4 }, // Psychic 20 or less: this chance you rant before it starts. Instant Fail
-  statements: 5,                // the testimony: one lie per frame, and one true line
-  statementSecs: 6,             // real seconds each statement waits for a card
-  move: { clear: 2, fuzzyBacked: 1, fuzzyAlone: -1, wrongLie: -1, pass: -1, onTruth: -2 },
-  rebuttalSecs: 6,
-  idleSecs: 1.8,                // ...but with nothing left to play, only this long: no standing there waiting
-  know: { claims: [1, 2], right: 1, wrong: -1, secs: 8 },
-  counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
-  escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
-  bands: { total: 4, partial: 1, pfail: -1 },   // final lean: +4 up total success · +1…+3 partial · −1…0 partial fail · below: fail
-  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, sus: 30 },
-  fail: { sus: 15, madDays: 2 },
-  pfail: { watchMins: 1440, sus: 5 },
-  success: { fearMins: 1440 },
-  aware: { pfail: 15, fail: 25, wrong: 20, success: 15, privateKill: 30, hitNoChange: 10, lostFight: 10 },
+  // the confrontation (play/confrontation): a fail makes everyone listening `failSus` warier of you; after IT changes in
+  // public, people go home early for `fearMins`
+  cf: { failSus: 15, fearMins: 1440 },
+  aware: { privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
   come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long

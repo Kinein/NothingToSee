@@ -50,7 +50,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 
 | To change… | Go to |
 | --- | --- |
-| Speeds, controls, damage, need drain, odds, any "feel" number | `js/data/tuning.js` (evidence, arena and fight-by-situation numbers: `EVIDENCE`) |
+| Speeds, controls, damage, need drain, odds, any "feel" number | `js/data/tuning.js` (evidence, confrontation and fight-by-situation numbers: `EVIDENCE`) |
 | Anything people say or read: gossip, Lenny, rumours, headlines, endings | `js/data/lines.js` |
 | The cast (names, looks, roles) and the three factions | `js/town/cast.js` (`CAST`, `FACTIONS`, `CREATURE_LOOK`) |
 | The town map, houses, rooms, THEIR lairs | `js/world/grid.js` |
@@ -82,7 +82,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |
 | Stashes, traps, raids, items on the floor | `js/play/stashes.js`, `traps.js`, `raids.js`, `items.js` |
 | Photos | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
-| The confrontation (arena battle) and its outcomes | `js/play/arena.js` (`openConfront`, `arenaOutcome`), `js/ui/arena-view.js` |
+| The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
 | "Come with me", witnesses THEY visit at night | `js/town/company.js` |
 | Autopilot / "what should I do" advice | `js/play/advice.js` |

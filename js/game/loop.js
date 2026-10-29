@@ -279,7 +279,8 @@ function frame(now) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
       simStep(dtReal);
     }
-    if (UI.cf) arenaTick(dtReal);
+    if (UI.cf) cfTick(dtReal);
+    cfLight(dtReal);
     styleStep(dtReal);
     worldStep(dtReal, preview);
     try {

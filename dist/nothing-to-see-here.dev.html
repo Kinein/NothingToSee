@@ -451,113 +451,10 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 @media (max-width:760px){#bd-pols{grid-template-columns:repeat(3,minmax(0,1fr))}.cork.paged .bd-grid{grid-template-columns:1fr}.bd-trays{grid-template-columns:1fr}}
 .pcard.strong .stamp{background:var(--stamp);color:#fff3ea}
 /* the confrontation: a spotlit ring in the dark, the crowd behind, your cards along the bottom */
-#arena{z-index:30;display:grid;place-items:center;padding:12px;background:radial-gradient(ellipse at 50% 64%,#1c1611,#060709 62%,#020305);animation:fadein .35s ease-out}
-#arena.out{opacity:0;transition:opacity .45s}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
-.ar-stage{position:relative;width:min(1000px,100%);height:min(680px,calc(100vh - 24px));overflow:hidden}
-.ar-spot{position:absolute;left:50%;top:58%;width:78%;height:44%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(255,236,196,.2),rgba(255,226,170,.07) 55%,transparent 72%);box-shadow:0 0 120px 40px rgba(255,220,160,.04);pointer-events:none}
-.ar-top{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;width:min(680px,96%);pointer-events:none;z-index:2}
-.ar-lean{display:flex;align-items:center;gap:10px;font:12.5px/1 var(--f-type);letter-spacing:.18em;color:#9b927f;text-transform:uppercase}
-.ar-side{min-width:56px;text-align:right}.ar-side.them{text-align:left}
-.ar-track{position:relative;display:flex;gap:6px;align-items:center;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,.04)}
-.ar-track i{flex:none;width:9px;height:9px;border-radius:50%;background:rgba(232,220,192,.14)}
-.ar-track i.win{background:rgba(255,210,122,.55)}.ar-track i.good{background:rgba(228,162,74,.3)}.ar-track i.bad{background:rgba(208,81,60,.32)}
-.ar-track i.mid{box-shadow:0 0 0 2px rgba(232,220,192,.22)}
-.ar-mark{--i:5;position:absolute;top:50%;left:calc(12.5px + var(--i) * 15px);width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:#d8cfba;box-shadow:0 0 10px rgba(232,220,192,.5);transition:left .6s cubic-bezier(.3,1.4,.5,1),background .4s}
-.ar-mark.win{background:var(--gold-hi);box-shadow:0 0 16px rgba(255,210,122,.9)}.ar-mark.good{background:var(--sodium);box-shadow:0 0 12px rgba(228,162,74,.7)}.ar-mark.bad{background:#e0583f;box-shadow:0 0 12px rgba(224,88,63,.7)}
-.ar-room{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
-.ar-room span{padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.05);font:11.5px/1.5 var(--f-type);letter-spacing:.03em}
-.ar-room .up{color:#e9c48a}.ar-room .down{color:#e0907e}
-.ar-beat{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:4px;text-align:center}
-.ar-beat.pop{animation:fadein .35s ease-out}
-.ar-beat b{font:italic 600 26px/1.05 var(--f-disp);color:#f2e6cc;text-shadow:0 2px 16px rgba(0,0,0,.9)}
-.ar-beat span{font:13.5px/1.3 var(--f-type);letter-spacing:.04em;color:#b9b09c}
-.ar-ring{--lean:0;position:absolute;left:12%;right:12%;top:19%;height:150px}
-.ar-p{position:absolute;left:var(--x);top:calc(40px + var(--y));transform:translateX(calc(-50% - var(--lean) * 10px)) rotate(calc(var(--lean) * -2.2deg)) scale(var(--s));transform-origin:50% 100%;transition:transform .7s cubic-bezier(.3,1.3,.5,1);font-style:normal}
-.ar-p img{display:block;width:92px;height:104px;object-fit:cover;object-position:50% 20%;filter:brightness(0) drop-shadow(0 0 1.5px rgba(232,220,192,.45));-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%);mask-image:radial-gradient(ellipse at 50% 40%,#000 55%,transparent 72%)}
-.ar-p.lit img{filter:brightness(.55) sepia(.3) drop-shadow(0 0 3px rgba(232,220,192,.6))}
-.ar-pq{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);padding:4px 9px;border-radius:9px;background:#efe9d8;color:#121214;font:500 13px/1.2 var(--f-ui);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.6);animation:pop .2s ease-out;z-index:2}
-.ar-pq.small{padding:2px 7px;background:rgba(239,233,216,.8);font-size:12px;bottom:calc(100% + 26px)}
-.ar-you,.ar-acc{position:absolute;bottom:31%;width:min(190px,22vw);margin:0}
-.ar-you{left:12%}
-.ar-acc{right:12%}
-.ar-you figcaption,.ar-acc figcaption{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);padding:3px 12px;border:1px solid var(--line2);background:rgba(10,11,14,.9);color:var(--ink);font:13px/1.2 var(--f-type);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
-.ar-acc figcaption{border-color:rgba(208,81,60,.45)}
-.ar-you img,.ar-acc img{display:block;width:100%;aspect-ratio:128/144;object-fit:cover;object-position:50% 25%;border-radius:50% 50% 46% 46%;-webkit-mask-image:radial-gradient(ellipse at 50% 45%,#000 58%,transparent 74%);mask-image:radial-gradient(ellipse at 50% 45%,#000 58%,transparent 74%);transition:filter .8s,transform .8s}
-.ar-you img{transform:scaleX(-1)}
-.ar-eyes{position:absolute;left:0;right:0;top:36%;height:10%;opacity:0;transition:opacity .4s;pointer-events:none}
-.ar-eyes::before,.ar-eyes::after{content:'';position:absolute;top:0;width:9%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#f4ffcf 0,rgba(190,255,140,.75) 35%,transparent 70%);filter:blur(.5px)}
-.ar-eyes::before{left:38%}.ar-eyes::after{left:54%}
-.ar-acc.shine .ar-eyes{opacity:1;animation:flick 2.2s steps(2) infinite}
 @keyframes flick{0%,70%{opacity:1}75%{opacity:.1}80%{opacity:1}}
-.ar-acc.pull img{filter:contrast(1.3) saturate(.55) hue-rotate(35deg) brightness(.92);transform:scaleY(1.06) skewX(-2deg)}
-.ar-say{position:absolute;max-width:min(300px,34%);padding:10px 14px 12px;border-radius:14px;background:#efe9d8;color:#121214;font:500 17px/1.3 var(--f-ui);box-shadow:0 10px 28px rgba(0,0,0,.6);opacity:0;transition:opacity .25s}
-.ar-say.on{opacity:1}
-.ar-say.pop{animation:pop .22s ease-out}
-.ar-say.them{right:8%;bottom:calc(31% + min(200px,24vw))}
-.ar-say.you{left:8%;bottom:calc(31% + min(200px,24vw));background:#d9e3ea}
-.ar-say::after{content:'';position:absolute;bottom:-9px;border:9px solid transparent;border-bottom:0;border-top-color:#efe9d8}
-.ar-say.them::after{right:120px}.ar-say.you::after{left:120px;border-top-color:#d9e3ea}
-.ar-say p{margin:0}
-.ar-fi{display:inline-flex;align-items:center;gap:5px;margin:0 0 6px;padding:2px 9px 2px 5px;border-radius:999px;background:#1d1a16;color:#e8dcc0;font:12px/1.5 var(--f-type);letter-spacing:.1em;text-transform:uppercase}
-.ar-fi em{font-style:normal}
-.ar-fi:empty{display:none}
-.ar-fi .ic{width:15px;height:15px}
-.ar-t{display:block;height:4px;margin-top:8px;border-radius:2px;background:rgba(0,0,0,.1);overflow:hidden;font-style:normal}
-.ar-t i{display:block;height:100%;width:0;background:#b02a1e}
-.ar-t.low i{background:#e0402c;animation:flate .3s steps(2) infinite}
-.ar-shown{position:absolute;left:50%;top:56%;width:124px;padding:7px 7px 6px;background:var(--polaroid);transform:translate(-50%,-50%) rotate(-3deg);box-shadow:0 20px 50px rgba(0,0,0,.7);animation:pop .25s ease-out;z-index:3}
-.ar-shown img{display:block;width:100%;aspect-ratio:180/230;object-fit:cover;object-position:50% 30%;background:#0b0b0b}
-.ar-shown.clear img{outline:4px solid #fffdf6}
-.ar-shown.fuzzy img{filter:blur(.8px)}
-.ar-shown em,.ar-card .ar-ct{display:block;margin-top:5px;color:#3a332a;font:11px/1.2 var(--f-type);letter-spacing:.06em;text-align:center;text-transform:uppercase;font-style:normal;white-space:nowrap}
-.ar-card .ar-ct{margin-top:4px;font-size:9.5px;letter-spacing:.02em}
-.ar-shown .pc-fi,.ar-card .pc-fi{position:absolute;right:-6px;top:-6px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1d1a16;color:#e8dcc0}
-.ar-shown .pc-fi .ic,.ar-card .pc-fi .ic{width:14px;height:14px}
-.ar-opts{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;white-space:nowrap;z-index:4}
-.ar-opt{display:flex;align-items:center;gap:7px;padding:7px 13px 7px 8px;border-radius:999px;border:1px solid var(--line2);background:rgba(10,11,14,.85);color:var(--ink);font:600 14.5px/1 var(--f-ui);cursor:pointer}
-.ar-opt:hover{border-color:var(--sodium)}
-.ar-opt kbd{min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:#e6dfcc;color:#16171a;font:700 12.5px/22px var(--f-ui);text-align:center}
-.ar-opt .ic{width:16px;height:16px}
-.ar-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(228,162,74,.16);border:1px solid rgba(228,162,74,.5);color:#f6dcae;font:14px var(--f-type)}
-.ar-chip .ic{width:15px;height:15px}
-.ar-bar{position:absolute;left:50%;bottom:150px;width:min(420px,80%);height:32px;transform:translateX(-50%);background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,230,200,.09) calc(10% - 1px) 10%),repeating-linear-gradient(-45deg,rgba(0,0,0,.18) 0 4px,transparent 4px 9px),linear-gradient(#6e1f16,#3b0e0a 55%,#2a0806);border:1px solid rgba(255,220,190,.16);box-shadow:inset 0 2px 8px rgba(0,0,0,.7);overflow:hidden;z-index:4;cursor:crosshair}
-.ar-bfuse{position:absolute;left:50%;bottom:141px;width:min(420px,80%);height:3px;transform:translateX(-50%);background:rgba(255,220,190,.08);z-index:4}
-.ar-bfuse i{display:block;height:100%;background:var(--sodium);box-shadow:0 0 8px rgba(228,162,74,.6);transform-origin:0 50%}
-.ar-bfuse.late i{background:var(--blood);animation:flate .3s steps(2) infinite}
-.ar-bar .fg{position:absolute;top:0;bottom:0;background:linear-gradient(#93d77c,#4e8b43 60%,#3e7536);box-shadow:0 0 16px rgba(140,220,120,.55),inset 1px 0 0 rgba(220,255,200,.5),inset -1px 0 0 rgba(220,255,200,.5)}
-.ar-bar .ft{position:absolute;top:0;bottom:0;left:0;width:4px;margin-left:-2px;background:#fffaf0;box-shadow:0 0 6px #fff,0 0 16px rgba(255,236,200,.9)}
-.ar-bar .ft::before{content:'';position:absolute;top:0;bottom:0;right:100%;width:46px;background:linear-gradient(to left,rgba(255,240,215,.42),transparent)}
-.ar-bar .ft.back::before{right:auto;left:100%;background:linear-gradient(to right,rgba(255,240,215,.42),transparent)}
-.ar-bar.hit{box-shadow:0 0 0 2px var(--ok),0 0 24px rgba(147,180,131,.6)} .ar-bar.miss{box-shadow:0 0 0 2px var(--blood),0 0 24px rgba(208,81,60,.55)}
-.ar-fan{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;justify-content:center;gap:4px;height:136px;align-items:flex-end}
-.ar-card{position:relative;width:86px;padding:5px 5px 4px;background:var(--polaroid);border:none;transform:rotate(var(--r)) translateY(14px);transform-origin:50% 100%;box-shadow:0 10px 20px rgba(0,0,0,.6);transition:transform .2s;cursor:pointer}
-.ar-card img{display:block;width:100%;aspect-ratio:180/230;object-fit:cover;object-position:50% 30%;background:#0b0b0b}
-.ar-card.clear img{outline:3px solid #fffdf6}
-.ar-card.fuzzy img{filter:blur(.6px)}
-.ar-card.sel,.ar-card:hover{transform:rotate(0deg) translateY(-6px) scale(1.08);z-index:2}
-.ar-card.sel{box-shadow:0 0 0 3px var(--sodium),0 14px 26px rgba(0,0,0,.7)}
-.ar-card.fit:not(.sel){transform:rotate(var(--r)) translateY(2px);box-shadow:0 0 0 2px rgba(255,210,122,.55),0 0 18px rgba(255,200,110,.35),0 10px 20px rgba(0,0,0,.6)}
-.ar-card.fit .pc-fi{background:var(--sodium);color:#1a140c}
-.ar-stage.up .ar-spot{animation:spotup .7s ease-out}
-.ar-stage.down .ar-spot{animation:spotdn .7s ease-out}
 @keyframes spotup{30%{background:radial-gradient(ellipse at 50% 50%,rgba(255,236,196,.3),rgba(255,226,170,.1) 55%,transparent 72%)}}
 @keyframes spotdn{30%{background:radial-gradient(ellipse at 50% 50%,rgba(220,90,70,.2),rgba(160,40,30,.06) 55%,transparent 72%)}}
-#arena.ending .ar-fan,#arena.ending .ar-opts,#arena.ending .ar-beat{opacity:0;transition:opacity .4s}
-#arena.ending .ar-delta{display:none}
-.ar-delta{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);padding:4px 14px;border-radius:999px;background:rgba(10,11,14,.82);font:600 19px/1.2 var(--f-ui);white-space:nowrap;opacity:0;pointer-events:none;z-index:4}
-.ar-delta.up{color:var(--gold-hi);box-shadow:0 0 0 1px rgba(255,210,122,.4),0 0 22px rgba(255,200,110,.25)}.ar-delta.down{color:#f08a74;box-shadow:0 0 0 1px rgba(240,138,116,.4)}
-.ar-delta.go{animation:ardelta 1.6s ease-out}
-@keyframes ardelta{0%{opacity:0;transform:translate(-50%,-20%) scale(.8)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}22%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-110%)}}
-.ar-verdict{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;gap:10px;width:min(620px,92%);text-align:center;pointer-events:none;z-index:5}
-.ar-verdict.on{display:flex;animation:arverdict .55s cubic-bezier(.2,1.3,.4,1) both}
-.ar-verdict b{font:italic 700 clamp(40px,7vw,68px)/1 var(--f-disp);text-shadow:0 4px 30px rgba(0,0,0,.95)}
-.ar-verdict span{font:15px/1.35 var(--f-type);letter-spacing:.05em;color:var(--ink);text-shadow:0 2px 10px #000}
-.ar-verdict.good b{color:var(--gold-hi)}.ar-verdict.meh b{color:#e6dfcc}.ar-verdict.bad b{color:#f08a74}
-@media (prefers-reduced-motion:reduce){.ar-delta.go{animation:arfade 1.6s linear}.ar-verdict.on{animation:fadein .3s}.ar-mark{transition:none}}
-@keyframes arfade{0%,80%{opacity:1}100%{opacity:0}}
-@keyframes arverdict{from{opacity:0;transform:translate(-50%,-50%) scale(1.25)}to{opacity:1;transform:translate(-50%,-50%)}}
-@media (max-width:700px){.ar-ring{left:2%;right:2%}.ar-p img{width:52px;height:60px}.ar-you{left:3%}.ar-acc{right:3%}.ar-say{max-width:46%;font-size:15px}.ar-say.them{right:3%}.ar-say.you{left:3%}.ar-say.them::after{right:30px}.ar-say.you::after{left:30px}.ar-card{width:64px}.ar-card .ar-ct{font-size:7.5px}.ar-beat b{font-size:21px}.ar-beat span{font-size:12px}.ar-side{min-width:0}.ar-you figcaption,.ar-acc figcaption{font-size:11px;padding:2px 8px}.ar-shown{top:66%;width:92px}.ar-delta{top:58%;font-size:15px}.ar-verdict{top:27%}}
 #over .sheet{max-width:520px;padding:30px 30px 26px;text-align:left}
 #over-ic .ic{width:48px;height:48px;color:var(--stamp);stroke-width:1.5}
 #over.won #over-ic .ic{color:var(--ok)}
@@ -776,7 +673,37 @@ svg.na{fill:#cbbdaa;stroke:none}
   .cork header{flex-wrap:wrap}
   #bd-top{order:3;flex-basis:100%;flex-wrap:wrap}
 }
-@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i,#arena,.ar-say.pop,.ar-shown,.ar-pq,.ar-acc.shine .ar-eyes{animation:none}.ar-p,.ar-mark{transition:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}
+@media (prefers-reduced-motion:reduce){.note,.po,#pie .pc,.pcard,#reveal.in,.goal .gr,.ping i,.cf-card,.cf-card.turned .cf-in{animation:none}.cf-card,.cf-mark{transition:none}body.breaking #bars,body.breaking #clock{animation:none}.bar .wx.on,.bar .tr,#eye.s3 img,#eyeTx{animation:none}}
+
+/* the confrontation: the world stays, under a stage light; the cards fan out over IT and turn */
+#arena{position:fixed;inset:0;z-index:30;pointer-events:none}
+.cf-top{position:absolute;left:50%;top:124px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 18px;border-radius:8px;background:rgba(8,7,6,.78);text-align:center;animation:fadein .4s ease-out}
+.cf-top b{font:600 22px/1.1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:#f3e2bd}
+.cf-top span{font:500 14px/1.2 var(--f-ui);color:var(--dim);letter-spacing:.04em}
+.cf-fan{position:absolute;left:0;top:0;width:0;height:0}
+.cf-card{position:absolute;left:0;top:0;margin:0;width:104px;transform-origin:50% 100%;transform:translate(-50%,-100%) translate(var(--x),-40px) rotate(var(--r)) scale(.55);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
+.cf-card.dealt{opacity:1;transform:translate(-50%,-100%) translate(var(--x),-62px) rotate(var(--r))}
+.cf-say{position:absolute;left:0;top:0;margin:0;transform:translate(-50%,-100%) translateY(-8px);max-width:300px;width:max-content;padding:5px 11px 6px;border-radius:4px;background:rgba(9,10,13,.94);border:1px solid rgba(230,223,204,.3);color:var(--ink);font:500 15px/1.25 var(--f-ui);text-align:center;z-index:3}
+body.cf-on #hud{opacity:.22;transition:opacity .4s}
+.cf-card.now{z-index:2}
+.cf-in{position:relative;transform-style:preserve-3d}
+.cf-face{position:relative;padding:6px 6px 0;background:#efe9d8;border-radius:3px;box-shadow:0 10px 24px rgba(0,0,0,.6);color:#1b1a18}
+.cf-face img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:#222}
+.cf-fr{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:3px;padding:1px 5px;border-radius:3px;background:rgba(10,10,12,.72);color:#e8dcc0;font:600 9px/1.4 var(--f-ui);font-style:normal;letter-spacing:.08em;text-transform:uppercase}
+.cf-fr .ic{width:10px;height:10px}
+.cf-face figcaption{padding:4px 2px 6px;font:500 10.5px/1.2 var(--f-ui);min-height:2.4em}
+.cf-mark{position:absolute;right:-9px;top:-11px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:700 24px/1 var(--f-ui);color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.5);transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.cf-card.yes .cf-mark{background:#3f8a4e} .cf-card.no .cf-mark{background:#a8352a}
+.cf-card.turned .cf-mark{transform:scale(1)}
+.cf-card.turned .cf-in{animation:cfflip .5s ease-in-out}
+.cf-card.turned.no .cf-face{filter:saturate(.35) brightness(.78)}
+@keyframes cfflip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+.cf-verdict{position:absolute;left:50%;bottom:13%;transform:translateX(-50%);text-align:center;padding:10px 22px;border-radius:8px;background:rgba(8,7,6,.82);animation:fadein .4s;white-space:nowrap}
+.cf-verdict b{display:block;font:700 30px/1.1 var(--f-ui);letter-spacing:.05em;text-transform:uppercase;color:#f3e2bd}
+.cf-verdict span{font:500 15px/1.3 var(--f-ui);color:var(--dim)}
+.cf-verdict.gives b{color:#9fd39a} .cf-verdict.ugly b{color:#ec8a74} .cf-verdict.shrug b{color:#d8c49a} .cf-verdict.ignored b{color:var(--dim)}
+.cf-key{position:absolute;right:16px;bottom:12px;margin:0;font:500 12px var(--f-ui);color:var(--faint);letter-spacing:.06em}
+@media (max-width:700px){.cf-card{width:80px}.cf-face figcaption{font-size:8.5px}.cf-top b{font-size:17px}.cf-verdict b{font-size:22px}}
 </style>
 
 
@@ -831,7 +758,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.12 · updated Oct 29, 2026</p>
+  <p id="version">v1.13 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -869,7 +796,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Rummage</kbd><span>Feel something in there? Open it up before it settles · back shelves hide a trap, a flashlight, pills</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: a Home card, or trap bait. THEY hate seeing them on you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Falls in big steps: THEIR thing or a sign 70 · a true form 50 · a fight with one 30 · drains near IT · under 60 you see things · under 40 red at the edges, hands too shaky for photos · under 20 no gossip, no confronting · 0: panic</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards stay on the board, only THEY can take one · alone, it’s Attack</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: every card on their board turns ✓ (it really is about them) or ✗ · 0–1 ✓ they shrug, you look mad · 2 it turns ugly · 3+ only THEM: it gives up · somebody listening must take you seriously · alone, it’s Attack</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Space</kbd><span>Hit · a red patch on the ground is where a blow lands: step out of it. Hit IT while it stands there open and it goes down</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down in front of people and it gives up · the FBI comes for it · alone, it dies and nobody saw</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
@@ -882,7 +809,7 @@ svg.na{fill:#cbbdaa;stroke:none}
   </div>
 </div>
 
-<div id="arena" class="overlay" hidden aria-live="polite"></div>
+<div id="arena" hidden aria-live="polite"></div>
 
 <div id="over" class="overlay modal" hidden>
   <div class="sheet" role="dialog" aria-label="The end">
@@ -1273,12 +1200,8 @@ const RANGED = {
   swarmSpd: 1.75,               // × a walk: faster than your jog, slower than your sprint. Run.
   swarmHit: 0.6, swarmEvery: 1.4, // stings anyone this close, this often
 };
-// the confrontation's own bar (play/arena) still uses these: how wide its green and how quick its tracker; grace:
-// real seconds it holds still as it opens; timeout: real seconds before freezing up counts as a miss
-const FIGHT_DIFF = { them: [0.25, 0.85] };
-const FIGHT = { grace: 0.35, timeout: 6 };
 
-// ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/arena, ui/case-board, combat/timing-bar)
+// ── Evidence, confronting, being hunted (them/proofs, play/oddities, play/confrontation, ui/case-board)
 // Every suspect has four frames: Home, Habit, Body, Contact. Each holds one card, clear or fuzzy. All four is a case.
 // A clear card pushes a fuzzy one out of its frame. Enough grey (explained) frames and they're CLEARED.
 const EVIDENCE = {
@@ -1289,24 +1212,10 @@ const EVIDENCE = {
   clearedGrey: 2,               // grey frames that stamp a suspect CLEARED (an ordinary person has two to find: their secret, their oddity)
   witnessDays: 2,               // someone who saw it change remembers it this long
   halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
-  // the arena: the crowd's lean runs −5 (with THEM) … +5 (with you), and starts from the room, held to −3 … +3
-  lean: { min: -5, max: 5, startMin: -3, startMax: 3 },
-  start: { close: -1, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2 },
-  rant: { stress: 80, p: 0.4 }, // Psychic 20 or less: this chance you rant before it starts. Instant Fail
-  statements: 5,                // the testimony: one lie per frame, and one true line
-  statementSecs: 6,             // real seconds each statement waits for a card
-  move: { clear: 2, fuzzyBacked: 1, fuzzyAlone: -1, wrongLie: -1, pass: -1, onTruth: -2 },
-  rebuttalSecs: 6,
-  idleSecs: 1.8,                // ...but with nothing left to play, only this long: no standing there waiting
-  know: { claims: [1, 2], right: 1, wrong: -1, secs: 8 },
-  counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
-  escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
-  bands: { total: 4, partial: 1, pfail: -1 },   // final lean: +4 up total success · +1…+3 partial · −1…0 partial fail · below: fail
-  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, sus: 30 },
-  fail: { sus: 15, madDays: 2 },
-  pfail: { watchMins: 1440, sus: 5 },
-  success: { fearMins: 1440 },
-  aware: { pfail: 15, fail: 25, wrong: 20, success: 15, privateKill: 30, hitNoChange: 10, lostFight: 10 },
+  // the confrontation (play/confrontation): a fail makes everyone listening `failSus` warier of you; after IT changes in
+  // public, people go home early for `fearMins`
+  cf: { failSus: 15, fearMins: 1440 },
+  aware: { privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
   come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long
@@ -1417,29 +1326,39 @@ const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.',
 const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
 const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
-// ── The confrontation (play/arena): THEY lie, a human tells the truth, and it all sounds the same
-const ARENA_OPEN = ['What is this?', 'You want to do this here? Fine.', 'Go on, then. Say it.', 'Everybody look. Here we go.', 'Is this about me?'];
-const ARENA_SAY = {
-  home: ['There’s nothing in my desk but pens.', 'Nobody keeps anything at mine. Look all you like.', 'My things are my things. Nothing in them.'],
-  habit: ['I was never there. Not once.', 'At that hour? I was in bed.', 'I go straight home after work. Every day.'],
-  body: ['Look at me. Do I look strange to you?', 'My face is my face.', 'That’s not me in any picture.'],
-  contact: ['Nobody can say a word against me.', 'Who says? Name one person.', 'I hardly know anyone here.'],
+// ── The confrontation (play/confrontation): each card turns ✓ or ✗ with one line from IT. A human owns up to what's
+// true; one of THEM can't deny what's real, so it squirms; a card that isn't about them, anybody denies.
+const CF_OPEN = ['{s}. Everyone listen.', 'I know what you are, {s}.', 'Look at this. All of you. {s}.', 'Tell them, {s}. Or I will.'];
+const CF_YES_HUMAN = ['Yes. It’s {t}. So?', 'That? That’s {t}. Happy now?', 'Fine. It’s {t}. Now everybody knows.'];
+const CF_YES_THEM = {
+  home: ['Where did you get that?', 'That— lots of people have those.', 'You had no right to go in there.'],
+  habit: ['Everyone has their little ways.', 'So I like it warm. So what?', 'I was… resting.'],
+  body: ['A trick of the light.', 'That’s… you can’t prove that’s me.', 'Put that away.'],
+  biography: ['Is that a crime now?', 'Who told you that?', 'I don’t see what that has to do with anything.'],
+  contact: ['People will say anything.', 'Who told you that?', 'That’s my business.'],
 };
-const ARENA_FILLER = ['I’ve lived in this town twenty years.', 'I take my coffee black. Always have.', 'I was born two streets from here.', 'I pay my taxes. Mostly.', 'I’ve never missed a day of work.'];
-const ARENA_LIE_BOUGHT = ['And {w} will tell you I was with them.', 'Ask {w}. {w} knows me.'];
-const ARENA_REBUT = ['That could be anyone in a coat.', 'A blur. You’ve got a blur.', 'That’s a shadow. That’s all that is.', 'Anyone can say anything.'];
-const ARENA_BACKED = { card: ['And this.', 'Then explain this one.'], habit: ['Every day, at that hour. I watched you.', 'I know where you go.'], witness: ['I saw it too.', 'It’s true. I was there.'] };
-const ARENA_CLEAR = ['…', 'Where did you get that?', 'That— that proves nothing.', 'Put that away.'];
-const ARENA_WRONG = ['What has that got to do with anything?', 'That’s not what I said.', 'You’re not even listening.'];
-const ARENA_PASS = ['See? Nothing.', 'Nothing to say to that?', 'Thought not.'];
-const ARENA_TRUTH = ['…Yes? That’s true. Everyone knows that.', 'And? It’s true.', 'That’s the one thing nobody doubts.'];
-const ARENA_KNOW = { lie: ['{q}? Not me. Never.', 'Me? {q}? Don’t be silly.'], open: ['How well do you even know me?', 'You don’t know the first thing about me.'] };
-const ARENA_COUNTER = ['They’ve been following me for days. Look at them.', 'Ask yourselves who’s been sneaking round people’s homes.', 'Look at the state of them. Look.', 'Who takes pictures of people’s faces? Who does that?'];
-const ARENA_HOLD = ['I’m fine. I’m not the one on trial.', 'Don’t change the subject.', 'Answer the question.'];
-const ARENA_ESCAPE = ['I don’t have to listen to this.', 'I’m leaving.', 'We’re done here.'];
-const ARENA_INNOCENT = ['Yes. It was {t}. Happy now?', 'That? That’s {t}. Thanks for telling everyone.', 'Fine. It’s {t}. Now you all know.'];
-const ARENA_PLANTED = ['I’ve never seen that in my life.', 'That’s not mine. I swear it’s not mine.', 'Somebody put that there.'];
-const ARENA_NOTMINE = ['That’s not me.', 'That isn’t anything to do with me.'];
+const CF_NO = {
+  home: ['That’s not mine. Never seen it.', 'Somebody put that there.', 'That isn’t anything to do with me.'],
+  habit: ['That’s not me.', 'I was never there.', 'Somebody else. Not me.'],
+  body: ['That’s not me in that picture.', 'That’s a blur. Could be anyone.', 'Not me.'],
+  biography: ['So? Lots of people moved here in March.', 'So? That’s just my life.', 'And? Half this town could say the same.'],
+  contact: ['Who says? Nobody.', 'People talk.', 'That’s just talk.'],
+};
+const CF_EMPTY = ['Well? Nothing? I thought so.', 'You’ve got nothing on me.', 'Go on, then. Show them.'];
+const CF_SHRUG = ['Are we done? Good.', 'Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'];
+// the verdict, big, when it's over
+const CF_VERDICT = {
+  gives: ['It gives up', 'In front of everyone. The FBI is on its way'],
+  ugly: ['It turns ugly', 'Nobody shrugs off two'],
+  shrug: ['They shrug it off', 'And everyone listening thinks you’re mad'],
+  ignored: ['Nobody reacts', 'Nobody here takes you seriously'],
+};
+// what the town says afterwards, in the hours after ({s}: the one you called out, {p}: you)
+const CF_TALK = {
+  gives: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
+  ugly: ['Did you see {s}’s face when {p} said it?', 'Strange business with {s} and {p}. It got ugly.'],
+  shrug: ['{p}’s lost it. Shouting at {s} like that.', 'Keep away from {p}. Seriously.'],
+};
 // the officer: a telling-off the first time (an opener, the complaint, the warning), a chase after that; a grab you slip
 // (what he shouts), and when you've slipped him enough, giving up
 const COP_WARN = {
@@ -1452,9 +1371,8 @@ const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
-const ARENA_RANT = ['Look at them! LOOK!', 'Why won’t anyone LISTEN?', 'It’s not a person!'];
-// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in (play/arena,
-// play/confront): the same words either way
+// the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in
+// (play/confront): the same words either way
 const CONFESS = {
   innocent: ['I’m innocent, man! STOP!', 'I didn’t DO anything! Stop!', 'I’m nobody! I’m just me! Please!'],
   bribed: ['I was bribed! It’s my fault!', 'They PAID me! I’m sorry, I’m sorry!', 'It was only money! I just looked away!'],
@@ -1471,52 +1389,6 @@ const MARK_NEWS = {
   lizards: 'Gold pins on some chests today',
   aliens: 'Something grows out of some people’s ears',
   zombies: 'Flies follow some people today. And that walk',
-};
-const ARENA_END = {
-  partial: ['Enough of this face.', 'You want to SEE?', 'FINE.'],
-  pfail: ['Are we done? Good.', 'You’ll regret this.', 'I’ll be seeing you.'],
-  fail: ['Get some sleep. Really.', 'Somebody call them a doctor.', 'Are you finished?'],
-  wrong: ['How could you.', 'I’ll never forget this.', 'Get away from me.'],
-};
-const ARENA_CROWD = { up: ['Oh my God.', 'It’s true…', 'Look at its face!'], down: ['Ha!', 'Get a grip.', 'Not this again.'], still: ['…', 'Hm.'] };
-// the banner over the ring: which part of it this is, and what you can do ({n}: the accused, {i} of {k}: the statement)
-const ARENA_BEAT = {
-  open:      ['Confronting {n}', 'Everyone in earshot is listening'],
-  stmt:      ['Testimony · {i} of {k}', 'A lie? Show the card from the same frame. Or let it pass'],
-  stmtEmpty: ['Testimony · {i} of {k}', 'No cards left to show'],
-  rebut:     ['It explains it away', 'Back it up: another card, a habit you watched, or a witness'],
-  rebutNone: ['It explains it away', 'Nothing to back it up with'],
-  know:      ['How well do you know me?', 'True, or a lie?'],
-  counter:   ['It turns it on you', 'Hold your nerve'],
-  escape:    ['It’s making a run for it', 'Block the way: E (or tap) in the green'],
-};
-// the verdict, big, when it's over
-const ARENA_VERDICT = {
-  total:   ['It gives up', 'The crowd holds it down. The FBI is on the way'],
-  partial: ['Its face comes off', 'Right in front of everyone'],
-  escaped: ['It breaks and runs', 'Everyone saw what it is. Go after it'],
-  pfail:   ['Doubt', 'The town will watch it. Tonight, it comes for you'],
-  fail:    ['They laugh at you', 'Nobody believes a word. People will talk'],
-  wrong:   ['Wrong person', 'You told the whole room their business'],
-};
-// why the crowd just moved, beside the number
-const ARENA_WHY = {
-  clear: 'caught in a lie', backed: 'backed up', alone: 'just a blur', wrongLie: 'wrong card for that', pass: 'a lie let go',
-  truth: 'that one was true', notMine: 'not theirs', innocent: 'only their own secret', planted: 'planted on them',
-  knowRight: 'you know them', knowWrong: 'you don’t', counter: 'you cracked', faced: 'that camera in their face', block: 'blocked the way',
-};
-// under the crowd meter: why it started where it did ({w}: someone in the room)
-const ARENA_ROOM = {
-  witness: '{w} saw it', close: '{w} is close to them',
-  unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
-};
-// what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
-const ARENA_TALK = {
-  total: ['{s} was one of THEM. In front of everyone.', 'They’ve got {s}. On its knees.'],
-  partial: ['{s} changed. Right there in front of us.', 'Don’t go out tonight. {s}’s still out there.'],
-  pfail: ['Strange business with {s} and {p}.', 'Did you see {s}’s face? Something wasn’t right.'],
-  fail: ['{p}’s lost it. Shouting at {s} like that.', 'Keep away from {p}. Seriously.'],
-  wrong: ['What {p} said to {s}. Shameful.', 'Poor {s}. {p} told everyone their business.'],
 };
 
 // ── Endings (game/state)
@@ -3278,6 +3150,7 @@ uniform vec2 uRes; uniform float uTime; uniform float uBloomK; uniform float uBa
 uniform float uNight; uniform float uDread; uniform float uDanger; uniform float uSel; uniform float uLetter; uniform float uJolt; uniform float uBlood; uniform float uBeat;
 uniform float uStK; uniform float uSBeat;
 uniform float uFade; uniform float uDaze; uniform float uLid; uniform vec3 uWash; uniform float uWashK;
+uniform float uStage; uniform vec2 uSpot;
 out vec4 frag;
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 vec3 shoulder(vec3 c){ vec3 t = max(c - 0.6, 0.0); return min(c, 0.6) + 0.4*(1.0 - exp(-t/0.4)); }
@@ -3346,6 +3219,12 @@ void main(){
     col = mix(col, vec3(1.0,0.84,0.52), edge.r*0.95);
     float gp = 0.55 + 0.45*sin(uTime*3.4);
     col = mix(col, vec3(0.72,1.0,0.84), edge.g*gp*0.85);
+  }
+  // the confrontation: a stage light where you stand, and the town gone dark around it
+  if(uStage > 0.001){
+    float sd = length((vUv - uSpot)*vec2(uRes.x/uRes.y, 1.0));
+    float lit = smoothstep(0.62, 0.2, sd);
+    col = mix(col, col*mix(0.16, 1.18, lit)*mix(vec3(1.0), vec3(1.06,0.98,0.84), lit), uStage);
   }
   // vignette, sleep, pulse, flash, grain
   float v = smoothstep(1.02, 0.2, length(d*vec2(1.0, 0.92))*(1.0 + bad*0.25 + uDread*0.25 + uDanger*0.3));
@@ -10391,6 +10270,10 @@ function composite() {
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
+    if (u.uStage) {
+      gl.uniform1f(u.uStage, R.stageK || 0);
+      gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
+    }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
     if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
@@ -24388,481 +24271,205 @@ function observeAct(n) {
     },
   });
 }
-// ───────────── the confrontation. A short battle, 45 to 75 seconds: THEY lie, you show the card that breaks the lie, and
-// the crowd decides. You bring every card you hold on them; a card is never spent, it stays on the board. The town is
-// paused throughout.
-//   1 Opening · 2 Testimony: five statements, show a card or let it pass · 3 "How well do you know me?" · 4 Counterattack
-//   · 5 Escape attempt (THEM only, the first time the lean reaches +3)
-// The room sets where the crowd's lean starts (−3…+3); where it ends decides it (EVIDENCE.bands). The wrong person always fails.
-// ── the room: who's in earshot, and which way each of them leans before a word is said
-const theirsPerson = (w) => bought(w) || (G.control && G.control.who === w.id) || G.chipped[w.id] || w.marked;
-const closeTo = (w, n) => (G.pairs[[w.id, n.id].sort().join('|')] || 0) >= EVIDENCE.start.closePairs;
-// someone who saw THEIR act or a change in the last two days, and would say so with you in the room
-function witnessOf(w, n) {
-  if (!backs(w)) return false;
-  if (sawRecently(w, n)) return true;
-  return G.events.some(
-    (e) =>
-      e.who === n.id &&
-      (e.k === 'bribe' || e.k === 'unmask' || e.k === 'trueform') &&
-      e.seen.includes(w.id) &&
-      G.t - e.t <= EVIDENCE.witnessDays * 1440,
-  );
+// ───────────── the confrontation. Face someone with people listening and call them out. Time stops, and the camera swings
+// round to frame you, IT and everyone in earshot, lit like a stage. Your case is every card on their board: no choosing.
+// One by one the cards fan out over IT and flip, ✓ (it really is about them) or ✗ (it isn't), each with one line from
+// IT. Then it plays out in the street, the same for anyone:
+//   0–1 ✓  they shrug it off, and everyone listening thinks you're mad
+//   2 ✓    it turns ugly: they run or hit you. One of THEM changes into its true form as it does; a human stays human
+//   3+ ✓   only THEM get here (a human never has more than two odd true things): IT gives up, and the FBI takes it
+// Someone has to take you seriously. With no listener who is clean (not bought, bitten, probed, one of THEM, nor 85+
+// suspicious of you), the ✓ still show and nothing happens: nobody reacts, and that tells you the crowd is THEIRS.
+// Bystanders don't vote. They help in the fight, and they're the ones who think you're mad when it fails.
+// who's listening: in earshot, and still standing there as people
+const cfListeners = (n) => earshot(n).filter((w) => w !== n && !w.trueForm && !w.fleeing && !w.hunter);
+// a listener who takes you seriously
+const takesSeriously = (w) => !servantKind(w) && !(w.sus >= 85);
+// ✓: the card really is about them. Their own oddity, or something of THEIRS on one of THEM. Something THEY left at
+// someone else's place lands on whoever lives there, and there it's a ✗.
+const cardHolds = (p, n) => (p.true === n.id && !p.planted) || p.innocent === n.id;
+// what IT says as each card turns
+function cardLine(p, n, ok) {
+  if (!ok) return pick(CF_NO[p.frame] || CF_NO.home);
+  if (!n.isThem) return pick(CF_YES_HUMAN).replace('{t}', oddTruth(n) || 'nothing');
+  return pick(CF_YES_THEM[p.frame] || CF_YES_THEM.home);
 }
-function arenaRoom(n) {
-  const E = EVIDENCE.start,
-    ear = earshot(n).filter((w) => w !== n && !w.trueForm && !w.fleeing && !w.hunter),
-    mods = [],
-    crowd = [];
-  let lean = 0;
-  const add = (v, why, w) => {
-    lean += v;
-    mods.push({ v, why, w: w ? w.id : null });
-  };
-  const theirs = [],
-    wits = [],
-    hidden = [];
-  for (const w of ear) {
-    crowd.push(w);
-    if (w.isThem) {
-      hidden.push(w); // shows nothing, unless you brought it along yourself
-      if (G.follower && G.follower.id === w.id) add(E.bought, 'theirs', w);
-      continue;
-    }
-    if (G.recant[w.id] && (sawRecently(w, n) || witnessOf(w, n) || G.recant[w.id] === 'bribed')) {
-      add(E.bought, 'recant', w); // got to: they stay silent
-      continue;
-    }
-    if (theirsPerson(w)) {
-      add(E.bought, 'theirs', w);
-      theirs.push(w);
-      continue;
-    }
-    if (witnessOf(w, n)) {
-      add(E.witness, 'witness', w);
-      wits.push(w);
-    }
-    if (closeTo(w, n)) add(E.close, 'close', w);
-  }
-  const st = PLAYER.needs.stress;
-  if (st > 80) add(E.psy20, 'unwell');
-  else if (st > 60) add(E.psy40, 'unwell');
-  if (G.madUntil > G.t) add(E.mad, 'mad');
-  const trapped = !!(n.trueForm && n.trueForm.mode === 'trapped');
-  if (trapped) add(E.trapped, 'trapped');
-  return {
-    ear,
-    crowd: crowd.slice(0, 8),
-    lean: clamp(lean, EVIDENCE.lean.startMin, EVIDENCE.lean.startMax),
-    mods,
-    theirs,
-    wits,
-    hidden,
-    trapped,
-  };
-}
-// ── starting it
 function openConfront(n) {
   if (!n || !n.onMap || UI.cf || G.over) return;
   closeMenu();
-  const room = arenaRoom(n);
-  if (!room.ear.length) return ui.note('confront', 'Nobody here to hear it', '');
+  if (tooShaken()) return shakenNote(); // under Psychic 20 you can't call anyone out
+  const ear = cfListeners(n);
+  if (!ear.length) return ui.note('confront', 'Nobody here to hear it', '');
   cancelAll(PLAYER);
-  const A = Object.assign(room, {
+  const cards = caseCards(n).map((p) => ({ p, ok: cardHolds(p, n) }));
+  const C = {
     n,
-    isThem: !!n.isThem,
-    hand: caseCards(n),
-    spent: [],
-    start: room.lean,
-    beat: 'open',
-    wait: 0,
-    then: null,
+    ear,
+    cards,
+    yes: cards.filter((c) => c.ok).length,
+    serious: ear.some(takesSeriously),
+    i: -1,
     t: 0,
-    tMax: 0,
-    sel: 0,
-    si: -1,
-    stmts: [],
-    claims: [],
-    ki: -1,
-    escTried: false,
-    escaped: false,
-    res: null,
+    beat: 'swing',
     prev: G.speed,
-    face: null,
-  });
-  UI.cf = A;
+    cam: { tx: cam.tx, tz: cam.tz, yawT: cam.yawT, zoomT: cam.zoomT, follow: cam.follow },
+    res: null,
+  };
+  UI.cf = C;
   G.speed = 0;
   n.tdir = Math.atan2(PLAYER.x - n.x, PLAYER.z - n.z);
   PLAYER.tdir = Math.atan2(n.x - PLAYER.x, n.z - PLAYER.z);
-  arenaOpen(A);
-  // Psychic 20 or less: you might never get as far as the cards
-  if (PLAYER.needs.stress >= EVIDENCE.rant.stress && chance(EVIDENCE.rant.p)) {
-    arenaSay(A, 'you', pick(ARENA_RANT));
-    audio.sting('awkward');
-    return after(A, 2.6, () => arenaEnd(A, 'fail'));
-  }
-  arenaSay(A, 'them', pick(ARENA_OPEN));
+  for (const w of ear) w.tdir = Math.atan2(n.x - w.x, n.z - w.z);
+  cfStage(C);
+  cfOpen(C);
+  ui.say(PLAYER, pick(CF_OPEN).replace('{s}', n.short), 3);
   audio.sting('murmur');
-  after(A, 2.4, () => testimony(A, 0));
 }
-function after(A, secs, fn) {
-  A.wait = secs;
-  A.then = fn;
+// the camera swings round so you and IT stand side by side, and pulls out far enough for everyone listening
+function cfStage(C) {
+  const P = PLAYER,
+    n = C.n,
+    a = Math.atan2(n.x - P.x, n.z - P.z);
+  const yaws = [a + Math.PI / 2, a - Math.PI / 2];
+  cam.yawT = Math.abs(angDiff(cam.yaw, yaws[0])) <= Math.abs(angDiff(cam.yaw, yaws[1])) ? yaws[0] : yaws[1];
+  const who = [P, n].concat(C.ear.slice(0, 8));
+  let cx = (P.x + n.x) / 2,
+    cz = (P.z + n.z) / 2;
+  // across the screen and up it, after the turn: how far out it has to pull to hold them all
+  const rx = Math.cos(cam.yawT),
+    rz = -Math.sin(cam.yawT);
+  let w = 2.5,
+    h = 2.5;
+  for (const c of who) {
+    const dx = c.x - cx,
+      dz = c.z - cz;
+    w = Math.max(w, Math.abs(dx * rx + dz * rz));
+    h = Math.max(h, Math.abs(dx * rz - dz * rx));
+  }
+  const aspect = R.canvas.width / Math.max(1, R.canvas.height);
+  cam.follow = false;
+  cam.tx = cx;
+  cam.tz = cz;
+  cam.zoomT = clamp(Math.max(h * 1.3 + 1.6, (w * 1.25 + 1.2) / aspect), 3.6, 9.5);
+  C.spot = [cx, cz];
 }
-function arenaTick(dt) {
-  const A = UI.cf;
-  if (!A) return;
-  if (A.bar) return arenaBarTick(A, dt);
-  if (A.wait > 0) {
-    A.wait -= dt;
-    if (A.wait <= 0) {
-      const f = A.then;
-      A.then = null;
-      if (f) f();
+// real seconds: the stage settles, then each card fans out and turns
+const CF_T = { swing: 1.1, deal: 0.55, turn: 1.25, verdict: 2.2 };
+function cfTick(dt) {
+  const C = UI.cf;
+  if (!C) return;
+  C.t += dt;
+  cfDraw(C);
+  if (C.beat === 'swing') {
+    if (C.t < CF_T.swing) return;
+    C.t = 0;
+    C.beat = 'deal';
+    if (!C.cards.length) {
+      C.line = pick(CF_EMPTY);
+      return cfVerdict(C);
     }
-    arenaTimer(A);
+    return cfNext(C);
+  }
+  if (C.beat === 'deal' && C.t >= CF_T.deal) {
+    C.beat = 'turn';
+    C.t = 0;
+    const c = C.cards[C.i];
+    c.shown = true;
+    C.line = cardLine(c.p, C.n, c.ok); // IT answers, under the card
+    audio.sting(c.ok ? (C.serious ? 'gasp' : 'murmur') : 'awkward');
+    cfDraw(C);
     return;
   }
-  if (A.tMax > 0) {
-    A.t -= dt;
-    arenaTimer(A);
-    if (A.t <= 0) {
-      A.tMax = 0;
-      if (A.beat === 'stmt') letPass(A);
-      else if (A.beat === 'rebut') backUp(A, null);
-      else if (A.beat === 'know') callClaim(A, null);
-    }
+  if (C.beat === 'turn' && C.t >= CF_T.turn) {
+    C.t = 0;
+    if (C.i + 1 < C.cards.length) return cfNext(C);
+    return cfVerdict(C);
   }
+  if (C.beat === 'verdict' && C.t >= CF_T.verdict) cfClose(C);
 }
-// ── 2. testimony: one line per frame, gaps first (a good liar attacks what you haven't got), one true line among them
-function makeTestimony(A) {
-  const held = new Set(A.hand.map((p) => p.frame)),
-    frames = shuffle(FRAMES.slice()).sort((a, b) => held.has(a) - held.has(b));
-  const st = frames.map((f) => ({ f, text: pick(ARENA_SAY[f]), lie: A.isThem }));
-  if (A.isThem)
-    for (const w of A.theirs.slice(0, 2))
-      st.splice(st.findIndex((s) => s.f === 'contact') + 1, 0, {
-        f: 'contact',
-        text: pick(ARENA_LIE_BOUGHT).replace(/\{w\}/g, w.short),
-        lie: true,
-      });
-  st.splice(irand(1, st.length), 0, { f: null, text: pick(ARENA_FILLER), lie: false });
-  return st;
+function cfNext(C) {
+  C.i++;
+  C.beat = 'deal';
+  C.t = 0;
+  audio.sting('click');
+  cfDraw(C);
 }
-function testimony(A, i) {
-  if (!A.stmts.length) A.stmts = makeTestimony(A);
-  if (i >= A.stmts.length) return knowBeat(A, 0);
-  A.beat = 'stmt';
-  A.si = i;
-  const s = A.stmts[i];
-  arenaSay(A, 'them', s.text, s.f);
-  A.t = A.tMax = A.hand.length ? EVIDENCE.statementSecs : EVIDENCE.idleSecs; // empty-handed: it goes by quickly
-  arenaDraw(A);
+function cfVerdict(C) {
+  C.beat = 'verdict';
+  C.t = 0;
+  C.res = !C.serious ? 'ignored' : C.yes >= 3 && C.n.isThem ? 'gives' : C.yes >= 2 ? 'ugly' : 'shrug';
+  if (C.res === 'shrug') C.line = pick(CF_SHRUG);
+  if (C.res === 'gives') audio.sting('slip');
+  cfDraw(C);
 }
-function nextStatement(A) {
-  A.beat = 'wait'; // an answer given: nothing more to press until the next line (a second card would land on this one)
-  after(A, 1.7, () => checkEscape(A, () => testimony(A, A.si + 1)));
+// keys: E, Space or Enter hurry it along. There's no way out but through.
+function cfKey(k) {
+  const C = UI.cf;
+  if (!C || !(k === 'e' || k === ' ' || k === 'enter')) return;
+  if (C.beat === 'swing') C.t = CF_T.swing;
+  else if (C.beat === 'turn') C.t = CF_T.turn;
+  else if (C.beat === 'verdict') C.t = CF_T.verdict;
 }
-function letPass(A) {
-  const s = A.stmts[A.si];
-  if (s.lie) {
-    move(A, EVIDENCE.move.pass, null, 'pass');
-    arenaSay(A, 'them', pick(ARENA_PASS));
-  }
-  nextStatement(A);
-}
-// a card shown is out of your hand for this confrontation, and still on the board after it: cards are never spent
-function spend(A, p) {
-  A.hand.splice(A.hand.indexOf(p), 1);
-  A.spent.push(p);
-  A.sel = clamp(A.sel, 0, Math.max(0, A.hand.length - 1));
-}
-const realOn = (p, n) => p.true === n.id && !p.planted && !p.innocent;
-function showCard(A, p) {
-  if (!p) return;
-  if (A.beat === 'rebut') return backUp(A, 'card', p);
-  if (A.beat !== 'stmt') return;
-  const s = A.stmts[A.si],
-    n = A.n;
-  A.tMax = 0;
-  spend(A, p);
-  arenaShow(A, p);
-  if (!A.isThem) return wrongPerson(A, p);
-  if (!s.lie) {
-    move(A, EVIDENCE.move.onTruth, 'laugh', 'truth');
-    arenaSay(A, 'them', pick(ARENA_TRUTH));
-  } else if (p.frame !== s.f) {
-    move(A, EVIDENCE.move.wrongLie, null, 'wrongLie');
-    arenaSay(A, 'them', pick(ARENA_WRONG));
-  } else if (!realOn(p, n)) {
-    move(A, EVIDENCE.wrong.other, null, 'notMine');
-    arenaSay(A, 'them', pick(ARENA_NOTMINE));
-  } else if (p.q === 'clear') {
-    move(A, EVIDENCE.move.clear, 'gasp', 'clear');
-    arenaSay(A, 'them', pick(ARENA_CLEAR));
-  } else {
-    // fuzzy: THEY explain it away, unless you can back it up
-    A.beat = 'rebut';
-    A.rebut = p;
-    arenaSay(A, 'them', pick(ARENA_REBUT));
-    A.t = A.tMax = A.hand.length || habitFits(A) || A.wits.length ? EVIDENCE.rebuttalSecs : EVIDENCE.idleSecs;
-    arenaDraw(A);
-    return;
-  }
-  nextStatement(A);
-}
-// a human tells the truth: there's nothing to break, and now everyone knows their business
-function wrongPerson(A, p) {
-  const n = A.n;
-  if (p.innocent && p.innocent === n.id) {
-    move(A, EVIDENCE.wrong.innocent, null, 'innocent');
-    arenaSay(A, 'them', pick(ARENA_INNOCENT).replace('{t}', oddTruth(n) || 'nothing'));
-    if (G.odd[n.id]) G.odd[n.id].public = true;
-  } else if (p.planted) {
-    move(A, EVIDENCE.wrong.planted, null, 'planted');
-    arenaSay(A, 'them', pick(ARENA_PLANTED));
-    A.framed = true;
-    const F = (G.framed || []).find((f) => f.id === n.id);
-    if (F) F.known = true;
-    for (const c of G.proofs.filter((x) => x.pin === n.id && x.planted)) flipCard(c, { what: 'planted' });
-  } else {
-    move(A, EVIDENCE.wrong.other, null, 'notMine');
-    arenaSay(A, 'them', pick(ARENA_NOTMINE));
-  }
-  nextStatement(A);
-}
-// ── the rebuttal: back a fuzzy card with a second card (both spent), a habit you've watched, or a witness in the room
-const habitFits = (A) => (A.rebut.frame === 'habit' || A.rebut.frame === 'body') && knownQ(A.n).length > 0;
-function backUp(A, how, p) {
-  if (A.beat !== 'rebut') return;
-  A.tMax = 0;
-  let ok = false;
-  if (how === 'card' && p && p !== A.rebut) {
-    spend(A, p);
-    arenaShow(A, p);
-    arenaSay(A, 'you', pick(ARENA_BACKED.card));
-    ok = true;
-  } else if (how === 'habit' && habitFits(A)) {
-    arenaSay(A, 'you', pick(ARENA_BACKED.habit));
-    ok = true;
-  } else if (how === 'witness' && A.wits.length) {
-    arenaSay(A, A.wits[0], pick(ARENA_BACKED.witness));
-    ok = true;
-  }
-  A.rebut = null;
-  A.beat = 'stmt';
-  move(A, ok ? EVIDENCE.move.fuzzyBacked : EVIDENCE.move.fuzzyAlone, ok ? 'gasp' : null, ok ? 'backed' : 'alone');
-  nextStatement(A);
-}
-// ── 3. "How well do you know me?": a claim about their routine, true or a lie. Watched it, and you know.
-function makeClaims(A) {
-  const n = A.n,
-    mine = G.quirks[n.id] || [],
-    known = knownQ(n),
-    fit = Object.keys(QUIRKS).filter((q) => QUIRKS[q].who(n) && !mine.includes(q)),
-    k = irand(EVIDENCE.know.claims[0], EVIDENCE.know.claims[1]),
-    out = [];
-  for (let i = 0; i < k; i++) {
-    const lie = A.isThem && mine.length > 0 && (i === 0 ? chance(0.65) : !out[0] || !out[0].lie);
-    const q = pick((lie ? mine : fit).filter((x) => !out.some((o) => o.q === x)));
-    if (!q) continue;
-    out.push({ q, lie, text: pick(ARENA_KNOW.lie).replace('{q}', QUIRKS[q].short), chip: known.includes(q) });
-  }
-  return out;
-}
-function knowBeat(A, i) {
-  if (!i) A.claims = makeClaims(A);
-  if (i >= A.claims.length) return counterBeat(A);
-  A.beat = 'know';
-  A.ki = i;
-  arenaSay(A, 'them', A.claims[i].text);
-  A.t = A.tMax = EVIDENCE.know.secs;
-  arenaDraw(A);
-}
-function callClaim(A, saysLie) {
-  if (A.beat !== 'know') return;
-  A.tMax = 0;
-  const c = A.claims[A.ki],
-    right = saysLie != null && saysLie === c.lie;
-  move(A, right ? EVIDENCE.know.right : EVIDENCE.know.wrong, right ? null : 'laugh', right ? 'knowRight' : 'knowWrong');
-  arenaSay(A, 'you', saysLie == null ? '…' : saysLie ? 'That’s a lie.' : 'That’s true.');
-  A.beat = 'wait';
-  after(A, 1.6, () => checkEscape(A, () => knowBeat(A, A.ki + 1)));
-}
-// ── 4. counterattack: THEY turn it on you. A witness answers for you; or your nerve holds; or it doesn't.
-function counterBeat(A) {
-  A.beat = 'counter';
-  arenaSay(A, 'them', pick(ARENA_COUNTER));
-  arenaDraw(A);
-  after(A, 2.4, () => {
-    const C = EVIDENCE.counter;
-    if (A.wits.length) arenaSay(A, A.wits[0], pick(ARENA_BACKED.witness));
-    else if (100 - PLAYER.needs.stress >= C.psy) arenaSay(A, 'you', pick(ARENA_HOLD));
-    else {
-      move(A, C.lose, 'laugh', 'counter');
-      arenaSay(A, 'you', '…');
-    }
-    if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced, null, 'faced'); // you had a lens in their face only yesterday
-    after(A, 2, () => checkEscape(A, () => arenaEnd(A)));
-  });
-}
-// ── 5. the escape attempt: the first time the crowd turns hard against it, it tries to walk out. Block the way.
-function checkEscape(A, cont) {
-  if (!A.isThem || A.trapped || A.escTried || A.lean < EVIDENCE.escapeAt) return cont();
-  A.escTried = true;
-  A.beat = 'escape';
-  A.cont = cont;
-  arenaSay(A, 'them', pick(ARENA_ESCAPE));
-  let [g, sp] = FIGHT_DIFF.them;
-  if (PLAYER.needs.stress >= 80) g *= 2 / 3;
-  if (PLAYER.needs.energy < 30) sp *= 1.2;
-  const a = rand(0.08, 0.92 - g);
-  A.bar = { a, b: a + g, sp, pos: 0, dir: 1, t: 0, res: null, rt: 0 };
-  arenaDraw(A);
-}
-function arenaBarTick(A, dt) {
-  const f = A.bar;
-  if (f.res) {
-    f.rt -= dt;
-    if (f.rt > 0) return;
-    A.bar = null;
-    if (f.res === 'hit') {
-      move(A, EVIDENCE.escapeBlock, 'gasp', 'block');
-      arenaSay(A, 'you', 'You’re not going anywhere.');
-      return after(A, 1.4, A.cont);
-    }
-    A.escaped = true; // out of the ring: it runs
-    return after(A, 1.2, () => arenaEnd(A));
-  }
-  f.t += dt;
-  if (f.t < FIGHT.grace) return; // the tracker holds still while the bar comes up, as in a fight
-  f.pos += f.dir * f.sp * dt;
-  if (f.pos > 1) {
-    f.pos = 2 - f.pos;
-    f.dir = -1;
-  } else if (f.pos < 0) {
-    f.pos = -f.pos;
-    f.dir = 1;
-  }
-  arenaBarDraw(A);
-  if (f.t > FIGHT.grace + FIGHT.timeout) arenaStrike(true); // freezing counts as a miss
-}
-function arenaStrike(froze) {
-  const A = UI.cf,
-    f = A && A.bar;
-  if (!f || f.res || (f.t < FIGHT.grace && !froze)) return; // too soon: the bar is still coming up
-  f.res = !froze && f.pos >= f.a && f.pos <= f.b ? 'hit' : 'miss';
-  f.rt = 0.7;
-  audio.sting(f.res === 'hit' ? 'caught' : 'awkward');
-  arenaBarDraw(A);
-}
-// ── the crowd's lean
-function move(A, v, fx, why) {
-  if (!v) return;
-  A.lean = clamp(A.lean + v, EVIDENCE.lean.min, EVIDENCE.lean.max);
-  arenaCrowd(A, v, why);
-  audio.sting(fx === 'gasp' ? 'gasp' : fx === 'laugh' || v < 0 ? 'crowdlaugh' : 'murmur');
-  if (A.isThem && A.lean >= 3 && fx === 'gasp') audio.sting('slip'); // the mask, slipping
-}
-// ── the end: the lean decides; a fade back to the same spot, and the town already moving
-function arenaEnd(A, forced) {
-  if (A.res) return;
-  A.beat = 'end';
-  A.tMax = 0;
-  const B = EVIDENCE.bands;
-  A.res =
-    forced ||
-    (!A.isThem
-      ? 'wrong'
-      : A.escaped
-        ? 'partial'
-        : A.lean >= B.total
-          ? 'total'
-          : A.lean >= B.partial
-            ? 'partial'
-            : A.lean >= B.pfail
-              ? 'pfail'
-              : 'fail');
-  // giving in, THEY say what they'd say with your fist in their face; so does one of THEIR people found out
-  const own = A.res === 'total' || (A.res === 'wrong' && servantKind(A.n));
-  arenaSay(A, 'them', own ? confess(A.n) : pick(ARENA_END[A.res]));
-  arenaDraw(A);
-  if (A.res === 'total' || A.res === 'partial') audio.sting('slip');
-  after(A, 2.6, () => closeArena(A));
-}
-function closeArena(A) {
+function cfClose(C) {
   UI.cf = null;
-  arenaClose();
-  G.speed = A.prev || 1;
-  if (!G.over) arenaOutcome(A);
+  cfHide();
+  Object.assign(cam, C.cam);
+  if (C.cam.follow) cam.follow = true;
+  G.speed = C.prev || 1;
+  if (!G.over) cfOutcome(C);
 }
-// what it leaves on the map
-function arenaOutcome(A) {
-  const n = A.n,
-    res = A.res,
-    ear = A.ear.filter((w) => w.onMap),
-    heed = ear.filter((w) => !w.isThem && !w.def.stranger),
-    W = EVIDENCE.aware;
+// what it leaves in the street
+function cfOutcome(C) {
+  const n = C.n,
+    heed = C.ear.filter((w) => w.onMap && !w.isThem && !w.def.stranger);
   n.confronted = true;
-  // another of THEM in the crowd took note of you
-  if (res !== 'total') for (const m of A.hidden) if (m !== n) bookNight(m);
-  arenaTalkLater(res, n);
-  (G.arenaLog = G.arenaLog || []).push({ t: G.t, who: n.id, res, lean: A.lean });
-  if (res === 'total') {
-    // it drops the act: on its knees, the crowd holding it, the grey cars on the way
+  (G.cfLog = G.cfLog || []).push({ t: G.t, who: n.id, yes: C.yes, of: C.cards.length, res: C.res });
+  if (C.res === 'ignored') return; // nobody here takes you seriously: nothing happens at all
+  cfTalkLater(C.res, n);
+  if (C.res === 'gives') {
+    // it drops the act: on its knees, the crowd holding it, the grey cars on the way. You were right, in public.
     n.cfOk = G.t;
-    surrender(n, 'confront'); // proven right in public: nobody thinks you're mad now (surrender)
-    return;
+    return surrender(n, 'confront');
   }
-  if (res === 'partial') {
-    // it changes in public: an aggressive one, or one that knows you well, goes for you with the crowd behind you
+  if (C.res === 'ugly') {
     n.cfOk = G.t;
-    const fight = !A.escaped && (temper(n) === 'aggressive' || G.aware >= 50);
-    trueForm(n, 'confront', fight ? 'attack' : 'flee');
-    if (n.trueForm) {
-      const tf = n.trueForm;
-      tf.public = true;
-      tf.cornered = fight;
-      tf.long = 30;
-      tf.crowd = heed.length;
+    if (n.isThem) {
+      // one of THEM changes as it goes: an aggressive one, or one that knows you well, comes at you with the crowd behind you
+      const fight = temper(n) === 'aggressive' || G.aware >= 50;
+      trueForm(n, 'confront', fight ? 'attack' : 'flee');
+      if (n.trueForm) {
+        const tf = n.trueForm;
+        tf.public = true;
+        tf.cornered = fight;
+        tf.long = 30;
+        tf.crowd = heed.length;
+      }
+      for (const w of heed) {
+        ui.bubble(w, 'exclaim', 'speech', 3);
+        (w.sawChange || (w.sawChange = {}))[n.id] = G.t;
+      }
+      exposeMember(n, 'unmask');
+      echo('unmask', { x: n.x, z: n.z, who: n.id, seen: heed.map((w) => w.id) });
+      G.fearUntil = G.t + EVIDENCE.cf.fearMins;
+      for (const w of suspects()) if (!w.isThem && !w.gone && !w.trueForm) makePlan(w);
+      return;
     }
-    for (const w of heed) {
-      ui.bubble(w, 'exclaim', 'speech', 3);
-      (w.sawChange || (w.sawChange = {}))[n.id] = G.t;
-    }
-    exposeMember(n, 'unmask');
-    echo('unmask', { x: n.x, z: n.z, who: n.id, seen: heed.map((w) => w.id) });
-    G.fearUntil = G.t + EVIDENCE.success.fearMins;
-    for (const w of suspects()) if (!w.isThem && !w.gone && !w.trueForm) makePlan(w);
+    // a human stays human, and you've started a fight with a neighbour: they hit you, or they run
+    for (const w of heed) ui.bubble(w, 'exclaim', 'speech', 2.5);
+    if (temper(n) === 'aggressive') hitBack(n);
+    else flee(n);
     return;
   }
-  if (res === 'pfail') {
-    // doubt: the town watches it for a day. It knows you now, and it comes for you tonight.
-    G.watchedUntil[n.id] = G.t + EVIDENCE.pfail.watchMins;
-    for (const w of heed) addSus(w, EVIDENCE.pfail.sus);
-    bookAware(W.pfail);
-    G.huntNight = tonightId();
-    addDanger(n, 25);
-    return;
+  // they shrug it off, and everyone listening thinks you're mad
+  for (const w of heed.concat([n])) {
+    addSus(w, EVIDENCE.cf.failSus);
+    if (w !== n) ui.bubble(w, 'laugh', 'speech', 2.5);
   }
-  // a fail: you look mad. The wrong person: a scandal too.
-  for (const w of heed) {
-    addSus(w, EVIDENCE.fail.sus);
-    ui.bubble(w, 'laugh', 'speech', 2.5);
-  }
-  G.madUntil = G.t + EVIDENCE.fail.madDays * 1440;
-  G.tearTonight = (G.tearTonight || 0) + 1;
-  if (res === 'wrong') {
-    bookAware(W.wrong);
-    addSus(n, EVIDENCE.wrong.sus);
-  } else {
-    bookAware(W.fail);
-    addDanger(n, 20);
-  }
+  echo('ridicule', { x: n.x, z: n.z, who: n.id });
 }
 // the town talks about it for hours afterwards
-function arenaTalkLater(res, n) {
-  const pool = ARENA_TALK[res] || ARENA_TALK.fail,
+function cfTalkLater(res, n) {
+  const pool = CF_TALK[res] || CF_TALK.shrug,
     by = pick(suspects().filter((s) => s !== n && !s.isThem && !s.gone && s.id !== 'lenny'));
   for (let k = 0; k < 2; k++)
     G.arenaTalk.push({
@@ -24878,33 +24485,6 @@ function arenaTalkTick() {
   if (!due) return;
   for (const x of L.filter((y) => G.t >= y.at)) hear(null, x.text, x.by || 'stranger');
   G.arenaTalk = L.filter((y) => G.t < y.at);
-}
-// keys during the battle: A/D pick a card, E shows it; in the rebuttal W cites a habit, S calls a witness;
-// in "How well do you know me?" A says true, D says lie
-function arenaKey(k) {
-  const A = UI.cf;
-  if (!A) return;
-  if (A.bar) {
-    if (k === 'e' || k === ' ' || k === 'enter') arenaStrike();
-    return;
-  }
-  if (A.beat === 'know') {
-    if (k === 'a' || k === 'arrowleft') callClaim(A, false);
-    else if (k === 'd' || k === 'arrowright') callClaim(A, true);
-    return;
-  }
-  if (A.beat === 'stmt' || A.beat === 'rebut') {
-    if (k === 'a' || k === 'arrowleft') A.sel = (A.sel + A.hand.length - 1) % Math.max(1, A.hand.length);
-    else if (k === 'd' || k === 'arrowright') A.sel = (A.sel + 1) % Math.max(1, A.hand.length);
-    else if (k === 'e' || k === 'enter' || k === ' ') showCard(A, A.hand[A.sel]);
-    else if (k === 'w' && A.beat === 'rebut') backUp(A, 'habit');
-    else if (k === 's' && A.beat === 'rebut') backUp(A, 'witness');
-    else if (k === 'q' && A.beat === 'stmt') {
-      A.tMax = 0;
-      letPass(A);
-    }
-    arenaDraw(A);
-  }
 }
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -28130,294 +27710,91 @@ function toggleHelp() {
   const h = $('#help');
   h.hidden = !h.hidden;
 }
-// ───────────── the arena on screen. A spotlit circle in the dark: you on the left, the accused on the right, the people who
-// were in earshot as silhouettes in a ring behind (up to eight). The crowd is the meter: it shuffles toward whoever
-// it believes. THEIR face shows the pressure (at +2 a flicker in the eyes, at +3 the skin pulls); a human's never slips.
-// the crowd meter runs from you (left, +5) to the accused (right, −5), coloured by what each end of it means
-function leanBand(L) {
-  const B = EVIDENCE.bands;
-  return L >= B.total ? 'win' : L >= B.partial ? 'good' : L >= B.pfail ? 'meh' : 'bad';
-}
-function arenaOpen(A) {
+// ───────────── the confrontation on screen. The world stays: a stage light where you stand (gfx/frame uStage), the town
+// gone dark around it, the HUD dimmed. Your cards fan out just over IT's head one at a time and turn, ✓ or ✗, and IT's
+// answer to each sits between the cards and its face. A banner says who you're calling out and in front of how many;
+// the verdict comes up at the bottom.
+// a card says plainly what it shows, where and when
+const cfCaption = (p) =>
+  [p.what || FRAME[p.frame].name, p.where, DOW[dow(dayNo(p.at))] + ' ' + fmtTime(p.at)].filter(Boolean).join(' · ');
+function cfOpen(C) {
   const el = $('#arena');
   el.innerHTML =
-    '<div class="ar-stage"><div class="ar-ring"></div><div class="ar-spot"></div><div class="ar-top">' +
-    '<div class="ar-lean"><span class="ar-side">You</span><div class="ar-track">' +
-    Array.from({ length: 11 }, (_, i) => '<i class="' + leanBand(5 - i) + (i === 5 ? ' mid' : '') + '"></i>').join('') +
-    '<b class="ar-mark"></b></div><span class="ar-side them"></span></div><div class="ar-room"></div>' +
-    '<div class="ar-beat"><b></b><span></span></div></div>' +
-    '<figure class="ar-you"><img alt=""><figcaption>You</figcaption></figure>' +
-    '<figure class="ar-acc"><img alt=""><i class="ar-eyes"></i><figcaption></figcaption></figure>' +
-    '<div class="ar-say them"><span class="ar-fi"></span><p></p><i class="ar-t"><i></i></i></div>' +
-    '<div class="ar-say you"><p></p></div><div class="ar-shown" hidden></div><b class="ar-delta"></b>' +
-    '<div class="ar-opts"></div><div class="ar-bar" hidden><i class="fg"></i><i class="ft"></i></div>' +
-    '<div class="ar-bfuse" hidden><i></i></div><div class="ar-verdict"><b></b><span></span></div>' +
-    '<div class="ar-fan"></div></div>';
-  el.querySelector('.ar-you img').src = getPortrait(PLAYER);
-  el.querySelector('.ar-acc img').src = A.n.trueForm ? snapImage(A.n, fightSnapRec(A.n)) : getPortrait(A.n); // held in your trap: no face to hide behind
-  el.querySelector('.ar-side.them').textContent = A.n.short;
-  el.querySelector('.ar-acc figcaption').textContent = A.n.short;
-  // why the meter starts where it does: only what you could know (who's THEIRS, or got to, stays unsaid)
-  const room = el.querySelector('.ar-room'),
-    said = new Set();
-  for (const m of A.mods) {
-    const w = m.w && (NPC[m.w] || CHARS.find((c) => c.id === m.w)),
-      t = ARENA_ROOM[m.why] && ARENA_ROOM[m.why].replace('{w}', w ? w.short : 'Someone');
-    if (!t || said.has(t) || said.size >= 4) continue;
-    said.add(t);
-    const c = document.createElement('span');
-    c.className = m.v > 0 ? 'up' : 'down';
-    c.textContent = (m.v > 0 ? '+' : '−') + Math.abs(m.v) + ' ' + t;
-    room.appendChild(c);
-  }
-  const ring = el.querySelector('.ar-ring'),
-    k = A.crowd.length;
-  A.crowd.forEach((w, i) => {
-    const f = k > 1 ? i / (k - 1) : 0.5,
-      p = document.createElement('i');
-    p.className = 'ar-p';
-    p.dataset.id = w.id;
-    p.style.setProperty('--x', (8 + f * 84).toFixed(1) + '%');
-    p.style.setProperty('--y', (Math.sin(f * Math.PI) * -26).toFixed(1) + 'px');
-    p.style.setProperty('--s', (0.82 + Math.sin(f * Math.PI) * 0.14).toFixed(2));
-    p.innerHTML = '<img alt="">';
-    p.querySelector('img').src = getPortrait(w);
-    ring.appendChild(p);
+    '<div class="cf-top"><b></b><span></span></div><div class="cf-fan"><p class="cf-say" hidden></p></div>' +
+    '<div class="cf-verdict" hidden><b></b><span></span></div><p class="cf-key">E · hurry it along</p>';
+  el.querySelector('.cf-top b').textContent = 'Confronting ' + C.n.short;
+  el.querySelector('.cf-top span').textContent =
+    C.ear.length + (C.ear.length === 1 ? ' person listening' : ' people listening') + ' · ' + cfTally(C);
+  const fan = el.querySelector('.cf-fan'),
+    k = C.cards.length;
+  C.cards.forEach((c, i) => {
+    const f = document.createElement('figure');
+    f.className = 'cf-card';
+    f.style.setProperty('--r', ((i - (k - 1) / 2) * Math.min(11, 44 / Math.max(1, k - 1))).toFixed(1) + 'deg');
+    f.style.setProperty('--x', ((i - (k - 1) / 2) * Math.min(132, 520 / Math.max(1, k))).toFixed(0) + 'px');
+    f.innerHTML =
+      '<div class="cf-in"><div class="cf-face"><img alt=""><i class="cf-fr"></i>' +
+      '<figcaption></figcaption><b class="cf-mark"></b></div></div>';
+    f.querySelector('img').src = proofImage(c.p);
+    f.querySelector('.cf-fr').innerHTML = svgIcon(FRAME[c.p.frame].icon) + '<span>' + FRAME[c.p.frame].name + '</span>';
+    f.querySelector('figcaption').textContent = cfCaption(c.p);
+    f.querySelector('.cf-mark').textContent = c.ok ? '✓' : '✗';
+    f.classList.add(c.ok ? 'yes' : 'no');
+    fan.appendChild(f);
+    c.el = f;
   });
-  // the escape bar takes a tap as well as E
-  el.querySelector('.ar-stage').onpointerdown = (e) => {
-    if (!UI.cf || !UI.cf.bar) return;
-    e.preventDefault();
-    arenaStrike();
-  };
   el.hidden = false;
-  el.classList.remove('out');
-  arenaCrowd(A, 0);
-  arenaDraw(A);
+  document.body.classList.add('cf-on');
 }
-// a line, in a bubble over whoever says it: THEIRS (tagged with the frame it's about), yours, or someone's in the crowd
-function arenaSay(A, who, text, frame) {
+const cfTally = (C) => {
+  const done = C.cards.filter((c) => c.shown),
+    yes = done.filter((c) => c.ok).length;
+  return C.cards.length ? '✓ ' + yes + ' of ' + C.cards.length : 'no cards on them';
+};
+// every frame while it's on: the fan rides above IT's head, the light eases in
+function cfDraw(C) {
   const el = $('#arena');
-  if (!el || el.hidden) return;
-  if (who === 'them' || who === 'you') {
-    const b = el.querySelector('.ar-say.' + who);
-    b.querySelector('p').textContent = text;
-    if (who === 'them')
-      b.querySelector('.ar-fi').innerHTML = frame
-        ? svgIcon(FRAME[frame].icon) + '<em>' + FRAME[frame].name + '</em>'
-        : '';
-    b.classList.remove('pop');
-    void b.offsetWidth;
-    b.classList.add('pop', 'on');
-    if (who === 'them') el.querySelector('.ar-say.you').classList.remove('on');
-    return;
+  if (!el || el.hidden || !cam.VP) return; // nothing drawn yet: nowhere to put it
+  const n = C.n,
+    [x, y] = project(n.x, 1.95, n.z),
+    fan = el.querySelector('.cf-fan');
+  fan.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px)';
+  C.cards.forEach((c, i) => {
+    c.el.classList.toggle('dealt', i <= C.i);
+    c.el.classList.toggle('turned', !!c.shown);
+    c.el.classList.toggle('now', i === C.i);
+  });
+  el.querySelector('.cf-top span').textContent =
+    C.ear.length + (C.ear.length === 1 ? ' person listening' : ' people listening') + ' · ' + cfTally(C);
+  const say = el.querySelector('.cf-say');
+  if (say.textContent !== (C.line || '')) {
+    say.textContent = C.line || '';
+    say.hidden = !C.line;
   }
-  const p = el.querySelector('.ar-p[data-id="' + who.id + '"]');
-  if (!p) return arenaSay(A, 'you', text);
-  const s = document.createElement('span');
-  s.className = 'ar-pq';
-  s.textContent = text;
-  p.appendChild(s);
-  p.classList.add('lit');
-  setTimeout(() => {
-    s.remove();
-    p.classList.remove('lit');
-  }, 2600);
+  const v = el.querySelector('.cf-verdict');
+  if (C.res && v.hidden) {
+    const [t, s] = CF_VERDICT[C.res];
+    v.querySelector('b').textContent = t;
+    v.querySelector('span').textContent = s;
+    v.className = 'cf-verdict ' + C.res;
+    v.hidden = false;
+  }
 }
-// the ring shuffles toward whoever it believes; a few of them murmur, gasp or laugh; the number says by how much, and why
-function arenaCrowd(A, v, why) {
+// the stage light, for gfx/frame: where on screen it falls, and how far in it has come
+function cfLight(dtReal) {
+  const on = !!UI.cf;
+  R.stageK = (R.stageK || 0) + ((on ? 1 : 0) - (R.stageK || 0)) * Math.min(1, dtReal * 3.5);
+  if (on && UI.cf.spot && cam.VP) {
+    const [x, y] = project(UI.cf.spot[0], 0.9, UI.cf.spot[1]),
+      r = R.canvas.getBoundingClientRect();
+    R.stageAt = [x / Math.max(1, r.width), 1 - y / Math.max(1, r.height)];
+  }
+}
+function cfHide() {
   const el = $('#arena');
-  if (!el) return;
-  const L = A.lean,
-    mark = el.querySelector('.ar-mark');
-  el.querySelector('.ar-ring').style.setProperty('--lean', L);
-  mark.style.setProperty('--i', 5 - L);
-  mark.className = 'ar-mark ' + leanBand(L);
-  const acc = el.querySelector('.ar-acc');
-  acc.classList.toggle('shine', A.isThem && L >= 2);
-  acc.classList.toggle('pull', A.isThem && L >= 3);
-  if (!v) return;
-  const d = el.querySelector('.ar-delta');
-  d.textContent = (v > 0 ? '+' : '−') + Math.abs(v) + (ARENA_WHY[why] ? ' · ' + ARENA_WHY[why] : '');
-  d.className = 'ar-delta ' + (v > 0 ? 'up' : 'down');
-  void d.offsetWidth;
-  d.classList.add('go');
-  const ps = [...el.querySelectorAll('.ar-p')];
-  for (let i = 0; i < Math.min(2, ps.length); i++) {
-    const p = pick(ps),
-      s = document.createElement('span');
-    s.className = 'ar-pq small';
-    s.textContent = pick(v > 0 ? ARENA_CROWD.up : v < 0 ? ARENA_CROWD.down : ARENA_CROWD.still);
-    p.appendChild(s);
-    setTimeout(() => s.remove(), 1500);
-  }
-  const st = el.querySelector('.ar-stage');
-  st.classList.remove('up', 'down');
-  void st.offsetWidth;
-  st.classList.add(v > 0 ? 'up' : 'down');
-}
-function arenaTimer(A) {
-  const el = $('#arena'),
-    t = el && el.querySelector('.ar-t');
-  if (!t) return;
-  const f = A.tMax > 0 ? clamp(A.t / A.tMax, 0, 1) : 0;
-  t.firstChild.style.width = (100 * f).toFixed(1) + '%';
-  t.classList.toggle('low', A.tMax > 0 && f < 0.34);
-}
-// the card you just laid down, big, on the floor between you, for a moment
-function arenaShow(A, p) {
-  const el = $('#arena .ar-shown');
-  if (!el) return;
-  el.className = 'ar-shown ' + p.q;
-  el.innerHTML =
-    '<img alt=""><span class="pc-fi">' +
-    svgIcon(FRAME[p.frame].icon) +
-    '</span><em>' +
-    FRAME[p.frame].name +
-    ' · ' +
-    p.q +
-    '</em>';
-  el.querySelector('img').src = proofImage(p);
-  el.hidden = false;
-  clearTimeout(UI.arShownT);
-  UI.arShownT = setTimeout(() => (el.hidden = true), 1600);
-}
-// the banner: which part of it this is, and what you can do in it
-function arenaBeat(A) {
-  const T = ARENA_BEAT,
-    b = A.bar ? 'escape' : A.beat;
-  let x = T[b];
-  if (b === 'stmt' && !A.hand.length) x = T.stmtEmpty;
-  else if (b === 'rebut' && !(A.hand.length || habitFits(A) || A.wits.length)) x = T.rebutNone;
-  return x
-    ? x.map((s) =>
-        s
-          .replace('{n}', A.n.short)
-          .replace('{i}', A.si + 1)
-          .replace('{k}', A.stmts.length),
-      )
-    : null;
-}
-// your cards along the bottom, and what you can do right now
-function arenaDraw(A) {
-  const el = $('#arena');
-  if (!el || el.hidden) return;
-  const fan = el.querySelector('.ar-fan'),
-    s = A.beat === 'stmt' && A.stmts[A.si],
-    fits = s && s.f; // the frame this line is about: the card that could break it sits up
-  const key = A.hand.map((p) => p.id).join(',') + ':' + A.sel + ':' + A.beat + ':' + A.si;
-  if (fan.dataset.k !== key) {
-    fan.dataset.k = key;
-    fan.innerHTML = '';
-    A.hand.forEach((p, i) => {
-      const c = document.createElement('button');
-      c.className = 'ar-card ' + p.q + (i === A.sel ? ' sel' : '') + (fits && p.frame === fits ? ' fit' : '');
-      c.style.setProperty('--r', ((i - (A.hand.length - 1) / 2) * 5).toFixed(1) + 'deg');
-      c.innerHTML =
-        '<img alt=""><span class="pc-fi">' +
-        svgIcon(FRAME[p.frame].icon) +
-        '</span><em class="ar-ct">' +
-        FRAME[p.frame].name +
-        ' · ' +
-        p.q +
-        '</em>';
-      c.querySelector('img').src = proofImage(p);
-      c.onclick = () => {
-        A.sel = i;
-        showCard(A, p);
-        arenaDraw(A);
-      };
-      fan.appendChild(c);
-    });
-  }
-  const opts = el.querySelector('.ar-opts'),
-    o = [];
-  const btn = (k, icon, label, fn) => o.push({ k, icon, label, fn });
-  if (A.beat === 'stmt') {
-    if (A.hand.length) btn('E', 'board', 'Show', () => showCard(A, A.hand[A.sel]));
-    btn('Q', 'pause', 'Let it pass', () => arenaKey('q'));
-  } else if (A.beat === 'rebut') {
-    if (A.hand.length) btn('E', 'board', 'And this', () => showCard(A, A.hand[A.sel]));
-    if (habitFits(A)) btn('W', 'clock', 'I watched you', () => backUp(A, 'habit'));
-    if (A.wits.length) btn('S', 'people', A.wits[0].short, () => backUp(A, 'witness'));
-  } else if (A.beat === 'know') {
-    const c = A.claims[A.ki];
-    if (c && c.chip) o.push({ chip: true, icon: QUIRKS[c.q].icon, label: 'You watched: ' + QUIRKS[c.q].short });
-    btn('A', 'chat', 'True', () => callClaim(A, false));
-    btn('D', 'x', 'Lie', () => callClaim(A, true));
-  }
-  const okey = A.beat + ':' + o.map((x) => x.label).join('|');
-  if (opts.dataset.k !== okey) {
-    opts.dataset.k = okey;
-    opts.innerHTML = '';
-    for (const x of o) {
-      const b = document.createElement(x.chip ? 'span' : 'button');
-      b.className = x.chip ? 'ar-chip' : 'ar-opt';
-      b.innerHTML = (x.k ? '<kbd>' + x.k + '</kbd>' : '') + svgIcon(x.icon) + '<span></span>';
-      b.querySelector('span').textContent = x.label;
-      if (x.fn)
-        b.onclick = () => {
-          x.fn();
-          arenaDraw(A);
-        };
-      opts.appendChild(b);
-    }
-  }
-  const bt = arenaBeat(A),
-    beat = el.querySelector('.ar-beat'),
-    bkey = bt ? bt.join('|') : '';
-  if (A.beat !== 'wait' && beat.dataset.k !== bkey) {
-    // between an answer and the next line it keeps saying what it said
-    beat.dataset.k = bkey;
-    beat.hidden = !bt;
-    if (bt) {
-      beat.querySelector('b').textContent = bt[0];
-      beat.querySelector('span').textContent = bt[1];
-      beat.classList.remove('pop');
-      void beat.offsetWidth;
-      beat.classList.add('pop');
-    }
-  }
-  const vd = el.querySelector('.ar-verdict');
-  if (A.res && !vd.dataset.k) {
-    const k = A.res === 'partial' && A.escaped ? 'escaped' : A.res,
-      V = ARENA_VERDICT[k] || ARENA_VERDICT.fail;
-    vd.dataset.k = k;
-    vd.className =
-      'ar-verdict on ' + (k === 'total' || k === 'partial' ? 'good' : k === 'pfail' || k === 'escaped' ? 'meh' : 'bad');
-    vd.querySelector('b').textContent = V[0];
-    vd.querySelector('span').textContent = V[1];
-  }
-  el.querySelector('.ar-bar').hidden = el.querySelector('.ar-bfuse').hidden = !A.bar;
-  if (A.bar) {
-    const fg = el.querySelector('.ar-bar .fg');
-    fg.style.left = (A.bar.a * 100).toFixed(1) + '%';
-    fg.style.width = ((A.bar.b - A.bar.a) * 100).toFixed(1) + '%';
-  }
-  el.classList.toggle('ending', A.beat === 'end');
-  arenaTimer(A);
-}
-function arenaBarDraw(A) {
-  const el = $('#arena'),
-    bar = el && el.querySelector('.ar-bar'),
-    f = A.bar;
-  if (!bar || !f) return;
-  const ft = bar.querySelector('.ft');
-  ft.style.left = (f.pos * 100).toFixed(2) + '%';
-  ft.classList.toggle('back', f.dir < 0);
-  bar.classList.toggle('hit', f.res === 'hit');
-  bar.classList.toggle('miss', f.res === 'miss');
-  const left = clamp(1 - (f.t - FIGHT.grace) / FIGHT.timeout, 0, 1); // the fuse under it, as in a fight
-  el.querySelector('.ar-bfuse i').style.transform = 'scaleX(' + left.toFixed(3) + ')';
-  el.querySelector('.ar-bfuse').classList.toggle('late', left < 0.3);
-}
-function arenaClose() {
-  const el = $('#arena');
-  el.classList.add('out');
-  setTimeout(() => {
-    el.hidden = true;
-    el.classList.remove('out');
-  }, 450);
+  el.hidden = true;
+  el.innerHTML = '';
+  document.body.classList.remove('cf-on');
 }
 // ───────────────────────── input & camera control ─────────────────────────
 const keys = {};
@@ -29345,7 +28722,7 @@ function initInput() {
     if (UI.scene) return;
     if (UI.cf) {
       e.preventDefault();
-      if (!e.repeat) arenaKey(k); // the confrontation: no way out but through
+      if (!e.repeat) cfKey(k); // the confrontation: no way out but through
       return;
     }
     if (k === 'escape') {
@@ -41289,8 +40666,7 @@ function freshG(start) {
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
-    madUntil: 0, // the town called you mad: −1 lean until then
-    watchedUntil: {}, // member id → doubted in public: no business in public places until then
+    watchedUntil: {}, // member id → no business in public places until then
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
     huntNight: 0, // a night THEY come for you whatever the odds
@@ -42499,7 +41875,8 @@ function frame(now) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
       simStep(dtReal);
     }
-    if (UI.cf) arenaTick(dtReal);
+    if (UI.cf) cfTick(dtReal);
+    cfLight(dtReal);
     styleStep(dtReal);
     worldStep(dtReal, preview);
     try {

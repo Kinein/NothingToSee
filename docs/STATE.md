@@ -20,7 +20,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | Field | Starts as | Written in | Read in |
 | --- | --- | --- | --- |
 | `t` | `start` | game/loop | world/paths, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, town/npc-update, … |
-| `speed` | `1` | town/arrest, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/arena, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
+| `speed` | `1` | town/arrest, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/confrontation, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
 | `inv` | `{
       trap: 0,
       flashlight: false,
@@ -61,14 +61,14 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `health` | `100` | player/needs, combat/hits, combat/throws, play/verbs, chase/hunt-step, chase/hunt-end | ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
 | `tvBugged` | `null` | — | — |
-| `control` | `null` | them/moves, game/state | sim/actions, them/servants, town/doors, town/company, play/stashes, play/arena, horror/encounters |
+| `control` | `null` | them/moves, game/state | sim/actions, them/servants, town/doors, town/company, play/stashes, horror/encounters |
 | `pickAt` | `-999` | — | — |
 | `hotRooms` | `null` | them/plan | player/needs |
 | `takenAt` | `-1e9` | them/moves, taken/taken, chase/they-come, chase/hunt-end | — |
 | `taken` | `0` | them/moves, taken/taken | — |
 | `playerChip` | `false` | them/moves, taken/back-up | them/awareness |
 | `landing` | `0` | them/plan | them/true-form, them/office-night, horror/encounters, chase/they-come, game/last-day, game/loop |
-| `pairs` | `{}` | — | town/npc-update, play/arena, ui/case-board |
+| `pairs` | `{}` | — | town/npc-update, ui/case-board |
 | `bought` | `{}` | — | them/plan, town/npc-update, them/proofs, them/moves, town/suspicion, taken/down-there |
 | `boughtBy` | `{}` | — | them/moves, them/true-form, town/talk |
 | `policeBought` | `false` | them/plan | — |
@@ -83,7 +83,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `horror` | `[]` | horror/director | town/talk, them/office-night |
 | `victims` | `[]` | — | them/plan, town/talk, them/night-attacks, horror/encounter-outcomes, taken/taken, taken/down-there, taken/lair-life |
 | `found` | `null` | them/night-attacks | — |
-| `chipped` | `{}` | — | them/moves, them/servants, them/night-attacks, town/company, them/office-night, play/arena, horror/encounter-outcomes, game/last-day |
+| `chipped` | `{}` | — | them/moves, them/servants, them/night-attacks, town/company, them/office-night, horror/encounter-outcomes, game/last-day |
 | `bitten` | `{}` | — | them/servants, them/night-attacks, horror/encounter-outcomes |
 | `confessed` | `{}` | — | them/servants |
 | `movedNote` | `null` | them/office-night | — |
@@ -97,7 +97,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, … |
 | `assaulted` | `[]` | — | play/traps |
 | `fights` | `0` | combat/melee | — |
-| `events` | `[]` | — | town/talk, town/echoes, play/confront, play/arena |
+| `events` | `[]` | — | town/talk, town/echoes, play/confront |
 | `heard` | `[]` | — | town/echoes, ui/case-board |
 | `headline` | `null` | town/echoes | ui/menus |
 | `faction` | `pick(['aliens', 'lizards', 'zombies'])` | — | gfx/people, gfx/creatures, gfx/portraits, sim/pose, town/routines, town/quirks, them/plan, town/npc-update, … |
@@ -127,7 +127,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `habits` | `{}` | town/routines, game/state | town/daily-plans, town/quirks, them/moves, town/talk, play/oddities |
 | `cleared` | `{}` | — | them/proofs, town/talk, play/oddities, ui/menus, ui/case-board |
 | `habitDone` | `{}` | — | town/routines |
-| `quirks` | `null` | town/quirks | town/npc-update, town/talk, play/confront, play/arena, game/state |
+| `quirks` | `null` | town/quirks | town/npc-update, town/talk, play/confront, game/state |
 | `qlog` | `[]` | town/quirks | town/talk |
 | `qyou` | `{}` | town/quirks, town/talk | — |
 | `qcnt` | `{}` | town/quirks | — |
@@ -147,28 +147,27 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `stageNews` | `null` | them/plan, town/echoes | — |
 | `gatherDay` | `irand(3, 4)` | player/work, them/plan | town/daily-plans, town/talk, horror/director, them/office-night |
 | `gatherTip` | `0` | town/talk, them/office-night | them/plan |
-| `proofs` | `[]` | — | town/npc-update, them/proofs, play/arena, ui/menus, ui/case-board |
+| `proofs` | `[]` | — | town/npc-update, them/proofs, ui/menus, ui/case-board |
 | `proofId` | `0` | — | them/proofs |
 | `pinShots` | `{}` | — | them/proofs |
 | `dashed` | `{}` | — | them/proofs |
 | `mark` | `{}` | — | ui/case-board |
-| `odd` | `{}` | play/oddities | town/talk, play/arena |
-| `framed` | `[]` | — | play/oddities, play/arena |
+| `odd` | `{}` | play/oddities | town/talk |
+| `framed` | `[]` | — | play/oddities |
 | `rumours` | `[]` | play/oddities | — |
 | `victimOf` | `{}` | play/oddities | town/talk |
-| `recant` | `{}` | — | them/proofs, town/company, play/arena |
-| `madUntil` | `0` | play/arena | — |
-| `watchedUntil` | `{}` | — | them/awareness, play/arena |
-| `fearUntil` | `0` | play/arena | town/daily-plans |
+| `recant` | `{}` | — | them/proofs, town/company |
+| `watchedUntil` | `{}` | — | them/awareness |
+| `fearUntil` | `0` | play/confrontation | town/daily-plans |
 | `huntNights` | `0` | player/work, combat/melee | them/true-form, town/company, ui/hud, chase/they-come |
-| `huntNight` | `0` | play/arena | them/true-form, chase/they-come |
-| `follower` | `null` | town/company | play/arena, ui/menus |
+| `huntNight` | `0` | — | them/true-form, chase/they-come |
+| `follower` | `null` | town/company | ui/menus |
 | `awareExtra` | `0` | them/awareness | — |
-| `tearTonight` | `0` | player/work, play/arena | — |
+| `tearTonight` | `0` | player/work | — |
 | `witVisit` | `null` | town/company | — |
 | `tail` | `null` | town/company | — |
 | `tailNext` | `0` | town/company | — |
-| `arenaTalk` | `[]` | play/arena | — |
+| `arenaTalk` | `[]` | play/confrontation | — |
 | `ritualBroke` | `0` | them/tells, play/photos | them/plan |
 | `gatherKnown` | `false` | them/plan | — |
 | `enc` | `null` | horror/encounters, horror/encounter-outcomes, game/state, game/loop | town/npc-update, them/office-night, ui/menus, horror/encounter-draw |
@@ -195,7 +194,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | Field | Written in |
 | --- | --- |
 | `accidentLock` | player/needs |
-| `arenaLog` | play/arena |
+| `cfLog` | play/confrontation |
 | `downAt` | chase/hunt-step |
 | `encId` | horror/encounters |
 | `endAt` | them/plan, them/true-form, play/confront |

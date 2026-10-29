@@ -396,6 +396,10 @@ function composite() {
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
+    if (u.uStage) {
+      gl.uniform1f(u.uStage, R.stageK || 0);
+      gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
+    }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
     if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);

@@ -43,6 +43,7 @@ uniform vec2 uRes; uniform float uTime; uniform float uBloomK; uniform float uBa
 uniform float uNight; uniform float uDread; uniform float uDanger; uniform float uSel; uniform float uLetter; uniform float uJolt; uniform float uBlood; uniform float uBeat;
 uniform float uStK; uniform float uSBeat;
 uniform float uFade; uniform float uDaze; uniform float uLid; uniform vec3 uWash; uniform float uWashK;
+uniform float uStage; uniform vec2 uSpot;
 out vec4 frag;
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 vec3 shoulder(vec3 c){ vec3 t = max(c - 0.6, 0.0); return min(c, 0.6) + 0.4*(1.0 - exp(-t/0.4)); }
@@ -111,6 +112,12 @@ void main(){
     col = mix(col, vec3(1.0,0.84,0.52), edge.r*0.95);
     float gp = 0.55 + 0.45*sin(uTime*3.4);
     col = mix(col, vec3(0.72,1.0,0.84), edge.g*gp*0.85);
+  }
+  // the confrontation: a stage light where you stand, and the town gone dark around it
+  if(uStage > 0.001){
+    float sd = length((vUv - uSpot)*vec2(uRes.x/uRes.y, 1.0));
+    float lit = smoothstep(0.62, 0.2, sd);
+    col = mix(col, col*mix(0.16, 1.18, lit)*mix(vec3(1.0), vec3(1.06,0.98,0.84), lit), uStage);
   }
   // vignette, sleep, pulse, flash, grain
   float v = smoothstep(1.02, 0.2, length(d*vec2(1.0, 0.92))*(1.0 + bad*0.25 + uDread*0.25 + uDanger*0.3));
