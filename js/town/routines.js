@@ -1,6 +1,6 @@
 //@ town/routines — Habits and secrets: everyone sneaks off once a day
-//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, doHabit, secretTick
-//@ Uses:    sim/core, ui/interface, town/cast, them/tells, core/util, world/grid, town/npc-update, world/objects, world/vision, town/quirks, …
+//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, slipCue, doHabit, secretTick
+//@ Uses:    sim/core, ui/interface, town/cast, them/tells, core/util, sim/actions, town/npc-update, world/objects, world/grid, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── routines: everyone sneaks off once a day. The guilty do it to be themselves.
 const HABIT_SPOTS = {
@@ -157,6 +157,20 @@ function lookAround(n) {
     return true;
   return npcSeesPlayer(n, 6);
 }
+// about to slip off: a look over the shoulder, a glance at the watch, then up. Humans do it before their own secret,
+// THEM before THEIR business: the cue gives nobody away. Follow, stay out of sight, take the photo at the spot.
+function slipCue(n) {
+  return mkAct({
+    kind: 'wait',
+    label: '…',
+    dur: 3,
+    anim: 'idle',
+    onStart: (c) => {
+      gesture(c, 'shoulder', 1.1);
+      gesture(c, 'watch', 1.0, 0, 1.15);
+    },
+  });
+}
 function doHabit(n) {
   const hb = G.habits[n.id];
   G.habitDone[n.id + '#' + (n.habitI || 0)] = dayNo();
@@ -210,11 +224,7 @@ function doHabit(n) {
         turn(c);
         c.secret = { t: 0, w: 0, spot: hb.spot };
         // a secret makes noise too: from close by, out of sight, it sounds just like one of THEM
-        if (G.started && visAt(c.x, c.z) < 0.4) {
-          const rp = roomAt(PLAYER.x, PLAYER.z),
-            rn = roomAt(c.x, c.z);
-          if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', c.x, c.z)) notifyPing(c.x, c.z);
-        }
+        if (visAt(c.x, c.z) < 0.4 && slipHeard(c.x, c.z)) notifyPing(c.x, c.z);
       },
       onEnd: (c, a, ok) => {
         c.secret = null;
@@ -222,8 +232,8 @@ function doHabit(n) {
       },
     });
   }
-  if (S.obj) enqueue(n, useAct(n, S.obj, o));
-  else enqueue(n, [goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
+  if (S.obj) enqueue(n, [slipCue(n), useAct(n, S.obj, o)]);
+  else enqueue(n, [slipCue(n), goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
 }
 // an innocent's secret: what you see is yours to judge. Only a photo of it clears them.
 function secretTick(n, dt) {

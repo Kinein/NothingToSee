@@ -59,18 +59,19 @@ const CREATURE_LOOK = {
     teeth: [0.74, 0.69, 0.55],
   },
 };
+// what the card says you caught, the way you'd say it: "Priya · hugging the radiator. In October?"
 const TELL_NOTE = {
-  hum: 'Floating. Eyes lit.',
-  speak: 'Clicking at the wall.',
-  flicker: 'Face slipped.',
-  tongue: 'Tongue. Too long.',
-  shed: 'Peeling off skin.',
-  bask: 'Hugging the radiator.',
-  feed: 'Eating raw meat.',
-  limb: 'Arm fell off.',
-  half: 'Half changed. For a second.',
-  stare: 'Swaying in the corner.',
-  true: 'Changed. Mid-change.',
+  hum: 'floating, eyes lit. Feet off the floor.',
+  speak: 'clicking at the wall. Like it was talking back.',
+  flicker: 'the face slipped. Just for a second.',
+  tongue: 'tongue, far too long. Tasting the air.',
+  shed: 'peeling skin off. In strips.',
+  bask: 'hugging the radiator, eyes shut. In October?',
+  feed: 'raw meat, bare hands. Straight from the fridge.',
+  limb: 'an arm came off. Put it back on.',
+  half: 'half changed. For a second.',
+  stare: 'facing the corner. Swaying. For minutes.',
+  true: 'changing. Mid-change.',
 };
 
 function setupCast() {

@@ -34,6 +34,7 @@ const CTRL = {
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
+  flashNear: 3,      // the flash rule: this close, from any side, they notice the photo; further off, only facing you
   boltSpeed: 3.5,    // enemy projectiles: tiles per game minute (7 tiles a second at normal speed)
   boltHit: 0.42,     // how close a bolt must pass to you to land
   boltRange: 14,
@@ -72,9 +73,10 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
-// what you happen to hear. The first few go by unnoticed; after that only now and then, only from close by,
-// and after each one you catch, a few more slip past again. Noise gets the ear; a scream gets the "!" marker.
-const TIP = { noise: { r: 8, p: 0.4, first: [3, 4], gap: [2, 4] }, scream: { r: 11, p: 0.45, first: [2, 3], gap: [1, 3] }, far: { r: 18, p: 0.4, first: [2, 3], gap: [1, 3] } };
+// what you happen to hear. Every slip (one of THEM changing for a moment, anyone at their secret) is heard from within
+// `slip.r`, through a wall. Other noises: the first few go by unnoticed, after that only now and then, only from close
+// by, and after each one you catch a few more slip past again. Noise gets the ear; a scream gets the "!" marker.
+const TIP = { slip: { r: 6 }, noise: { r: 8, p: 0.4, first: [3, 4], gap: [2, 4] }, scream: { r: 11, p: 0.45, first: [2, 3], gap: [1, 3] }, far: { r: 18, p: 0.4, first: [2, 3], gap: [1, 3] } };
 const ATTACK_ODDS = [0, 0.33, 0.45, 0.6, 0.8, 0.95];
 const HORROR_MIX = [null, [0.5, 0.35, 0.15, 0], [0.35, 0.3, 0.25, 0.1], [0.25, 0.2, 0.3, 0.25], [0.15, 0.15, 0.3, 0.4], [0.1, 0.1, 0.3, 0.5]];
 const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY are cleaning up after THEMSELVES'], [55, 'eye', 'Someone watches your window'], [70, 'eye', 'THEY are coming for you'], [100, 'eye', 'THEY are ready for you']];

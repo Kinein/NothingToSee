@@ -224,7 +224,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #zz .ic{width:22px;height:22px;animation:zz 2s ease-in-out infinite}
 @keyframes zz{50%{transform:translateY(-4px) rotate(-8deg)}}
 #hints{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:8px;pointer-events:none;transition:opacity .6s}
-#hints.out{opacity:0}
+#hints.out span{opacity:0;transition:opacity .6s}
+#hints.out span.glow{opacity:1} /* the photo hint still glows once the rest have gone */
 #hints span{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:rgba(12,13,17,.85);border:1px solid var(--line2);font-size:14.5px;white-space:nowrap}
 #hints .hg{color:var(--goal)}
 #hints kbd{display:inline-block;padding:0 5px;margin-right:2px;border-radius:5px;background:rgba(230,223,204,.14);border:1px solid var(--line2);font:600 12.5px/18px var(--f-ui)}
@@ -691,6 +692,13 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 .cf-verdict.gives b{color:#9fd39a} .cf-verdict.ugly b{color:#ec8a74} .cf-verdict.shrug b{color:#d8c49a} .cf-verdict.ignored b{color:var(--dim)}
 .cf-key{position:absolute;right:16px;bottom:12px;margin:0;font:500 12px var(--f-ui);color:var(--faint);letter-spacing:.06em}
 @media (max-width:700px){.cf-card{width:80px}.cf-face figcaption{font-size:8.5px}.cf-top b{font-size:17px}.cf-verdict b{font-size:22px}}
+
+/* the photo hint: something odd in the wedge in front of you */
+#hints span.glow{color:#f6e3b4;text-shadow:0 0 10px rgba(255,206,120,.85)}
+#hints span.glow kbd{background:var(--sodium);color:#141210;border-color:var(--sodium);box-shadow:0 0 12px rgba(255,190,90,.7)}
+#cam-mark{position:absolute;left:0;top:0;z-index:5;margin:-12px 0 0 16px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(10,9,8,.82);border:1px solid rgba(246,227,180,.55);color:#f6e3b4;animation:fadein .2s}
+#cam-mark .ic{width:15px;height:15px}
+#cam-mark[hidden]{display:none}
 </style>
 
 
@@ -722,7 +730,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
   <div id="zz" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleeping</div>
-  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
+  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span id="hint-photo"><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
   <div id="tools"></div>
 </div>
 <div id="pie" hidden></div>
@@ -745,7 +753,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.14 · updated Oct 29, 2026</p>
+  <p id="version">v1.15 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -768,7 +776,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run · over benches, fences, chairs</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of what’s in front. Every try fills one frame, greys one or finds nothing · film is free, a lens in someone’s face isn’t</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of the whole wedge in front of you, no aiming · something odd in it (THEIRS or a human’s secret) and the F hint glows, a camera mark over it · within 3 steps they notice the photo from any side; further off, only if they face you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Act on what’s in reach</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3M2 12h20M12 2v20"/></svg><kbd>Drag · C</kbd><span>Look around · back to you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Wheel · pinch</kbd><span>Zoom</span></div>
@@ -1093,6 +1101,7 @@ const CTRL = {
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
+  flashNear: 3,      // the flash rule: this close, from any side, they notice the photo; further off, only facing you
   boltSpeed: 3.5,    // enemy projectiles: tiles per game minute (7 tiles a second at normal speed)
   boltHit: 0.42,     // how close a bolt must pass to you to land
   boltRange: 14,
@@ -1131,9 +1140,10 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
-// what you happen to hear. The first few go by unnoticed; after that only now and then, only from close by,
-// and after each one you catch, a few more slip past again. Noise gets the ear; a scream gets the "!" marker.
-const TIP = { noise: { r: 8, p: 0.4, first: [3, 4], gap: [2, 4] }, scream: { r: 11, p: 0.45, first: [2, 3], gap: [1, 3] }, far: { r: 18, p: 0.4, first: [2, 3], gap: [1, 3] } };
+// what you happen to hear. Every slip (one of THEM changing for a moment, anyone at their secret) is heard from within
+// `slip.r`, through a wall. Other noises: the first few go by unnoticed, after that only now and then, only from close
+// by, and after each one you catch a few more slip past again. Noise gets the ear; a scream gets the "!" marker.
+const TIP = { slip: { r: 6 }, noise: { r: 8, p: 0.4, first: [3, 4], gap: [2, 4] }, scream: { r: 11, p: 0.45, first: [2, 3], gap: [1, 3] }, far: { r: 18, p: 0.4, first: [2, 3], gap: [1, 3] } };
 const ATTACK_ODDS = [0, 0.33, 0.45, 0.6, 0.8, 0.95];
 const HORROR_MIX = [null, [0.5, 0.35, 0.15, 0], [0.35, 0.3, 0.25, 0.1], [0.25, 0.2, 0.3, 0.25], [0.15, 0.15, 0.3, 0.4], [0.1, 0.1, 0.3, 0.5]];
 const AWARE_STEPS = [[40, 'phone', 'THEY know your number'], [50, 'eye', 'THEY are cleaning up after THEMSELVES'], [55, 'eye', 'Someone watches your window'], [70, 'eye', 'THEY are coming for you'], [100, 'eye', 'THEY are ready for you']];
@@ -1223,8 +1233,13 @@ const AJAR = { open: 0.55, mid: 0.035, edge: 0.12, night: 0.2, guilty: 2, min: 6
 // ── Lines: what people say, read and see written. Plain text only; the code that uses each pool is named beside it.
 
 // ── Lenny, rumours, small talk topics (town/cast, town/talk)
-const LENNY_HINTS = ['Three of ’em. Always three. And a week, that’s all THEY need.', 'Everybody’s got a funny habit. THEIRS are funnier. Watch for the ones that don’t add up.', '#FACTION', 'Pictures. Nobody believes what you SAW. Not even you.', 'The loudest one pointing fingers? Ask yourself why.', 'Catch ’em at THEIR business. Envelopes. Stashes. Gadgets. That’s proof.', 'People talk. Half of it’s rubbish. Go and look for yourself.', 'Shake things. Radios. Microwaves. THEY keep stuff in things. In their own desk? Gotcha.', '#PLACE', 'Some nights THEY meet. 1 a.m., behind Pell’s. Ask me the day before.', 'Pick up what THEY drop. THEY hate seein’ it on you.', 'Proof first. Then call ’em out. In public, where folks can hear.', 'Alone with one of ’em, you got no friends. THEY don’t need to pretend.'];
-const LENNY_FACTION = { aliens: 'THEY stare at lights. And THEY can’t leave a gadget alone.', lizards: 'THEY hug radiators. Cold blood. And the fish, God, the fish.', zombies: 'Check the fridges. THEY’re always hungry. Don’t sleep, neither.' };
+const LENNY_HINTS = ['Three of ’em. Always three. And a week, that’s all THEY need.', 'Everybody’s got a funny habit. THEIRS are funnier. Watch for the ones that don’t add up.', '#FACTION', 'Pictures. Nobody believes what you SAW. Not even you.', 'The loudest one pointing fingers? Ask yourself why.', 'Somebody looks over their shoulder, checks their watch, gets up? Follow ’em. Everybody does it. THEY do it too.', 'People talk. Half of it’s rubbish. Go and look for yourself.', 'Take things. Not pictures of things: the things. Found at somebody’s place, it’s on them.', '#NONSENSE', '#PLACE', '#FACTION', '#NONSENSE', 'Some nights THEY meet. 1 a.m., behind Pell’s. Ask me the day before.', '#FACTION', 'Pick up what THEY drop. THEY hate seein’ it on you.', 'Proof first. Then call ’em out. In public, where folks can hear.', 'Alone with one of ’em, you got no friends. THEY don’t need to pretend.'];
+const LENNY_FACTION = {
+  aliens: ['THEY stare at lights. And THEY can’t leave a gadget alone.', 'Look in their homes. Little cylinders that hum. A pistol with no trigger.', 'THEY click at walls. At the server rack. Like it talks back.', 'Their papers never agree. Born in Ohio on one, Toronto on the other. Fakes.', 'Look in a fridge. Empty. Spotless. Nobody lives like that.', 'Floating. Eyes lit up. You get a picture of THAT, you got ’em.'],
+  lizards: ['THEY hug radiators. Cold blood. And the fish, God, the fish.', 'Coolers of fish, eaten to the bone. Skins in the laundry. Check.', 'Raw fish at lunch. Who does that?', 'Brass tokens, stamped with scales. THEY pay each other in ’em.', 'Royal blood, some of ’em. Or the country club, and they don’t look the type.', 'Nothing about ’em is old. THEY don’t live long enough.', 'The tongue. Too long. Watch a mouth when it thinks nobody’s looking.'],
+  zombies: ['Check the fridges. THEY’re always hungry. Don’t sleep, neither.', 'Raw meat, bare hands. Out of the fridge at the office.', 'THEY stand in corners. Facing the wall. Swaying.', 'Old. Very old. Ask about the old days. THEY were there.', 'Their own obituary, in a drawer. A jar of teeth. I seen it.', 'An arm. Comes right off. Then back on, like nothing.'],
+};
+const LENNY_NONSENSE = ['Pigeons. Count ’em. Never the same number twice.', 'The moon’s closer on Tuesdays. Measured it.', 'Never trust a man with two watches.', 'Mailboxes. THEY don’t use ’em. I use ’em.', 'Shoelaces. Look at the shoelaces.', 'The bus is never late when you want it late.'];
 const LENNY_RAMBLE = ['Pigeons are fine.', 'Eat something.', 'Don’t look at the moon.', 'Forms never end.'];
 const RUMORS = {
   aliens: ['{s} hums. Like a fridge.', '{s} never blinks.', 'Radios go weird near {s}.', '{s} sugars everything.'],
@@ -12183,6 +12198,18 @@ function applyGestures(c, T) {
     if (g.k === 'punch' && !it) {
       keyPose(T, PUNCH, p, sstep(0, 0.12, p) * (1 - sstep(0.85, 1, p)));
       c.fx.sharp = true;
+    } else if (g.k === 'shoulder' && !it) {
+      // a look back over the shoulder
+      const k = sstep(0, 0.25, p) * (1 - sstep(0.7, 1, p));
+      T.hy += 1.15 * k;
+      T.twist += 0.35 * k;
+    } else if (g.k === 'watch' && !it) {
+      // the left wrist up, a glance down at the watch
+      const k = sstep(0, 0.25, p) * (1 - sstep(0.75, 1, p));
+      T.uaL = lerp(T.uaL, -0.75, k);
+      T.faL = lerp(T.faL, -1.95, k);
+      T.aoL = lerp(T.aoL, 0.45, k);
+      T.hp += 0.35 * k;
     } else if (g.k === 'flinch') {
       // hit: the head snaps back, the arms come up, the knees give
       const k = sstep(0, 0.1, p) * (1 - sstep(0.3, 1, p));
@@ -13505,18 +13532,19 @@ const CREATURE_LOOK = {
     teeth: [0.74, 0.69, 0.55],
   },
 };
+// what the card says you caught, the way you'd say it: "Priya · hugging the radiator. In October?"
 const TELL_NOTE = {
-  hum: 'Floating. Eyes lit.',
-  speak: 'Clicking at the wall.',
-  flicker: 'Face slipped.',
-  tongue: 'Tongue. Too long.',
-  shed: 'Peeling off skin.',
-  bask: 'Hugging the radiator.',
-  feed: 'Eating raw meat.',
-  limb: 'Arm fell off.',
-  half: 'Half changed. For a second.',
-  stare: 'Swaying in the corner.',
-  true: 'Changed. Mid-change.',
+  hum: 'floating, eyes lit. Feet off the floor.',
+  speak: 'clicking at the wall. Like it was talking back.',
+  flicker: 'the face slipped. Just for a second.',
+  tongue: 'tongue, far too long. Tasting the air.',
+  shed: 'peeling skin off. In strips.',
+  bask: 'hugging the radiator, eyes shut. In October?',
+  feed: 'raw meat, bare hands. Straight from the fridge.',
+  limb: 'an arm came off. Put it back on.',
+  half: 'half changed. For a second.',
+  stare: 'facing the corner. Swaying. For minutes.',
+  true: 'changing. Mid-change.',
 };
 
 function setupCast() {
@@ -13928,6 +13956,20 @@ function lookAround(n) {
     return true;
   return npcSeesPlayer(n, 6);
 }
+// about to slip off: a look over the shoulder, a glance at the watch, then up. Humans do it before their own secret,
+// THEM before THEIR business: the cue gives nobody away. Follow, stay out of sight, take the photo at the spot.
+function slipCue(n) {
+  return mkAct({
+    kind: 'wait',
+    label: '…',
+    dur: 3,
+    anim: 'idle',
+    onStart: (c) => {
+      gesture(c, 'shoulder', 1.1);
+      gesture(c, 'watch', 1.0, 0, 1.15);
+    },
+  });
+}
 function doHabit(n) {
   const hb = G.habits[n.id];
   G.habitDone[n.id + '#' + (n.habitI || 0)] = dayNo();
@@ -13981,11 +14023,7 @@ function doHabit(n) {
         turn(c);
         c.secret = { t: 0, w: 0, spot: hb.spot };
         // a secret makes noise too: from close by, out of sight, it sounds just like one of THEM
-        if (G.started && visAt(c.x, c.z) < 0.4) {
-          const rp = roomAt(PLAYER.x, PLAYER.z),
-            rn = roomAt(c.x, c.z);
-          if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', c.x, c.z)) notifyPing(c.x, c.z);
-        }
+        if (visAt(c.x, c.z) < 0.4 && slipHeard(c.x, c.z)) notifyPing(c.x, c.z);
       },
       onEnd: (c, a, ok) => {
         c.secret = null;
@@ -13993,8 +14031,8 @@ function doHabit(n) {
       },
     });
   }
-  if (S.obj) enqueue(n, useAct(n, S.obj, o));
-  else enqueue(n, [goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
+  if (S.obj) enqueue(n, [slipCue(n), useAct(n, S.obj, o)]);
+  else enqueue(n, [slipCue(n), goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
 }
 // an innocent's secret: what you see is yours to judge. Only a photo of it clears them.
 function secretTick(n, dt) {
@@ -14658,6 +14696,9 @@ function mayShed(n, why) {
   if (!theyOut() && !called && why !== 'trap' && !forYou(n, why) && !roomAt(n.x, n.z)) return false; // your trap catches it wherever it is
   return true;
 }
+// a slip is always heard from close by, through a wall: one of THEM changing for a moment, or anyone at their secret
+const slipHeard = (x, z) =>
+  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r);
 function heardIt(kind, x, z) {
   const T = TIP[kind],
     P = PLAYER;
@@ -15791,12 +15832,8 @@ function beginTell(n, a, typeHint) {
   n.tell = { type, t: 0, w: 0, awarded: false, caught: false, room: roomAt(n.x, n.z), dur: a.dur };
   if (type === 'shed' && n.pose !== 'sit') n.pose = 'crouch';
   n.danger = Math.min(100, n.danger + 5);
-  // now and then, from close by and out of sight, you catch a noise. Most of the time you don't.
-  if (G.started && visAt(n.x, n.z) < 0.4) {
-    const rp = roomAt(PLAYER.x, PLAYER.z),
-      rn = roomAt(n.x, n.z);
-    if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', n.x, n.z)) notifyPing(n.x, n.z);
-  }
+  // from close by and out of sight you always hear it: sneak up, peek through a door left ajar
+  if (visAt(n.x, n.z) < 0.4 && slipHeard(n.x, n.z)) notifyPing(n.x, n.z);
 }
 function notifyPing(x, z) {
   ui.ping(x, z);
@@ -20154,7 +20191,8 @@ function lennyTip() {
   let line;
   if (G.lennyHint < LENNY_HINTS.length) line = LENNY_HINTS[G.lennyHint++];
   else line = pick(LENNY_HINTS.filter((l) => l !== '#PLACE' || covert().length));
-  if (line === '#FACTION') line = LENNY_FACTION[clueFaction()]; // Lenny is right more often than not
+  if (line === '#FACTION') line = pick(LENNY_FACTION[clueFaction()]); // Lenny is right more often than not
+  if (line === '#NONSENSE') line = pick(LENNY_NONSENSE);
   if (line === '#PLACE') {
     const c = pick(covert()) || NPC.hale;
     line =
@@ -22920,7 +22958,7 @@ function startStashTrip(n, st) {
       st.moveAt = G.t + rand(1.5, 2.5) * 1440;
     },
   });
-  enqueue(n, dest === o ? [take] : [take, put]);
+  enqueue(n, dest === o ? [slipCue(n), take] : [slipCue(n), take, put]);
 }
 // a photo of a thing is just a print: you take things, you photograph people
 function photoStash(it) {
@@ -24786,20 +24824,21 @@ function photoItem(it) {
 // never saw you do it), and anyone watching minds that you're pointing it at a person. At night the flash turns every head.
 const PHOTO_FACE = 4.5;
 function photoSeen(subj) {
-  const P = PLAYER,
-    h = hourF(),
-    night = h >= 19.5 || h < 6.5;
-  const face = !!subj && Math.hypot(subj.x - P.x, subj.z - P.z) <= PHOTO_FACE;
+  // the flash rule: within about three steps, from any side, they notice the photo. Further off, only someone facing
+  // you who can see you. Whoever notices gets a "!" over their head, and finds you weirder; the one in the frame most.
+  const P = PLAYER;
   for (const n of CHARS) {
     if (n.isPlayer || !n.onMap || n.def.stranger || n.exposed || asleep(n)) continue;
-    const d = Math.hypot(n.x - P.x, n.z - P.z);
-    const flash = night && d <= 12 && losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z));
-    const sees = npcSeesPlayer(n, PHOTO_RANGE) || flash;
-    if (!sees) continue;
+    const d = Math.hypot(n.x - P.x, n.z - P.z),
+      near =
+        d <= CTRL.flashNear &&
+        (roomAt(n.x, n.z) === roomAt(P.x, P.z) ||
+          losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z)));
+    if (!near && !npcSeesPlayer(n, PHOTO_RANGE)) continue;
+    ui.bubble(n, 'exclaim', 'speech', 2);
     if (n === subj) {
-      if (face) n.faceShot = G.t; // a lens in their face: they'll bring it up if you ever call them out
-      addSus(n, face ? 10 : 4);
-      ui.bubble(n, face ? 'exclaim' : 'question', 'speech', 2);
+      if (near) n.faceShot = G.t; // a camera in their face
+      addSus(n, near ? 10 : 4);
       if (
         n.isThem &&
         !n.trueForm &&
@@ -24809,12 +24848,61 @@ function photoSeen(subj) {
       ) {
         n.reactAt = G.t;
         ridicule(n);
-      } else if (n.shotAt !== G.t) addDanger(n, face ? 15 : 8);
-    } else if (subj || flash) {
-      addSus(n, subj ? (face ? 5 : 2) : 2);
-      if (d < 7) ui.bubble(n, 'question', 'speech', 1.8);
-    }
+      } else if (n.shotAt !== G.t) addDanger(n, near ? 15 : 8);
+    } else addSus(n, near ? 4 : 2);
   }
+}
+// ── the photo hint. F shoots the whole wedge in front of you, no aiming. When something worth a photo is in it, the
+// "F photo" hint at the bottom glows and a small camera mark shows over it. It glows for a human's secret as much as for
+// THEM, and for what your own eyes are making up: it means odd, not THEM.
+const photoWorth = (n) =>
+  !n.isPlayer &&
+  n.onMap &&
+  n.shown > 0.5 &&
+  !n.exposed &&
+  !n.surrendered &&
+  ((n.tell && !n.tell.photo && !n.tell.unmask && n.tell.type !== 'glare') ||
+    (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
+    (n.secret && !n.secret.done) ||
+    (n.trace && !n.trace.photo) ||
+    !!n.vis);
+function photoHintTick(dtReal) {
+  UI.hintT = (UI.hintT || 0) - dtReal;
+  if (UI.hintT > 0) return placeCamMark();
+  UI.hintT = 0.2;
+  let best = null;
+  const P = PLAYER;
+  if (G && G.started && !G.over && P.onMap && !G.away && !G.sleeping && !UI.caseOpen && !UI.cf && !shaky()) {
+    let bd = 1e9;
+    for (const n of CHARS)
+      if (photoWorth(n) && inPhotoCone(n.x, n.z)) {
+        const d = Math.hypot(n.x - P.x, n.z - P.z);
+        if (d < bd) {
+          bd = d;
+          best = n;
+        }
+      }
+    if (!best && SHADE.on && SHADE.c && inPhotoCone(SHADE.c.x, SHADE.c.z)) best = SHADE.c;
+  }
+  UI.photoHint = best;
+  const h = $('#hint-photo');
+  if (h) h.classList.toggle('glow', !!best);
+  placeCamMark();
+}
+function placeCamMark() {
+  let el = $('#cam-mark');
+  const n = UI.photoHint;
+  if (!el) {
+    if (!n) return;
+    el = document.createElement('i');
+    el.id = 'cam-mark';
+    el.innerHTML = svgIcon('camera');
+    $('#fx').appendChild(el);
+  }
+  el.hidden = !n || !cam.VP;
+  if (el.hidden) return;
+  const [x, y] = project(n.x, 1.85, n.z); // beside the head, clear of anything they say
+  el.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px)';
 }
 function toggleCam(force) {
   const on = force != null ? force : !UI.camMode;
@@ -32193,6 +32281,7 @@ function halfTick() {
 }
 function halfSlip(n, seen) {
   n.halfAt = G.t;
+  if (!seen && visAt(n.x, n.z) < 0.4 && slipHeard(n.x, n.z)) notifyPing(n.x, n.z); // you hear it through the wall
   n.tell = {
     type: 'half',
     fac: G.faction,
@@ -41785,6 +41874,7 @@ function frame(now) {
       if (!CAP.on) updateFocus(dtReal);
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
+      photoHintTick(dtReal);
     }
   } catch (err) {
     console.error(err);

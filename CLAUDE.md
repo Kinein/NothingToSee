@@ -70,7 +70,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Talking and gossip (`gossipLine`: clues only, told once each) | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
 | Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
-| Tells, THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
+| Tells (every slip heard from close by: `slipHeard`), the slipping-off cue (`slipCue`, town/routines), THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
 | Evidence: four frames per suspect, one plain card each (✓/✗ only in a confrontation) | `js/them/proofs.js` (`addProof`, `cardIn`, `caseCards`) |
 | Innocent oddities (lookalikes, habits, tics), rumours (talk only, never cards) | `js/play/oddities.js`; the lookalikes: `ODDITY_HOME` in data/lines.js |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
@@ -83,7 +83,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Hidden things, the fridge, taking and the place rule (`takeThing`, `placeOwner`) | `js/play/stashes.js` (`STASH_KINDS`, `PLANTS`) |
 | THEIR plant at a victim's place and in your home, THEY take things back, signs for a gut feeling | `js/play/plants.js` (`morningThings`) |
 | Traps, raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
-| Photos | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
+| Photos: the wedge, the photo hint (`photoHintTick`), the flash rule (`photoSeen`) | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
 | "Come with me", witnesses THEY visit at night | `js/town/company.js` |

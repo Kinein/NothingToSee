@@ -466,6 +466,18 @@ function applyGestures(c, T) {
     if (g.k === 'punch' && !it) {
       keyPose(T, PUNCH, p, sstep(0, 0.12, p) * (1 - sstep(0.85, 1, p)));
       c.fx.sharp = true;
+    } else if (g.k === 'shoulder' && !it) {
+      // a look back over the shoulder
+      const k = sstep(0, 0.25, p) * (1 - sstep(0.7, 1, p));
+      T.hy += 1.15 * k;
+      T.twist += 0.35 * k;
+    } else if (g.k === 'watch' && !it) {
+      // the left wrist up, a glance down at the watch
+      const k = sstep(0, 0.25, p) * (1 - sstep(0.75, 1, p));
+      T.uaL = lerp(T.uaL, -0.75, k);
+      T.faL = lerp(T.faL, -1.95, k);
+      T.aoL = lerp(T.aoL, 0.45, k);
+      T.hp += 0.35 * k;
     } else if (g.k === 'flinch') {
       // hit: the head snaps back, the arms come up, the knees give
       const k = sstep(0, 0.1, p) * (1 - sstep(0.3, 1, p));

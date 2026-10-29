@@ -614,7 +614,7 @@ function startStashTrip(n, st) {
       st.moveAt = G.t + rand(1.5, 2.5) * 1440;
     },
   });
-  enqueue(n, dest === o ? [take] : [take, put]);
+  enqueue(n, dest === o ? [slipCue(n), take] : [slipCue(n), take, put]);
 }
 // a photo of a thing is just a print: you take things, you photograph people
 function photoStash(it) {

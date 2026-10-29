@@ -340,7 +340,8 @@ function lennyTip() {
   let line;
   if (G.lennyHint < LENNY_HINTS.length) line = LENNY_HINTS[G.lennyHint++];
   else line = pick(LENNY_HINTS.filter((l) => l !== '#PLACE' || covert().length));
-  if (line === '#FACTION') line = LENNY_FACTION[clueFaction()]; // Lenny is right more often than not
+  if (line === '#FACTION') line = pick(LENNY_FACTION[clueFaction()]); // Lenny is right more often than not
+  if (line === '#NONSENSE') line = pick(LENNY_NONSENSE);
   if (line === '#PLACE') {
     const c = pick(covert()) || NPC.hale;
     line =

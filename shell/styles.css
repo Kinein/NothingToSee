@@ -218,7 +218,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #zz .ic{width:22px;height:22px;animation:zz 2s ease-in-out infinite}
 @keyframes zz{50%{transform:translateY(-4px) rotate(-8deg)}}
 #hints{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:8px;pointer-events:none;transition:opacity .6s}
-#hints.out{opacity:0}
+#hints.out span{opacity:0;transition:opacity .6s}
+#hints.out span.glow{opacity:1} /* the photo hint still glows once the rest have gone */
 #hints span{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:rgba(12,13,17,.85);border:1px solid var(--line2);font-size:14.5px;white-space:nowrap}
 #hints .hg{color:var(--goal)}
 #hints kbd{display:inline-block;padding:0 5px;margin-right:2px;border-radius:5px;background:rgba(230,223,204,.14);border:1px solid var(--line2);font:600 12.5px/18px var(--f-ui)}
@@ -685,3 +686,10 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 .cf-verdict.gives b{color:#9fd39a} .cf-verdict.ugly b{color:#ec8a74} .cf-verdict.shrug b{color:#d8c49a} .cf-verdict.ignored b{color:var(--dim)}
 .cf-key{position:absolute;right:16px;bottom:12px;margin:0;font:500 12px var(--f-ui);color:var(--faint);letter-spacing:.06em}
 @media (max-width:700px){.cf-card{width:80px}.cf-face figcaption{font-size:8.5px}.cf-top b{font-size:17px}.cf-verdict b{font-size:22px}}
+
+/* the photo hint: something odd in the wedge in front of you */
+#hints span.glow{color:#f6e3b4;text-shadow:0 0 10px rgba(255,206,120,.85)}
+#hints span.glow kbd{background:var(--sodium);color:#141210;border-color:var(--sodium);box-shadow:0 0 12px rgba(255,190,90,.7)}
+#cam-mark{position:absolute;left:0;top:0;z-index:5;margin:-12px 0 0 16px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(10,9,8,.82);border:1px solid rgba(246,227,180,.55);color:#f6e3b4;animation:fadein .2s}
+#cam-mark .ic{width:15px;height:15px}
+#cam-mark[hidden]{display:none}

@@ -1,6 +1,6 @@
 //@ play/photos — Photos: reading what is in frame
-//@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, toggleCam
-//@ Uses:    sim/core, ui/interface, town/suspicion, them/tells, sim/actions, data/tuning, world/vision, core/util, gfx/portraits, play/stashes, …
+//@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, photoHintTick, placeCamMark, toggleCam
+//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, world/grid, world/vision, core/util, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -315,20 +315,21 @@ function photoItem(it) {
 // never saw you do it), and anyone watching minds that you're pointing it at a person. At night the flash turns every head.
 const PHOTO_FACE = 4.5;
 function photoSeen(subj) {
-  const P = PLAYER,
-    h = hourF(),
-    night = h >= 19.5 || h < 6.5;
-  const face = !!subj && Math.hypot(subj.x - P.x, subj.z - P.z) <= PHOTO_FACE;
+  // the flash rule: within about three steps, from any side, they notice the photo. Further off, only someone facing
+  // you who can see you. Whoever notices gets a "!" over their head, and finds you weirder; the one in the frame most.
+  const P = PLAYER;
   for (const n of CHARS) {
     if (n.isPlayer || !n.onMap || n.def.stranger || n.exposed || asleep(n)) continue;
-    const d = Math.hypot(n.x - P.x, n.z - P.z);
-    const flash = night && d <= 12 && losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z));
-    const sees = npcSeesPlayer(n, PHOTO_RANGE) || flash;
-    if (!sees) continue;
+    const d = Math.hypot(n.x - P.x, n.z - P.z),
+      near =
+        d <= CTRL.flashNear &&
+        (roomAt(n.x, n.z) === roomAt(P.x, P.z) ||
+          losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z)));
+    if (!near && !npcSeesPlayer(n, PHOTO_RANGE)) continue;
+    ui.bubble(n, 'exclaim', 'speech', 2);
     if (n === subj) {
-      if (face) n.faceShot = G.t; // a lens in their face: they'll bring it up if you ever call them out
-      addSus(n, face ? 10 : 4);
-      ui.bubble(n, face ? 'exclaim' : 'question', 'speech', 2);
+      if (near) n.faceShot = G.t; // a camera in their face
+      addSus(n, near ? 10 : 4);
       if (
         n.isThem &&
         !n.trueForm &&
@@ -338,12 +339,61 @@ function photoSeen(subj) {
       ) {
         n.reactAt = G.t;
         ridicule(n);
-      } else if (n.shotAt !== G.t) addDanger(n, face ? 15 : 8);
-    } else if (subj || flash) {
-      addSus(n, subj ? (face ? 5 : 2) : 2);
-      if (d < 7) ui.bubble(n, 'question', 'speech', 1.8);
-    }
+      } else if (n.shotAt !== G.t) addDanger(n, near ? 15 : 8);
+    } else addSus(n, near ? 4 : 2);
   }
+}
+// ── the photo hint. F shoots the whole wedge in front of you, no aiming. When something worth a photo is in it, the
+// "F photo" hint at the bottom glows and a small camera mark shows over it. It glows for a human's secret as much as for
+// THEM, and for what your own eyes are making up: it means odd, not THEM.
+const photoWorth = (n) =>
+  !n.isPlayer &&
+  n.onMap &&
+  n.shown > 0.5 &&
+  !n.exposed &&
+  !n.surrendered &&
+  ((n.tell && !n.tell.photo && !n.tell.unmask && n.tell.type !== 'glare') ||
+    (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
+    (n.secret && !n.secret.done) ||
+    (n.trace && !n.trace.photo) ||
+    !!n.vis);
+function photoHintTick(dtReal) {
+  UI.hintT = (UI.hintT || 0) - dtReal;
+  if (UI.hintT > 0) return placeCamMark();
+  UI.hintT = 0.2;
+  let best = null;
+  const P = PLAYER;
+  if (G && G.started && !G.over && P.onMap && !G.away && !G.sleeping && !UI.caseOpen && !UI.cf && !shaky()) {
+    let bd = 1e9;
+    for (const n of CHARS)
+      if (photoWorth(n) && inPhotoCone(n.x, n.z)) {
+        const d = Math.hypot(n.x - P.x, n.z - P.z);
+        if (d < bd) {
+          bd = d;
+          best = n;
+        }
+      }
+    if (!best && SHADE.on && SHADE.c && inPhotoCone(SHADE.c.x, SHADE.c.z)) best = SHADE.c;
+  }
+  UI.photoHint = best;
+  const h = $('#hint-photo');
+  if (h) h.classList.toggle('glow', !!best);
+  placeCamMark();
+}
+function placeCamMark() {
+  let el = $('#cam-mark');
+  const n = UI.photoHint;
+  if (!el) {
+    if (!n) return;
+    el = document.createElement('i');
+    el.id = 'cam-mark';
+    el.innerHTML = svgIcon('camera');
+    $('#fx').appendChild(el);
+  }
+  el.hidden = !n || !cam.VP;
+  if (el.hidden) return;
+  const [x, y] = project(n.x, 1.85, n.z); // beside the head, clear of anything they say
+  el.style.transform = 'translate(' + x.toFixed(0) + 'px,' + y.toFixed(0) + 'px)';
 }
 function toggleCam(force) {
   const on = force != null ? force : !UI.camMode;

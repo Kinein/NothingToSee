@@ -35,6 +35,9 @@ function mayShed(n, why) {
   if (!theyOut() && !called && why !== 'trap' && !forYou(n, why) && !roomAt(n.x, n.z)) return false; // your trap catches it wherever it is
   return true;
 }
+// a slip is always heard from close by, through a wall: one of THEM changing for a moment, or anyone at their secret
+const slipHeard = (x, z) =>
+  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r);
 function heardIt(kind, x, z) {
   const T = TIP[kind],
     P = PLAYER;

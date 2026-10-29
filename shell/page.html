@@ -36,7 +36,7 @@
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
   <div id="zz" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleeping</div>
-  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
+  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span id="hint-photo"><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
   <div id="tools"></div>
 </div>
 <div id="pie" hidden></div>
@@ -59,7 +59,7 @@
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.14 · updated Oct 29, 2026</p>
+  <p id="version">v1.15 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -82,7 +82,7 @@
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run · over benches, fences, chairs</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of what’s in front. Every try fills one frame, greys one or finds nothing · film is free, a lens in someone’s face isn’t</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of the whole wedge in front of you, no aiming · something odd in it (THEIRS or a human’s secret) and the F hint glows, a camera mark over it · within 3 steps they notice the photo from any side; further off, only if they face you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Act on what’s in reach</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3M2 12h20M12 2v20"/></svg><kbd>Drag · C</kbd><span>Look around · back to you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Wheel · pinch</kbd><span>Zoom</span></div>

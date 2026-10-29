@@ -117,12 +117,8 @@ function beginTell(n, a, typeHint) {
   n.tell = { type, t: 0, w: 0, awarded: false, caught: false, room: roomAt(n.x, n.z), dur: a.dur };
   if (type === 'shed' && n.pose !== 'sit') n.pose = 'crouch';
   n.danger = Math.min(100, n.danger + 5);
-  // now and then, from close by and out of sight, you catch a noise. Most of the time you don't.
-  if (G.started && visAt(n.x, n.z) < 0.4) {
-    const rp = roomAt(PLAYER.x, PLAYER.z),
-      rn = roomAt(n.x, n.z);
-    if ((!rn || !rp || rn.bld === rp.bld) && heardIt('noise', n.x, n.z)) notifyPing(n.x, n.z);
-  }
+  // from close by and out of sight you always hear it: sneak up, peek through a door left ajar
+  if (visAt(n.x, n.z) < 0.4 && slipHeard(n.x, n.z)) notifyPing(n.x, n.z);
 }
 function notifyPing(x, z) {
   ui.ping(x, z);

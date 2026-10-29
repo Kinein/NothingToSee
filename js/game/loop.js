@@ -317,6 +317,7 @@ function frame(now) {
       if (!CAP.on) updateFocus(dtReal);
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
+      photoHintTick(dtReal);
     }
   } catch (err) {
     console.error(err);
