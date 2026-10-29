@@ -1,6 +1,6 @@
 //@ ui/hud — The corner HUD: bars, days, clock, THEIR eye, evidence
 //@ Defines: PSY_PATH, PSY_GROOVES, BARS, EYE_STATES, buildHud, initTips, toggleWalls, setBar, TREND_DRIFT, barTrend, updateHud
-//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, ui/case-board, …
+//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, player/work, …
 //@ (header made by tools/map.js; stripped by build.py)
 // the rows down the left: your body, then your job, then your head. The fill is what you have left: full is good, for all of them.
 // (Psychic is the stress dial turned round: 100 − stress. Inside, the game still counts stress.)
@@ -28,7 +28,7 @@ const BARS = [
     warn: () => PLAYER.needs.energy < 20,
   },
   { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 || G.smelly },
-  { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && isWorkday() },
+  { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && inShift() },
   { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
@@ -70,7 +70,9 @@ function buildHud() {
     const b = e.target.closest('.bar');
     if (!b || !G || !G.started || G.over || ARREST.on || G.away) return;
     if (b.dataset.k === 'work') {
-      if (isWorkday() && !G.sickDay) enqueue(PLAYER, deskWork(false));
+      const why = deskShut();
+      if (why) ui.note('work', why, '');
+      else enqueue(PLAYER, deskWork(false));
     } else doNeed(b.dataset.k);
     audio.blip('click');
   };

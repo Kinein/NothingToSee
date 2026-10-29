@@ -184,7 +184,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #boardBtn .slots i{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(230,223,204,.35);background:rgba(4,5,8,.6)}
 #boardBtn .slots i.done{background:var(--stamp);border-color:var(--stamp)}
 #boardBtn .slots i.unm{border-color:var(--sodium);background:radial-gradient(circle,var(--sodium) 32%,rgba(4,5,8,.6) 40%)}
-#bd-faction .plan i.cur{border-color:#7a1f16;background:radial-gradient(circle,#4a3a6a 35%,transparent 40%)}
 #cards{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));top:calc(124px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
 .pcard{pointer-events:auto;cursor:pointer;width:150px;padding:8px 8px 10px;background:var(--polaroid);border-radius:3px;box-shadow:0 14px 34px rgba(0,0,0,.6);transform:rotate(var(--tilt,0deg));animation:cin .5s cubic-bezier(.2,1.4,.4,1)}
 .pcard .pol{position:relative;aspect-ratio:180/230;background:#0b0b0b;overflow:hidden}
@@ -269,6 +268,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .po.dis kbd{background:#8f8a80}
 .po .pwhy{font-style:normal;font-size:12.5px;color:#ec8a74;background:rgba(10,11,14,.8);padding:0 6px;border-radius:6px;white-space:nowrap}
 @media (pointer:coarse){.po kbd,.prompt kbd{display:none}}
+.route-dot{position:absolute;left:-11px;top:-6px;width:22px;height:12px;border:2px solid rgba(232,211,106,.85);border-radius:50%;pointer-events:none;animation:routePulse 1.1s ease-in-out infinite}
+@keyframes routePulse{50%{opacity:.35}}
 .prompt{position:absolute;left:0;top:0;display:flex;align-items:center;gap:7px;padding:3px 11px 3px 3px;border-radius:999px;background:rgba(10,11,14,.9);border:1px solid var(--line2);font:600 14.5px/1 var(--f-ui);color:var(--ink);white-space:nowrap;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.45)}
 .prompt kbd{min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:#e6dfcc;color:#16171a;font:700 12.5px/22px var(--f-ui);text-align:center}
 .prompt span{padding:4px 0}
@@ -336,9 +337,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .okst.gonest{border-color:#5a5448;color:#5a5448}
 .okst.caught{border-color:#a3241a;color:#a3241a}
 .okst{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) rotate(-9deg);padding:2px 8px 0;border:2px solid #3f7a3a;color:#3f7a3a;font:14px/1.4 var(--f-type);letter-spacing:.12em;background:rgba(231,224,204,.75);pointer-events:none}
-#bd-faction .plan{display:flex;gap:4px;margin-top:2px}
-#bd-faction .plan i{width:10px;height:10px;border-radius:50%;border:1.5px solid #4a3a6a}
-#bd-faction .plan i.on{background:#4a3a6a}
 .xx{position:absolute;inset:14px 10px 64px;pointer-events:none}
 .xx::before,.xx::after{content:'';position:absolute;left:50%;top:50%;width:120%;height:6px;margin:-3px 0 0 -60%;background:rgba(176,30,20,.85);border-radius:3px;transform:rotate(40deg)}
 .xx::after{transform:rotate(-40deg)}
@@ -394,6 +392,10 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .slot.big.foc{box-shadow:0 0 0 3px var(--sodium)}
 .okst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) rotate(-9deg);padding:2px 8px 0;border:2px solid #3f7a3a;color:#3f7a3a;font:14px/1.4 var(--f-type);letter-spacing:.12em;background:rgba(231,224,204,.8);pointer-events:none;white-space:nowrap}
 .okst.them{border-color:#a3241a;color:#a3241a}
+.okst.mad{top:55%;transform:translate(-50%,-50%) rotate(7deg);border-color:#a3241a;color:#a3241a;font-size:13px;letter-spacing:.08em;border-width:3px;border-style:double}
+.psus.pol{width:100%;justify-content:center;margin-top:-2px;background:rgba(0,0,0,.08)}
+.psus.pol .ic{color:#5a5244}.psus.pol span{flex:1;max-width:120px;height:5px;background:rgba(0,0,0,.14)}
+.psus.pol.mid span i{background:#c2761c} .psus.pol.hi span i{background:#a3241a} .psus.pol.hi .ic{color:#a3241a}
 #bd-detail{position:relative;z-index:5;align-self:start;max-height:calc(100vh - 220px);overflow:auto;padding:18px 18px 22px;background:#efe8d4;color:#1d1a16;box-shadow:0 20px 50px rgba(0,0,0,.6);background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(80,110,160,.18) 23px 24px)}
 #bd-detail .x{position:absolute;right:12px;top:12px;background:#e2d9c1;border-color:rgba(0,0,0,.2);color:#1d1a16}
 #bd-detail h4{margin:16px 0 8px;font:400 13px/1 var(--f-type);letter-spacing:.14em;text-transform:uppercase;color:#7a6a52}
@@ -760,7 +762,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.17 · updated Oct 29, 2026</p>
+  <p id="version">v1.18 · updated Oct 30, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -784,7 +786,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of the whole wedge in front of you, no aiming · something odd in it (THEIRS or a human’s secret) and the F hint glows, a camera mark over it · within 3 steps they notice the photo from any side; further off, only if they face you</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Act on what’s in reach</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Walk there · click someone or something to go up to it and act</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3M2 12h20M12 2v20"/></svg><kbd>Drag · C</kbd><span>Look around · back to you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Wheel · pinch</kbd><span>Zoom</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg><kbd>Q · R</kbd><span>Rotate</span></div>
@@ -1078,10 +1080,19 @@ const M4 = {
 };
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
 
-// ── Time and movement (sim/core)
-const WALK = 1.15;                 // tiles per game minute
-const SPEEDS = [0, 2, 5, 12];      // game minutes per real second
-const SLEEP_SPEED = 45;
+// ── Time and movement (sim/core, game/loop)
+// The clock runs CLOCK × as fast as bodies do. Walking, running and the short things people do (a coffee, a word, the
+// toilet) are timed in body minutes, BODY of a game minute (sim/actions), so they take the real seconds they always
+// took while the day goes by quicker. A fight holds the clock back to the body's pace (game/loop fightOn). Talk is
+// TALK × quicker than that. Past BODY_ACT minutes an action's own time runs with the clock (a nap, the TV, a shift).
+const CLOCK = 1.25;
+const TALK = 1.15;
+const BODY_ACT = 20;
+const WALK = 1.15;                 // tiles per body minute
+const SPEEDS = [0, 2 * CLOCK, 5 * CLOCK, 12 * CLOCK]; // game minutes per real second: normal, a quiet stretch hurried
+const AWAY_SPEED = 45 * CLOCK;     // held in the cells: the hours fly
+const SLEEP_SPEED = (AWAY_SPEED * 4) / 3; // asleep, passed out, knocked cold: a third quicker again
+const STIR_SLOW = 0.5;             // asleep, and something wrong close by (in your flat, one of THEM near): this × as fast
 const PHOTO_RANGE = 11;
 // direct control: every number the keyboard play depends on, in one place (distances in tiles, angles in degrees, times in game minutes unless marked)
 const CTRL = {
@@ -1118,7 +1129,10 @@ const CTRL = {
 // ── Work and damage (sim/core, player/work, combat/hits)
 // the work bar: +30 on sitting down (once an hour), +25/h working, −9/h away. Empty, and you're let go: no second chances,
 // but it takes most of a shift away from the desk to get there.
-const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
+// fresh: where the bar starts each shift (from 17:00 on, as if it were already morning). from/to: the hours your desk
+// lets you sit down to work, in game minutes; outside them there's nobody in and no work
+const WORK = { sit: 20, fill: 25, drain: 16, low: 30, fresh: 75, from: 8 * 60, to: 17 * 60 };
+const MAD_SUS = 60; // suspicion of you at which someone thinks you're mad: the full meter on the board, the clinic's count
 const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18, thrown: 18, sting: 3 };   // what a blow costs your health
 // the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
 // He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
@@ -1144,7 +1158,11 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50 };
+// passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
+// `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
+const OUT = { wake: 50, rest: 0.67, blink: 170 };
+const BED = { energy: 13.5, stress: -5 };   // a night in your own bed, per game hour (play/verbs sleepAct)
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
 // what you happen to hear. Every slip (one of THEM changing for a moment, anyone at their secret) is heard from within
@@ -1212,13 +1230,13 @@ const EVIDENCE = {
   oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one card, in one frame, and it holds up
   cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
   witnessDays: 2,               // someone who saw it change remembers it this long
+  scare: 2.4,                   // walk this close to someone at their habit (THEIRS, or a person's secret) and they break off
   // the confrontation (play/confrontation): a fail makes everyone listening `failSus` warier of you; after IT changes in
   // public, people go home early for `fearMins`
   cf: { failSus: 15, fearMins: 1440 },
   aware: { privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
-  come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long
   saved: 25,                    // suspicion off a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
@@ -1387,7 +1405,6 @@ const GOSSIP_BOUGHT = ['{s}? Salt of the earth. Helped me out when nobody else w
 const GOSSIP_LOST = ['I don’t remember last night. Any of it.', 'Last night’s gone. I woke up and it was just… gone.', 'Funny. I can’t remember last night. Not a thing.'];
 const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.', 'I’ve told you everything I’ve heard.'];
 const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
-const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
 // ── The confrontation (play/confrontation): each card turns ✓ or ✗ with one line from IT. A human owns up to what's
 // true; one of THEM can't deny what's real, so it squirms; a card that isn't about them, anybody denies.
@@ -10411,7 +10428,7 @@ function composite() {
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0)); // a scene's lids, or yours, passed out
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
     if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
     gl.uniform1f(u.uNight, HX.night);
@@ -12536,7 +12553,7 @@ function followPath(c, dt) {
   const pace = c.isPlayer
     ? CTRL.walk * (c.run ? CTRL.sprint : 1)
     : (c.spd || 1) * (c.run ? CTRL.npcRun : c.trueForm ? 1 : CTRL.npcPace);
-  let dist = WALK * dt * pace * slow,
+  let dist = WALK * BODY * dt * pace * slow,
     moved = 0;
   while (dist > 1e-6 && c.pi < c.path.length) {
     const p = c.path[c.pi],
@@ -12566,6 +12583,15 @@ function followPath(c, dt) {
 // ───────────────────────── actions (shared by player and NPCs)
 let ACT_ID = 0;
 let SIM_SPD = SPEEDS[1]; // game minutes per real second right now
+let BODY = 1 / CLOCK; // body minutes per game minute right now: 1 while a fight holds the clock back (game/loop simStep)
+// how fast an action's own time runs, per game minute. The short ones take the real seconds they always did; past
+// BODY_ACT minutes the rest runs with the clock. Sleep, a shift and anything that waits for something: the clock.
+function actPace(a) {
+  if (a.long || a.sleep || a.dur == null || !(a.dur > 0)) return 1;
+  const k = a.kind === 'talk' ? BODY * TALK : BODY,
+    s = Math.min(a.dur, BODY_ACT);
+  return a.dur / (s / k + a.dur - s);
+}
 function mkAct(o) {
   return Object.assign(
     { id: ++ACT_ID, stage: 'init', t: 0, waitT: 0, icon: 'dots', label: '…', interruptible: true },
@@ -12922,7 +12948,8 @@ function runAct(c, a, dt) {
       a.t = 0;
       return;
     }
-    a.t += dt;
+    const pd = dt * actPace(a);
+    a.t += pd;
     c.anim = a.anim || 'use';
     if (a.kind === 'talk') {
       c.tdir = Math.atan2(a.target.x - c.x, a.target.z - c.z);
@@ -12936,7 +12963,7 @@ function runAct(c, a, dt) {
         return;
       }
     }
-    if (a.fx && c.isPlayer) applyNeedFx(a.fx, dt);
+    if (a.fx && c.isPlayer) applyNeedFx(a.fx, pd); // the same good done, however long it took on the clock
     if (a.onTick) a.onTick(c, a, dt);
     if (a.stage !== 'run') return;
     const met =
@@ -13354,6 +13381,8 @@ function accident() {
   setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
 }
+// out cold where you fell: the hours go by as fast as in bed (G.sleeping), behind your eyelids (passOutLids), and it
+// rests you worse than a bed does. You come round at half your energy.
 function passOut() {
   const P = PLAYER;
   hardReset(P);
@@ -13365,17 +13394,22 @@ function passOut() {
       label: 'Passed out',
       icon: 'bed',
       passout: true,
+      sleep: true,
       interruptible: false,
-      dur: starving ? 300 : 180,
+      dur: null,
+      fx: { energy: BED.energy * OUT.rest, stress: BED.stress * OUT.rest },
+      until: (c, a) => c.needs.energy >= OUT.wake || a.t >= 12 * 60,
       onStart: (c) => {
         c.pose = 'floorlie';
+        G.sleeping = true;
       },
-      onTick: (c, a, dt) => {
+      onTick: (c) => {
         c.anim = 'sleep';
-        applyNeedFx({ energy: 22 }, dt);
       },
       onEnd: (c) => {
+        G.sleeping = false;
         c.pose = 'stand';
+        if (G.dayShown !== dayNo()) ui.dayCard();
         if (starving) {
           const b = OBJ_BY_ID.homeBed;
           placeChar(c, b.x + 1, b.z);
@@ -13388,6 +13422,25 @@ function passOut() {
     true,
   );
   ui.note('bed', 'Passed out', 'bad');
+}
+// out cold, the lids come down. Every OUT.blink game minutes they come open a crack for a moment, onto the hours going
+// by, and shut again; at the end they open for good. In real seconds, so it reads the same however fast time goes.
+function passOutLids(dtReal) {
+  const a = G && G.started && PLAYER ? PLAYER.queue[0] : null,
+    out = !!(a && a.passout && a.stage === 'run');
+  const lid = R.outLid || 0;
+  if (!out) {
+    R.outLid = Math.max(0, lid - dtReal * 0.9);
+    return;
+  }
+  const k = Math.floor(a.t / OUT.blink);
+  if (k > 0 && a.blinkK !== k) {
+    a.blinkK = k;
+    a.blinkR = R.time;
+  }
+  const u = a.blinkR != null ? (R.time - a.blinkR) / 1.3 : 1,
+    tgt = u < 1 ? 1 - 0.62 * Math.sin(Math.PI * u) : 1;
+  R.outLid = lid < tgt ? Math.min(tgt, lid + dtReal * 1.6) : tgt; // going under takes a moment; a flutter is quick
 }
 function breakdown() {
   const P = PLAYER;
@@ -13475,6 +13528,22 @@ function goodDay() {
   for (const n of suspects()) if (!n.gone && (n.plan || []).some((b) => b.a === 'work')) addSus(n, -6);
   ui.note('work', 'A good day’s work', 'good');
 }
+// five o'clock: the day's work is done with, good or bad. The bar starts over as it will in the morning, and nothing
+// moves it again until the next shift
+function shiftOver() {
+  G.workBar = WORK.fresh;
+  G.workWarned = false;
+  G.awayT = 0;
+}
+// your desk only takes you in office hours, on a working day: at night you can't even sit down at it
+function deskShut() {
+  if (!isWorkday()) return 'No work today';
+  if (G.sickDay) return 'Day off';
+  const m = tod();
+  if (m < WORK.from) return 'Too early · the shift is at 9:00';
+  if (m >= WORK.to) return 'Shift’s over · back at 9:00';
+  return null;
+}
 function onTimeCross(t0, t1) {
   const cross = (m) => Math.floor((t1 - m) / 1440) > Math.floor((t0 - m) / 1440);
   if (cross(0)) newDay();
@@ -13499,7 +13568,10 @@ function onTimeCross(t0, t1) {
   if (cross(9 * 60) && isWorkday() && !G.sickDay && !playerAtDesk())
     ui.note('work', G.overtimeToday ? 'Overtime · it drains twice as fast' : 'Shift started', 'warn');
   if (cross(180) && dayNo() === G.gatherDay) gatheringOver();
-  if (cross(17 * 60)) goodDay();
+  if (cross(17 * 60)) {
+    goodDay();
+    shiftOver();
+  }
   if (cross(17 * 60) && G.sickDay) G.sickDay = false;
   if (cross(22 * 60 + 50) && NPC.vic.onMap && NPC.vic.shown > 0.5) ui.say(NPC.vic, 'Closing up.', 3);
   for (const n of CHARS) if (n.plan) for (const b of n.plan) if (cross(b.s)) n.thinkCd = 0;
@@ -13519,7 +13591,6 @@ function newDay() {
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
-  G.workBar = Math.min(100, G.workBar + 15); // a night's sleep on it: Hale forgets a little
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
   G.mailToday = false;
@@ -13557,7 +13628,7 @@ const CREATURE = {
   lizards: { body: [0.15, 0.22, 0.11], skin: [0.36, 0.5, 0.22] },
   zombies: { body: [0.19, 0.18, 0.15], skin: [0.5, 0.53, 0.42] },
 };
-const TF_CHANGE = 6; // game minutes for the change: three seconds at normal speed, enough to raise a camera
+const TF_CHANGE = 6; // body minutes for the change: three seconds at normal speed, enough to raise a camera
 const CREATURE_LOOK = {
   aliens: {
     s: 1.0,
@@ -14091,11 +14162,41 @@ function doHabit(n) {
   if (S.obj) enqueue(n, [slipCue(n), useAct(n, S.obj, o)]);
   else enqueue(n, [slipCue(n), goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
 }
+// walk right up on someone at their habit and they break off: a start, and they're off back to whatever they should be
+// doing. This close they hear you from behind too. A person is only embarrassed; THEY take note of you.
+function scaredOff(n) {
+  const P = PLAYER;
+  if (!G.started || !P.onMap || G.sleeping || G.away) return false;
+  if (Math.hypot(P.x - n.x, P.z - n.z) > EVIDENCE.scare) return false;
+  const rn = roomAt(n.x, n.z);
+  return (
+    (!!rn && rn === roomAt(P.x, P.z)) || losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z))
+  );
+}
+function scareOff(n) {
+  const a = n.queue[0];
+  if (a && a.stage === 'run') a.cancel = true; // up and away; their day picks up where it was
+  ui.bubble(n, 'exclaim', 'speech', 2.2);
+  gesture(n, 'flinch', 0.5);
+  if (n.tell) {
+    n.tell.caught = true; // nothing left behind, nothing more to see
+    n.pinnedDay = dayNo();
+    addDanger(n, 10);
+    return;
+  }
+  addSus(n, 4);
+  ui.say(n, pick(['God! You scared me.', 'Don’t creep up on people.', 'I was just going.']), 2.6);
+  audio.sting('awkward');
+}
 // an innocent's secret: what you see is yours to judge. Only a photo of it clears them.
 function secretTick(n, dt) {
   const s = n.secret;
   s.t += dt;
-  if (!G.started || s.done) return;
+  if (!G.started || s.done || s.scared) return;
+  if (s.t > 0.3 && scaredOff(n)) {
+    s.scared = true;
+    return scareOff(n);
+  }
   if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) {
     s.caught = true;
     addSus(n, 6);
@@ -15051,7 +15152,7 @@ function npcUpdate(n, dt) {
   if (n.hideUntil && !n.onMap) return;
   if (n.trueForm && n.onMap) {
     stepChar(n, dt);
-    if (n.tell) n.tell.t += dt;
+    if (n.tell) n.tell.t += dt * BODY;
     if (n.trueForm) trueFormTick(n, dt);
     return;
   }
@@ -15089,8 +15190,8 @@ function npcUpdate(n, dt) {
   if (n.isThem && !n.exposed) theirThingsOnYou(n, dt);
   if (n.wcCd > 0) n.wcCd -= dt;
   stepChar(n, dt);
-  if (n.tell) tellTick(n, dt);
-  if (n.secret) secretTick(n, dt);
+  if (n.tell) tellTick(n, dt * BODY); // a slip plays out in body time, like anything else a body does
+  if (n.secret) secretTick(n, dt * BODY);
   if (habitReady(n) && !n.fleeing && !n.hideUntil) {
     const cur = n.queue[0];
     if (!cur) n.thinkCd = 0;
@@ -15980,6 +16081,7 @@ function tellTick(n, dt) {
     } else if (tl.spotT) tl.spotT = Math.max(0, tl.spotT - dt);
     return;
   }
+  if (!tl.caught && tl.t > 0.3 && scaredOff(n)) return scareOff(n); // right up on it: it breaks off and goes
   if (!tl.caught && tl.t > 0.4 && npcSeesPlayer(n)) caughtWatching(n);
   if ((tl.type === 'speak' || tl.type === 'stare') && seen) {
     tl.bt = (tl.bt || 0) + dt;
@@ -17192,7 +17294,7 @@ function arrestEscortTick(dt) {
     followPath(P, dt);
   } else if (d > 0.08) {
     P.path = null;
-    const sp = Math.min(d, WALK * CTRL.walk * (d > 1 ? 1 : 0.75) * dt),
+    const sp = Math.min(d, WALK * BODY * CTRL.walk * (d > 1 ? 1 : 0.75) * dt),
       moved = tryMove(P, (dx / d) * sp, (dz / d) * sp);
     P.moving = moved > 1e-4;
     P.walkPh += moved * 3.7;
@@ -17384,7 +17486,7 @@ const CELL_ID = M4.ident(),
   CELL_CHALK = [0.82, 0.8, 0.74],
   CELL_CHALK_E = [0.12, 0.12, 0.11];
 // the speed the clock runs while you sleep or are away: the hours fly, except while you're booked and walked down
-const awaySpeed = () => (CELL.on && CELL.phase !== 'held' ? 1 : SLEEP_SPEED);
+const awaySpeed = () => (CELL.on ? (CELL.phase !== 'held' ? CLOCK : AWAY_SPEED) : SLEEP_SPEED);
 
 // cuffed in front: hands together in your lap when you sit, held up with the board when you're booked; the head goes
 // where your mood puts it (CELL.moodK: down, up at the bars, back over your shoulder at the window, leant on the wall)
@@ -18430,7 +18532,7 @@ function trueFormTick(n, dt) {
   if (
     !P.onMap ||
     (home && !tf.cornered) ||
-    G.t - tf.lastSeen > (darkNow() ? EVIDENCE.fight.loseSight * SPEEDS[1] : 3) || // at night it takes longer to lose it
+    G.t - tf.lastSeen > (darkNow() ? EVIDENCE.fight.loseSight * SIM_SPD : 3) || // at night it takes longer to lose it
     (!tf.cornered && G.t - tf.t0 > (tf.long || 12)) ||
     crowd
   ) {
@@ -18493,7 +18595,7 @@ function mayHuntYou() {
   return s >= 5 || (s >= 4 && a >= 30) || (s >= 3 && a >= 50) || a >= 70 || huntForced();
 }
 // a night THEY come whatever the odds: you killed one where nobody saw, or a confrontation left it doubting you
-const huntForced = () => G.huntNights > 0 || G.huntNight === tonightId();
+const huntForced = () => G.huntNights > 0 || (G.huntNight > 0 && G.huntNight === tonightId());
 function witnessTrue(w, n) {
   if ((w.def && w.def.fbi) || w.thrall) return; // they've seen worse
   const tf = n.trueForm;
@@ -19303,8 +19405,8 @@ function perceptionTick(dt) {
     }
   }
 }
-// the ordinary people who think you're mad: 60+ suspicion of you. The evidence book counts them.
-const thinkMad = () => suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= 60);
+// the ordinary people who think you're mad: MAD_SUS+ suspicion of you. The evidence book counts them.
+const thinkMad = () => suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= MAD_SUS);
 // at 06:00: three of them means Mom calls and a clinic letter comes; still three the next morning, the medics
 function clinicCheck() {
   if (thinkMad().length < 3) {
@@ -21315,65 +21417,8 @@ function nightTick(dt) {
     G.attack = null;
   }
 }
-// ───────────── company. Anyone who doesn't find you weird comes with you for an hour, and stands in the crowd when you
-// call someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
-// witness. Lizards buy them off, aliens wipe it out of their heads, the dead make sure. Be outside their door, and it's
-// you THEY meet.
-function resolveCome(n) {
-  const F = G.follower && NPC[G.follower.id];
-  if (F && F !== n) endFollow(F, true);
-  if (n.sus >= EVIDENCE.come.sus || asleep(n) || n.fleeing) {
-    ui.say(n, pick(COME_WITH.no), 3);
-    return;
-  }
-  ui.say(n, pick(COME_WITH.yes), 3);
-  G.follower = { id: n.id, until: G.t + EVIDENCE.come.mins };
-  for (const a of n.queue) a.cancel = true;
-  enqueue(n, followAct(n));
-}
-// a step behind you, wherever you go, for the hour
-function followAct(n) {
-  return mkAct({
-    kind: 'wait',
-    label: 'With you',
-    icon: 'walk',
-    dur: null,
-    anim: 'idle',
-    interruptible: false,
-    onStart: (c, a) => (a.rp = 99),
-    onTick: (c, a, dt) => {
-      const F = G.follower,
-        P = PLAYER;
-      if (!F || F.id !== c.id || G.t > F.until || !P.onMap || G.away || G.sleeping || c.fleeing) {
-        a.cancel = true;
-        c.path = null;
-        c.moving = false;
-        endFollow(c);
-        return;
-      }
-      const d = Math.hypot(P.x - c.x, P.z - c.z);
-      if (d < 1.8) {
-        c.path = null;
-        c.moving = false;
-        c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-        return;
-      }
-      a.rp += dt;
-      if (a.rp > 0.6 || !c.path || c.pi >= c.path.length) {
-        a.rp = 0;
-        const t = nearestWalkable(P.x, P.z, c, 2);
-        if (t) setPath(c, t[0], t[1]);
-      }
-      c.run = d > 5;
-      followPath(c, dt);
-    },
-  });
-}
-function endFollow(c, quiet) {
-  if (!G.follower || G.follower.id !== c.id) return;
-  G.follower = null;
-  if (!quiet && c.onMap && !asleep(c)) ui.say(c, pick(COME_WITH.bye), 2.6);
-}
+// ───────────── witnesses. THEY know who saw: at night THEY go after a witness. Lizards buy them off, aliens wipe it out
+// of their heads, the dead make sure. Be outside their door, and it's you THEY meet.
 // ── at 20:00: tonight one of THEM goes after somebody who saw it change
 function witnessNight() {
   G.witVisit = null;
@@ -21455,8 +21500,7 @@ const theirPeople = () =>
       !asleep(w) &&
       !w.fleeing &&
       !w.engaged &&
-      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)) &&
-      !(G.follower && G.follower.id === w.id),
+      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)),
   );
 function tailTick() {
   const T = EVIDENCE.tail,
@@ -22410,12 +22454,11 @@ function removeItem(it) {
 // Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. You take it: found
 // at someone's place it's a Home card on them (the place rule); a photo of it is only a print. THEY tidy up after you,
 // and every couple of days each of THEM moves the one in a shared place somewhere else, in broad daylight.
+// Nothing you can't get a hand into: not the vending machine, not the water cooler.
 const SHAKE_TYPES = new Set([
   'microwave',
   'coffee',
   'printer',
-  'vending',
-  'watercooler',
   'fridge_office',
   'fridge',
   'stove',
@@ -22649,7 +22692,10 @@ function tamperSeen(o, a, k) {
 }
 // Rummage: hands in, feeling about. Something loose in there and your fingers find it: you stop, and the same key opens
 // it up. Nothing, and that's all it was. The back shelves (the stockroom, the crates) sometimes give you something to keep.
+// The bins are rummaged and dug through in one go: something that shouldn't be in there comes out with your hand,
+// and otherwise you might turn up something useful (or a clue in the rubbish).
 const RUMMAGE_FIND = new Set(['metalshelf', 'crates']);
+const RUMMAGE_TRASH = new Set(['trashcan', 'dumpster']);
 const RUMMAGE_DIG = new Set([
   'metalshelf',
   'crates',
@@ -22670,8 +22716,9 @@ const RUMMAGE_DIG = new Set([
   'newsrack',
 ]);
 function rummageAct(o) {
-  return useP(o, 'Rummage', 'search', {
-    dur: 4,
+  const trash = RUMMAGE_TRASH.has(o.type);
+  return useP(o, 'Rummage', trash ? 'trash' : 'search', {
+    dur: o.type === 'dumpster' ? 6 : 4,
     anim: RUMMAGE_DIG.has(o.type) ? 'dig' : 'use',
     onStart: () => {
       const r = roomAt(o.cx, o.cz),
@@ -22685,12 +22732,18 @@ function rummageAct(o) {
       tamperSeen(o, a, 1);
       if (o.type === 'fridge' || a.hit || a.t < a.dur * 0.45) return; // a fridge you just open and look in
       const st = stashIn(o),
-        loose = (st && !st.out) || junkIn(o);
+        loose = (st && !st.out) || (!trash && junkIn(o));
       if (!loose) return;
       a.hit = true;
       a.ok = true;
       a.stage = 'exit';
       a.t = 0; // your fingers close on it: stop right there
+      if (trash) {
+        audio.blip('click');
+        ui.bubble(c, 'exclaim', 'thought', 1.6);
+        openUp(o); // in the rubbish, it comes out with your hand
+        return;
+      }
       o.data.rattle = 1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       audio.blip('click');
@@ -22710,6 +22763,7 @@ function rummageAct(o) {
       if (o.type === 'fridge') return fridgeLook(o);
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
+      if (trash) return o.id === 'breakBin' ? binDig() : digResult(o);
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
       if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
@@ -22787,7 +22841,7 @@ function openUp(o, quiet) {
       room: (roomAt(o.cx, o.cz) || {}).key || null,
       at: G.t,
     });
-    if (!quiet) ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
+    if (!quiet) ui.note('box', (RUMMAGE_TRASH.has(o.type) ? 'In the rubbish: ' : 'Inside: ') + S.desc + '.', 'onto');
     if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
@@ -23915,7 +23969,7 @@ function sleepAct(bed, nap, alarmAt) {
     long: true,
     need: 'energy',
     dur: nap ? 60 : null,
-    fx: nap ? { energy: 15, stress: -3 } : { energy: 13.5, stress: -5 },
+    fx: nap ? { energy: 15, stress: -3 } : BED,
     until: nap ? null : (c, a) => (a.alarm ? G.t >= a.alarm : c.needs.energy >= 99.5),
     alarm,
     onStart: () => {
@@ -24183,7 +24237,8 @@ function deskWork(slack) {
     work: !slack,
     slack: !!slack,
     dur: slack ? 45 : null,
-    until: slack ? null : () => !isWorkday() || tod() >= 17 * 60,
+    check: deskShut,
+    until: slack ? null : () => !!deskShut(),
     fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5 },
     onStart: () => {
       if (G.awayT > 60 && NPC.hale.onMap && NPC.hale.shown > 0.5 && G.haleSaw) {
@@ -24398,7 +24453,6 @@ function fbiTake(n) {
 const SOC = {
   chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
   gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
-  come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
     icon: 'ear',
@@ -25098,6 +25152,9 @@ const Q = (f) => () => enqueue(PLAYER, f());
 // things you can't shake: the everyday ones stay one key press (your fridge, your desk)
 const NO_SHAKE = new Set(['homeFridge', 'deskA2']);
 const shakenFresh = (o) => o.data.shakenUntil > G.t;
+// been through already: rummaged and nothing there, or taken apart and lying open. E looks past it, to whatever
+// came out of it onto the floor
+const spentObj = (o) => o.data.openUntil > G.t || (shakenFresh(o) && !(o.data.rattle > 0));
 function menuForObject(o) {
   let m = objMenu(o);
   if (shakeable(o) && !NO_SHAKE.has(o.id)) {
@@ -25110,8 +25167,10 @@ function menuForObject(o) {
         owner.queue[0] &&
         owner.queue[0].stage === 'run' &&
         (owner.queue[0].obj === o || (o.id && DESK_OWNER[o.id] && owner.queue[0].obj === OBJ_BY_ID[owner.def.chair]));
-    const busy = (o.users || []).some((u) => u && !u.isPlayer) ? 'In use' : here ? 'They’re here' : null;
-    if (o.data.openUntil > G.t) m.ops.push(opt('Open', 'box', null, 'Already open'));
+    const busy = (o.users || []).some((u) => u && !u.isPlayer) ? 'In use' : here ? 'They’re here' : null,
+      trash = RUMMAGE_TRASH.has(o.type),
+      none = trash ? 'Been through it' : 'Nothing in it';
+    if (o.data.openUntil > G.t) m.ops.push(opt('Open', 'box', null, trash ? 'Been through it' : 'Already open'));
     else if (shakenFresh(o) && o.data.rattle > 0)
       m.ops.push(
         opt(
@@ -25125,12 +25184,12 @@ function menuForObject(o) {
       m.ops.push(
         opt(
           'Rummage',
-          'search',
+          trash ? 'trash' : 'search',
           Q(() => rummageAct(o)),
-          busy || (shakenFresh(o) ? 'Nothing in it' : null),
+          busy || (shakenFresh(o) ? none : null),
         ),
       );
-    if (shakenFresh(o)) m.sub = o.data.rattle > 0 ? 'Something in there' : 'Nothing in it';
+    if (shakenFresh(o)) m.sub = o.data.rattle > 0 ? 'Something in there' : none;
   }
   return fitMenu(m);
 }
@@ -25525,53 +25584,20 @@ function objMenu(o) {
       );
       break;
     case 'trashcan':
-      if (o.id === 'breakBin') {
-        ops.push(
-          opt(
-            'Dig',
-            'trash',
-            Q(() =>
-              useP(o, 'Dig', 'trash', {
-                dur: 4,
-                anim: 'dig',
-                onEnd: (c, a, ok) => {
-                  if (ok) binDig();
-                },
-              }),
-            ),
-          ),
-        );
-        break;
-      }
-    // falls through
     case 'dumpster':
-      ops.push(
-        opt(
-          'Dig',
-          'trash',
-          Q(() =>
-            useP(o, 'Dig', 'trash', {
-              dur: 6,
-              anim: 'dig',
-              onEnd: (c, a, ok) => {
-                if (ok) digResult(o);
-              },
-            }),
-          ),
-        ),
-      );
-    // falls through: behind the dumpster, or up against a tree in the park, you could get away with it
     case 'tree':
-      if (peeSpot(o))
+      // the bins: Rummage, as for anything with insides (menuForObject). Behind the dumpster, or up against a tree in
+      // the park, you could get away with a pee: only offered once you need to go
+      if (peeSpot(o) && PLAYER.needs.bladder < BLADDER.peeAt)
         ops.push(
           opt(
             'Pee',
             'toilet',
             Q(() => peeAct(o)),
-            PLAYER.needs.bladder > 80 ? 'Don’t need to' : null,
           ),
         );
-      break;
+      if (!ops.length) return null;
+      return { title: o.name, sub: objStatus(o), icon: t === 'tree' ? 'toilet' : 'trash', ops };
     case 'payphone':
       ops.push(
         opt(
@@ -25631,7 +25657,7 @@ function deskMenu(o) {
         'Work',
         'work',
         Q(() => deskWork(false)),
-        isWorkday() ? null : 'No work today',
+        deskShut(),
       ),
     ],
   };
@@ -25721,14 +25747,16 @@ function menuForChar(n) {
       ops,
     };
   }
-  // slots stay put: A Chat · D Ask… (Gossip, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch.
+  // slots stay put: A Chat · D Gossip (what's going round: clues, never cards) · W Confront (Attack when you're alone; Catch) · S Watch.
   // No daily limits: ask again and you're told there's nothing new.
   ops.push(opt('Chat', 'chat', T('chat')));
   if (n.id === 'lenny') {
     ops.push(opt('Theories', 'ear', T('lenny')));
     ops.push(opt('Give meal', 'gift', T('feed'), G.inv.meal > 0 ? null : 'No meal'));
   } else {
-    ops.push(opt('Ask…', 'ear', () => openMenu(askMenu(n), UI.menuX, UI.menuY, { char: n })));
+    ops.push(
+      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= MAD_SUS ? 'Won’t gossip with you' : null),
+    );
     if (n.fleeing) ops.push(hit('Catch', 'walk'));
     else ops.push(cfOpt());
     ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
@@ -25745,23 +25773,6 @@ function menuForChar(n) {
             .map((q) => QUIRKS[q].short)
             .join(' · '),
     ops,
-  };
-}
-// the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
-function askMenu(n) {
-  const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
-  return {
-    title: n.name,
-    img: getPortrait(n),
-    ops: [
-      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
-      opt(
-        'Come with me',
-        'walk',
-        T('come'),
-        G.follower && G.follower.id === n.id ? 'With you' : n.sus >= EVIDENCE.come.sus ? 'Finds you weird' : null,
-      ),
-    ],
   };
 }
 const ITEM_NAMES = {
@@ -25784,7 +25795,7 @@ function itemName(it) {
   }
   if (it.kind === 'opened') {
     const o = OBJ[it.obj];
-    return o ? o.name + ' · opened up' : ITEM_NAMES.opened;
+    return o ? o.name + (RUMMAGE_TRASH.has(o.type) ? ' · gone through' : ' · opened up') : ITEM_NAMES.opened;
   }
   if (it.kind === 'trap') {
     if (it.shut) return 'A sprung trap';
@@ -25819,8 +25830,8 @@ function menuForItem(it) {
               a.t = Math.max(0, a.t - dt);
               const m = tryMove(
                 c,
-                (dx / d) * Math.min(d - 0.55, WALK * CTRL.walk * dt),
-                (dz / d) * Math.min(d - 0.55, WALK * CTRL.walk * dt),
+                (dx / d) * Math.min(d - 0.55, WALK * BODY * CTRL.walk * dt),
+                (dz / d) * Math.min(d - 0.55, WALK * BODY * CTRL.walk * dt),
               );
               c.moving = m > 1e-5;
               c.walkPh += m * 3.7;
@@ -26179,7 +26190,7 @@ function autonomy(dt) {
   G.autoT += dt;
   if (G.autoT < 4) return;
   G.autoT = 0;
-  if (cur && cur.sleep && cur.stage === 'run' && N.bladder < 9 && inReach({ obj: OBJ_BY_ID.wcHome })) {
+  if (cur && cur.sleep && !cur.passout && cur.stage === 'run' && N.bladder < 9 && inReach({ obj: OBJ_BY_ID.wcHome })) {
     const wc = OBJ_BY_ID.wcHome,
       bed = cur.obj;
     cur.cancel = true;
@@ -27003,7 +27014,7 @@ const BARS = [
     warn: () => PLAYER.needs.energy < 20,
   },
   { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 || G.smelly },
-  { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && isWorkday() },
+  { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && inShift() },
   { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
@@ -27045,7 +27056,9 @@ function buildHud() {
     const b = e.target.closest('.bar');
     if (!b || !G || !G.started || G.over || ARREST.on || G.away) return;
     if (b.dataset.k === 'work') {
-      if (isWorkday() && !G.sickDay) enqueue(PLAYER, deskWork(false));
+      const why = deskShut();
+      if (why) ui.note('work', why, '');
+      else enqueue(PLAYER, deskWork(false));
     } else doNeed(b.dataset.k);
     audio.blip('click');
   };
@@ -27505,25 +27518,14 @@ function openBoard(focusId) {
   if (focusId && NPC[focusId]) showSuspect(NPC[focusId]);
   else focusPol(UI.bdSel || suspects()[0].id);
 }
-// the top strip: THEIR card (what THEY are once you know, THEIR five days) and THEIR eye
+// the top strip: THEIR card (what THEY are once you know, how many of THEM are down) and THEIR eye
 function drawTop() {
   const F = FACTIONS[G.faction];
   const fc = $('#bd-faction');
   fc.innerHTML =
     '<span class="pin"></span><span class="fi">' +
     svgIcon(G.factionKnown ? F.icon : 'question') +
-    '</span><b></b><span class="plan" data-tip="THEIR plan"></span><span class="exp"></span>';
-  const ph = clamp(G.phase || 1, 1, WEEK);
-  fc.querySelector('.plan').innerHTML = Array.from(
-    { length: WEEK },
-    (_, i) =>
-      '<i class="' +
-      (i < ph - 1 ? 'on' : i === ph - 1 ? 'cur' : '') +
-      '" data-tip="' +
-      DOW_LONG[i] +
-      (G.factionKnown ? ' · ' + PHASES[G.faction][i] : '') +
-      '"></i>',
-  ).join('');
+    '</span><b></b><span class="exp"></span>';
   fc.querySelector('b').textContent = G.factionKnown ? F.label : 'THEM';
   fc.querySelector('.exp').innerHTML = [0, 1, 2]
     .map(
@@ -27548,7 +27550,7 @@ function drawTop() {
     mad.dataset.tip =
       nMad >= 3
         ? 'Three people think you’re mad. At 06:00, Mom calls and the clinic writes'
-        : 'People who find you weird enough (60+) to call your mother. Three, and the clinic writes';
+        : 'People who find you weird enough (a full meter) to call your mother. Three, and the clinic writes';
   }
   const eye = $('#bd-eye'),
     es = eyeState();
@@ -27596,6 +27598,25 @@ function stampFor(n) {
   if (G.mark[n.id]) return [G.mark[n.id], MARK_STAMP[G.mark[n.id]]];
   return null;
 }
+// how weird they find you, under the name: full is MAD_SUS, the point where they'd call your mother
+const madFull = (n) => !n.slain && !n.gone && !n.exposed && n.sus >= MAD_SUS;
+function susMeter(n) {
+  if (n.id === 'lenny' || n.slain || n.gone) return '';
+  const full = madFull(n);
+  return (
+    '<span class="psus pol' +
+    (full ? ' hi' : n.sus >= MAD_SUS * 0.66 ? ' mid' : '') +
+    '" data-tip="Suspicion of you · ' +
+    Math.round(n.sus) +
+    ' of ' +
+    MAD_SUS +
+    '">' +
+    svgIcon('eye') +
+    '<span><i style="width:' +
+    Math.round(clamp(n.sus / MAD_SUS, 0, 1) * 100) +
+    '%"></i></span></span>'
+  );
+}
 function drawPols() {
   const list = $('#bd-pols');
   list.innerHTML = '';
@@ -27611,11 +27632,14 @@ function drawPols() {
     card.dataset.id = n.id;
     card.style.setProperty('--tilt', (hash2(n.id.length, n.id.charCodeAt(0), 3) * 7 - 3.5).toFixed(1) + 'deg');
     card.innerHTML =
-      '<span class="pin"></span><img alt=""><b></b><span class="slots">' +
+      '<span class="pin"></span><img alt=""><b></b>' +
+      susMeter(n) +
+      '<span class="slots">' +
       FRAMES.map((f) => slotHtml(n, f)).join('') +
       '</span>' +
       (n.slain ? '<span class="xx"></span>' : '') +
-      (sp ? '<span class="okst ' + sp[0] + '">' + sp[1] + '</span>' : '');
+      (sp ? '<span class="okst ' + sp[0] + '">' + sp[1] + '</span>' : '') +
+      (madFull(n) ? '<span class="okst mad">THINKS YOU MAD</span>' : '');
     card.querySelector('img').src = getPortrait(n);
     card.querySelector('b').textContent = n.short;
     fillSlotImgs(card);
@@ -27724,11 +27748,11 @@ function showSuspect(n) {
     '</button><div class="sd-head"><img alt=""><div><b></b><span class="sd-role"></span>' +
     (n.id !== 'lenny'
       ? '<span class="psus big' +
-        (n.sus >= 60 ? ' hi' : '') +
+        (madFull(n) ? ' hi' : '') +
         '" data-tip="Suspicion of you">' +
         svgIcon('eye') +
         '<span><i style="width:' +
-        Math.round(n.sus) +
+        Math.round(clamp(n.sus / MAD_SUS, 0, 1) * 100) +
         '%"></i></span></span>'
       : '') +
     '<span class="sd-mark"></span></div></div><div class="sd-frames">' +
@@ -28055,6 +28079,8 @@ function dismissHints() {
     if (h) h.classList.add('out');
   }
 }
+// a click: on someone or something, you walk up to it if it's off (input/walking routeTo) and it opens as E would;
+// anywhere else, you walk there
 function handleClick(px, py) {
   if (UI.menuOpen) {
     closeMenu();
@@ -28063,25 +28089,38 @@ function handleClick(px, py) {
   if (!G || !G.started || G.over || UI.caseOpen || UI.cf || CAP.on) return;
   dismissHints();
   const p = pickAt(px, py);
-  if (!p || p.tile) return; // clicking the floor does nothing: you walk with the keys
-  const far = () => ui.float(PLAYER, 'Too far', '');
+  if (!p) return;
+  if (p.char && p.char.isPlayer) {
+    routeStop();
+    return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
+  }
+  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj));
+  if (!some) {
+    const g = rayGround(screenRay(px, py));
+    return routeTo(g[0], g[1], null);
+  }
+  if (!inReach(p)) {
+    const at = p.char ? [p.char.x, p.char.z] : p.item ? [p.item.x, p.item.z] : [p.obj.cx, p.obj.cz];
+    return routeTo(at[0], at[1], p);
+  }
+  routeStop();
+  clickOn(p, px, py, true);
+}
+// what clicking something in reach does (also where a walk to it ends)
+function clickOn(p, px, py, pointer) {
   if (p.char) {
     const n = p.char;
-    if (n.isPlayer) return presentMenu(menuForChar(n), px, py, { char: n }, true);
-    if (!inReach(p)) return far();
     if (n.trueForm) {
       if (n.tell.t >= TF_CHANGE) playerMelee(n);
       else ui.note('lock', 'Attack · Changing', '');
       return;
     }
-    return presentMenu(menuForChar(n), px, py, { char: n }, true);
+    return presentMenu(menuForChar(n), px, py, { char: n }, pointer);
   }
-  if (p.item) return inReach(p) ? presentMenu(menuForItem(p.item), px, py, { item: p.item }, true) : far();
+  if (p.item) return presentMenu(menuForItem(p.item), px, py, { item: p.item }, pointer);
   if (p.obj) {
     const m = interactive(p.obj) ? menuForObject(p.obj) : null;
-    if (!m) return;
-    if (!inReach(p)) return far();
-    presentMenu(m, px, py, { obj: p.obj }, true);
+    if (m) presentMenu(m, px, py, { obj: p.obj }, pointer);
   }
 }
 // out of its skin it's nobody you know: no name on it, wherever a name would show
@@ -28599,7 +28638,9 @@ function vaultTick(c, dt) {
 function driveTick(dt) {
   const P = PLAYER;
   if (P.vault && vaultTick(P, dt)) return;
-  const v = moveInput();
+  const key = moveInput();
+  if (key) routeStop(); // the keys take over from the mouse
+  const v = key || routeStep();
   if (!v || !P.onMap || G.away) {
     if (!P.queue.length) {
       P.run = false;
@@ -28617,13 +28658,14 @@ function driveTick(dt) {
   const slow = (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow(),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
-    sp = speed * dt;
-  if (run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+    sp = key ? speed * dt : Math.min(speed * dt, ROUTE.left); // a route stops on its turns, not past them
+  if (key && run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
-  const go = steerAssist(P, v),
+  const go = key ? steerAssist(P, v) : v,
     moved = tryMove(P, go[0] * sp, go[1] * sp);
+  if (!key && ROUTE.on) ROUTE.stall = moved < sp * 0.3 ? ROUTE.stall + sp : 0;
   if (!swinging) P.tdir = Math.atan2(v[0], v[1]); // mid-swing you keep facing what you swung at
   P.path = null;
   P.run = run;
@@ -28634,6 +28676,159 @@ function driveTick(dt) {
     G.idleT = 0;
     cam.follow = true;
   }
+}
+// ───────────── walking by mouse. Click the floor and you go there; click someone or something further off and you walk up
+// to it, and it opens just as if you'd pressed E beside it. Only the mouse finds its way round things (A*, world/paths):
+// the keys stay your own feet, and touching one drops the route.
+const ROUTE = {
+  on: false,
+  pts: null,
+  pi: 0,
+  goal: null,
+  end: null,
+  tx: 0,
+  tz: 0,
+  left: 0,
+  stall: 0,
+  retry: 0,
+  rpAt: 0,
+};
+function routeStop() {
+  ROUTE.on = false;
+  ROUTE.pts = null;
+  ROUTE.goal = null;
+  ROUTE.end = null;
+}
+const routeAt = (g) => (g.char ? [g.char.x, g.char.z] : g.item ? [g.item.x, g.item.z] : [g.obj.cx, g.obj.cz]);
+const routeGone = (g) =>
+  g.char ? !g.char.onMap || g.char.shown < 0.5 : g.item ? !G.items.includes(g.item) : !!g.obj.wrecked;
+// the point of a thing you'd reach for: its nearest edge, just inside, so a wall it stands against doesn't count
+function routeEdge(g, x, z) {
+  if (!g.obj) return routeAt(g);
+  const o = g.obj;
+  return [clamp(x, o.x + 0.05, o.x + o.w - 0.05), clamp(z, o.z + 0.05, o.z + o.h - 0.05)];
+}
+// where to stand: for a thing, any open tile it can be reached from (nearest first); otherwise the tile under the point
+function routeTiles(x, z, g) {
+  const P = PLAYER;
+  if (!g || !g.obj) {
+    const t = nearestWalkable(x, z, P, 2);
+    return t ? [t] : [];
+  }
+  const o = g.obj,
+    out = [];
+  for (let tz = Math.floor(o.z) - 2; tz <= Math.ceil(o.z + o.h) + 1; tz++)
+    for (let tx = Math.floor(o.x) - 2; tx <= Math.ceil(o.x + o.w) + 1; tx++) {
+      if (!walkable(tx, tz, P) || objEdgeDist(o, tx + 0.5, tz + 0.5) > CTRL.reachObj) continue;
+      const e = routeEdge(g, tx + 0.5, tz + 0.5);
+      if (!wallBetween(tx + 0.5, tz + 0.5, e[0], e[1])) out.push([tx, tz]);
+    }
+  return out.sort(
+    (a, b) => Math.hypot(a[0] + 0.5 - P.x, a[1] + 0.5 - P.z) - Math.hypot(b[0] + 0.5 - P.x, b[1] + 0.5 - P.z),
+  );
+}
+function routePlan(x, z, g, raw) {
+  const P = PLAYER;
+  for (const t of routeTiles(x, z, g).slice(0, 6)) {
+    const path = findPath(P.x, P.z, t[0], t[1], P);
+    if (!path) continue;
+    const pts = (raw ? path : smoothPath(P, path)).map((q) => [q[0] + 0.5, q[1] + 0.5]);
+    if (!g && standOK(x, z) && Math.floor(x) === t[0] && Math.floor(z) === t[1]) {
+      if (pts.length) pts[pts.length - 1] = [x, z];
+      else pts.push([x, z]);
+    }
+    if (!pts.length) pts.push([t[0] + 0.5, t[1] + 0.5]);
+    Object.assign(ROUTE, { on: true, pts, pi: 0, goal: g, end: pts[pts.length - 1], tx: x, tz: z, stall: 0 });
+    return true;
+  }
+  return false;
+}
+function routeTo(x, z, g) {
+  const P = PLAYER;
+  if (!P.onMap || G.away || ARREST.on) return false;
+  const cur = P.queue[0];
+  if (cur && !cur.swing && (cur.interruptible === false || cur.photo)) return false; // passing out, a breakdown: not now
+  ROUTE.retry = 0;
+  ROUTE.rpAt = performance.now();
+  if (!routePlan(x, z, g)) {
+    routeStop();
+    ui.float(P, 'No way there', '');
+    return false;
+  }
+  return true;
+}
+// you've got there: turn to it and it opens, as E would
+function routeArrive(g) {
+  const P = PLAYER,
+    [x, z] = routeAt(g);
+  P.tdir = Math.atan2(x - P.x, z - P.z);
+  const xy = anchorXY(g) || [window.innerWidth / 2, window.innerHeight / 2];
+  clickOn(g, xy[0], xy[1], true);
+}
+// the way to go this step, or null: [ux, uz], with ROUTE.left how far to the next turn
+function routeStep() {
+  if (!ROUTE.on) return null;
+  const P = PLAYER,
+    g = ROUTE.goal;
+  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.scene || UI.cf || ARREST.on || !P.onMap || G.away)
+    return (routeStop(), null);
+  if (g) {
+    if (routeGone(g)) return (routeStop(), null);
+    // someone, or something on the floor: stop once it's within plain reach. A thing: walk all the way to where you'd stand
+    const [x, z] = routeAt(g),
+      reach = g.char ? CTRL.reachChar : CTRL.reachItem;
+    if (!g.obj && Math.hypot(x - P.x, z - P.z) <= reach && !wallBetween(P.x, P.z, x, z)) {
+      routeStop();
+      routeArrive(g);
+      return null;
+    }
+    // someone walking about: aim again now and then where they are now
+    const now = performance.now();
+    if (g.char && now - ROUTE.rpAt > 500) {
+      ROUTE.rpAt = now;
+      if (Math.hypot(g.char.x - ROUTE.tx, g.char.z - ROUTE.tz) > 1.2 && !routePlan(g.char.x, g.char.z, g))
+        return (routeStop(), null);
+    }
+  }
+  let pt = ROUTE.pts[ROUTE.pi];
+  while (pt && Math.hypot(pt[0] - P.x, pt[1] - P.z) < 0.08) pt = ROUTE.pts[++ROUTE.pi];
+  if (!pt) {
+    routeStop();
+    if (g) {
+      const e = routeEdge(g, P.x, P.z);
+      if (inReach(g) && !wallBetween(P.x, P.z, e[0], e[1])) routeArrive(g);
+      else ui.float(P, 'Can’t reach', '');
+    }
+    return null;
+  }
+  // caught on a corner (driveTick counts the steps that went nowhere): try the plain tile route, then give up
+  if (ROUTE.stall > 0.6) {
+    if (ROUTE.retry++ >= 2 || !routePlan(ROUTE.tx, ROUTE.tz, g, true)) {
+      routeStop();
+      ui.float(P, 'Can’t get through', '');
+      return null;
+    }
+    return routeStep();
+  }
+  const dx = pt[0] - P.x,
+    dz = pt[1] - P.z,
+    d = Math.hypot(dx, dz);
+  ROUTE.left = d;
+  return [dx / d, dz / d];
+}
+// a ring on the floor where you're headed
+function routeMarker() {
+  let el = UI.routeEl;
+  if (!el) {
+    el = UI.routeEl = document.createElement('div');
+    el.className = 'route-dot';
+    $('#fx').appendChild(el);
+  }
+  const e = ROUTE.on && !ROUTE.goal ? ROUTE.end : null;
+  el.hidden = !e;
+  if (!e) return;
+  const [x, y] = project(e[0], 0.02, e[1]);
+  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }
 // ───────────── what E would act on: the nearest thing you're roughly facing. Forgiving, and sticky once picked.
 const DEG = Math.PI / 180;
@@ -28670,13 +28865,13 @@ function pickFocus() {
   const cur = UI.focus,
     face = P.tdir,
     out = [];
-  const consider = (f, x, z, d, reach, a) => {
+  const consider = (f, x, z, d, reach, a, pen) => {
     const same = cur && (cur.char || cur.obj || cur.item) === (f.char || f.obj || f.item);
     const ok =
       (d <= reach && (a <= CTRL.facing * DEG || d <= CTRL.close)) ||
       (same && d <= reach + CTRL.holdDist && (a <= CTRL.holdFacing * DEG || d <= CTRL.close));
     if (!ok || wallBetween(P.x, P.z, x, z)) return;
-    f.score = d + a * 1.1 - (same ? 0.45 : 0) - (f.char ? 0.15 : 0) - (f.char && f.char.riteBy ? 0.7 : 0); // someone in ITS grip comes first: E pulls them out, not a swing at it
+    f.score = d + a * 1.1 + (pen || 0) - (same ? 0.45 : 0) - (f.char ? 0.15 : 0) - (f.char && f.char.riteBy ? 0.7 : 0); // someone in ITS grip comes first: E pulls them out, not a swing at it
     out.push(f);
   };
   const angTo = (x, z) => Math.abs(angDiff(face, Math.atan2(x - P.x, z - P.z)));
@@ -28701,13 +28896,13 @@ function pickFocus() {
     if (d > CTRL.reachObj + CTRL.holdDist) continue;
     const ex = clamp(qx, o.x + 0.05, o.x + o.w - 0.05),
       ez = clamp(qz, o.z + 0.05, o.z + o.h - 0.05); // just inside its edge, so the wall check doesn't hit the wall it stands against
-    consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)));
+    consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)), spentObj(o) ? 1.6 : 0);
   }
   for (const it of G.items) {
     if (it.kind === 'tape') continue;
     const d = Math.hypot(it.x - P.x, it.z - P.z);
     if (d > CTRL.reachItem + CTRL.holdDist) continue;
-    consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z));
+    consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z), it.kind === 'opened' ? 0.6 : 0); // what came out first, the mess after
   }
   out.sort((a, b) => a.score - b.score);
   for (const f of out) {
@@ -28720,6 +28915,7 @@ function pickFocus() {
   return null;
 }
 function updateFocus(dtReal) {
+  routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
   const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
   if (!live) UI.focus = null;
@@ -37503,7 +37699,7 @@ function escPlay(dt) {
     P = PLAYER;
   E.t += dt;
   if (E.t > 5) capGoal(null);
-  const dtg = dt * SPEEDS[1];
+  const dtg = (dt * SPEEDS[1]) / CLOCK; // body minutes, at the normal pace
   driveTick(dtg);
   animate(P, dt, dtg);
   updateShown(P, dt);
@@ -38668,7 +38864,7 @@ function sleepTakeCheck(fresh) {
     G.takeAt = 0;
     const ph = theirDay(),
       a = G.aware,
-      forced = G.huntNights > 0 || G.huntNight === night;
+      forced = G.huntNights > 0 || (G.huntNight > 0 && G.huntNight === night); // 0: never set (and the first morning's night)
     if (
       (forced || (theyStir() && (ph >= 3 || a >= 50) && G.t - (G.takenAt || -1e9) >= 2 * 1440)) &&
       inRoomSet(PLAYER, (r) => r.home)
@@ -40715,7 +40911,7 @@ function freshG(start) {
     traps: [],
     broken: {},
     intruded: '',
-    workBar: 75,
+    workBar: WORK.fresh,
     workBonusAt: -999,
     awayT: 0,
     workWarned: false,
@@ -40845,7 +41041,6 @@ function freshG(start) {
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
     huntNight: 0, // a night THEY come for you whatever the odds
-    follower: null, // { id, until }: someone who came with you
     awareExtra: 0, // awareness booked for the next 06:00 by what you did (see EVIDENCE.aware)
     tearTonight: 0, // cards THEY tear from your flat tonight
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
@@ -41130,6 +41325,11 @@ function loadGame(data) {
         ? { temper: pick(['careful', 'aggressive']), fightR: 3, catchR: 3, restless: 0 }
         : { temper: pick(['aggressive', 'mocker', 'timid']), odd: false, sig: [], restless: 0 };
   if (!G.quirks || !Object.keys(G.quirks).length) makeQuirks();
+  for (const st of G.stashes || [])
+    if (OBJ[st.obj] && !shakeable(OBJ[st.obj]) && NPC[st.by]) {
+      const pool = stashPool(NPC[st.by]).filter((o) => !G.stashes.some((q) => q.obj === o.idx && !q.bagged));
+      if (pool.length) st.obj = pick(pool).idx;
+    } // an older save: kept where no hand gets in any more (the vending machine, the water cooler), it moves
   for (const [id, s] of Object.entries(data.npcs || {})) if (NPC[id]) Object.assign(NPC[id], s);
   for (const n of suspects())
     if (n.surrendered) {
@@ -41794,9 +41994,49 @@ function hurrying() {
     !moveInput()
   );
 }
+// a fight holds the clock back to the body's own pace, so every wind-up, blow and dodge takes the real seconds it always
+// did: one of THEM loose close by, a blow on its way, someone running you down, anything in the air
+function fightOn() {
+  const P = PLAYER;
+  if (HUNT.on || ARREST.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
+  if (P.queue[0] && P.queue[0].swing) return true;
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap) continue;
+    if (c.tele && c.tele.end > G.t) return true;
+    if (c.trueForm && (c.trueForm.atk || Math.hypot(c.x - P.x, c.z - P.z) < 12)) return true;
+    if (c.queue[0] && c.queue[0].chase === P) return true;
+  }
+  return false;
+}
+// asleep or out cold, and something wrong close by: someone in your flat, one of THEM about, THEY on THEIR way for you.
+// The night slows (STIR_SLOW), so you see it coming.
+function stirNear() {
+  const P = PLAYER;
+  if (!G.sleeping || G.away || !P.onMap) return false;
+  if ((G.attack && G.attack.target === 'player') || (G.takeAt && G.takeAt - G.t < 60)) return true;
+  const pr = roomAt(P.x, P.z),
+    home = !!(pr && pr.home);
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap) continue;
+    const d = Math.hypot(c.x - P.x, c.z - P.z);
+    if (d > 12) continue;
+    if (c.trueForm || c.breakIn || c.raiding || c.riteBy || (c.tell && c.tell.watch)) return true;
+    if (home && d < 9) {
+      const r = roomAt(c.x, c.z);
+      if (r && r.home) return true; // someone in your flat
+    }
+  }
+  return false;
+}
+function clockSpeed() {
+  if (G.speed === 0) return 0;
+  if (G.sleeping || G.away) return awaySpeed() * (stirNear() ? STIR_SLOW : 1);
+  return SPEEDS[hurrying() ? 2 : 1];
+}
 function simStep(dtReal, spdOver) {
-  const spd =
-    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? awaySpeed() : SPEEDS[hurrying() ? 2 : 1];
+  const fight = spdOver == null && !G.sleeping && !G.away && fightOn();
+  BODY = fight ? 1 : 1 / CLOCK;
+  const spd = spdOver != null ? spdOver : fight && G.speed ? SPEEDS[1] / CLOCK : clockSpeed();
   if (spd > 0) SIM_SPD = spd;
   const dtg = dtReal * spd;
   if (dtg > 0) {
@@ -41814,7 +42054,7 @@ function simStep(dtReal, spdOver) {
       if (G.away && G.t >= G.away.until) comeBack();
       if (PLAYER.onMap) {
         stepChar(PLAYER, sub);
-        driveTick(sub);
+        driveTick(sub * BODY); // your own feet: body minutes
       }
       if (ARREST.on) arrestTick(sub);
       for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, sub);
@@ -41868,7 +42108,7 @@ function simStep(dtReal, spdOver) {
   }
   for (const c of CHARS)
     if (c.onMap) {
-      if (spd > 0) animate(c, dtReal, dtg);
+      if (spd > 0) animate(c, dtReal, dtg * BODY);
       updateShown(c, dtReal);
     }
   for (const d of DOORS) {
@@ -41899,7 +42139,7 @@ function simStep(dtReal, spdOver) {
     const want = d.want || (d.pairL && d.pairL.want) || (d.pairR && d.pairR.want);
     // it swings open at the pace of a hand pushing it (about a third of a second at normal speed), and falls to faster
     d.open = clamp(
-      d.open + (want ? Math.max(dtReal * 3.4, dtg * 1.7) : -Math.max(dtReal * 5, dtg * 3)),
+      d.open + (want ? Math.max(dtReal * 3.4, dtg * BODY * 1.7) : -Math.max(dtReal * 5, dtg * BODY * 3)),
       d.ajar || d.slack > G.t ? AJAR.open : 0,
       1,
     );
@@ -42022,9 +42262,10 @@ function frame(now) {
   try {
     const preview = !G.started;
     if (preview) {
-      SIM_SPD = 1.2;
-      G.t += dtReal * 1.2;
-      for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, dtReal * 1.2);
+      SIM_SPD = 1.2 * CLOCK;
+      BODY = 1 / CLOCK;
+      G.t += dtReal * SIM_SPD;
+      for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, dtReal * SIM_SPD);
       for (const c of CHARS)
         if (c.onMap) {
           animate(c, dtReal, dtReal);
@@ -42090,6 +42331,7 @@ function frame(now) {
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
       photoHintTick(dtReal);
+      passOutLids(dtReal);
     }
   } catch (err) {
     console.error(err);

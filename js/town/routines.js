@@ -1,6 +1,6 @@
 //@ town/routines — Habits and secrets: everyone sneaks off once a day
-//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, slipCue, doHabit, secretTick
-//@ Uses:    sim/core, ui/interface, town/cast, them/tells, core/util, sim/actions, town/npc-update, world/objects, world/grid, world/vision, …
+//@ Defines: HABIT_SPOTS, SECRET, RITUAL_STAKE, HABIT_SLOTS, habitTimes, makeHabits, habitDay, habitReady, habitNextAt, SECRET_BY, habitSpot, lookAround, slipCue, doHabit, scaredOff, scareOff, …
+//@ Uses:    sim/core, ui/interface, core/util, town/cast, them/tells, world/grid, town/suspicion, sim/actions, sim/pose, town/npc-update, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── routines: everyone sneaks off once a day. The guilty do it to be themselves.
 const HABIT_SPOTS = {
@@ -235,11 +235,41 @@ function doHabit(n) {
   if (S.obj) enqueue(n, [slipCue(n), useAct(n, S.obj, o)]);
   else enqueue(n, [slipCue(n), goAct(S.at, { label: 'Walking', habit: true }), waitAct(o)]);
 }
+// walk right up on someone at their habit and they break off: a start, and they're off back to whatever they should be
+// doing. This close they hear you from behind too. A person is only embarrassed; THEY take note of you.
+function scaredOff(n) {
+  const P = PLAYER;
+  if (!G.started || !P.onMap || G.sleeping || G.away) return false;
+  if (Math.hypot(P.x - n.x, P.z - n.z) > EVIDENCE.scare) return false;
+  const rn = roomAt(n.x, n.z);
+  return (
+    (!!rn && rn === roomAt(P.x, P.z)) || losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z))
+  );
+}
+function scareOff(n) {
+  const a = n.queue[0];
+  if (a && a.stage === 'run') a.cancel = true; // up and away; their day picks up where it was
+  ui.bubble(n, 'exclaim', 'speech', 2.2);
+  gesture(n, 'flinch', 0.5);
+  if (n.tell) {
+    n.tell.caught = true; // nothing left behind, nothing more to see
+    n.pinnedDay = dayNo();
+    addDanger(n, 10);
+    return;
+  }
+  addSus(n, 4);
+  ui.say(n, pick(['God! You scared me.', 'Don’t creep up on people.', 'I was just going.']), 2.6);
+  audio.sting('awkward');
+}
 // an innocent's secret: what you see is yours to judge. Only a photo of it clears them.
 function secretTick(n, dt) {
   const s = n.secret;
   s.t += dt;
-  if (!G.started || s.done) return;
+  if (!G.started || s.done || s.scared) return;
+  if (s.t > 0.3 && scaredOff(n)) {
+    s.scared = true;
+    return scareOff(n);
+  }
   if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) {
     s.caught = true;
     addSus(n, 6);

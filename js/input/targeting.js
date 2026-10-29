@@ -1,6 +1,6 @@
 //@ input/targeting — What E acts on; keyboard handling
 //@ Defines: DEG, wallBetween, menuForFocus, pickFocus, updateFocus, anchorXY, interact, initInput
-//@ Uses:    input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, world/grid, …
+//@ Uses:    input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, ui/menus, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what E would act on: the nearest thing you're roughly facing. Forgiving, and sticky once picked.
 const DEG = Math.PI / 180;
@@ -37,13 +37,13 @@ function pickFocus() {
   const cur = UI.focus,
     face = P.tdir,
     out = [];
-  const consider = (f, x, z, d, reach, a) => {
+  const consider = (f, x, z, d, reach, a, pen) => {
     const same = cur && (cur.char || cur.obj || cur.item) === (f.char || f.obj || f.item);
     const ok =
       (d <= reach && (a <= CTRL.facing * DEG || d <= CTRL.close)) ||
       (same && d <= reach + CTRL.holdDist && (a <= CTRL.holdFacing * DEG || d <= CTRL.close));
     if (!ok || wallBetween(P.x, P.z, x, z)) return;
-    f.score = d + a * 1.1 - (same ? 0.45 : 0) - (f.char ? 0.15 : 0) - (f.char && f.char.riteBy ? 0.7 : 0); // someone in ITS grip comes first: E pulls them out, not a swing at it
+    f.score = d + a * 1.1 + (pen || 0) - (same ? 0.45 : 0) - (f.char ? 0.15 : 0) - (f.char && f.char.riteBy ? 0.7 : 0); // someone in ITS grip comes first: E pulls them out, not a swing at it
     out.push(f);
   };
   const angTo = (x, z) => Math.abs(angDiff(face, Math.atan2(x - P.x, z - P.z)));
@@ -68,13 +68,13 @@ function pickFocus() {
     if (d > CTRL.reachObj + CTRL.holdDist) continue;
     const ex = clamp(qx, o.x + 0.05, o.x + o.w - 0.05),
       ez = clamp(qz, o.z + 0.05, o.z + o.h - 0.05); // just inside its edge, so the wall check doesn't hit the wall it stands against
-    consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)));
+    consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)), spentObj(o) ? 1.6 : 0);
   }
   for (const it of G.items) {
     if (it.kind === 'tape') continue;
     const d = Math.hypot(it.x - P.x, it.z - P.z);
     if (d > CTRL.reachItem + CTRL.holdDist) continue;
-    consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z));
+    consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z), it.kind === 'opened' ? 0.6 : 0); // what came out first, the mess after
   }
   out.sort((a, b) => a.score - b.score);
   for (const f of out) {
@@ -87,6 +87,7 @@ function pickFocus() {
   return null;
 }
 function updateFocus(dtReal) {
+  routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
   const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
   if (!live) UI.focus = null;

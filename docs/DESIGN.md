@@ -290,7 +290,7 @@ THEY slip in the restroom too, and a full bladder while you're tailing someone i
 
 - Hale's filing cabinet as a Biography source: **not built**. Facts come from chat, rummaging at their place, the paper
   and Mom.
-- "Come with me": **kept, without liking**. Anyone whose suspicion of you is under 25 comes along.
+- "Come with me": **removed in v1.18** (was: kept, without liking). Anyone whose suspicion of you is under 25 comes along.
 - Explained (grey), searched-and-nothing (dashed) and the CLEARED stamp: **notes for the player**. Seeing a secret
   explained or searching and finding nothing writes a note under the face; the automatic CLEARED stamp is gone, and
   your own CLEARED / IT'S THEM marks stay.

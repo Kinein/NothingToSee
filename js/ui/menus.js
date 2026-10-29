@@ -1,6 +1,6 @@
 //@ ui/menus — Interaction menus for objects, people, items
-//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
-//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, world/objects, player/needs, data/tuning, …
+//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
+//@ Uses:    sim/core, play/verbs, sim/actions, ui/interface, play/stashes, core/util, world/objects, gfx/portraits, player/needs, data/tuning, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
 function opt(label, icon, fn, dis) {
@@ -10,6 +10,9 @@ const Q = (f) => () => enqueue(PLAYER, f());
 // things you can't shake: the everyday ones stay one key press (your fridge, your desk)
 const NO_SHAKE = new Set(['homeFridge', 'deskA2']);
 const shakenFresh = (o) => o.data.shakenUntil > G.t;
+// been through already: rummaged and nothing there, or taken apart and lying open. E looks past it, to whatever
+// came out of it onto the floor
+const spentObj = (o) => o.data.openUntil > G.t || (shakenFresh(o) && !(o.data.rattle > 0));
 function menuForObject(o) {
   let m = objMenu(o);
   if (shakeable(o) && !NO_SHAKE.has(o.id)) {
@@ -22,8 +25,10 @@ function menuForObject(o) {
         owner.queue[0] &&
         owner.queue[0].stage === 'run' &&
         (owner.queue[0].obj === o || (o.id && DESK_OWNER[o.id] && owner.queue[0].obj === OBJ_BY_ID[owner.def.chair]));
-    const busy = (o.users || []).some((u) => u && !u.isPlayer) ? 'In use' : here ? 'They’re here' : null;
-    if (o.data.openUntil > G.t) m.ops.push(opt('Open', 'box', null, 'Already open'));
+    const busy = (o.users || []).some((u) => u && !u.isPlayer) ? 'In use' : here ? 'They’re here' : null,
+      trash = RUMMAGE_TRASH.has(o.type),
+      none = trash ? 'Been through it' : 'Nothing in it';
+    if (o.data.openUntil > G.t) m.ops.push(opt('Open', 'box', null, trash ? 'Been through it' : 'Already open'));
     else if (shakenFresh(o) && o.data.rattle > 0)
       m.ops.push(
         opt(
@@ -37,12 +42,12 @@ function menuForObject(o) {
       m.ops.push(
         opt(
           'Rummage',
-          'search',
+          trash ? 'trash' : 'search',
           Q(() => rummageAct(o)),
-          busy || (shakenFresh(o) ? 'Nothing in it' : null),
+          busy || (shakenFresh(o) ? none : null),
         ),
       );
-    if (shakenFresh(o)) m.sub = o.data.rattle > 0 ? 'Something in there' : 'Nothing in it';
+    if (shakenFresh(o)) m.sub = o.data.rattle > 0 ? 'Something in there' : none;
   }
   return fitMenu(m);
 }
@@ -437,53 +442,20 @@ function objMenu(o) {
       );
       break;
     case 'trashcan':
-      if (o.id === 'breakBin') {
-        ops.push(
-          opt(
-            'Dig',
-            'trash',
-            Q(() =>
-              useP(o, 'Dig', 'trash', {
-                dur: 4,
-                anim: 'dig',
-                onEnd: (c, a, ok) => {
-                  if (ok) binDig();
-                },
-              }),
-            ),
-          ),
-        );
-        break;
-      }
-    // falls through
     case 'dumpster':
-      ops.push(
-        opt(
-          'Dig',
-          'trash',
-          Q(() =>
-            useP(o, 'Dig', 'trash', {
-              dur: 6,
-              anim: 'dig',
-              onEnd: (c, a, ok) => {
-                if (ok) digResult(o);
-              },
-            }),
-          ),
-        ),
-      );
-    // falls through: behind the dumpster, or up against a tree in the park, you could get away with it
     case 'tree':
-      if (peeSpot(o))
+      // the bins: Rummage, as for anything with insides (menuForObject). Behind the dumpster, or up against a tree in
+      // the park, you could get away with a pee: only offered once you need to go
+      if (peeSpot(o) && PLAYER.needs.bladder < BLADDER.peeAt)
         ops.push(
           opt(
             'Pee',
             'toilet',
             Q(() => peeAct(o)),
-            PLAYER.needs.bladder > 80 ? 'Don’t need to' : null,
           ),
         );
-      break;
+      if (!ops.length) return null;
+      return { title: o.name, sub: objStatus(o), icon: t === 'tree' ? 'toilet' : 'trash', ops };
     case 'payphone':
       ops.push(
         opt(
@@ -543,7 +515,7 @@ function deskMenu(o) {
         'Work',
         'work',
         Q(() => deskWork(false)),
-        isWorkday() ? null : 'No work today',
+        deskShut(),
       ),
     ],
   };
@@ -633,14 +605,16 @@ function menuForChar(n) {
       ops,
     };
   }
-  // slots stay put: A Chat · D Ask… (Gossip, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch.
+  // slots stay put: A Chat · D Gossip (what's going round: clues, never cards) · W Confront (Attack when you're alone; Catch) · S Watch.
   // No daily limits: ask again and you're told there's nothing new.
   ops.push(opt('Chat', 'chat', T('chat')));
   if (n.id === 'lenny') {
     ops.push(opt('Theories', 'ear', T('lenny')));
     ops.push(opt('Give meal', 'gift', T('feed'), G.inv.meal > 0 ? null : 'No meal'));
   } else {
-    ops.push(opt('Ask…', 'ear', () => openMenu(askMenu(n), UI.menuX, UI.menuY, { char: n })));
+    ops.push(
+      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= MAD_SUS ? 'Won’t gossip with you' : null),
+    );
     if (n.fleeing) ops.push(hit('Catch', 'walk'));
     else ops.push(cfOpt());
     ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
@@ -657,23 +631,6 @@ function menuForChar(n) {
             .map((q) => QUIRKS[q].short)
             .join(' · '),
     ops,
-  };
-}
-// the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
-function askMenu(n) {
-  const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
-  return {
-    title: n.name,
-    img: getPortrait(n),
-    ops: [
-      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
-      opt(
-        'Come with me',
-        'walk',
-        T('come'),
-        G.follower && G.follower.id === n.id ? 'With you' : n.sus >= EVIDENCE.come.sus ? 'Finds you weird' : null,
-      ),
-    ],
   };
 }
 const ITEM_NAMES = {
@@ -696,7 +653,7 @@ function itemName(it) {
   }
   if (it.kind === 'opened') {
     const o = OBJ[it.obj];
-    return o ? o.name + ' · opened up' : ITEM_NAMES.opened;
+    return o ? o.name + (RUMMAGE_TRASH.has(o.type) ? ' · gone through' : ' · opened up') : ITEM_NAMES.opened;
   }
   if (it.kind === 'trap') {
     if (it.shut) return 'A sprung trap';
@@ -731,8 +688,8 @@ function menuForItem(it) {
               a.t = Math.max(0, a.t - dt);
               const m = tryMove(
                 c,
-                (dx / d) * Math.min(d - 0.55, WALK * CTRL.walk * dt),
-                (dz / d) * Math.min(d - 0.55, WALK * CTRL.walk * dt),
+                (dx / d) * Math.min(d - 0.55, WALK * BODY * CTRL.walk * dt),
+                (dz / d) * Math.min(d - 0.55, WALK * BODY * CTRL.walk * dt),
               );
               c.moving = m > 1e-5;
               c.walkPh += m * 3.7;

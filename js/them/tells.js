@@ -208,6 +208,7 @@ function tellTick(n, dt) {
     } else if (tl.spotT) tl.spotT = Math.max(0, tl.spotT - dt);
     return;
   }
+  if (!tl.caught && tl.t > 0.3 && scaredOff(n)) return scareOff(n); // right up on it: it breaks off and goes
   if (!tl.caught && tl.t > 0.4 && npcSeesPlayer(n)) caughtWatching(n);
   if ((tl.type === 'speak' || tl.type === 'stare') && seen) {
     tl.bt = (tl.bt || 0) + dt;

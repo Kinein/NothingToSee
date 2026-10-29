@@ -46,7 +46,7 @@ const CELL_ID = M4.ident(),
   CELL_CHALK = [0.82, 0.8, 0.74],
   CELL_CHALK_E = [0.12, 0.12, 0.11];
 // the speed the clock runs while you sleep or are away: the hours fly, except while you're booked and walked down
-const awaySpeed = () => (CELL.on && CELL.phase !== 'held' ? 1 : SLEEP_SPEED);
+const awaySpeed = () => (CELL.on ? (CELL.phase !== 'held' ? CLOCK : AWAY_SPEED) : SLEEP_SPEED);
 
 // cuffed in front: hands together in your lap when you sit, held up with the board when you're booked; the head goes
 // where your mood puts it (CELL.moodK: down, up at the bars, back over your shoulder at the window, leant on the wall)

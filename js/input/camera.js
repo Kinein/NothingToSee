@@ -1,6 +1,6 @@
 //@ input/camera — Input and camera control
-//@ Defines: MENU_TYPES, BARE_SEATS, panBy, pickAt, dismissHints, handleClick, handleHover
-//@ Uses:    gfx/renderer, ui/interface, sim/core, ui/menus, ui/pie-menu, taken/taken, sim/actions, core/util, world/vision, world/grid, …
+//@ Defines: MENU_TYPES, BARE_SEATS, panBy, pickAt, dismissHints, handleClick, clickOn, handleHover
+//@ Uses:    gfx/renderer, ui/interface, sim/core, ui/menus, ui/pie-menu, input/walking, taken/taken, core/util, world/vision, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── input & camera control ─────────────────────────
 const keys = {};
@@ -86,6 +86,8 @@ function dismissHints() {
     if (h) h.classList.add('out');
   }
 }
+// a click: on someone or something, you walk up to it if it's off (input/walking routeTo) and it opens as E would;
+// anywhere else, you walk there
 function handleClick(px, py) {
   if (UI.menuOpen) {
     closeMenu();
@@ -94,25 +96,38 @@ function handleClick(px, py) {
   if (!G || !G.started || G.over || UI.caseOpen || UI.cf || CAP.on) return;
   dismissHints();
   const p = pickAt(px, py);
-  if (!p || p.tile) return; // clicking the floor does nothing: you walk with the keys
-  const far = () => ui.float(PLAYER, 'Too far', '');
+  if (!p) return;
+  if (p.char && p.char.isPlayer) {
+    routeStop();
+    return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
+  }
+  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj));
+  if (!some) {
+    const g = rayGround(screenRay(px, py));
+    return routeTo(g[0], g[1], null);
+  }
+  if (!inReach(p)) {
+    const at = p.char ? [p.char.x, p.char.z] : p.item ? [p.item.x, p.item.z] : [p.obj.cx, p.obj.cz];
+    return routeTo(at[0], at[1], p);
+  }
+  routeStop();
+  clickOn(p, px, py, true);
+}
+// what clicking something in reach does (also where a walk to it ends)
+function clickOn(p, px, py, pointer) {
   if (p.char) {
     const n = p.char;
-    if (n.isPlayer) return presentMenu(menuForChar(n), px, py, { char: n }, true);
-    if (!inReach(p)) return far();
     if (n.trueForm) {
       if (n.tell.t >= TF_CHANGE) playerMelee(n);
       else ui.note('lock', 'Attack · Changing', '');
       return;
     }
-    return presentMenu(menuForChar(n), px, py, { char: n }, true);
+    return presentMenu(menuForChar(n), px, py, { char: n }, pointer);
   }
-  if (p.item) return inReach(p) ? presentMenu(menuForItem(p.item), px, py, { item: p.item }, true) : far();
+  if (p.item) return presentMenu(menuForItem(p.item), px, py, { item: p.item }, pointer);
   if (p.obj) {
     const m = interactive(p.obj) ? menuForObject(p.obj) : null;
-    if (!m) return;
-    if (!inReach(p)) return far();
-    presentMenu(m, px, py, { obj: p.obj }, true);
+    if (m) presentMenu(m, px, py, { obj: p.obj }, pointer);
   }
 }
 // out of its skin it's nobody you know: no name on it, wherever a name would show

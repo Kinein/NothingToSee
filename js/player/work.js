@@ -1,6 +1,6 @@
 //@ player/work — The work bar, shifts, getting fired
-//@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, goodDay, onTimeCross, newDay
-//@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, play/plants, them/awareness, world/grid, …
+//@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, goodDay, shiftOver, deskShut, onTimeCross, newDay
+//@ Uses:    sim/core, data/tuning, ui/interface, core/util, them/plan, them/night-attacks, game/state, play/plants, them/awareness, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
 function playerAtDesk() {
@@ -55,6 +55,22 @@ function goodDay() {
   for (const n of suspects()) if (!n.gone && (n.plan || []).some((b) => b.a === 'work')) addSus(n, -6);
   ui.note('work', 'A good day’s work', 'good');
 }
+// five o'clock: the day's work is done with, good or bad. The bar starts over as it will in the morning, and nothing
+// moves it again until the next shift
+function shiftOver() {
+  G.workBar = WORK.fresh;
+  G.workWarned = false;
+  G.awayT = 0;
+}
+// your desk only takes you in office hours, on a working day: at night you can't even sit down at it
+function deskShut() {
+  if (!isWorkday()) return 'No work today';
+  if (G.sickDay) return 'Day off';
+  const m = tod();
+  if (m < WORK.from) return 'Too early · the shift is at 9:00';
+  if (m >= WORK.to) return 'Shift’s over · back at 9:00';
+  return null;
+}
 function onTimeCross(t0, t1) {
   const cross = (m) => Math.floor((t1 - m) / 1440) > Math.floor((t0 - m) / 1440);
   if (cross(0)) newDay();
@@ -79,7 +95,10 @@ function onTimeCross(t0, t1) {
   if (cross(9 * 60) && isWorkday() && !G.sickDay && !playerAtDesk())
     ui.note('work', G.overtimeToday ? 'Overtime · it drains twice as fast' : 'Shift started', 'warn');
   if (cross(180) && dayNo() === G.gatherDay) gatheringOver();
-  if (cross(17 * 60)) goodDay();
+  if (cross(17 * 60)) {
+    goodDay();
+    shiftOver();
+  }
   if (cross(17 * 60) && G.sickDay) G.sickDay = false;
   if (cross(22 * 60 + 50) && NPC.vic.onMap && NPC.vic.shown > 0.5) ui.say(NPC.vic, 'Closing up.', 3);
   for (const n of CHARS) if (n.plan) for (const b of n.plan) if (cross(b.s)) n.thinkCd = 0;
@@ -99,7 +118,6 @@ function newDay() {
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
-  G.workBar = Math.min(100, G.workBar + 15); // a night's sleep on it: Hale forgets a little
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
   G.mailToday = false;

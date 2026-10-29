@@ -13,7 +13,7 @@ function sleepTakeCheck(fresh) {
     G.takeAt = 0;
     const ph = theirDay(),
       a = G.aware,
-      forced = G.huntNights > 0 || G.huntNight === night;
+      forced = G.huntNights > 0 || (G.huntNight > 0 && G.huntNight === night); // 0: never set (and the first morning's night)
     if (
       (forced || (theyStir() && (ph >= 3 || a >= 50) && G.t - (G.takenAt || -1e9) >= 2 * 1440)) &&
       inRoomSet(PLAYER, (r) => r.home)

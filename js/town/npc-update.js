@@ -22,7 +22,7 @@ function npcUpdate(n, dt) {
   if (n.hideUntil && !n.onMap) return;
   if (n.trueForm && n.onMap) {
     stepChar(n, dt);
-    if (n.tell) n.tell.t += dt;
+    if (n.tell) n.tell.t += dt * BODY;
     if (n.trueForm) trueFormTick(n, dt);
     return;
   }
@@ -60,8 +60,8 @@ function npcUpdate(n, dt) {
   if (n.isThem && !n.exposed) theirThingsOnYou(n, dt);
   if (n.wcCd > 0) n.wcCd -= dt;
   stepChar(n, dt);
-  if (n.tell) tellTick(n, dt);
-  if (n.secret) secretTick(n, dt);
+  if (n.tell) tellTick(n, dt * BODY); // a slip plays out in body time, like anything else a body does
+  if (n.secret) secretTick(n, dt * BODY);
   if (habitReady(n) && !n.fleeing && !n.hideUntil) {
     const cur = n.queue[0];
     if (!cur) n.thinkCd = 0;

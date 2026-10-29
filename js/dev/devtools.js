@@ -127,7 +127,7 @@ window.__dev = {
       .map(([k, v]) => ({ fn: k, msPerFrame: +(v / n).toFixed(2), calls: DEV.calls[k] || n, totalMs: +v.toFixed(0) }));
     return { frames: DEV.frames, fps: +(DEV.frames / secs).toFixed(1), rows, slowest: DEV.slow.slice(0, 15) };
   },
-  /** play at `x` game minutes per real second (normal is 2), e.g. speed(45) to watch days go by */
+  /** play at `x` game minutes per real second (normal is 2.5), e.g. speed(45) to watch days go by */
   speed(x) {
     SPEEDS[1] = SPEEDS[2] = x;
   },

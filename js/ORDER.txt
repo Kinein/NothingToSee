@@ -64,7 +64,7 @@ town/doors.js                    # Broken restroom lock, doors left ajar
 town/talk.js                     # Talk: what people say, and the talking action itself
 town/echoes.js                   # Echoes: what happened, where, who saw
 them/night-attacks.js            # Night attacks
-town/company.js                  # Come with me; the witnesses THEY go after at night, and standing guard for one
+town/company.js                  # The witnesses THEY go after at night, and standing guard for one; THEIR people tailing you
 horror/director.js               # Horror director: daily events by THEIR phase
 them/office-night.js             # The office after dark
 play/items.js                    # Items left behind

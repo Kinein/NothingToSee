@@ -1,6 +1,6 @@
 //@ game/state — Game state, new game, saving, endings
 //@ Defines: SAVE_KEY, freshG, resetWorld, newGame, syncNPCs, saveGame, readSave, loadGame, gameOver
-//@ Uses:    sim/core, ui/interface, gfx/renderer, town/cast, world/vision, core/util, world/grid, world/objects, town/quirks, game/last-day, …
+//@ Uses:    sim/core, ui/interface, gfx/renderer, town/cast, core/util, world/vision, world/objects, world/grid, town/quirks, game/last-day, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── game state, saving, the loop ─────────────────────────
 const SAVE_KEY = 'nothing-to-see-here-v3'; // the five-day rework: older saves don't carry over
@@ -27,7 +27,7 @@ function freshG(start) {
     traps: [],
     broken: {},
     intruded: '',
-    workBar: 75,
+    workBar: WORK.fresh,
     workBonusAt: -999,
     awayT: 0,
     workWarned: false,
@@ -157,7 +157,6 @@ function freshG(start) {
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
     huntNight: 0, // a night THEY come for you whatever the odds
-    follower: null, // { id, until }: someone who came with you
     awareExtra: 0, // awareness booked for the next 06:00 by what you did (see EVIDENCE.aware)
     tearTonight: 0, // cards THEY tear from your flat tonight
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
@@ -442,6 +441,11 @@ function loadGame(data) {
         ? { temper: pick(['careful', 'aggressive']), fightR: 3, catchR: 3, restless: 0 }
         : { temper: pick(['aggressive', 'mocker', 'timid']), odd: false, sig: [], restless: 0 };
   if (!G.quirks || !Object.keys(G.quirks).length) makeQuirks();
+  for (const st of G.stashes || [])
+    if (OBJ[st.obj] && !shakeable(OBJ[st.obj]) && NPC[st.by]) {
+      const pool = stashPool(NPC[st.by]).filter((o) => !G.stashes.some((q) => q.obj === o.idx && !q.bagged));
+      if (pool.length) st.obj = pick(pool).idx;
+    } // an older save: kept where no hand gets in any more (the vending machine, the water cooler), it moves
   for (const [id, s] of Object.entries(data.npcs || {})) if (NPC[id]) Object.assign(NPC[id], s);
   for (const n of suspects())
     if (n.surrendered) {

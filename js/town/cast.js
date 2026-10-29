@@ -27,7 +27,7 @@ const CREATURE = {
   lizards: { body: [0.15, 0.22, 0.11], skin: [0.36, 0.5, 0.22] },
   zombies: { body: [0.19, 0.18, 0.15], skin: [0.5, 0.53, 0.42] },
 };
-const TF_CHANGE = 6; // game minutes for the change: three seconds at normal speed, enough to raise a camera
+const TF_CHANGE = 6; // body minutes for the change: three seconds at normal speed, enough to raise a camera
 const CREATURE_LOOK = {
   aliens: {
     s: 1.0,

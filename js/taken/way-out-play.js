@@ -7,7 +7,7 @@ function escPlay(dt) {
     P = PLAYER;
   E.t += dt;
   if (E.t > 5) capGoal(null);
-  const dtg = dt * SPEEDS[1];
+  const dtg = (dt * SPEEDS[1]) / CLOCK; // body minutes, at the normal pace
   driveTick(dtg);
   animate(P, dt, dtg);
   updateShown(P, dt);

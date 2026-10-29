@@ -31,7 +31,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `traps` | `[]` | — | play/stashes, play/traps, ui/menus |
 | `broken` | `{}` | — | world/paths, town/doors, play/raids, ui/menus, game/loop |
 | `intruded` | `''` | town/doors, play/raids | — |
-| `workBar` | `75` | player/work, them/moves | play/advice, ui/hud |
+| `workBar` | `WORK.fresh` | player/work, them/moves | play/advice, ui/hud |
 | `workBonusAt` | `-999` | player/work | — |
 | `awayT` | `0` | player/work | play/verbs |
 | `workWarned` | `false` | player/work | — |
@@ -79,7 +79,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `attackFoe` | `null` | them/plan, them/night-attacks, horror/encounter-outcomes | — |
 | `openCd` | `0` | horror/director | — |
 | `underSeen` | `''` | — | — |
-| `attack` | `null` | them/true-form, them/night-attacks, them/office-night, taken/taken, game/state | town/talk, horror/encounters |
+| `attack` | `null` | them/true-form, them/night-attacks, them/office-night, taken/taken, game/state | town/talk, horror/encounters, game/loop |
 | `horror` | `[]` | horror/director | town/talk, them/office-night |
 | `victims` | `[]` | — | them/plan, town/talk, them/night-attacks, horror/encounter-outcomes, taken/taken, taken/down-there, taken/lair-life |
 | `found` | `null` | them/night-attacks | — |
@@ -94,7 +94,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `houseDark` | `{}` | them/night-attacks | game/loop |
 | `sickNext` | `false` | player/work, them/moves, combat/hits, combat/throws, taken/back-up | — |
 | `shakenUntil` | `0` | them/true-form, combat/hits, game/last-day | sim/movement, play/photos, input/walking |
-| `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, town/cell, … |
+| `away` | `null` | combat/hits, taken/taken, taken/back-up | player/needs, player/work, town/routines, town/quirks, them/plan, town/npc-update, them/moves, town/arrest, … |
 | `assaulted` | `[]` | — | play/traps |
 | `fights` | `0` | combat/melee | — |
 | `events` | `[]` | — | town/talk, town/echoes, play/confront |
@@ -117,11 +117,11 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `homeLights` | `false` | game/loop | gfx/draw-helpers, sim/core |
 | `tvOn` | `false` | play/verbs | gfx/draw-helpers, sim/core |
 | `agnesLights` | `false` | game/loop | gfx/draw-helpers, sim/core |
-| `sleeping` | `false` | town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/quirks, them/plan, town/npc-update, town/cell, them/true-form, town/talk, … |
+| `sleeping` | `false` | player/needs, town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/routines, town/quirks, them/plan, town/npc-update, town/cell, them/true-form, … |
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
 | `over` | `null` | game/state | player/needs, player/work, them/plan, them/moves, town/arrest, town/cell, town/fleeing, them/true-form, … |
-| `started` | `false` | game/state | gfx/draw-helpers, gfx/frame, town/routines, town/quirks, them/plan, town/npc-update, them/tells, town/cell, … |
+| `started` | `false` | game/state | gfx/draw-helpers, gfx/frame, player/needs, town/routines, town/quirks, them/plan, town/npc-update, them/tells, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |
 | `habits` | `{}` | town/routines, game/state | town/daily-plans, town/quirks, them/moves, town/talk, play/oddities |
@@ -141,7 +141,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `plan` | `0` | — | — |
 | `stage` | `1` | them/plan | them/tells, them/moves, them/servants, town/cell, them/true-form, combat/bolts, them/night-attacks, horror/director, … |
 | `stagePts` | `0` | them/plan | — |
-| `phase` | `1` | them/plan, game/state | town/talk, them/office-night, ui/case-board, horror/layer, horror/half-forms-real, horror/tenth-forms, horror/encounters |
+| `phase` | `1` | them/plan, game/state | town/talk, them/office-night, horror/layer, horror/half-forms-real, horror/tenth-forms, horror/encounters |
 | `weekStart` | `1` | — | them/plan |
 | `stageNews` | `null` | them/plan, town/echoes | — |
 | `gatherDay` | `irand(3, 4)` | player/work, them/plan | town/daily-plans, town/talk, horror/director, them/office-night |
@@ -161,7 +161,6 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `fearUntil` | `0` | play/confrontation | town/daily-plans |
 | `huntNights` | `0` | player/work, combat/melee | them/true-form, town/company, ui/hud, chase/they-come |
 | `huntNight` | `0` | play/plants | them/true-form, chase/they-come |
-| `follower` | `null` | town/company | ui/menus |
 | `awareExtra` | `0` | them/awareness | — |
 | `tearTonight` | `0` | player/work | — |
 | `witVisit` | `null` | town/company | — |
@@ -185,7 +184,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `rainAmt` | `0.8` | player/work | town/traffic-weather |
 | `rainK` | `0` | town/traffic-weather, game/state | gfx/draw-helpers, gfx/frame, town/cell, game/loop |
 | `wet` | `0` | town/traffic-weather, game/state | gfx/draw-helpers, gfx/frame |
-| `dayShown` | `0` | ui/interface, chase/they-come, chase/hunt | play/verbs |
+| `dayShown` | `0` | ui/interface, chase/they-come, chase/hunt | player/needs, play/verbs |
 
 ## `G` fields added on the fly
 

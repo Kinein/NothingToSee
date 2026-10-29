@@ -44,7 +44,7 @@ function sleepAct(bed, nap, alarmAt) {
     long: true,
     need: 'energy',
     dur: nap ? 60 : null,
-    fx: nap ? { energy: 15, stress: -3 } : { energy: 13.5, stress: -5 },
+    fx: nap ? { energy: 15, stress: -3 } : BED,
     until: nap ? null : (c, a) => (a.alarm ? G.t >= a.alarm : c.needs.energy >= 99.5),
     alarm,
     onStart: () => {
@@ -312,7 +312,8 @@ function deskWork(slack) {
     work: !slack,
     slack: !!slack,
     dur: slack ? 45 : null,
-    until: slack ? null : () => !isWorkday() || tod() >= 17 * 60,
+    check: deskShut,
+    until: slack ? null : () => !!deskShut(),
     fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5 },
     onStart: () => {
       if (G.awayT > 60 && NPC.hale.onMap && NPC.hale.shown > 0.5 && G.haleSaw) {

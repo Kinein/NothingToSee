@@ -1,6 +1,6 @@
 //@ ui/case-board — The evidence book: four frames on every suspect, the suspect page, Biography, the mad counter
-//@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, drawPols, drawHeard, refreshBoard, drawStrings, showSuspect, closeSuspect, focusPol, boardKey, closeBoard, …
-//@ Uses:    ui/interface, sim/core, them/proofs, core/util, town/cast, world/grid, play/biography, them/plan, town/quirks, ui/hud, …
+//@ Defines: SLOT_TIP, MARK_STAMP, openBoard, drawTop, slotHtml, fillSlotImgs, stampFor, susMeter, drawPols, drawHeard, refreshBoard, drawStrings, showSuspect, closeSuspect, focusPol, boardKey, …
+//@ Uses:    ui/interface, sim/core, them/proofs, core/util, town/cast, data/tuning, world/grid, play/biography, town/quirks, ui/hud, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the board. A cork board that pauses the town. Every suspect shows four frame slots under their polaroid,
 // empty or holding a card. A card says plainly what it shows, where and when; nothing on it says whether it holds up.
@@ -22,25 +22,14 @@ function openBoard(focusId) {
   if (focusId && NPC[focusId]) showSuspect(NPC[focusId]);
   else focusPol(UI.bdSel || suspects()[0].id);
 }
-// the top strip: THEIR card (what THEY are once you know, THEIR five days) and THEIR eye
+// the top strip: THEIR card (what THEY are once you know, how many of THEM are down) and THEIR eye
 function drawTop() {
   const F = FACTIONS[G.faction];
   const fc = $('#bd-faction');
   fc.innerHTML =
     '<span class="pin"></span><span class="fi">' +
     svgIcon(G.factionKnown ? F.icon : 'question') +
-    '</span><b></b><span class="plan" data-tip="THEIR plan"></span><span class="exp"></span>';
-  const ph = clamp(G.phase || 1, 1, WEEK);
-  fc.querySelector('.plan').innerHTML = Array.from(
-    { length: WEEK },
-    (_, i) =>
-      '<i class="' +
-      (i < ph - 1 ? 'on' : i === ph - 1 ? 'cur' : '') +
-      '" data-tip="' +
-      DOW_LONG[i] +
-      (G.factionKnown ? ' · ' + PHASES[G.faction][i] : '') +
-      '"></i>',
-  ).join('');
+    '</span><b></b><span class="exp"></span>';
   fc.querySelector('b').textContent = G.factionKnown ? F.label : 'THEM';
   fc.querySelector('.exp').innerHTML = [0, 1, 2]
     .map(
@@ -65,7 +54,7 @@ function drawTop() {
     mad.dataset.tip =
       nMad >= 3
         ? 'Three people think you’re mad. At 06:00, Mom calls and the clinic writes'
-        : 'People who find you weird enough (60+) to call your mother. Three, and the clinic writes';
+        : 'People who find you weird enough (a full meter) to call your mother. Three, and the clinic writes';
   }
   const eye = $('#bd-eye'),
     es = eyeState();
@@ -113,6 +102,25 @@ function stampFor(n) {
   if (G.mark[n.id]) return [G.mark[n.id], MARK_STAMP[G.mark[n.id]]];
   return null;
 }
+// how weird they find you, under the name: full is MAD_SUS, the point where they'd call your mother
+const madFull = (n) => !n.slain && !n.gone && !n.exposed && n.sus >= MAD_SUS;
+function susMeter(n) {
+  if (n.id === 'lenny' || n.slain || n.gone) return '';
+  const full = madFull(n);
+  return (
+    '<span class="psus pol' +
+    (full ? ' hi' : n.sus >= MAD_SUS * 0.66 ? ' mid' : '') +
+    '" data-tip="Suspicion of you · ' +
+    Math.round(n.sus) +
+    ' of ' +
+    MAD_SUS +
+    '">' +
+    svgIcon('eye') +
+    '<span><i style="width:' +
+    Math.round(clamp(n.sus / MAD_SUS, 0, 1) * 100) +
+    '%"></i></span></span>'
+  );
+}
 function drawPols() {
   const list = $('#bd-pols');
   list.innerHTML = '';
@@ -128,11 +136,14 @@ function drawPols() {
     card.dataset.id = n.id;
     card.style.setProperty('--tilt', (hash2(n.id.length, n.id.charCodeAt(0), 3) * 7 - 3.5).toFixed(1) + 'deg');
     card.innerHTML =
-      '<span class="pin"></span><img alt=""><b></b><span class="slots">' +
+      '<span class="pin"></span><img alt=""><b></b>' +
+      susMeter(n) +
+      '<span class="slots">' +
       FRAMES.map((f) => slotHtml(n, f)).join('') +
       '</span>' +
       (n.slain ? '<span class="xx"></span>' : '') +
-      (sp ? '<span class="okst ' + sp[0] + '">' + sp[1] + '</span>' : '');
+      (sp ? '<span class="okst ' + sp[0] + '">' + sp[1] + '</span>' : '') +
+      (madFull(n) ? '<span class="okst mad">THINKS YOU MAD</span>' : '');
     card.querySelector('img').src = getPortrait(n);
     card.querySelector('b').textContent = n.short;
     fillSlotImgs(card);
@@ -241,11 +252,11 @@ function showSuspect(n) {
     '</button><div class="sd-head"><img alt=""><div><b></b><span class="sd-role"></span>' +
     (n.id !== 'lenny'
       ? '<span class="psus big' +
-        (n.sus >= 60 ? ' hi' : '') +
+        (madFull(n) ? ' hi' : '') +
         '" data-tip="Suspicion of you">' +
         svgIcon('eye') +
         '<span><i style="width:' +
-        Math.round(n.sus) +
+        Math.round(clamp(n.sus / MAD_SUS, 0, 1) * 100) +
         '%"></i></span></span>'
       : '') +
     '<span class="sd-mark"></span></div></div><div class="sd-frames">' +

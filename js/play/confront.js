@@ -105,7 +105,6 @@ function fbiTake(n) {
 const SOC = {
   chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
   gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
-  come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
     icon: 'ear',

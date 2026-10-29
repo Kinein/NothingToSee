@@ -153,7 +153,7 @@ function arrestEscortTick(dt) {
     followPath(P, dt);
   } else if (d > 0.08) {
     P.path = null;
-    const sp = Math.min(d, WALK * CTRL.walk * (d > 1 ? 1 : 0.75) * dt),
+    const sp = Math.min(d, WALK * BODY * CTRL.walk * (d > 1 ? 1 : 0.75) * dt),
       moved = tryMove(P, (dx / d) * sp, (dz / d) * sp);
     P.moving = moved > 1e-4;
     P.walkPh += moved * 3.7;

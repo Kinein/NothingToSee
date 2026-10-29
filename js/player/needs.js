@@ -1,6 +1,6 @@
 //@ player/needs — The player body: needs, Psychic, accidents, passing out, panic
-//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, passOut, breakdown
-//@ Uses:    sim/core, data/tuning, ui/interface, sim/actions, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, …
+//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, passOut, passOutLids, breakdown
+//@ Uses:    sim/core, data/tuning, ui/interface, gfx/renderer, sim/actions, core/util, world/grid, them/tells, town/suspicion, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the player's body
 // how well a need is doing, 0 bad … 100 fine (stress is the one that counts the other way)
@@ -147,6 +147,8 @@ function accident() {
   setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
 }
+// out cold where you fell: the hours go by as fast as in bed (G.sleeping), behind your eyelids (passOutLids), and it
+// rests you worse than a bed does. You come round at half your energy.
 function passOut() {
   const P = PLAYER;
   hardReset(P);
@@ -158,17 +160,22 @@ function passOut() {
       label: 'Passed out',
       icon: 'bed',
       passout: true,
+      sleep: true,
       interruptible: false,
-      dur: starving ? 300 : 180,
+      dur: null,
+      fx: { energy: BED.energy * OUT.rest, stress: BED.stress * OUT.rest },
+      until: (c, a) => c.needs.energy >= OUT.wake || a.t >= 12 * 60,
       onStart: (c) => {
         c.pose = 'floorlie';
+        G.sleeping = true;
       },
-      onTick: (c, a, dt) => {
+      onTick: (c) => {
         c.anim = 'sleep';
-        applyNeedFx({ energy: 22 }, dt);
       },
       onEnd: (c) => {
+        G.sleeping = false;
         c.pose = 'stand';
+        if (G.dayShown !== dayNo()) ui.dayCard();
         if (starving) {
           const b = OBJ_BY_ID.homeBed;
           placeChar(c, b.x + 1, b.z);
@@ -181,6 +188,25 @@ function passOut() {
     true,
   );
   ui.note('bed', 'Passed out', 'bad');
+}
+// out cold, the lids come down. Every OUT.blink game minutes they come open a crack for a moment, onto the hours going
+// by, and shut again; at the end they open for good. In real seconds, so it reads the same however fast time goes.
+function passOutLids(dtReal) {
+  const a = G && G.started && PLAYER ? PLAYER.queue[0] : null,
+    out = !!(a && a.passout && a.stage === 'run');
+  const lid = R.outLid || 0;
+  if (!out) {
+    R.outLid = Math.max(0, lid - dtReal * 0.9);
+    return;
+  }
+  const k = Math.floor(a.t / OUT.blink);
+  if (k > 0 && a.blinkK !== k) {
+    a.blinkK = k;
+    a.blinkR = R.time;
+  }
+  const u = a.blinkR != null ? (R.time - a.blinkR) / 1.3 : 1,
+    tgt = u < 1 ? 1 - 0.62 * Math.sin(Math.PI * u) : 1;
+  R.outLid = lid < tgt ? Math.min(tgt, lid + dtReal * 1.6) : tgt; // going under takes a moment; a flutter is quick
 }
 function breakdown() {
   const P = PLAYER;

@@ -369,8 +369,8 @@ function perceptionTick(dt) {
     }
   }
 }
-// the ordinary people who think you're mad: 60+ suspicion of you. The evidence book counts them.
-const thinkMad = () => suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= 60);
+// the ordinary people who think you're mad: MAD_SUS+ suspicion of you. The evidence book counts them.
+const thinkMad = () => suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= MAD_SUS);
 // at 06:00: three of them means Mom calls and a clinic letter comes; still three the next morning, the medics
 function clinicCheck() {
   if (thinkMad().length < 3) {

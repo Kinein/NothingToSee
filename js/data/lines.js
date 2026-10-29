@@ -152,7 +152,6 @@ const GOSSIP_BOUGHT = ['{s}? Salt of the earth. Helped me out when nobody else w
 const GOSSIP_LOST = ['I don’t remember last night. Any of it.', 'Last night’s gone. I woke up and it was just… gone.', 'Funny. I can’t remember last night. Not a thing.'];
 const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.', 'I’ve told you everything I’ve heard.'];
 const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
-const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
 // ── The confrontation (play/confrontation): each card turns ✓ or ✗ with one line from IT. A human owns up to what's
 // true; one of THEM can't deny what's real, so it squirms; a card that isn't about them, anybody denies.

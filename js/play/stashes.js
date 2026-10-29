@@ -1,17 +1,16 @@
 //@ play/stashes — Stashes and rummaging: THEIR things, lookalikes, the fridge, taking and the place rule
-//@ Defines: SHAKE_TYPES, STASH_KINDS, FRIDGE_THEM, FRIDGE_PLAIN, PLANTS, junkIn, ownerOf, stashPool, placeOwner, placeLabel, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_DIG, rummageAct, …
-//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, world/grid, town/suspicion, data/lines, play/verbs, play/photos, …
+//@ Defines: SHAKE_TYPES, STASH_KINDS, FRIDGE_THEM, FRIDGE_PLAIN, PLANTS, junkIn, ownerOf, stashPool, placeOwner, placeLabel, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_TRASH, RUMMAGE_DIG, …
+//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, play/verbs, world/grid, town/suspicion, data/lines, play/photos, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── stashes: what THEY keep inside ordinary things
 // Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. You take it: found
 // at someone's place it's a Home card on them (the place rule); a photo of it is only a print. THEY tidy up after you,
 // and every couple of days each of THEM moves the one in a shared place somewhere else, in broad daylight.
+// Nothing you can't get a hand into: not the vending machine, not the water cooler.
 const SHAKE_TYPES = new Set([
   'microwave',
   'coffee',
   'printer',
-  'vending',
-  'watercooler',
   'fridge_office',
   'fridge',
   'stove',
@@ -245,7 +244,10 @@ function tamperSeen(o, a, k) {
 }
 // Rummage: hands in, feeling about. Something loose in there and your fingers find it: you stop, and the same key opens
 // it up. Nothing, and that's all it was. The back shelves (the stockroom, the crates) sometimes give you something to keep.
+// The bins are rummaged and dug through in one go: something that shouldn't be in there comes out with your hand,
+// and otherwise you might turn up something useful (or a clue in the rubbish).
 const RUMMAGE_FIND = new Set(['metalshelf', 'crates']);
+const RUMMAGE_TRASH = new Set(['trashcan', 'dumpster']);
 const RUMMAGE_DIG = new Set([
   'metalshelf',
   'crates',
@@ -266,8 +268,9 @@ const RUMMAGE_DIG = new Set([
   'newsrack',
 ]);
 function rummageAct(o) {
-  return useP(o, 'Rummage', 'search', {
-    dur: 4,
+  const trash = RUMMAGE_TRASH.has(o.type);
+  return useP(o, 'Rummage', trash ? 'trash' : 'search', {
+    dur: o.type === 'dumpster' ? 6 : 4,
     anim: RUMMAGE_DIG.has(o.type) ? 'dig' : 'use',
     onStart: () => {
       const r = roomAt(o.cx, o.cz),
@@ -281,12 +284,18 @@ function rummageAct(o) {
       tamperSeen(o, a, 1);
       if (o.type === 'fridge' || a.hit || a.t < a.dur * 0.45) return; // a fridge you just open and look in
       const st = stashIn(o),
-        loose = (st && !st.out) || junkIn(o);
+        loose = (st && !st.out) || (!trash && junkIn(o));
       if (!loose) return;
       a.hit = true;
       a.ok = true;
       a.stage = 'exit';
       a.t = 0; // your fingers close on it: stop right there
+      if (trash) {
+        audio.blip('click');
+        ui.bubble(c, 'exclaim', 'thought', 1.6);
+        openUp(o); // in the rubbish, it comes out with your hand
+        return;
+      }
       o.data.rattle = 1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       audio.blip('click');
@@ -306,6 +315,7 @@ function rummageAct(o) {
       if (o.type === 'fridge') return fridgeLook(o);
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
+      if (trash) return o.id === 'breakBin' ? binDig() : digResult(o);
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
       if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
@@ -383,7 +393,7 @@ function openUp(o, quiet) {
       room: (roomAt(o.cx, o.cz) || {}).key || null,
       at: G.t,
     });
-    if (!quiet) ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
+    if (!quiet) ui.note('box', (RUMMAGE_TRASH.has(o.type) ? 'In the rubbish: ' : 'Inside: ') + S.desc + '.', 'onto');
     if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {

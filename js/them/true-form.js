@@ -238,7 +238,7 @@ function trueFormTick(n, dt) {
   if (
     !P.onMap ||
     (home && !tf.cornered) ||
-    G.t - tf.lastSeen > (darkNow() ? EVIDENCE.fight.loseSight * SPEEDS[1] : 3) || // at night it takes longer to lose it
+    G.t - tf.lastSeen > (darkNow() ? EVIDENCE.fight.loseSight * SIM_SPD : 3) || // at night it takes longer to lose it
     (!tf.cornered && G.t - tf.t0 > (tf.long || 12)) ||
     crowd
   ) {
@@ -301,7 +301,7 @@ function mayHuntYou() {
   return s >= 5 || (s >= 4 && a >= 30) || (s >= 3 && a >= 50) || a >= 70 || huntForced();
 }
 // a night THEY come whatever the odds: you killed one where nobody saw, or a confrontation left it doubting you
-const huntForced = () => G.huntNights > 0 || G.huntNight === tonightId();
+const huntForced = () => G.huntNights > 0 || (G.huntNight > 0 && G.huntNight === tonightId());
 function witnessTrue(w, n) {
   if ((w.def && w.def.fbi) || w.thrall) return; // they've seen worse
   const tf = n.trueForm;

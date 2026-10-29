@@ -1,6 +1,6 @@
 //@ game/loop — Per-frame simulation, main loop, boot
-//@ Defines: hurrying, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
-//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, game/state, taken/taken, core/util, horror/layer, world/grid, world/vision, …
+//@ Defines: hurrying, fightOn, stirNear, clockSpeed, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
+//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, sim/actions, game/state, taken/taken, world/grid, data/tuning, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── per-frame simulation
 let lightT = 0,
@@ -22,9 +22,49 @@ function hurrying() {
     !moveInput()
   );
 }
+// a fight holds the clock back to the body's own pace, so every wind-up, blow and dodge takes the real seconds it always
+// did: one of THEM loose close by, a blow on its way, someone running you down, anything in the air
+function fightOn() {
+  const P = PLAYER;
+  if (HUNT.on || ARREST.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
+  if (P.queue[0] && P.queue[0].swing) return true;
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap) continue;
+    if (c.tele && c.tele.end > G.t) return true;
+    if (c.trueForm && (c.trueForm.atk || Math.hypot(c.x - P.x, c.z - P.z) < 12)) return true;
+    if (c.queue[0] && c.queue[0].chase === P) return true;
+  }
+  return false;
+}
+// asleep or out cold, and something wrong close by: someone in your flat, one of THEM about, THEY on THEIR way for you.
+// The night slows (STIR_SLOW), so you see it coming.
+function stirNear() {
+  const P = PLAYER;
+  if (!G.sleeping || G.away || !P.onMap) return false;
+  if ((G.attack && G.attack.target === 'player') || (G.takeAt && G.takeAt - G.t < 60)) return true;
+  const pr = roomAt(P.x, P.z),
+    home = !!(pr && pr.home);
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap) continue;
+    const d = Math.hypot(c.x - P.x, c.z - P.z);
+    if (d > 12) continue;
+    if (c.trueForm || c.breakIn || c.raiding || c.riteBy || (c.tell && c.tell.watch)) return true;
+    if (home && d < 9) {
+      const r = roomAt(c.x, c.z);
+      if (r && r.home) return true; // someone in your flat
+    }
+  }
+  return false;
+}
+function clockSpeed() {
+  if (G.speed === 0) return 0;
+  if (G.sleeping || G.away) return awaySpeed() * (stirNear() ? STIR_SLOW : 1);
+  return SPEEDS[hurrying() ? 2 : 1];
+}
 function simStep(dtReal, spdOver) {
-  const spd =
-    spdOver != null ? spdOver : G.speed === 0 ? 0 : G.sleeping || G.away ? awaySpeed() : SPEEDS[hurrying() ? 2 : 1];
+  const fight = spdOver == null && !G.sleeping && !G.away && fightOn();
+  BODY = fight ? 1 : 1 / CLOCK;
+  const spd = spdOver != null ? spdOver : fight && G.speed ? SPEEDS[1] / CLOCK : clockSpeed();
   if (spd > 0) SIM_SPD = spd;
   const dtg = dtReal * spd;
   if (dtg > 0) {
@@ -42,7 +82,7 @@ function simStep(dtReal, spdOver) {
       if (G.away && G.t >= G.away.until) comeBack();
       if (PLAYER.onMap) {
         stepChar(PLAYER, sub);
-        driveTick(sub);
+        driveTick(sub * BODY); // your own feet: body minutes
       }
       if (ARREST.on) arrestTick(sub);
       for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, sub);
@@ -96,7 +136,7 @@ function simStep(dtReal, spdOver) {
   }
   for (const c of CHARS)
     if (c.onMap) {
-      if (spd > 0) animate(c, dtReal, dtg);
+      if (spd > 0) animate(c, dtReal, dtg * BODY);
       updateShown(c, dtReal);
     }
   for (const d of DOORS) {
@@ -127,7 +167,7 @@ function simStep(dtReal, spdOver) {
     const want = d.want || (d.pairL && d.pairL.want) || (d.pairR && d.pairR.want);
     // it swings open at the pace of a hand pushing it (about a third of a second at normal speed), and falls to faster
     d.open = clamp(
-      d.open + (want ? Math.max(dtReal * 3.4, dtg * 1.7) : -Math.max(dtReal * 5, dtg * 3)),
+      d.open + (want ? Math.max(dtReal * 3.4, dtg * BODY * 1.7) : -Math.max(dtReal * 5, dtg * BODY * 3)),
       d.ajar || d.slack > G.t ? AJAR.open : 0,
       1,
     );
@@ -250,9 +290,10 @@ function frame(now) {
   try {
     const preview = !G.started;
     if (preview) {
-      SIM_SPD = 1.2;
-      G.t += dtReal * 1.2;
-      for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, dtReal * 1.2);
+      SIM_SPD = 1.2 * CLOCK;
+      BODY = 1 / CLOCK;
+      G.t += dtReal * SIM_SPD;
+      for (const n of CHARS) if (!n.isPlayer) npcUpdate(n, dtReal * SIM_SPD);
       for (const c of CHARS)
         if (c.onMap) {
           animate(c, dtReal, dtReal);
@@ -318,6 +359,7 @@ function frame(now) {
       updateFx(dtReal);
       if (!CAP.on) updateHud(dtReal);
       photoHintTick(dtReal);
+      passOutLids(dtReal);
     }
   } catch (err) {
     console.error(err);

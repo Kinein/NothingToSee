@@ -125,7 +125,7 @@ function autonomy(dt) {
   G.autoT += dt;
   if (G.autoT < 4) return;
   G.autoT = 0;
-  if (cur && cur.sleep && cur.stage === 'run' && N.bladder < 9 && inReach({ obj: OBJ_BY_ID.wcHome })) {
+  if (cur && cur.sleep && !cur.passout && cur.stage === 'run' && N.bladder < 9 && inReach({ obj: OBJ_BY_ID.wcHome })) {
     const wc = OBJ_BY_ID.wcHome,
       bed = cur.obj;
     cur.cancel = true;

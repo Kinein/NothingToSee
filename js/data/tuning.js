@@ -1,13 +1,22 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, PSY, BLADDER, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FOE_HP, …
+//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, NEEDS, PSY, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
 
-// ── Time and movement (sim/core)
-const WALK = 1.15;                 // tiles per game minute
-const SPEEDS = [0, 2, 5, 12];      // game minutes per real second
-const SLEEP_SPEED = 45;
+// ── Time and movement (sim/core, game/loop)
+// The clock runs CLOCK × as fast as bodies do. Walking, running and the short things people do (a coffee, a word, the
+// toilet) are timed in body minutes, BODY of a game minute (sim/actions), so they take the real seconds they always
+// took while the day goes by quicker. A fight holds the clock back to the body's pace (game/loop fightOn). Talk is
+// TALK × quicker than that. Past BODY_ACT minutes an action's own time runs with the clock (a nap, the TV, a shift).
+const CLOCK = 1.25;
+const TALK = 1.15;
+const BODY_ACT = 20;
+const WALK = 1.15;                 // tiles per body minute
+const SPEEDS = [0, 2 * CLOCK, 5 * CLOCK, 12 * CLOCK]; // game minutes per real second: normal, a quiet stretch hurried
+const AWAY_SPEED = 45 * CLOCK;     // held in the cells: the hours fly
+const SLEEP_SPEED = (AWAY_SPEED * 4) / 3; // asleep, passed out, knocked cold: a third quicker again
+const STIR_SLOW = 0.5;             // asleep, and something wrong close by (in your flat, one of THEM near): this × as fast
 const PHOTO_RANGE = 11;
 // direct control: every number the keyboard play depends on, in one place (distances in tiles, angles in degrees, times in game minutes unless marked)
 const CTRL = {
@@ -44,7 +53,10 @@ const CTRL = {
 // ── Work and damage (sim/core, player/work, combat/hits)
 // the work bar: +30 on sitting down (once an hour), +25/h working, −9/h away. Empty, and you're let go: no second chances,
 // but it takes most of a shift away from the desk to get there.
-const WORK = { sit: 20, fill: 25, drain: 16, low: 30 };
+// fresh: where the bar starts each shift (from 17:00 on, as if it were already morning). from/to: the hours your desk
+// lets you sit down to work, in game minutes; outside them there's nobody in and no work
+const WORK = { sit: 20, fill: 25, drain: 16, low: 30, fresh: 75, from: 8 * 60, to: 17 * 60 };
+const MAD_SUS = 60; // suspicion of you at which someone thinks you're mad: the full meter on the board, the clinic's count
 const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18, thrown: 18, sting: 3 };   // what a blow costs your health
 // the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
 // He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game
@@ -70,7 +82,11 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50 };
+// passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
+// `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
+const OUT = { wake: 50, rest: 0.67, blink: 170 };
+const BED = { energy: 13.5, stress: -5 };   // a night in your own bed, per game hour (play/verbs sleepAct)
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
 // what you happen to hear. Every slip (one of THEM changing for a moment, anyone at their secret) is heard from within
@@ -138,13 +154,13 @@ const EVIDENCE = {
   oddRate: 0.7,                 // ordinary people who carry one innocent oddity: one card, in one frame, and it holds up
   cleanAt: 50,                  // from here THEY move THEIR things and tidy up after THEMSELVES
   witnessDays: 2,               // someone who saw it change remembers it this long
+  scare: 2.4,                   // walk this close to someone at their habit (THEIRS, or a person's secret) and they break off
   // the confrontation (play/confrontation): a fail makes everyone listening `failSus` warier of you; after IT changes in
   // public, people go home early for `fearMins`
   cf: { failSus: 15, fearMins: 1440 },
   aware: { privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
-  come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long
   saved: 25,                    // suspicion off a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM

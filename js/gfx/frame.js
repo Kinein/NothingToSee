@@ -401,7 +401,7 @@ function composite() {
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, CAP.fx.lid);
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0)); // a scene's lids, or yours, passed out
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
     if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
     gl.uniform1f(u.uNight, HX.night);

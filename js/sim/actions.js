@@ -1,10 +1,19 @@
 //@ sim/actions — The action queue shared by player and NPCs
-//@ Defines: ACT_ID, SIM_SPD, mkAct, TUCK, objSlots, chooseSlot, enqueue, hardReset, cancelAll, finishAct, runAct, SIT_TALK, talkSeat, talkApproach, STEP_MAX, lineFree, …
+//@ Defines: ACT_ID, SIM_SPD, BODY, actPace, mkAct, TUCK, objSlots, chooseSlot, enqueue, hardReset, cancelAll, finishAct, runAct, SIT_TALK, talkSeat, talkApproach, …
 //@ Uses:    core/util, data/tuning, ui/interface, sim/core, world/paths, sim/movement, world/objects, sim/seat-moves, player/needs, town/suspicion
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── actions (shared by player and NPCs)
 let ACT_ID = 0;
 let SIM_SPD = SPEEDS[1]; // game minutes per real second right now
+let BODY = 1 / CLOCK; // body minutes per game minute right now: 1 while a fight holds the clock back (game/loop simStep)
+// how fast an action's own time runs, per game minute. The short ones take the real seconds they always did; past
+// BODY_ACT minutes the rest runs with the clock. Sleep, a shift and anything that waits for something: the clock.
+function actPace(a) {
+  if (a.long || a.sleep || a.dur == null || !(a.dur > 0)) return 1;
+  const k = a.kind === 'talk' ? BODY * TALK : BODY,
+    s = Math.min(a.dur, BODY_ACT);
+  return a.dur / (s / k + a.dur - s);
+}
 function mkAct(o) {
   return Object.assign(
     { id: ++ACT_ID, stage: 'init', t: 0, waitT: 0, icon: 'dots', label: '…', interruptible: true },
@@ -361,7 +370,8 @@ function runAct(c, a, dt) {
       a.t = 0;
       return;
     }
-    a.t += dt;
+    const pd = dt * actPace(a);
+    a.t += pd;
     c.anim = a.anim || 'use';
     if (a.kind === 'talk') {
       c.tdir = Math.atan2(a.target.x - c.x, a.target.z - c.z);
@@ -375,7 +385,7 @@ function runAct(c, a, dt) {
         return;
       }
     }
-    if (a.fx && c.isPlayer) applyNeedFx(a.fx, dt);
+    if (a.fx && c.isPlayer) applyNeedFx(a.fx, pd); // the same good done, however long it took on the clock
     if (a.onTick) a.onTick(c, a, dt);
     if (a.stage !== 'run') return;
     const met =

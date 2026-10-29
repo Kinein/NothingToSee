@@ -1,66 +1,9 @@
-//@ town/company — Come with me; the witnesses THEY go after at night, and standing guard for one
-//@ Defines: resolveCome, followAct, endFollow, witnessNight, witnessTick, recant, witnessSaved, tailTick, tailAct
-//@ Uses:    sim/core, ui/interface, core/util, sim/actions, data/tuning, town/suspicion, world/paths, sim/movement, data/lines, them/proofs, …
+//@ town/company — The witnesses THEY go after at night, and standing guard for one; THEIR people tailing you
+//@ Defines: witnessNight, witnessTick, recant, witnessSaved, tailTick, tailAct
+//@ Uses:    sim/core, ui/interface, them/proofs, core/util, world/paths, sim/actions, them/awareness, town/cast, world/grid, them/moves, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── company. Anyone who doesn't find you weird comes with you for an hour, and stands in the crowd when you
-// call someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
-// witness. Lizards buy them off, aliens wipe it out of their heads, the dead make sure. Be outside their door, and it's
-// you THEY meet.
-function resolveCome(n) {
-  const F = G.follower && NPC[G.follower.id];
-  if (F && F !== n) endFollow(F, true);
-  if (n.sus >= EVIDENCE.come.sus || asleep(n) || n.fleeing) {
-    ui.say(n, pick(COME_WITH.no), 3);
-    return;
-  }
-  ui.say(n, pick(COME_WITH.yes), 3);
-  G.follower = { id: n.id, until: G.t + EVIDENCE.come.mins };
-  for (const a of n.queue) a.cancel = true;
-  enqueue(n, followAct(n));
-}
-// a step behind you, wherever you go, for the hour
-function followAct(n) {
-  return mkAct({
-    kind: 'wait',
-    label: 'With you',
-    icon: 'walk',
-    dur: null,
-    anim: 'idle',
-    interruptible: false,
-    onStart: (c, a) => (a.rp = 99),
-    onTick: (c, a, dt) => {
-      const F = G.follower,
-        P = PLAYER;
-      if (!F || F.id !== c.id || G.t > F.until || !P.onMap || G.away || G.sleeping || c.fleeing) {
-        a.cancel = true;
-        c.path = null;
-        c.moving = false;
-        endFollow(c);
-        return;
-      }
-      const d = Math.hypot(P.x - c.x, P.z - c.z);
-      if (d < 1.8) {
-        c.path = null;
-        c.moving = false;
-        c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-        return;
-      }
-      a.rp += dt;
-      if (a.rp > 0.6 || !c.path || c.pi >= c.path.length) {
-        a.rp = 0;
-        const t = nearestWalkable(P.x, P.z, c, 2);
-        if (t) setPath(c, t[0], t[1]);
-      }
-      c.run = d > 5;
-      followPath(c, dt);
-    },
-  });
-}
-function endFollow(c, quiet) {
-  if (!G.follower || G.follower.id !== c.id) return;
-  G.follower = null;
-  if (!quiet && c.onMap && !asleep(c)) ui.say(c, pick(COME_WITH.bye), 2.6);
-}
+// ───────────── witnesses. THEY know who saw: at night THEY go after a witness. Lizards buy them off, aliens wipe it out
+// of their heads, the dead make sure. Be outside their door, and it's you THEY meet.
 // ── at 20:00: tonight one of THEM goes after somebody who saw it change
 function witnessNight() {
   G.witVisit = null;
@@ -142,8 +85,7 @@ const theirPeople = () =>
       !asleep(w) &&
       !w.fleeing &&
       !w.engaged &&
-      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)) &&
-      !(G.follower && G.follower.id === w.id),
+      (bought(w) || G.chipped[w.id] || w.marked || (G.control && G.control.who === w.id)),
   );
 function tailTick() {
   const T = EVIDENCE.tail,
