@@ -27,8 +27,7 @@ function workTick(dt) {
         ui.float(PLAYER, '+' + WORK.sit, 'good');
       }
     }
-    const sb = stressBand();
-    G.workBar = Math.min(100, G.workBar + ((WORK.fill * dt) / 60) * (sb >= 2 ? 0.5 : sb === 1 ? 0.75 : 1));
+    G.workBar = Math.min(100, G.workBar + (WORK.fill * dt) / 60);
     G.awayT = 0;
     G.workWarned = false;
   } else {
@@ -102,7 +101,6 @@ function newDay() {
   G.momToday = false;
   G.mailToday = false;
   G.overtimeToday = false;
-  if (PLAYER.needs.stress < 30) G.stressFloor = Math.max(0, G.stressFloor - 3); // a calm day eases the floor
   for (const n of CHARS) if (!n.isPlayer && !n.def.stranger) n.sus = Math.max(0, n.sus - 3);
   G.rainDay = chance(0.34);
   G.rainAmt = rand(0.5, 1);

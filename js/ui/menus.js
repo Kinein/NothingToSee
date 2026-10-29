@@ -1,6 +1,6 @@
 //@ ui/menus — Interaction menus for objects, people, items
 //@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
-//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, gfx/portraits, play/stashes, player/needs, world/objects, town/cast, …
+//@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, world/objects, player/needs, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
 function opt(label, icon, fn, dis) {
@@ -102,7 +102,6 @@ function objMenu(o) {
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (c.needs.stress > 65) {
-                  addStress(6);
                   ui.note('mirror', 'Your reflection lagged', 'bad');
                   audio.sting('whisper');
                 } else ui.float(c, 'Tired', '');
@@ -187,7 +186,6 @@ function objMenu(o) {
                   if (!ok) return;
                   const wrong = G.phoneRing && G.phoneRing.wrong;
                   G.phoneRing = null;
-                  addStress(12);
                   ui.note(
                     'phone',
                     wrong
@@ -329,7 +327,7 @@ function objMenu(o) {
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (chance(G.faction === 'aliens' ? 0.45 : 0.15)) {
-                  addStress(6);
+                  if (G.faction === 'aliens') psyMark('sign');
                   ui.note('ear', 'Clicks. Counting.', 'onto');
                   G.leads.push('Server rack clicks in patterns');
                 } else ui.note('ear', 'Just fans', '');
@@ -376,7 +374,7 @@ function objMenu(o) {
                 if (G.mailToday) return ui.note('mail', 'Empty', '');
                 G.mailToday = true;
                 if (G.aware >= 40 && chance(0.5)) {
-                  addStress(10);
+                  psyMark('sign');
                   ui.note('mail', 'A photo of your door. From inside.', 'bad');
                   audio.sting('whisper');
                 } else ui.note('mail', pick(MAIL), '');
@@ -396,7 +394,7 @@ function objMenu(o) {
             useP(pc, 'Browse', 'pc', {
               dur: 30,
               anim: 'type',
-              fx: { stress: 10, energy: -2 },
+              fx: { energy: -2 },
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (chance(0.45)) {
@@ -424,7 +422,7 @@ function objMenu(o) {
                 if (!ok) return;
                 const below = them().find((m) => m.under);
                 if (below && G.faction === 'lizards') {
-                  addStress(6);
+                  psyMark('sign');
                   ui.note('ear', 'Breathing down there. Slow. Warm.', 'onto');
                   G.leads.push('Someone goes down the drain behind Pell’s');
                 } else ui.note('ear', 'Water. Rats.', '');
@@ -463,7 +461,6 @@ function objMenu(o) {
             useP(o, 'Dig', 'trash', {
               dur: 6,
               anim: 'dig',
-              fx: { stress: 2 },
               onEnd: (c, a, ok) => {
                 if (ok) digResult(o);
               },
@@ -471,6 +468,17 @@ function objMenu(o) {
           ),
         ),
       );
+    // falls through: behind the dumpster, or up against a tree in the park, you could get away with it
+    case 'tree':
+      if (peeSpot(o))
+        ops.push(
+          opt(
+            'Pee',
+            'toilet',
+            Q(() => peeAct(o)),
+            PLAYER.needs.bladder > 80 ? 'Don’t need to' : null,
+          ),
+        );
       break;
     case 'payphone':
       ops.push(
@@ -570,21 +578,13 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt('Confront', 'confront', () => openConfront(n), n.sus >= 85 ? 'Not listening' : null)
+      ? opt(
+          'Confront',
+          'confront',
+          () => openConfront(n),
+          tooShaken() ? 'Too shaken' : n.sus >= 85 ? 'Not listening' : null,
+        )
       : opt('Attack', 'fist', () => playerMelee(n));
-  if (tooShaken())
-    return {
-      title: n.trueForm ? '???' : n.def.stranger ? 'Stranger' : n.name,
-      img: n.trueForm ? null : getPortrait(n),
-      icon: 'nerve',
-      sub: 'You can’t face anyone like this',
-      // you can't talk calmly, but you can still shout it at them
-      ops: [opt('Too shaken', 'nerve', null, 'Calm down')].concat(
-        !n.trueForm && !n.def.stranger && !n.exposed && !n.surrendered && n.id !== 'lenny' && earshot(n).length
-          ? [cfOpt()]
-          : [],
-      ),
-    };
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   const hit = (label, icon) => opt(label, icon, () => playerMelee(n));
   // its true form: no menu, the key is the blow. On its knees, there's nothing left to do but wait.
@@ -661,13 +661,12 @@ function menuForChar(n) {
 }
 // the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
 function askMenu(n) {
-  const T = (k) => () => enqueue(PLAYER, talkAct(n, k)),
-    st = PLAYER.needs.stress;
+  const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   return {
     title: n.name,
     img: getPortrait(n),
     ops: [
-      opt('Gossip', 'ear', T('gossip'), st >= 60 ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
+      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
       opt(
         'Come with me',
         'walk',
@@ -804,7 +803,7 @@ function bagItem(it) {
   const home = itemHome(it),
     saw = itemSeenWith(it);
   removeItem(it);
-  addStress(3);
+  if (it.by && !it.innocent) psyMark('sign');
   if (it.by) {
     if (!G.factionKnown) revealFaction();
     takeProofItem({
@@ -920,7 +919,7 @@ const ITEMS_INV = [
           dur: 2,
           anim: 'drink',
           prop: 'can',
-          fx: { energy: 780, stress: 180, bladder: -300 },
+          fx: { energy: 780, bladder: -300 },
         }),
       );
     },

@@ -201,12 +201,7 @@ function encPullAct(v) {
     dur: 0.6,
     anim: 'use',
     interruptible: false,
-    check: () =>
-      tooShaken()
-        ? 'Too shaken'
-        : G.enc && G.enc.vic.includes(v.id) && v.riteBy && inReach({ char: v })
-          ? null
-          : 'Too far',
+    check: () => (G.enc && G.enc.vic.includes(v.id) && v.riteBy && inReach({ char: v }) ? null : 'Too far'),
     onStart: (c) => {
       c.tdir = Math.atan2(v.x - c.x, v.z - c.z);
     },
@@ -408,7 +403,6 @@ function encMark(E, v, n, seen, kneel) {
   encAftermath(E, v, kneel);
   if (seen) {
     // you watched it happen and did nothing
-    addStress(6);
     const what =
       E.fac === 'aliens'
         ? ' was opened up and put back. Doesn’t remember.'

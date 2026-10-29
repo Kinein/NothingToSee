@@ -67,5 +67,6 @@ function boltHits(b) {
   }
   if (n) ui.bubble(n, 'exclaim', 'speech', 1.4);
   G.lastHitBy = n ? n.id : null;
+  psyMark('fight');
   hurt(b.dmg, true);
 }

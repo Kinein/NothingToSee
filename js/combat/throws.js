@@ -147,6 +147,7 @@ function throwLand(th) {
   if (d < 6) HX.shake = Math.max(HX.shake || 0, 0.25);
   if (P.onMap && !G.away && d < RANGED.hit) {
     G.lastHitBy = th.by.id;
+    psyMark('fight');
     hurt(HURT.thrown, true);
     if (!G.over && P.onMap) knockBack(P, th, 0.8);
   } else if (P.onMap && d < 3 && th.arc) ui.float(P, 'Dodged', 'good');
@@ -228,7 +229,7 @@ function swarmSting(s) {
   G.health = Math.max(0, G.health - HURT.sting);
   G.sickNext = true;
   G.lastHitBy = s.by.id;
-  addStress(1.5);
+  psyMark('fight');
   R.pulse = Math.max(R.pulse || 0, 0.35);
   ui.float(PLAYER, '−' + HURT.sting, 'bad');
   audio.hx('sting', 0, 0.45);

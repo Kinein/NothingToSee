@@ -378,7 +378,7 @@ function bloomPasses() {
 }
 function composite() {
   const stress = G && G.started && PLAYER ? PLAYER.needs.stress : 20;
-  const bad = clamp((stress - 58) / 42, 0, 1);
+  const bad = clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
   const sleep = G && G.sleeping ? 1 : 0;
   R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
   pass(R.comp, null, (u) => {

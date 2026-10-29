@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, STRESS_K, SHAKEN_LOCK, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FOE_HP, …
+//@ Defines: WALK, SPEEDS, SLEEP_SPEED, PHOTO_RANGE, CTRL, WORK, HURT, POLICE, NEEDS, PSY, BLADDER, TIP, ATTACK_ODDS, HORROR_MIX, AWARE_STEPS, FOE_HP, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -56,13 +56,20 @@ const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk:
 const NEEDS = [
   { k: 'hunger', n: 'Hunger', icon: 'food', rate: -5.6 },
   { k: 'energy', n: 'Energy', icon: 'bolt', rate: -4.0 },
-  { k: 'bladder', n: 'Bladder', icon: 'toilet', rate: -8.0 },
+  { k: 'bladder', n: 'Bladder', icon: 'toilet', rate: -10.0 },
   { k: 'stress', n: 'Psychic', icon: 'nerve', rate: -1.0, inv: true },
 ];
-// Stress builds slowly, out of the town's small wrongness: the dark, a noise, a face that slips, Lenny's theories.
-// Facing it head-on (a fight, a confrontation, being grabbed) shakes you less than you'd think.
-const STRESS_K = { rate: 0.6, event: 0.75 };   // multipliers on every rise: per-hour drift, and one-off jolts
-const SHAKEN_LOCK = 80;                        // from here (breaking) you can't face anyone: no talking, no fighting
+// Psychic (100 − stress) falls in a few big steps, never in small ones, and the steps never take it all the way down
+// (player/needs psyDrop): to `sign` when you see THEIR thing or a slight sign, to `form` at a true form, to `fight` when
+// you trade blows with one. Near IT it drains, per game hour: `fast` by a true form or something wrong going on within
+// `near` tiles, `slow` within `things` tiles of THEIR things; the dark at night drifts it down by `dark`.
+// What it does: under `visions` rare visions · under `shaky` more of them, red at the edges and your hands shake (no
+// photos) · under `mute` no gossip and no confronting (you can still fight) · at 0 a panic attack, out of it at `after`.
+const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9, things: 3.5, visions: 60, shaky: 40, mute: 20, after: 40 };
+// the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
+// public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
+// `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
 // what you happen to hear. The first few go by unnoticed; after that only now and then, only from close by,

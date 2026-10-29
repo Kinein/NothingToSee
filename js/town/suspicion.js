@@ -74,7 +74,6 @@ function ridicule(n) {
     addSus(b, 10);
     ui.bubble(b, 'laugh', 'speech', 2);
   }
-  addStress(5); // ridiculed, and called a lunatic
   n.danger = Math.max(dangerFloor(n), n.danger - 25);
   echo('ridicule', { x: n.x, z: n.z, who: n.id });
 }

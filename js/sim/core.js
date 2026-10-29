@@ -11,7 +11,7 @@ const CHARS = [];
 let PLAYER = null;
 const NPC = {};
 let FOG_COL = [0.03, 0.035, 0.06];
-const SHADE = { on: false, c: null, t: 0 };
+const SHADE = { on: false, c: null, t: 0, kind: 'shade' }; // a vision: shade · run · watch (horror/visions)
 
 const dayNo = (t = G.t) => Math.floor(t / 1440) + 1;
 const tod = (t = G.t) => ((t % 1440) + 1440) % 1440;

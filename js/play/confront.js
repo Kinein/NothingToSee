@@ -52,7 +52,6 @@ function surrender(n, why) {
     'Dropped the act ' + (why === 'beaten' ? 'after a beating' : 'in front of everyone') + '. On its knees, waiting.',
     { by: 'you' },
   );
-  addStress(why === 'beaten' ? 3 : 2);
   echo('exposed', { x: n.x, z: n.z, who: n.id });
   audio.sting('onto');
 }
@@ -112,7 +111,7 @@ const SOC = {
     icon: 'ear',
     dur: 15,
     mid: true,
-    fx: { stress: 10 },
+    fx: {},
     res: () => lennyHint(),
   },
   feed: {
@@ -154,7 +153,6 @@ function observeAct(n) {
     icon: 'eye',
     dur: 8,
     anim: 'stare',
-    fx: { stress: 4 },
     check: () => (n.onMap && n.shown > 0.5 && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 9 ? null : 'Can’t see them'),
     onTick: (c, a, dt) => {
       c.tdir = Math.atan2(n.x - c.x, n.z - c.z);

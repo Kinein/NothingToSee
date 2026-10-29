@@ -1,6 +1,6 @@
 //@ combat/melee — Blows out in the street: THEIR telegraphed strikes, yours, people punching
 //@ Defines: privateFight, teleSet, teleEnd, lungeChar, foeWind, foeCalm, foeMelee, foeStrike, punchAct, brawl, knockBack, fightOutcome, earshot, viewLine, perceptionTick, clinicCheck, …
-//@ Uses:    sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, player/needs, world/grid, town/arrest, …
+//@ Uses:    sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, world/grid, town/arrest, horror/layer, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── blows, out in the street. Nothing stops for a fight: Space swings, and your feet do the dodging.
 // THEIR blow is shown before it comes: a red patch on the ground where it will land, darkening as it winds up. Be out of
@@ -147,9 +147,9 @@ function foeStrike(n, A, held) {
     return;
   }
   const blow = (HURT[G.faction] || 18) * (G.loose ? 1.2 : tf.private ? EVIDENCE.fight.privateBlow : 1);
+  psyMark('fight');
   G.lastHitBy = n.id; // an id, never the person: G is saved whole
   ui.bubble(n, 'exclaim', 'speech', 1.4);
-  addStress(3);
   hurt(Math.round(blow), true);
   if (!G.over && P.onMap) knockBack(P, n, 0.9);
 }
@@ -232,7 +232,7 @@ function fightOutcome(n) {
     ui.say(n, pick(COP_HIT), 2.6);
     return arrestStart(n); // no warning for that
   }
-  addStress(2);
+  if (n.trueForm) psyMark('fight');
   G.fights = (G.fights || 0) + 1;
   const tf = n.trueForm;
   if (tf) {
@@ -366,7 +366,6 @@ function perceptionTick(dt) {
     if (d < 3.2 && n.sus >= 25 && n.remarkDay !== dayNo() && !n.tell && n.id !== 'lenny' && !asleep(n)) {
       n.remarkDay = dayNo();
       ui.say(n, viewLine(n), 3);
-      if (n.sus >= 85) addStress(2);
     }
   }
 }
@@ -380,7 +379,6 @@ function clinicCheck() {
   }
   if (G.clinicDay && G.clinicDay === dayNo() - 1) return gameOver('committed');
   G.clinicDay = dayNo();
-  addStress(8);
   setTimeout(() => {
     ui.note('phone', 'Mom called. People phoned her.', 'bad');
     audio.blip('ring');

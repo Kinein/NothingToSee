@@ -128,6 +128,7 @@ function playerPhoto() {
   if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
+  if (shaky()) return shakenNote('Your hands shake too much for a photo'); // under 40: you can still take things
   cancelAll(P);
   enqueue(
     P,
@@ -312,7 +313,6 @@ function takePhoto(tg) {
     const vision = (SHADE.on && SHADE.c && inFrame(SHADE.c.x, SHADE.c.z)) || chars.some((n) => n.vis && !n.tell);
     if (vision) {
       const pr = addPrint({ kind: 'nothing', what: 'Nothing', where: placeName(ax, az) });
-      addStress(3);
       ui.card({ title: 'Nothing', img: printImage(pr), stamp: 'NOTHING' });
     } else {
       const who = tg.char || chars[0] || null;

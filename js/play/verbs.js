@@ -1,6 +1,6 @@
 //@ play/verbs — What you can do: snooping, eating, Lenny, chat
-//@ Defines: DESK_OWNER, chain, nextAlarm, sleepAct, cookChain, snackAct, eatHereAct, vendAct, coffeeAct, toiletAct, showerAct, warmAct, EAT_SEATS, nearSeat, seatedEat, comfortAct, …
-//@ Uses:    sim/core, ui/interface, sim/actions, core/util, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, …
+//@ Defines: DESK_OWNER, chain, nextAlarm, sleepAct, cookChain, snackAct, eatHereAct, vendAct, coffeeAct, toiletAct, showerAct, peeAct, warmAct, EAT_SEATS, nearSeat, seatedEat, …
+//@ Uses:    sim/core, ui/interface, sim/actions, core/util, world/objects, town/suspicion, player/needs, data/tuning, world/grid, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── what you can do ─────────────────────────
 const DESK_OWNER = {
@@ -57,7 +57,6 @@ function sleepAct(bed, nap, alarmAt) {
     onEnd: (c, a) => {
       if (!nap) {
         G.sleeping = false;
-        if (G.t - G.sleepFrom >= 360) G.stressFloor = Math.max(0, G.stressFloor - 6);
         if (G.t - G.sleepFrom >= 240) G.health = Math.min(100, G.health + 10);
         if (G.dayShown !== dayNo()) ui.dayCard();
       }
@@ -110,7 +109,7 @@ function coffeeAct(o) {
     anim: 'drink',
     prop: 'cup',
     need: 'energy',
-    fx: { energy: 140, bladder: -100, stress: 3 },
+    fx: { energy: 140, bladder: -(BLADDER.coffee * 60) / 7 },
   });
 }
 function toiletAct(o) {
@@ -125,8 +124,44 @@ function toiletAct(o) {
   });
 }
 function showerAct(o) {
-  return useP(o, 'Shower', 'shower', { dur: 14, anim: 'shower', fx: { stress: -17 } });
+  return useP(o, 'Shower', 'shower', {
+    dur: 14,
+    anim: 'shower',
+    fx: { stress: -17 },
+    onEnd: (c, a, ok) => {
+      if (ok && G.smelly) {
+        G.smelly = false;
+        ui.note('shower', 'Clean again', 'good');
+      }
+    },
+  });
 }
+// a quick one in a hedge or behind the bins. Anyone who sees it finds you weirder, and while you're at it you're easy
+// to notice: not while you're following someone.
+function peeAct(o) {
+  return useP(o, 'Pee', 'toilet', {
+    dur: BLADDER.pee,
+    anim: 'idle',
+    pee: true,
+    need: 'bladder',
+    onStart: (c) => (c.tdir = Math.atan2(o.cx - c.x, o.cz - c.z)),
+    onTick: (c, a) => {
+      for (const n of CHARS) {
+        if (n.isPlayer || n.def.stranger || a.seen?.has(n) || !npcSeesPlayer(n, 9)) continue;
+        (a.seen || (a.seen = new Set())).add(n);
+        addSus(n, BLADDER.peeSus);
+        ui.bubble(n, 'exclaim', 'speech', 2.5);
+      }
+    },
+    onEnd: (c, a, ok) => {
+      if (!ok) return;
+      c.needs.bladder = 100;
+      if (a.seen && a.seen.size) ui.note('toilet', 'In the bushes · ' + a.seen.size + ' saw', 'bad');
+    },
+  });
+}
+// somewhere out of doors you could get away with it: a tree in the park, a dumpster in the alley
+const peeSpot = (o) => (o.type === 'tree' || o.type === 'dumpster') && !roomAt(o.cx, o.cz);
 function warmAct(o) {
   return useP(o, 'Warm up', 'warm', { dur: 30, anim: 'warm', need: 'stress', fx: { stress: -6 } });
 }
@@ -275,7 +310,7 @@ function deskWork(slack) {
     slack: !!slack,
     dur: slack ? 45 : null,
     until: slack ? null : () => !isWorkday() || tod() >= 17 * 60,
-    fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5, stress: 1.2 },
+    fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5 },
     onStart: () => {
       if (G.awayT > 60 && NPC.hale.onMap && NPC.hale.shown > 0.5 && G.haleSaw) {
         ui.say(NPC.hale, 'Where were you?', 3);
@@ -306,7 +341,6 @@ function tvAct(dur) {
     onTick: (c, a, dt) => {
       if (G.aware >= 25 && !a.faces && chance(dt * 0.02)) {
         a.faces = true;
-        addStress(6);
         ui.note('tv', 'Faces in the static. Watching you watch.', 'bad');
         audio.sting('whisper');
       }
@@ -314,7 +348,6 @@ function tvAct(dur) {
       if (h >= 0 && h < 4.5 && !a.late && chance(dt * 0.02)) {
         a.late = true;
         if (G.aware >= 40) {
-          addStress(12);
           ui.note('tv', 'Static. Then your name.', 'bad');
           audio.sting('whisper');
         }

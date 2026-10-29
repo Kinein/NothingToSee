@@ -20,13 +20,13 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  173 lines
+### data/tuning  ·  #2  ·  180 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
-- **Defines (24):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `POLICE` `NEEDS` `STRESS_K` `SHAKEN_LOCK` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `FIGHT_DIFF` `FIGHT` `EVIDENCE` `AJAR`
+- **Defines (24):** `WALK` `SPEEDS` `SLEEP_SPEED` `PHOTO_RANGE` `CTRL` `WORK` `HURT` `POLICE` `NEEDS` `PSY` `BLADDER` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `FIGHT_DIFF` `FIGHT` `EVIDENCE` `AJAR`
 - **→ uses:** —
-- **← used by:** 42
+- **← used by:** 47
 
 ### data/lines  ·  #3  ·  220 lines
 
@@ -34,7 +34,7 @@ What people say and read: gossip, Lenny, rumours, news, endings. Change the word
 
 - **Defines (70):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `GOSSIP_SAW` `GOSSIP_BOUGHT` `GOSSIP_LOST` `TOLD_ALL` `LENNY_TOLD` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `COP_WARN` `COP_CHASE` `COP_CATCH` `COP_SLIP` `COP_HIT` `COP_QUIT` `ARENA_RANT` `CONFESS` `MARK_NEWS` `ARENA_END` `ARENA_CROWD` … +10
 - **→ uses:** —
-- **← used by:** 20
+- **← used by:** 19
 
 ## world/
 
@@ -68,7 +68,7 @@ What the player can see: field of view and explored cells
 
 - **Defines (18):** `visTarget` `visCur` `explored` `SIGHT_R` `darkSight` `computeVision` `smoothVision` `TW` `TH` `texLight` `texVis` `MAPS` `solidForExpand` `EXP_SOLID` `EXP_OUT` `expandMaps` `visAt` `lumAt`
 - **→ uses:** world/grid, world/light-map, world/objects
-- **← used by:** 38
+- **← used by:** 39
 
 ### world/paths  ·  #20  ·  178 lines
 
@@ -213,7 +213,7 @@ Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and
 renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 
 - **Defines (6):** `renderFrame` `drawMask` `pass` `bindTex` `bloomPasses` `composite`
-- **→ uses:** gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, core/util, world/light-map, gfx/people, town/traffic-weather … +7
+- **→ uses:** gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, core/util, world/light-map, gfx/people, town/traffic-weather … +8
 - **← used by:** 3 (ui/interface, game/loop, dev/devtools)
 
 ### gfx/portraits  ·  #26  ·  342 lines
@@ -292,20 +292,20 @@ The action queue shared by player and NPCs
 
 ## player/
 
-### player/needs  ·  #34  ·  186 lines
+### player/needs  ·  #34  ·  213 lines
 
 The player body: needs, Psychic, accidents, passing out, panic
 
-- **Defines (15):** `lvl` `setNeed` `applyNeedFx` `bump` `addStress` `tooShaken` `shakenNote` `stressBand` `mood` `moodWord` `needsTick` `hunted` `accident` `passOut` `breakdown`
-- **→ uses:** sim/core, ui/interface, sim/actions, data/tuning, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, world/light-map, play/advice, chase/hunt, play/items … +2
-- **← used by:** 35
+- **Defines (21):** `lvl` `setNeed` `applyNeedFx` `bump` `addStress` `psychic` `psyDrop` `psyMark` `tooShaken` `shaky` `shakenNote` `stressBand` `mood` `moodWord` `needsTick` `hunted` `psySees` `psyDrain` `accident` `passOut` `breakdown`
+- **→ uses:** sim/core, data/tuning, ui/interface, sim/actions, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, world/light-map, play/advice, chase/hunt, world/vision … +3
+- **← used by:** 24
 
-### player/work  ·  #35  ·  109 lines
+### player/work  ·  #35  ·  107 lines
 
 The work bar, shifts, getting fired
 
 - **Defines (9):** `playerAtDesk` `inOffice` `workBand` `workTick` `workHit` `workLost` `goodDay` `onTimeCross` `newDay`
-- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, player/needs, audio/sound, town/cast, town/suspicion … +8
+- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, audio/sound, town/cast, town/suspicion, play/oddities … +7
 - **← used by:** 6 (town/npc-update, them/moves, play/stashes, play/advice, ui/hud, game/loop)
 
 ## town/
@@ -358,12 +358,12 @@ Per-frame NPC update
 - **→ uses:** core/util, sim/actions, sim/core, world/objects, town/cast, town/quirks, world/grid, town/daily-plans, ui/interface, them/tells, them/moves, town/talk, world/paths, them/plan … +10
 - **← used by:** 26
 
-### town/arrest  ·  #48  ·  300 lines
+### town/arrest  ·  #48  ·  299 lines
 
 Being arrested, shown on the map
 
 - **Defines (17):** `ARREST` `COP_MESH` `copCarMesh` `arrested` `arrestCarIn` `copCarV` `arrestStart` `arrestCuffed` `arrestEscortTick` `arrestLoad` `arrestRide` `arrestInside` `arrestRelease` `arrestDropOff` `arrestTick` `arrestFrame` `arrestReset`
-- **→ uses:** sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, gfx/gl, world/paths, gfx/renderer, world/grid, them/moves, ui/interface, town/npc-update, sim/movement … +17
+- **→ uses:** sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, gfx/gl, world/paths, gfx/renderer, world/grid, them/moves, ui/interface, town/npc-update, sim/movement … +16
 - **← used by:** 19
 
 ### town/cell  ·  #49  ·  514 lines
@@ -372,30 +372,30 @@ Held in a cell
 
 - **Defines (34):** `CELL` `CELL_YOU` `CELL_ID` `CELL_DOOR_M` `CELL_SKY` `CELL_SKY_E` `CELL_SUN` `CELL_TUBE` `CELL_TUBE_E` `CELL_HAND` `CELL_BOARD` `CELL_CHALK` `CELL_CHALK_E` `awaySpeed` `CELL_POSE` `CELL_COP_POSE` `cellFrame` `cellEnter` `cellExit` `cellPhase` `cellSeat` `cellCopAtDesk` `cellRoute` `cellStep` `cellMood` `cellLights` `CELL_NIGHT` `CELL_NOON` `CELL_GOLD` `cellSky` `cellHand` `cellDraw` `ambushTick` `addNote`
 - **→ uses:** gfx/renderer, sim/core, gfx/station, core/util, world/grid, taken/taken, game/loop, gfx/gl, town/suspicion, world/light-map, audio/sound, world/vision, them/true-form, them/awareness … +11
-- **← used by:** 20
+- **← used by:** 19
 
-### town/suspicion  ·  #50  ·  84 lines
+### town/suspicion  ·  #50  ·  83 lines
 
 Suspicion and danger per person
 
 - **Defines (11):** `addSus` `asleep` `pinned` `dangerFloor` `canPanic` `addDanger` `seesSpot` `bystanders` `reactTo` `ridicule` `hitBack`
-- **→ uses:** sim/core, ui/interface, core/util, them/proofs, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, world/light-map, world/vision, them/true-form, player/needs, sim/actions … +1
+- **→ uses:** sim/core, ui/interface, core/util, them/proofs, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, world/light-map, world/vision, them/true-form, sim/actions, data/tuning
 - **← used by:** 33
 
-### town/fleeing  ·  #51  ·  257 lines
+### town/fleeing  ·  #51  ·  256 lines
 
 Fleeing to hideouts
 
 - **Defines (13):** `HIDEOUTS` `hideoutFor` `flee` `hideAway` `giveUp` `chaseAct` `swingAct` `swingReach` `swingable` `swingFirst` `swingTarget` `playerMelee` `attackKey`
-- **→ uses:** sim/core, sim/actions, ui/interface, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, town/suspicion, combat/melee, sim/movement, gfx/renderer, player/needs … +13
+- **→ uses:** sim/core, sim/actions, ui/interface, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, town/suspicion, combat/melee, sim/movement, gfx/renderer, them/plan … +12
 - **← used by:** 21
 
-### town/doors  ·  #58  ·  90 lines
+### town/doors  ·  #58  ·  89 lines
 
 Broken restroom lock, doors left ajar
 
 - **Defines (7):** `upToNoGood` `ajarChance` `doorFree` `roomSize` `doorPass` `roomWatch` `awkward`
-- **→ uses:** sim/core, data/tuning, core/util, world/grid, ui/interface, town/suspicion, world/objects, town/npc-update, play/raids, play/traps, them/tells, player/needs, audio/sound
+- **→ uses:** sim/core, data/tuning, core/util, world/grid, ui/interface, town/suspicion, world/objects, town/npc-update, play/raids, play/traps, them/tells, audio/sound
 - **← used by:** 1 (game/loop)
 
 ### town/talk  ·  #59  ·  747 lines
@@ -440,12 +440,12 @@ THEIR five-day plan: phases, stages, how it moves on each midnight
 - **→ uses:** sim/core, core/util, ui/interface, gfx/renderer, game/state, them/awareness, audio/sound, sim/actions, town/cast, world/grid, gfx/gl, gfx/world-geometry, town/fleeing, world/objects … +9
 - **← used by:** 35
 
-### them/tells  ·  #43  ·  518 lines
+### them/tells  ·  #43  ·  524 lines
 
 Tells: the small signs THEY give
 
 - **Defines (12):** `npcSeesPlayer` `roomHasOthers` `tryTell` `beginTell` `notifyPing` `endTell` `tellTick` `applyTellAnim` `awardTell` `caughtWatching` `ritualCaught` `revealFaction`
-- **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, world/vision, player/needs, town/suspicion, them/proofs, them/awareness … +10
+- **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, player/needs, world/vision, town/suspicion, them/proofs, them/awareness … +11
 - **← used by:** 20
 
 ### them/proofs  ·  #44  ·  287 lines
@@ -464,7 +464,7 @@ THEIR awareness of you, settled at 06:00
 - **→ uses:** sim/core, town/cast, core/util, ui/interface, town/echoes, data/tuning
 - **← used by:** 27
 
-### them/moves  ·  #46  ·  543 lines
+### them/moves  ·  #46  ·  539 lines
 
 THEIR morning moves: the Bought, Scatter, Destroy, Protect
 
@@ -480,7 +480,7 @@ THEIR people: who THEY own, THEIR mark from day 4, the truth beaten out
 - **→ uses:** sim/core, ui/interface, data/lines, them/moves, data/tuning, them/plan, core/util
 - **← used by:** 4 (gfx/people, sim/pose, combat/brawl, play/arena)
 
-### them/true-form  ·  #52  ·  558 lines
+### them/true-form  ·  #52  ·  556 lines
 
 True form: the change, then hunt or flee
 
@@ -496,7 +496,7 @@ Night attacks
 - **→ uses:** sim/core, core/util, sim/actions, them/plan, world/grid, town/fleeing, play/items, them/awareness, town/cast, town/npc-update, town/echoes, them/true-form, ui/interface, world/paths … +18
 - **← used by:** 4 (player/work, them/true-form, town/company, game/loop)
 
-### them/office-night  ·  #64  ·  720 lines
+### them/office-night  ·  #64  ·  718 lines
 
 The office after dark
 
@@ -506,28 +506,28 @@ The office after dark
 
 ## combat/
 
-### combat/bolts  ·  #53  ·  67 lines
+### combat/bolts  ·  #53  ·  68 lines
 
 Projectiles THEY shoot
 
 - **Defines (4):** `BOLTS` `fireBolt` `boltTick` `boltHits`
-- **→ uses:** sim/core, gfx/renderer, data/tuning, world/grid, core/util, audio/sound, world/light-map, town/fleeing, chase/hunt, taken/taken, ui/interface, combat/hits
+- **→ uses:** sim/core, gfx/renderer, data/tuning, world/grid, core/util, audio/sound, world/light-map, town/fleeing, chase/hunt, taken/taken, ui/interface, player/needs, combat/hits
 - **← used by:** 11
 
-### combat/hits  ·  #54  ·  119 lines
+### combat/hits  ·  #54  ·  118 lines
 
 Taking hits, knockouts, hospital, limbo
 
 - **Defines (6):** `swing` `hurt` `knockOut` `hospital` `goAway` `comeBack`
-- **→ uses:** sim/core, ui/interface, taken/taken, sim/actions, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, combat/melee, sim/pose, player/needs, audio/sound … +9
+- **→ uses:** sim/core, ui/interface, taken/taken, sim/actions, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, combat/melee, sim/pose, audio/sound, ui/pie-menu … +8
 - **← used by:** 8
 
-### combat/melee  ·  #55  ·  394 lines
+### combat/melee  ·  #55  ·  392 lines
 
 Blows out in the street: THEIR telegraphed strikes, yours, people punching
 
 - **Defines (20):** `fightSnapRec` `privateFight` `crowdHelp` `teleSet` `teleEnd` `lungeChar` `foeWind` `foeCalm` `foeMelee` `foeStrike` `punchAct` `brawl` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `thinkMad` `clinicCheck` `privateKill`
-- **→ uses:** sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, player/needs, world/grid, town/arrest, horror/layer, combat/hits, sim/actions, town/cast … +15
+- **→ uses:** sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, world/grid, town/arrest, horror/layer, combat/hits, sim/actions, town/cast, them/awareness … +15
 - **← used by:** 21
 
 ### combat/brawl  ·  #56  ·  162 lines
@@ -538,30 +538,30 @@ Hitting people: the count, onlookers, the police call, out cold
 - **→ uses:** data/tuning, sim/core, core/util, ui/interface, town/suspicion, combat/melee, them/awareness, sim/actions, data/lines, town/fleeing, audio/sound, horror/layer, them/moves, town/npc-update … +5
 - **← used by:** 2 (town/fleeing, combat/melee)
 
-### combat/throws  ·  #57  ·  330 lines
+### combat/throws  ·  #57  ·  331 lines
 
 What THEY throw from further off: furniture, swarms; the red patches on the floor
 
 - **Defines (26):** `THROWN` `SWARMS` `THROWABLE` `THROW_ID` `CB_COL` `foeRanged` `throwPick` `throwStart` `throwTick` `throwFly` `throwLand` `throwMatrix` `swarmOf` `swarmStart` `flyOK` `swarmTick` `swarmSting` `combatTick` `combatClear` `wreckReset` `combatDraw` `SWARM_DARK` `SWARM_GOLD` `SWARM_GLINT` `cbDecal` `combatDecals`
-- **→ uses:** sim/core, data/tuning, core/util, gfx/renderer, horror/layer, audio/sound, world/objects, ui/interface, world/grid, gfx/gl, input/walking, combat/hits, combat/melee, sim/actions … +3
+- **→ uses:** sim/core, data/tuning, core/util, gfx/renderer, horror/layer, audio/sound, world/objects, ui/interface, world/grid, gfx/gl, input/walking, player/needs, combat/hits, combat/melee … +3
 - **← used by:** 10
 
 ## horror/
 
-### horror/director  ·  #63  ·  166 lines
+### horror/director  ·  #63  ·  165 lines
 
 Horror director: daily events by THEIR phase
 
 - **Defines (8):** `clueFaction` `SMELL` `MOVED` `planDay` `sentAfter` `openTick` `lureTick` `lureEnd`
-- **→ uses:** sim/core, core/util, sim/actions, them/plan, data/tuning, town/echoes, them/true-form, ui/interface, gfx/renderer, town/cast, them/moves, town/suspicion, combat/melee, them/awareness … +7
+- **→ uses:** sim/core, core/util, sim/actions, them/plan, data/tuning, town/echoes, them/true-form, ui/interface, gfx/renderer, town/cast, them/moves, town/suspicion, combat/melee, them/awareness … +6
 - **← used by:** 5 (player/work, town/talk, them/office-night, play/verbs, ui/menus)
 
-### horror/visions  ·  #70  ·  155 lines
+### horror/visions  ·  #70  ·  172 lines
 
 Visions
 
-- **Defines (8):** `VISION_FACTIONS` `visionFaction` `hallucinate` `visionDoor` `visionPing` `visionFlicker` `visionNote` `visionShade`
-- **→ uses:** sim/core, core/util, audio/sound, world/grid, town/cast, horror/layer, world/paths, world/vision, data/lines, horror/half-forms-real, horror/night, them/tells, gfx/renderer, town/cell … +3
+- **Defines (12):** `VISION_FACTIONS` `visionFaction` `hallucinate` `visionDoor` `visionPing` `visionFlicker` `visionSpot` `visionFigure` `visionShade` `visionRunner` `visionWatcher` `visionStep`
+- **→ uses:** sim/core, core/util, world/grid, data/tuning, audio/sound, world/vision, horror/layer, world/paths, town/cast, player/needs, horror/half-forms-real, horror/night, them/tells, gfx/renderer … +2
 - **← used by:** 2 (horror/half-forms-real, game/loop)
 
 ### horror/layer  ·  #88  ·  692 lines
@@ -601,7 +601,7 @@ Half-changed for a second
 Half-changed for real, late in the week
 
 - **Defines (4):** `HALF_STRESS` `halfTick` `halfSlip` `visionHalf`
-- **→ uses:** sim/core, core/util, gfx/renderer, horror/half-forms, them/awareness, town/suspicion, world/vision, horror/layer, horror/visions, audio/sound
+- **→ uses:** sim/core, core/util, gfx/renderer, horror/half-forms, data/tuning, them/awareness, town/suspicion, world/vision, horror/layer, horror/visions, audio/sound
 - **← used by:** 2 (them/office-night, horror/visions)
 
 ### horror/tenth-forms  ·  #94  ·  147 lines
@@ -620,12 +620,12 @@ Who's who; encounters: choosing when, where, who, and getting everyone in place
 - **→ uses:** sim/core, core/util, world/grid, gfx/renderer, horror/encounter-outcomes, world/paths, town/npc-update, them/plan, sim/actions, them/awareness, town/cast, world/vision, town/daily-plans, horror/encounter-draw … +3
 - **← used by:** 4 (them/office-night, horror/encounter-outcomes, horror/encounter-draw, game/loop)
 
-### horror/encounter-outcomes  ·  #96  ·  549 lines
+### horror/encounter-outcomes  ·  #96  ·  543 lines
 
 An encounter under way: the rite, being noticed, pulling victims out, how it ends
 
 - **Defines (21):** `encBegin` `riteTick` `encAnnounce` `encAudible` `encMood` `encNoticed` `encThreat` `encPullAct` `encPulled` `encRelease` `encLetGo` `encThank` `encFinish` `ENC_AFTER` `encAftermath` `encMark` `encTakeStranger` `encAbort` `encEnd` `encGoal` `encDyn`
-- **→ uses:** sim/core, sim/actions, core/util, horror/encounters, town/fleeing, town/npc-update, ui/interface, horror/layer, gfx/renderer, horror/encounter-draw, them/true-form, world/vision, them/plan, player/needs … +14
+- **→ uses:** sim/core, sim/actions, core/util, horror/encounters, town/fleeing, town/npc-update, ui/interface, horror/layer, gfx/renderer, horror/encounter-draw, them/true-form, world/vision, them/plan, town/spawning … +14
 - **← used by:** 5 (them/true-form, ui/menus, play/advice, horror/encounters, game/loop)
 
 ### horror/encounter-draw  ·  #97  ·  786 lines
@@ -654,12 +654,12 @@ Stashes and rummaging
 - **→ uses:** sim/core, core/util, town/cast, ui/interface, world/objects, town/suspicion, them/proofs, world/grid, play/verbs, data/lines, them/tells, them/awareness, audio/sound, play/items … +14
 - **← used by:** 6 (play/oddities, play/photos, ui/menus, input/camera, game/state, game/loop)
 
-### play/oddities  ·  #67  ·  179 lines
+### play/oddities  ·  #67  ·  178 lines
 
 False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
 
 - **Defines (15):** `ODD_FRAMES` `ownThings` `makeOddities` `oddityIn` `oddPeople` `innocentCard` `oddTruth` `secretSeen` `readOddity` `watchedHuman` `tellRumour` `markVictim` `framingMorning` `framingTick` `plantStash`
-- **→ uses:** sim/core, core/util, them/proofs, play/stashes, data/lines, ui/interface, world/objects, town/cast, data/tuning, town/routines, town/cell, player/needs, audio/sound, play/photos … +4
+- **→ uses:** sim/core, core/util, them/proofs, play/stashes, data/lines, ui/interface, world/objects, town/cast, data/tuning, town/routines, town/cell, audio/sound, player/needs, play/photos … +4
 - **← used by:** 14
 
 ### play/traps  ·  #68  ·  184 lines
@@ -670,36 +670,36 @@ Traps
 - **→ uses:** sim/core, ui/interface, sim/actions, play/items, core/util, town/suspicion, audio/sound, town/echoes, them/tells, them/proofs, town/npc-update, world/objects, world/grid, world/paths … +5
 - **← used by:** 6 (town/npc-update, combat/brawl, town/doors, play/raids, ui/menus, game/loop)
 
-### play/raids  ·  #69  ·  132 lines
+### play/raids  ·  #69  ·  131 lines
 
 Raids: kicking in a door
 
 - **Defines (5):** `doorHouse` `breakInAct` `knockAct` `heardBreakIn` `raidEnter`
-- **→ uses:** sim/core, ui/interface, core/util, town/suspicion, town/npc-update, play/traps, play/verbs, audio/sound, player/needs, them/tells, data/lines, them/moves, town/echoes, sim/actions … +2
+- **→ uses:** sim/core, ui/interface, core/util, town/suspicion, town/npc-update, play/traps, play/verbs, audio/sound, them/tells, data/lines, them/moves, town/echoes, player/needs, sim/actions … +2
 - **← used by:** 2 (town/doors, ui/menus)
 
-### play/verbs  ·  #71  ·  386 lines
+### play/verbs  ·  #71  ·  419 lines
 
 What you can do: snooping, eating, Lenny, chat
 
-- **Defines (30):** `DESK_OWNER` `chain` `useP` `nextAlarm` `sleepAct` `cookChain` `snackAct` `eatHereAct` `vendAct` `coffeeAct` `toiletAct` `showerAct` `warmAct` `EAT_SEATS` `nearSeat` `seatedEat` `comfortAct` `momAct` `FINDS` `findSomething` `rummageResult` `pillsAct` `deskWork` `tvAct` `binDig` `digResult` `socialChance` `PLACE_SELF` `resolveChat` `resolveGossip`
-- **→ uses:** sim/core, ui/interface, sim/actions, core/util, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, horror/director, town/talk, chase/they-come, world/paths … +5
+- **Defines (32):** `DESK_OWNER` `chain` `useP` `nextAlarm` `sleepAct` `cookChain` `snackAct` `eatHereAct` `vendAct` `coffeeAct` `toiletAct` `showerAct` `peeAct` `peeSpot` `warmAct` `EAT_SEATS` `nearSeat` `seatedEat` `comfortAct` `momAct` `FINDS` `findSomething` `rummageResult` `pillsAct` `deskWork` `tvAct` `binDig` `digResult` `socialChance` `PLACE_SELF` `resolveChat` `resolveGossip`
+- **→ uses:** sim/core, ui/interface, sim/actions, core/util, world/objects, town/suspicion, player/needs, data/tuning, world/grid, audio/sound, them/plan, them/tells, horror/director, town/talk … +6
 - **← used by:** 8
 
-### play/confront  ·  #72  ·  180 lines
+### play/confront  ·  #72  ·  178 lines
 
 Giving up, the FBI, the talk options
 
 - **Defines (5):** `GIVE_UP` `surrender` `fbiTake` `SOC` `observeAct`
-- **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, them/tells, audio/sound, them/awareness, gfx/portraits … +15
+- **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, them/tells, audio/sound, them/awareness, gfx/portraits … +14
 - **← used by:** 6 (them/true-form, combat/melee, town/talk, play/arena, ui/menus, chase/fbi)
 
-### play/arena  ·  #73  ·  521 lines
+### play/arena  ·  #73  ·  518 lines
 
 The confrontation: an arena battle in front of the town, and what it leaves on the map
 
 - **Defines (31):** `theirsPerson` `closeTo` `witnessOf` `arenaRoom` `openConfront` `after` `arenaTick` `makeTestimony` `testimony` `nextStatement` `letPass` `spend` `realOn` `showCard` `wrongPerson` `habitFits` `backUp` `makeClaims` `knowBeat` `callClaim` `counterBeat` `checkEscape` `arenaBarTick` `arenaStrike` `move` `arenaEnd` `closeArena` `arenaOutcome` `arenaTalkLater` `arenaTalkTick` `arenaKey`
-- **→ uses:** sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, town/quirks, town/suspicion, world/grid, player/needs … +12
+- **→ uses:** sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, them/awareness, town/quirks, gfx/world-geometry, town/suspicion, world/grid, input/camera … +11
 - **← used by:** 5 (play/stashes, ui/menus, ui/arena-view, input/targeting, game/loop)
 
 ### play/photos  ·  #74  ·  401 lines
@@ -710,22 +710,22 @@ Photos: reading what is in frame
 - **→ uses:** sim/core, ui/interface, them/proofs, town/suspicion, ui/menus, them/tells, sim/actions, data/tuning, world/vision, core/util, audio/sound, town/cast, world/grid, world/light-map … +10
 - **← used by:** 11
 
-### play/advice  ·  #76  ·  267 lines
+### play/advice  ·  #76  ·  266 lines
 
 Needs to the right thing to do, here; inventory hooks
 
 - **Defines (10):** `playerWhere` `pathLen` `nearestObj` `needTarget` `doNeed` `autonomy` `goalCache` `currentGoal` `computeGoal` `goalAct`
-- **→ uses:** sim/core, sim/actions, play/verbs, world/objects, player/needs, ui/interface, world/grid, data/tuning, town/cast, town/talk, them/plan, town/suspicion, game/last-day, chase/hunt-end … +4
+- **→ uses:** sim/core, sim/actions, play/verbs, world/objects, ui/interface, player/needs, world/grid, data/tuning, town/cast, town/talk, them/plan, town/suspicion, game/last-day, chase/hunt-end … +4
 - **← used by:** 3 (player/needs, ui/interface, ui/hud)
 
 ## ui/
 
-### ui/menus  ·  #75  ·  942 lines
+### ui/menus  ·  #75  ·  941 lines
 
 Interaction menus for objects, people, items
 
 - **Defines (16):** `opt` `Q` `NO_SHAKE` `shakenFresh` `menuForObject` `fitMenu` `objMenu` `deskMenu` `objStatus` `menuForChar` `askMenu` `ITEM_NAMES` `itemName` `menuForItem` `bagItem` `ITEMS_INV`
-- **→ uses:** sim/core, play/verbs, ui/interface, sim/actions, core/util, gfx/portraits, play/stashes, player/needs, world/objects, town/cast, data/tuning, world/grid, data/lines, audio/sound … +19
+- **→ uses:** sim/core, play/verbs, ui/interface, sim/actions, core/util, play/stashes, gfx/portraits, world/objects, player/needs, town/cast, data/tuning, world/grid, data/lines, audio/sound … +19
 - **← used by:** 10
 
 ### ui/interface  ·  #77  ·  633 lines
@@ -734,7 +734,7 @@ Notes, bubbles, tooltips, overlays
 
 - **Defines (23):** `ICON_PATHS` `NEED_ART` `ICON_NEED` `BOLT_PATH` `needArt` `artIcon` `svgIcon` `$` `esc` `UI` `RING_C` `ringSvg` `setRing` `ui` `LAYOUT` `layoutPush` `layoutOverlays` `headY` `updateFx` `updateActRing` `playerActShown` `actProgress` `updateGoal`
 - **→ uses:** sim/core, gfx/renderer, world/grid, core/util, them/plan, gfx/frame, play/advice, audio/sound, ui/hud-images, ui/hud, them/proofs, gfx/portraits, ui/case-board, taken/taken … +4
-- **← used by:** 63
+- **← used by:** 62
 
 ### ui/hud-images  ·  #78  ·  22 lines
 
@@ -744,12 +744,12 @@ Embedded HUD pictures (base64 PNG): data only
 - **→ uses:** —
 - **← used by:** 2 (ui/interface, ui/hud)
 
-### ui/hud  ·  #79  ·  409 lines
+### ui/hud  ·  #79  ·  408 lines
 
 The corner HUD: bars, days, clock, THEIR eye, evidence
 
 - **Defines (14):** `PSY_PATH` `PSY_GROOVES` `psySvg` `BARS` `EYE_STATES` `eyeState` `eyeLine` `buildHud` `initTips` `toggleWalls` `setBar` `TREND_DRIFT` `barTrend` `updateHud`
-- **→ uses:** ui/interface, sim/core, them/plan, gfx/renderer, core/util, ui/hud-images, audio/sound, ui/case-board, ui/menus, player/needs, data/tuning, town/arrest, sim/actions, play/verbs … +4
+- **→ uses:** ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, ui/case-board, ui/menus, town/arrest, sim/actions, play/verbs … +4
 - **← used by:** 4 (ui/interface, ui/case-board, input/targeting, game/loop)
 
 ### ui/pie-menu  ·  #80  ·  100 lines
@@ -799,7 +799,7 @@ WASD walking relative to the camera
 What E acts on; keyboard handling
 
 - **Defines (8):** `DEG` `wallBetween` `menuForFocus` `pickFocus` `updateFocus` `anchorXY` `interact` `initInput`
-- **→ uses:** input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, world/grid, ui/menus, town/fleeing, town/arrest, taken/taken … +10
+- **→ uses:** input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, world/grid, ui/menus, town/fleeing, town/arrest, taken/taken … +9
 - **← used by:** 3 (town/fleeing, ui/interface, game/loop)
 
 ## audio/
@@ -846,20 +846,20 @@ The way out of the lair: the setup for each lair
 - **→ uses:** taken/taken, world/grid, core/util, them/awareness, world/objects, taken/down-there, taken/coming, world/paths, gfx/renderer, taken/way-out-play, horror/layer, sim/core, world/vision, game/loop … +2
 - **← used by:** 1 (taken/taken)
 
-### taken/way-out-play  ·  #102  ·  550 lines
+### taken/way-out-play  ·  #102  ·  549 lines
 
 Escaping the lair: watchers, sleepers, being caught, getting out
 
 - **Defines (12):** `escPlay` `escKey` `escListen` `escIntel` `escWatch` `escFollow` `escSleep` `escWake` `escFx` `escCaught` `escOut` `ESC_OUT`
-- **→ uses:** taken/taken, gfx/renderer, horror/layer, audio/sound, world/grid, core/util, sim/core, world/light-map, ui/interface, world/paths, world/vision, sim/pose, them/moves, town/cell … +8
+- **→ uses:** taken/taken, gfx/renderer, horror/layer, audio/sound, world/grid, core/util, sim/core, world/light-map, ui/interface, world/paths, world/vision, sim/pose, them/moves, town/cell … +7
 - **← used by:** 3 (taken/taken, taken/way-out, chase/they-come)
 
-### taken/back-up  ·  #103  ·  174 lines
+### taken/back-up  ·  #103  ·  169 lines
 
 Back up top
 
 - **Defines (3):** `capDropSpot` `capDrop` `capOutcome`
-- **→ uses:** taken/taken, sim/core, taken/coming, core/util, player/needs, horror/layer, world/objects, audio/sound, sim/pose, world/paths, world/vision, them/plan, gfx/renderer, town/echoes … +2
+- **→ uses:** taken/taken, sim/core, taken/coming, core/util, horror/layer, world/objects, audio/sound, sim/pose, world/paths, world/vision, them/plan, gfx/renderer, player/needs, town/echoes … +2
 - **← used by:** 2 (taken/taken, taken/way-out-play)
 
 ### taken/lair-life  ·  #104  ·  441 lines
@@ -880,12 +880,12 @@ When THEY come for you
 - **→ uses:** sim/core, taken/taken, core/util, them/plan, horror/layer, gfx/renderer, ui/interface, audio/sound, chase/hunt, taken/coming, them/proofs, them/awareness, world/vision, taken/down-there … +1
 - **← used by:** 6 (them/moves, play/verbs, input/targeting, chase/hunt, game/state, game/loop)
 
-### chase/hunt  ·  #106  ·  385 lines
+### chase/hunt  ·  #106  ·  384 lines
 
 When THEY come for you: the hunters, their tuning, how each kind of hunt starts
 
 - **Defines (17):** `HUNT` `HUNT_WHO` `HUNT_SPD` `HUNT_SRCH` `HUNT_SEE` `HUNT_LOSE` `HUNT_GRAB` `BED_SPOT` `WIN_IN` `WIN_OUT` `BLDG_OUT` `huntActor` `huntH` `huntLive` `huntStart` `HUNT_SETUP` `huntBeam`
-- **→ uses:** sim/core, audio/sound, horror/layer, core/util, taken/coming, ui/interface, taken/taken, world/paths, chase/they-come, sim/characters, town/arrest, chase/hunt-end, them/awareness, ui/pie-menu … +6
+- **→ uses:** sim/core, audio/sound, horror/layer, core/util, taken/coming, ui/interface, taken/taken, world/paths, chase/they-come, sim/characters, town/arrest, chase/hunt-end, them/awareness, ui/pie-menu … +5
 - **← used by:** 13
 
 ### chase/hunt-step  ·  #107  ·  621 lines
@@ -896,12 +896,12 @@ The hunt each frame: seeing, chasing, grabs, being beaten
 - **→ uses:** chase/hunt, sim/core, horror/layer, audio/sound, chase/hunt-end, taken/taken, sim/actions, core/util, gfx/renderer, world/paths, taken/coming, world/grid, ui/interface, world/light-map … +13
 - **← used by:** 8
 
-### chase/hunt-end  ·  #108  ·  367 lines
+### chase/hunt-end  ·  #108  ·  366 lines
 
 How a hunt ends, and how it looks and sounds
 
 - **Defines (8):** `huntCaught` `huntEscaped` `huntClear` `huntGoal` `huntFx` `huntDraw` `huntDecals` `huntUI`
-- **→ uses:** chase/hunt, sim/core, horror/layer, core/util, taken/taken, gfx/renderer, taken/coming, world/grid, audio/sound, ui/interface, gfx/draw-helpers, world/paths, town/cast, world/vision … +9
+- **→ uses:** chase/hunt, sim/core, horror/layer, core/util, taken/taken, gfx/renderer, taken/coming, world/grid, audio/sound, ui/interface, gfx/draw-helpers, world/paths, town/cast, world/vision … +8
 - **← used by:** 7
 
 ### chase/flee  ·  #109  ·  88 lines
@@ -922,7 +922,7 @@ The grey cars: the FBI takes one that gave up
 
 ## game/
 
-### game/state  ·  #111  ·  536 lines
+### game/state  ·  #111  ·  535 lines
 
 Game state, new game, saving, endings
 

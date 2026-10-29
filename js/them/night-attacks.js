@@ -143,7 +143,7 @@ function raidTick(n, dt) {
   if (!tg.isPlayer && P.onMap && dp < 6 && G.t - (tf.seenIn || -99) < 1 && !A.broken) {
     A.broken = true;
     A.seen = true;
-    addStress(12);
+    psyMark('form');
     if (mayHuntYou() && chance(0.6)) {
       tf.mode = 'attack';
       tf.t0 = G.t;
@@ -218,7 +218,7 @@ function raidTick(n, dt) {
   n.tell.lunge = !n.tell.feed;
   if (P.onMap && visAt(n.x, n.z) > 0.5 && !A.seen) {
     A.seen = true;
-    addStress(12);
+    psyMark('form');
   }
   if (G.t - A.struggle > 8) {
     n.tell.feed = n.tell.lunge = false;

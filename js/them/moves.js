@@ -302,14 +302,12 @@ function abduct(how) {
     el.hidden = true;
     UI.scene = null;
     if (G.over) return;
-    if (probe) {
-      G.stressFloor = Math.min(50, G.stressFloor + 5);
-      setTimeout(() => ui.note('sick', 'Hours missing. Your neck hurts.', 'bad'), 1500);
-    } else {
+    psyMark('form'); // you saw what THEY are, taking you
+    if (probe) setTimeout(() => ui.note('sick', 'Hours missing. Your neck hurts.', 'bad'), 1500);
+    else {
       G.playerChip = true;
       setTimeout(() => ui.note('sick', 'A small scar behind your ear', 'bad'), 1500);
     }
-    addStress(12);
     G.visionOff = G.t + 120;
     G.sickNext = true;
     goAway('taken', G.t + irand(150, 200));
@@ -527,7 +525,6 @@ function policeWarn(c, edge) {
         onTick: face,
       });
   G.policeWarned = true;
-  addStress(5);
   hardReset(c);
   enqueue(c, [line('mid'), line('close'), goAct(edge, { label: 'Leaving' })]);
   setTimeout(() => !G.over && ui.note('badge', 'A warning from the police. Next time he takes you in.', 'bad'), 2600);
@@ -539,7 +536,6 @@ function heldUntil() {
 }
 function arrest() {
   // no street to do it on: straight inside
-  addStress(8);
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
   CELL.book = true;

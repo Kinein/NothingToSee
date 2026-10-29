@@ -1,32 +1,38 @@
 //@ player/needs — The player body: needs, Psychic, accidents, passing out, panic
-//@ Defines: setNeed, applyNeedFx, bump, shakenNote, stressBand, mood, moodWord, needsTick, accident, passOut, breakdown
-//@ Uses:    sim/core, ui/interface, sim/actions, data/tuning, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, …
+//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, passOut, breakdown
+//@ Uses:    sim/core, data/tuning, ui/interface, sim/actions, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the player's body
 // how well a need is doing, 0 bad … 100 fine (stress is the one that counts the other way)
 const lvl = (k) => (k === 'stress' ? 100 - PLAYER.needs.stress : PLAYER.needs[k]);
 function setNeed(k, v) {
-  PLAYER.needs[k] = clamp(v, k === 'stress' ? G.stressFloor : 0, 100);
+  PLAYER.needs[k] = clamp(v, 0, 100);
 }
+// what an action does to you while it runs. It can calm you; it never shakes you: Psychic only falls in steps (psyDrop)
+// and drains near IT (psyDrain).
 function applyNeedFx(fx, dt) {
   const N = PLAYER.needs;
-  for (const k in fx) {
-    if (k in N) {
-      const v = k === 'stress' && fx[k] > 0 ? fx[k] * STRESS_K.rate : fx[k];
-      setNeed(k, N[k] + (v * dt) / 60);
-    }
-  }
+  for (const k in fx) if (k in N && !(k === 'stress' && fx[k] > 0)) setNeed(k, N[k] + (fx[k] * dt) / 60);
 }
 function bump(k, v) {
   if (k in PLAYER.needs) setNeed(k, PLAYER.needs[k] + v);
 }
-const addStress = (v) => bump('stress', v > 0 ? v * STRESS_K.event : v);
-const tooShaken = () => !!(PLAYER && PLAYER.needs && PLAYER.needs.stress >= SHAKEN_LOCK);
-function shakenNote() {
+// relief only: something that calms you. Nothing small shakes you any more (see psyDrop).
+const addStress = (v) => v < 0 && bump('stress', v);
+const psychic = () => (PLAYER && PLAYER.needs ? 100 - PLAYER.needs.stress : 100);
+// a big step: Psychic falls to this mark, if it's higher. Seeing THEIR thing or a sign, a true form, a fight with one.
+function psyDrop(to) {
+  if (psychic() > to) setNeed('stress', 100 - to);
+}
+const psyMark = (kind) => psyDrop(PSY[kind]);
+// under 20: no gossip and no confronting. Anything else (chat, fighting, your hands) still works.
+const tooShaken = () => psychic() < PSY.mute;
+const shaky = () => psychic() < PSY.shaky; // under 40 your hands shake: no photos
+function shakenNote(what) {
   if (R.time < (UI.shakenNoteCd || 0)) return;
   UI.shakenNoteCd = R.time + 2.5;
   ui.bubble(PLAYER, 'nerve', 'thought', 2);
-  ui.note('nerve', 'Too shaken to face anyone', 'warn');
+  ui.note('nerve', what || 'Too shaken to say it', 'warn');
 }
 // 0 calm · 1 tense · 2 shaken · 3 breaking · 4 panic
 function stressBand(s = PLAYER.needs.stress) {
@@ -61,7 +67,7 @@ function needsTick(dt) {
   if (sleeping) {
     base.hunger = -2.6;
     base.energy = 0;
-    base.bladder = -4.2;
+    base.bladder = BLADDER.asleep;
     base.stress = 0;
   }
   const h = hourF(),
@@ -69,26 +75,13 @@ function needsTick(dt) {
   const room = roomAt(P.x, P.z);
   const dark = cellLum(i) < 0.12;
   if (!sleeping) {
-    if (dark && (h >= 21 || h < 6))
-      base.stress += 3; // darkness at night
-    else if (dark) base.stress += 1;
+    if (dark && (h >= 21 || h < 6)) base.stress += PSY.dark; // the dark at night: a slow drift
     if (room && room.home && !dark) base.stress -= 2; // a lit home
-    if (!room && (h >= 21 || h < 5.5)) base.stress += 2; // outdoors late
-    for (const k of ['hunger', 'energy', 'bladder']) if (N[k] < 15) base.stress += 2;
     if (N.hunger < 12) base.energy -= 3; // starving
-    if (inShift() && G.workBar < 30) base.stress += 3; // a red work bar
     if (G.inv.foilOn) base.stress -= 2.5;
-    if (G.hotRooms && room && G.hotRooms.includes(room.key)) base.stress += 4;
   }
-  applyNeedFx(base, dt);
-  // an hour above 70 raises the long-term floor
-  if (N.stress > 70) {
-    G.hiStress += dt;
-    while (G.hiStress >= 60) {
-      G.hiStress -= 60;
-      G.stressFloor = Math.min(50, G.stressFloor + 2);
-    }
-  }
+  for (const k in base) if (k in N) setNeed(k, N[k] + (base[k] * dt) / 60);
+  if (!sleeping) psyDrain(dt, room);
   autonomy(dt);
   if (N.bladder <= 0 && !G.accidentLock) accident();
   if (N.energy <= 0 && !sleeping && !(a && a.passout)) passOut();
@@ -102,13 +95,46 @@ function needsTick(dt) {
   }
 }
 const hunted = () => HUNT.on || CHARS.some((c) => c.trueForm && c.trueForm.mode === 'attack' && c.onMap);
+// near IT, Psychic drains: fast by a true form you can see or something wrong going on (a rite, one of THEM changing),
+// slowly by THEIR things. Seeing them is a step too: a true form drops you to 50, THEIR thing or a sign to 70.
+const psySees = (x, z, r) => Math.hypot(x - PLAYER.x, z - PLAYER.z) <= r && visAt(x, z) > 0.45;
+function psyDrain(dt, room) {
+  const P = PLAYER;
+  if (!P.onMap) return;
+  let fast = false,
+    slow = false;
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap || c.shown < 0.4) continue;
+    const form = c.trueForm || (c.tell && c.tell.type === 'true');
+    if (form && psySees(c.x, c.z, PSY.near)) {
+      psyMark('form');
+      fast = true;
+    } else if (c.riteBy && psySees(c.x, c.z, PSY.near)) fast = true; // something wrong being done to someone
+  }
+  if (!fast) {
+    for (const it of G.items)
+      if (
+        it.by &&
+        !it.innocent &&
+        it.kind !== 'trap' &&
+        it.kind !== 'opened' &&
+        psySees(it.x, it.z, PSY.things * 1.7)
+      ) {
+        psyMark('sign'); // THEIR thing, in plain sight
+        if (Math.hypot(it.x - P.x, it.z - P.z) <= PSY.things) slow = true;
+      }
+    if (G.hotRooms && room && G.hotRooms.includes(room.key)) slow = true; // THEIR gear hums in the walls here
+  }
+  const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
+  if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
+}
 function accident() {
   const P = PLAYER,
     N = P.needs;
   G.accidentLock = true;
   setTimeout(() => (G.accidentLock = false), 3000);
   N.bladder = 100;
-  addStress(10);
+  G.smelly = true; // until you shower: people notice you from further off
   addItem({ kind: 'puddle', x: P.x, z: P.z, rot: Math.random() * 3 });
   let seen = 0;
   for (const n of CHARS)
@@ -118,6 +144,7 @@ function accident() {
       ui.bubble(n, 'exclaim', 'speech', 3);
     }
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
+  setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
 }
 function passOut() {
@@ -138,7 +165,7 @@ function passOut() {
       },
       onTick: (c, a, dt) => {
         c.anim = 'sleep';
-        applyNeedFx({ energy: 22, stress: 2 }, dt);
+        applyNeedFx({ energy: 22 }, dt);
       },
       onEnd: (c) => {
         c.pose = 'stand';
@@ -175,7 +202,7 @@ function breakdown() {
       },
       onEnd: (c) => {
         c.pose = 'stand';
-        setNeed('stress', 72);
+        setNeed('stress', 100 - PSY.after); // you come out of it at 40
       },
     }),
     true,

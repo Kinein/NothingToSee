@@ -348,7 +348,7 @@ function witnessTrue(w, n) {
 function youSeeTrue(n) {
   const tf = n.trueForm;
   tf.seenByYou = true;
-  addStress(tf.mode === 'rite' || tf.mode === 'riteOut' ? 8 : 12);
+  psyMark('form');
   G.visionOff = Math.max(G.visionOff, G.t + 120);
   G.shakenUntil = G.t + 120;
   if (n.tell.t < TF_CHANGE + 0.2) tf.sawChange = true;
@@ -461,7 +461,6 @@ function killMember(n, how) {
     { by: 'you' },
   );
   cardSoon({ char: n, stamp: how === 'mob' ? 'FINISHED' : 'KILLED' }, () => snapImage(n, rec));
-  addStress(how === 'mob' ? 3 : 6);
   echo('killed', { x: n.x, z: n.z, who: n.id });
   audio.sting('onto');
   if (!alive().length) {
@@ -553,7 +552,6 @@ function exposedTick(n, dt) {
         onCatch: (c) => {
           c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
           ui.say(c, pick(['Not here. Not with all of them watching.', 'Later.', 'I know where you sleep.']), 3);
-          addStress(5);
         },
         onLose: () => {},
       }),

@@ -135,7 +135,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .bar .bt b{position:absolute;left:0;top:0;bottom:0;width:var(--v,50%);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 72%,#fff) 0,var(--c) 40%,color-mix(in srgb,var(--c) 78%,#000) 100%);transition:width .45s ease-out,opacity .3s}
 .bar .bt b::after{content:'';position:absolute;top:0;bottom:0;right:0;width:1px;background:rgba(255,250,235,.7);box-shadow:0 0 4px rgba(255,250,235,.5)}
 .bar .bt::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(4,5,8,.5) calc(25% - 1px) 25%)}
-.bar .bt .flr{position:absolute;right:0;top:0;bottom:0;width:var(--f,0%);background:repeating-linear-gradient(135deg,rgba(4,5,8,.62) 0 2px,transparent 2px 4px);transition:width .6s}
 .bar .wx{width:16px;height:22px;background:center/contain no-repeat;opacity:0;transition:opacity .25s}
 .bar .wx.on{opacity:1;animation:wxp .9s ease-in-out infinite}
 .bar .wx.red{background-image:var(--ex-red);--wc:rgba(255,70,60,.85)}

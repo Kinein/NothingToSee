@@ -72,7 +72,6 @@ function arrestStart(off) {
   P.run = false;
   P.jog = false;
   if (G.speed > 1) G.speed = 1;
-  addStress(8);
   echo('police', { x: P.x, z: P.z });
   audio.sting('caught');
   Object.assign(ARREST, { on: true, phase: 'cuff', off, t0: G.t, until: heldUntil(), car: null, loadAt: 0, rp: 0 });

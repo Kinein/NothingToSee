@@ -150,7 +150,6 @@ function lureEnd(L, broken, quiet) {
     if (c && c.queue[0] && c.queue[0].label === '…') hardReset(c);
     if (quiet || !st) return;
     ui.say(st, pick(['Where am I?', 'What was I doing?']), 3);
-    addStress(6);
     if (c && c.onMap) {
       R.flash = Math.max(R.flash, 0.4);
       hardReset(c);

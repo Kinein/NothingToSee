@@ -1,6 +1,6 @@
 //@ them/tells — Tells: the small signs THEY give
 //@ Defines: npcSeesPlayer, roomHasOthers, tryTell, beginTell, notifyPing, endTell, tellTick, applyTellAnim, awardTell, caughtWatching, ritualCaught, revealFaction
-//@ Uses:    sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, world/vision, …
+//@ Uses:    sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the tells
 function npcSeesPlayer(n, maxD = 9) {
@@ -9,7 +9,12 @@ function npcSeesPlayer(n, maxD = 9) {
   const dx = P.x - n.x,
     dz = P.z - n.z,
     d = Math.hypot(dx, dz);
+  // you're easy to notice: in a hedge with your trousers down, or smelling of your own accident
+  const pee = P.queue[0] && P.queue[0].pee && P.queue[0].stage === 'run';
+  if (pee) maxD *= BLADDER.peeSeen;
+  else if (G.smelly) maxD *= BLADDER.smell;
   if (d > maxD) return false;
+  if (pee && d < 4 && losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z))) return true;
   const rn = roomAt(n.x, n.z),
     rp = roomAt(P.x, P.z);
   if (rn && rn === rp && rn.private) return true;
@@ -170,7 +175,7 @@ function tellTick(n, dt) {
     const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
     if (seen && !tl.seen) {
       tl.seen = true;
-      addStress(5);
+      psyMark('sign');
     }
     if (seen && !tl.caught && npcSeesPlayer(n, 8)) {
       tl.caught = true;
@@ -185,10 +190,11 @@ function tellTick(n, dt) {
   // what you see is only what you see: nothing is filed, nothing slows down. A photo is the only record.
   const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
   if (seen) tl.w += dt;
+  if (seen && tl.w > 0.8 && n.isThem) psyMark('sign'); // a slight sign, seen with your own eyes
   if (tl.watch) {
     if (seen && !tl.scared && tl.w > 1) {
       tl.scared = true;
-      addStress(10);
+      psyMark('sign');
       audio.sting('whisper');
     }
     n.odd = { k: 'watch', amt: 15, note: 'Standing in the road at night, staring at my window.', until: G.t + 2 };
@@ -197,7 +203,7 @@ function tellTick(n, dt) {
   if (tl.ritual) {
     if (seen && tl.w > 1.2 && !G.ritualSeenDay[dayNo()]) {
       G.ritualSeenDay[dayNo()] = true;
-      addStress(15);
+      psyMark('sign');
       audio.sting('whisper');
     } // watched: it spoils THEIR night, and tells you nothing
     if (!tl.caught && tl.t > 2 && npcSeesPlayer(n, 8)) {
@@ -442,7 +448,7 @@ function awardTell(n) {
   if (tl) tl.awarded = true;
   const type = tl ? tl.type : 'stare',
     change = type === 'true';
-  addStress(change ? 10 : 4);
+  psyMark(change ? 'form' : 'sign');
   if (!G.factionKnown) revealFaction();
   const where = placeName(n.x, n.z);
   const rec = change

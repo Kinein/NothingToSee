@@ -227,7 +227,7 @@ function worldStep(dtReal, preview) {
 function styleStep(dtReal) {
   const live = G && G.started && PLAYER;
   const st = live ? PLAYER.needs.stress : 0;
-  const tgt = live ? Math.max(sstep(36, 94, st), HX.dread * 0.55, HX.blood * 0.85) : 0.3;
+  const tgt = live ? Math.max(sstep(100 - PSY.shaky, 98, st), HX.dread * 0.55, HX.blood * 0.85) : 0.3;
   STY.k += (tgt - STY.k) * Math.min(1, dtReal * 0.5);
   if (live && st >= 80 && G.speed && !G.sleeping && !G.away && !G.over) {
     STY.beatT -= dtReal;

@@ -184,7 +184,7 @@ function runAct(c, a, dt) {
     }
     if (a.kind === 'use' && c.isPlayer) return playerUseInit(c, a, dt);
     if (a.kind === 'talk' && c.isPlayer) {
-      if (tooShaken()) {
+      if (a.soc === 'gossip' && tooShaken()) {
         shakenNote();
         return finishAct(c, a, false);
       }

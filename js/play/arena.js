@@ -1,6 +1,6 @@
 //@ play/arena — The confrontation: an arena battle in front of the town, and what it leaves on the map
 //@ Defines: witnessOf, arenaRoom, openConfront, after, arenaTick, makeTestimony, testimony, nextStatement, letPass, spend, showCard, wrongPerson, backUp, makeClaims, knowBeat, callClaim, …
-//@ Uses:    sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, …
+//@ Uses:    sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, them/awareness, town/quirks, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the confrontation. A short battle, 45 to 75 seconds: THEY lie, you show the card that breaks the lie, and
 // the crowd decides. You bring every card you hold on them; a card is never spent, it stays on the board. The town is
@@ -108,7 +108,6 @@ function openConfront(n) {
   G.speed = 0;
   n.tdir = Math.atan2(PLAYER.x - n.x, PLAYER.z - n.z);
   PLAYER.tdir = Math.atan2(n.x - PLAYER.x, n.z - PLAYER.z);
-  addStress(3);
   arenaOpen(A);
   // Psychic 20 or less: you might never get as far as the cards
   if (PLAYER.needs.stress >= EVIDENCE.rant.stress && chance(EVIDENCE.rant.p)) {
@@ -315,7 +314,6 @@ function counterBeat(A) {
     else if (100 - PLAYER.needs.stress >= C.psy) arenaSay(A, 'you', pick(ARENA_HOLD));
     else {
       move(A, C.lose, 'laugh', 'counter');
-      addStress(C.stress);
       arenaSay(A, 'you', '…');
     }
     if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced, null, 'faced'); // you had a lens in their face only yesterday
@@ -471,7 +469,6 @@ function arenaOutcome(A) {
   if (res === 'wrong') {
     bookAware(W.wrong);
     addSus(n, EVIDENCE.wrong.sus);
-    addStress(5);
   } else {
     bookAware(W.fail);
     addDanger(n, 20);

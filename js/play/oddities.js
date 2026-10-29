@@ -71,7 +71,6 @@ function readOddity(st, it) {
   const n = NPC[st.by],
     S = stashDef(st),
     o = OBJ[it.obj];
-  addStress(2);
   if (o) closeUp(o, true);
   if (!n) return;
   addNote(n, 'Read it: ' + S.truth + '.', { by: 'you' });

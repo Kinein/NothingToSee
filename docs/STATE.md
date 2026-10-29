@@ -31,13 +31,12 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `traps` | `[]` | — | play/stashes, play/traps, ui/menus |
 | `broken` | `{}` | — | world/paths, town/doors, play/raids, ui/menus, game/loop |
 | `intruded` | `''` | town/doors, play/raids | — |
-| `workBar` | `75` | player/work, them/moves | player/needs, play/advice, ui/hud |
+| `workBar` | `75` | player/work, them/moves | play/advice, ui/hud |
 | `workBonusAt` | `-999` | player/work | — |
 | `awayT` | `0` | player/work | play/verbs |
 | `workWarned` | `false` | player/work | — |
 | `sickDay` | `false` | player/work, combat/hits, taken/taken, taken/back-up | sim/core, ui/hud |
-| `stressFloor` | `0` | player/needs, player/work, them/moves, play/verbs, taken/back-up | ui/hud |
-| `hiStress` | `0` | player/needs | — |
+| `smelly` | `false` | player/needs, play/verbs | them/tells, ui/hud |
 | `sleepFrom` | `0` | play/verbs | — |
 | `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions |
 | `whisperCd` | `30` | horror/visions | — |
@@ -105,7 +104,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `them` | `[]` | game/state | town/cast, town/npc-update |
 | `exposed` | `[]` | — | them/true-form, horror/visions, play/confront |
 | `factionKnown` | `false` | them/tells | them/plan, them/proofs, them/true-form, play/stashes, horror/visions, play/confront, play/photos, ui/menus, … |
-| `items` | `[]` | play/items, game/state | them/proofs, them/moves, them/night-attacks, them/office-night, play/stashes, play/traps, play/photos, ui/menus, … |
+| `items` | `[]` | play/items, game/state | player/needs, them/proofs, them/moves, them/night-attacks, them/office-night, play/stashes, play/traps, play/photos, … |
 | `leads` | `[]` | — | them/servants, town/talk, them/office-night, play/stashes, play/verbs, play/photos, ui/menus, horror/encounter-outcomes |
 | `lennyHint` | `0` | town/talk | — |
 | `momToday` | `false` | player/work, play/verbs | — |
@@ -121,7 +120,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sleeping` | `false` | town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/quirks, them/plan, town/npc-update, town/cell, them/true-form, town/talk, … |
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
-| `over` | `null` | game/state | player/work, them/plan, them/moves, town/arrest, town/cell, town/fleeing, them/true-form, combat/hits, … |
+| `over` | `null` | game/state | player/needs, player/work, them/plan, them/moves, town/arrest, town/cell, town/fleeing, them/true-form, … |
 | `started` | `false` | game/state | gfx/draw-helpers, gfx/frame, town/routines, town/quirks, them/plan, town/npc-update, them/tells, town/cell, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |

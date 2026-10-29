@@ -245,7 +245,6 @@ function swingTarget(c, dir, reach) {
 function playerMelee(n) {
   const P = PLAYER;
   if (!P.onMap || R.time < (UI.swingCd || 0) || P.queue.some((a) => a.swing)) return;
-  if (tooShaken()) return shakenNote(); // breaking: your hands won't do it
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
   enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower

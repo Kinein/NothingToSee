@@ -1,6 +1,6 @@
 //@ play/advice — Needs to the right thing to do, here; inventory hooks
 //@ Defines: playerWhere, pathLen, nearestObj, needTarget, doNeed, autonomy, currentGoal, computeGoal, goalAct
-//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, player/needs, ui/interface, world/grid, data/tuning, town/cast, town/talk, …
+//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, ui/interface, player/needs, world/grid, data/tuning, town/cast, town/talk, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── needs → the right thing to do, here
 function playerWhere() {
@@ -74,7 +74,6 @@ function needTarget(k) {
         !shift &&
         w === 'out' &&
         day &&
-        !tooShaken() &&
         L &&
         L.onMap &&
         L.pose === 'sit' &&

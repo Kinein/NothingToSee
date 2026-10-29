@@ -141,7 +141,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .bar .bt b{position:absolute;left:0;top:0;bottom:0;width:var(--v,50%);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 72%,#fff) 0,var(--c) 40%,color-mix(in srgb,var(--c) 78%,#000) 100%);transition:width .45s ease-out,opacity .3s}
 .bar .bt b::after{content:'';position:absolute;top:0;bottom:0;right:0;width:1px;background:rgba(255,250,235,.7);box-shadow:0 0 4px rgba(255,250,235,.5)}
 .bar .bt::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(4,5,8,.5) calc(25% - 1px) 25%)}
-.bar .bt .flr{position:absolute;right:0;top:0;bottom:0;width:var(--f,0%);background:repeating-linear-gradient(135deg,rgba(4,5,8,.62) 0 2px,transparent 2px 4px);transition:width .6s}
 .bar .wx{width:16px;height:22px;background:center/contain no-repeat;opacity:0;transition:opacity .25s}
 .bar .wx.on{opacity:1;animation:wxp .9s ease-in-out infinite}
 .bar .wx.red{background-image:var(--ex-red);--wc:rgba(255,70,60,.85)}
@@ -832,7 +831,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.11 · updated Oct 29, 2026</p>
+  <p id="version">v1.12 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -869,7 +868,7 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Weird</kbd><span>All anyone holds about you · Chat, a good day’s work and being proven right bring it down · the book counts who thinks you’re mad: three at 06:00 and the clinic writes</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Rummage</kbd><span>Feel something in there? Open it up before it settles · back shelves hide a trap, a flashlight, pills</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: a Home card, or trap bait. THEY hate seeing them on you</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting, only shouting it at them</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Falls in big steps: THEIR thing or a sign 70 · a true form 50 · a fight with one 30 · drains near IT · under 60 you see things · under 40 red at the edges, hands too shaky for photos · under 20 no gossip, no confronting · 0: panic</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards stay on the board, only THEY can take one · alone, it’s Attack</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Space</kbd><span>Hit · a red patch on the ground is where a blow lands: step out of it. Hit IT while it stands there open and it goes down</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down in front of people and it gives up · the FBI comes for it · alone, it dies and nobody saw</span></div>
@@ -1203,13 +1202,20 @@ const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk:
 const NEEDS = [
   { k: 'hunger', n: 'Hunger', icon: 'food', rate: -5.6 },
   { k: 'energy', n: 'Energy', icon: 'bolt', rate: -4.0 },
-  { k: 'bladder', n: 'Bladder', icon: 'toilet', rate: -8.0 },
+  { k: 'bladder', n: 'Bladder', icon: 'toilet', rate: -10.0 },
   { k: 'stress', n: 'Psychic', icon: 'nerve', rate: -1.0, inv: true },
 ];
-// Stress builds slowly, out of the town's small wrongness: the dark, a noise, a face that slips, Lenny's theories.
-// Facing it head-on (a fight, a confrontation, being grabbed) shakes you less than you'd think.
-const STRESS_K = { rate: 0.6, event: 0.75 };   // multipliers on every rise: per-hour drift, and one-off jolts
-const SHAKEN_LOCK = 80;                        // from here (breaking) you can't face anyone: no talking, no fighting
+// Psychic (100 − stress) falls in a few big steps, never in small ones, and the steps never take it all the way down
+// (player/needs psyDrop): to `sign` when you see THEIR thing or a slight sign, to `form` at a true form, to `fight` when
+// you trade blows with one. Near IT it drains, per game hour: `fast` by a true form or something wrong going on within
+// `near` tiles, `slow` within `things` tiles of THEIR things; the dark at night drifts it down by `dark`.
+// What it does: under `visions` rare visions · under `shaky` more of them, red at the edges and your hands shake (no
+// photos) · under `mute` no gossip and no confronting (you can still fight) · at 0 a panic attack, out of it at `after`.
+const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9, things: 3.5, visions: 60, shaky: 40, mute: 20, after: 40 };
+// the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
+// public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
+// `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8 };
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
 // what you happen to hear. The first few go by unnoticed; after that only now and then, only from close by,
@@ -10367,7 +10373,7 @@ function bloomPasses() {
 }
 function composite() {
   const stress = G && G.started && PLAYER ? PLAYER.needs.stress : 20;
-  const bad = clamp((stress - 58) / 42, 0, 1);
+  const bad = clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
   const sleep = G && G.sleeping ? 1 : 0;
   R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
   pass(R.comp, null, (u) => {
@@ -10754,7 +10760,7 @@ const CHARS = [];
 let PLAYER = null;
 const NPC = {};
 let FOG_COL = [0.03, 0.035, 0.06];
-const SHADE = { on: false, c: null, t: 0 };
+const SHADE = { on: false, c: null, t: 0, kind: 'shade' }; // a vision: shade · run · watch (horror/visions)
 
 const dayNo = (t = G.t) => Math.floor(t / 1440) + 1;
 const tod = (t = G.t) => ((t % 1440) + 1440) % 1440;
@@ -12708,7 +12714,7 @@ function runAct(c, a, dt) {
     }
     if (a.kind === 'use' && c.isPlayer) return playerUseInit(c, a, dt);
     if (a.kind === 'talk' && c.isPlayer) {
-      if (tooShaken()) {
+      if (a.soc === 'gossip' && tooShaken()) {
         shakenNote();
         return finishAct(c, a, false);
       }
@@ -13176,27 +13182,33 @@ function stepChar(c, dt) {
 // how well a need is doing, 0 bad … 100 fine (stress is the one that counts the other way)
 const lvl = (k) => (k === 'stress' ? 100 - PLAYER.needs.stress : PLAYER.needs[k]);
 function setNeed(k, v) {
-  PLAYER.needs[k] = clamp(v, k === 'stress' ? G.stressFloor : 0, 100);
+  PLAYER.needs[k] = clamp(v, 0, 100);
 }
+// what an action does to you while it runs. It can calm you; it never shakes you: Psychic only falls in steps (psyDrop)
+// and drains near IT (psyDrain).
 function applyNeedFx(fx, dt) {
   const N = PLAYER.needs;
-  for (const k in fx) {
-    if (k in N) {
-      const v = k === 'stress' && fx[k] > 0 ? fx[k] * STRESS_K.rate : fx[k];
-      setNeed(k, N[k] + (v * dt) / 60);
-    }
-  }
+  for (const k in fx) if (k in N && !(k === 'stress' && fx[k] > 0)) setNeed(k, N[k] + (fx[k] * dt) / 60);
 }
 function bump(k, v) {
   if (k in PLAYER.needs) setNeed(k, PLAYER.needs[k] + v);
 }
-const addStress = (v) => bump('stress', v > 0 ? v * STRESS_K.event : v);
-const tooShaken = () => !!(PLAYER && PLAYER.needs && PLAYER.needs.stress >= SHAKEN_LOCK);
-function shakenNote() {
+// relief only: something that calms you. Nothing small shakes you any more (see psyDrop).
+const addStress = (v) => v < 0 && bump('stress', v);
+const psychic = () => (PLAYER && PLAYER.needs ? 100 - PLAYER.needs.stress : 100);
+// a big step: Psychic falls to this mark, if it's higher. Seeing THEIR thing or a sign, a true form, a fight with one.
+function psyDrop(to) {
+  if (psychic() > to) setNeed('stress', 100 - to);
+}
+const psyMark = (kind) => psyDrop(PSY[kind]);
+// under 20: no gossip and no confronting. Anything else (chat, fighting, your hands) still works.
+const tooShaken = () => psychic() < PSY.mute;
+const shaky = () => psychic() < PSY.shaky; // under 40 your hands shake: no photos
+function shakenNote(what) {
   if (R.time < (UI.shakenNoteCd || 0)) return;
   UI.shakenNoteCd = R.time + 2.5;
   ui.bubble(PLAYER, 'nerve', 'thought', 2);
-  ui.note('nerve', 'Too shaken to face anyone', 'warn');
+  ui.note('nerve', what || 'Too shaken to say it', 'warn');
 }
 // 0 calm · 1 tense · 2 shaken · 3 breaking · 4 panic
 function stressBand(s = PLAYER.needs.stress) {
@@ -13231,7 +13243,7 @@ function needsTick(dt) {
   if (sleeping) {
     base.hunger = -2.6;
     base.energy = 0;
-    base.bladder = -4.2;
+    base.bladder = BLADDER.asleep;
     base.stress = 0;
   }
   const h = hourF(),
@@ -13239,26 +13251,13 @@ function needsTick(dt) {
   const room = roomAt(P.x, P.z);
   const dark = cellLum(i) < 0.12;
   if (!sleeping) {
-    if (dark && (h >= 21 || h < 6))
-      base.stress += 3; // darkness at night
-    else if (dark) base.stress += 1;
+    if (dark && (h >= 21 || h < 6)) base.stress += PSY.dark; // the dark at night: a slow drift
     if (room && room.home && !dark) base.stress -= 2; // a lit home
-    if (!room && (h >= 21 || h < 5.5)) base.stress += 2; // outdoors late
-    for (const k of ['hunger', 'energy', 'bladder']) if (N[k] < 15) base.stress += 2;
     if (N.hunger < 12) base.energy -= 3; // starving
-    if (inShift() && G.workBar < 30) base.stress += 3; // a red work bar
     if (G.inv.foilOn) base.stress -= 2.5;
-    if (G.hotRooms && room && G.hotRooms.includes(room.key)) base.stress += 4;
   }
-  applyNeedFx(base, dt);
-  // an hour above 70 raises the long-term floor
-  if (N.stress > 70) {
-    G.hiStress += dt;
-    while (G.hiStress >= 60) {
-      G.hiStress -= 60;
-      G.stressFloor = Math.min(50, G.stressFloor + 2);
-    }
-  }
+  for (const k in base) if (k in N) setNeed(k, N[k] + (base[k] * dt) / 60);
+  if (!sleeping) psyDrain(dt, room);
   autonomy(dt);
   if (N.bladder <= 0 && !G.accidentLock) accident();
   if (N.energy <= 0 && !sleeping && !(a && a.passout)) passOut();
@@ -13272,13 +13271,46 @@ function needsTick(dt) {
   }
 }
 const hunted = () => HUNT.on || CHARS.some((c) => c.trueForm && c.trueForm.mode === 'attack' && c.onMap);
+// near IT, Psychic drains: fast by a true form you can see or something wrong going on (a rite, one of THEM changing),
+// slowly by THEIR things. Seeing them is a step too: a true form drops you to 50, THEIR thing or a sign to 70.
+const psySees = (x, z, r) => Math.hypot(x - PLAYER.x, z - PLAYER.z) <= r && visAt(x, z) > 0.45;
+function psyDrain(dt, room) {
+  const P = PLAYER;
+  if (!P.onMap) return;
+  let fast = false,
+    slow = false;
+  for (const c of CHARS) {
+    if (c.isPlayer || !c.onMap || c.shown < 0.4) continue;
+    const form = c.trueForm || (c.tell && c.tell.type === 'true');
+    if (form && psySees(c.x, c.z, PSY.near)) {
+      psyMark('form');
+      fast = true;
+    } else if (c.riteBy && psySees(c.x, c.z, PSY.near)) fast = true; // something wrong being done to someone
+  }
+  if (!fast) {
+    for (const it of G.items)
+      if (
+        it.by &&
+        !it.innocent &&
+        it.kind !== 'trap' &&
+        it.kind !== 'opened' &&
+        psySees(it.x, it.z, PSY.things * 1.7)
+      ) {
+        psyMark('sign'); // THEIR thing, in plain sight
+        if (Math.hypot(it.x - P.x, it.z - P.z) <= PSY.things) slow = true;
+      }
+    if (G.hotRooms && room && G.hotRooms.includes(room.key)) slow = true; // THEIR gear hums in the walls here
+  }
+  const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
+  if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
+}
 function accident() {
   const P = PLAYER,
     N = P.needs;
   G.accidentLock = true;
   setTimeout(() => (G.accidentLock = false), 3000);
   N.bladder = 100;
-  addStress(10);
+  G.smelly = true; // until you shower: people notice you from further off
   addItem({ kind: 'puddle', x: P.x, z: P.z, rot: Math.random() * 3 });
   let seen = 0;
   for (const n of CHARS)
@@ -13288,6 +13320,7 @@ function accident() {
       ui.bubble(n, 'exclaim', 'speech', 3);
     }
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
+  setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
 }
 function passOut() {
@@ -13308,7 +13341,7 @@ function passOut() {
       },
       onTick: (c, a, dt) => {
         c.anim = 'sleep';
-        applyNeedFx({ energy: 22, stress: 2 }, dt);
+        applyNeedFx({ energy: 22 }, dt);
       },
       onEnd: (c) => {
         c.pose = 'stand';
@@ -13345,7 +13378,7 @@ function breakdown() {
       },
       onEnd: (c) => {
         c.pose = 'stand';
-        setNeed('stress', 72);
+        setNeed('stress', 100 - PSY.after); // you come out of it at 40
       },
     }),
     true,
@@ -13383,8 +13416,7 @@ function workTick(dt) {
         ui.float(PLAYER, '+' + WORK.sit, 'good');
       }
     }
-    const sb = stressBand();
-    G.workBar = Math.min(100, G.workBar + ((WORK.fill * dt) / 60) * (sb >= 2 ? 0.5 : sb === 1 ? 0.75 : 1));
+    G.workBar = Math.min(100, G.workBar + (WORK.fill * dt) / 60);
     G.awayT = 0;
     G.workWarned = false;
   } else {
@@ -13458,7 +13490,6 @@ function newDay() {
   G.momToday = false;
   G.mailToday = false;
   G.overtimeToday = false;
-  if (PLAYER.needs.stress < 30) G.stressFloor = Math.max(0, G.stressFloor - 3); // a calm day eases the floor
   for (const n of CHARS) if (!n.isPlayer && !n.def.stranger) n.sus = Math.max(0, n.sus - 3);
   G.rainDay = chance(0.34);
   G.rainAmt = rand(0.5, 1);
@@ -15692,7 +15723,12 @@ function npcSeesPlayer(n, maxD = 9) {
   const dx = P.x - n.x,
     dz = P.z - n.z,
     d = Math.hypot(dx, dz);
+  // you're easy to notice: in a hedge with your trousers down, or smelling of your own accident
+  const pee = P.queue[0] && P.queue[0].pee && P.queue[0].stage === 'run';
+  if (pee) maxD *= BLADDER.peeSeen;
+  else if (G.smelly) maxD *= BLADDER.smell;
   if (d > maxD) return false;
+  if (pee && d < 4 && losClear(Math.floor(n.x), Math.floor(n.z), Math.floor(P.x), Math.floor(P.z))) return true;
   const rn = roomAt(n.x, n.z),
     rp = roomAt(P.x, P.z);
   if (rn && rn === rp && rn.private) return true;
@@ -15853,7 +15889,7 @@ function tellTick(n, dt) {
     const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
     if (seen && !tl.seen) {
       tl.seen = true;
-      addStress(5);
+      psyMark('sign');
     }
     if (seen && !tl.caught && npcSeesPlayer(n, 8)) {
       tl.caught = true;
@@ -15868,10 +15904,11 @@ function tellTick(n, dt) {
   // what you see is only what you see: nothing is filed, nothing slows down. A photo is the only record.
   const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
   if (seen) tl.w += dt;
+  if (seen && tl.w > 0.8 && n.isThem) psyMark('sign'); // a slight sign, seen with your own eyes
   if (tl.watch) {
     if (seen && !tl.scared && tl.w > 1) {
       tl.scared = true;
-      addStress(10);
+      psyMark('sign');
       audio.sting('whisper');
     }
     n.odd = { k: 'watch', amt: 15, note: 'Standing in the road at night, staring at my window.', until: G.t + 2 };
@@ -15880,7 +15917,7 @@ function tellTick(n, dt) {
   if (tl.ritual) {
     if (seen && tl.w > 1.2 && !G.ritualSeenDay[dayNo()]) {
       G.ritualSeenDay[dayNo()] = true;
-      addStress(15);
+      psyMark('sign');
       audio.sting('whisper');
     } // watched: it spoils THEIR night, and tells you nothing
     if (!tl.caught && tl.t > 2 && npcSeesPlayer(n, 8)) {
@@ -16125,7 +16162,7 @@ function awardTell(n) {
   if (tl) tl.awarded = true;
   const type = tl ? tl.type : 'stare',
     change = type === 'true';
-  addStress(change ? 10 : 4);
+  psyMark(change ? 'form' : 'sign');
   if (!G.factionKnown) revealFaction();
   const where = placeName(n.x, n.z);
   const rec = change
@@ -16852,14 +16889,12 @@ function abduct(how) {
     el.hidden = true;
     UI.scene = null;
     if (G.over) return;
-    if (probe) {
-      G.stressFloor = Math.min(50, G.stressFloor + 5);
-      setTimeout(() => ui.note('sick', 'Hours missing. Your neck hurts.', 'bad'), 1500);
-    } else {
+    psyMark('form'); // you saw what THEY are, taking you
+    if (probe) setTimeout(() => ui.note('sick', 'Hours missing. Your neck hurts.', 'bad'), 1500);
+    else {
       G.playerChip = true;
       setTimeout(() => ui.note('sick', 'A small scar behind your ear', 'bad'), 1500);
     }
-    addStress(12);
     G.visionOff = G.t + 120;
     G.sickNext = true;
     goAway('taken', G.t + irand(150, 200));
@@ -17077,7 +17112,6 @@ function policeWarn(c, edge) {
         onTick: face,
       });
   G.policeWarned = true;
-  addStress(5);
   hardReset(c);
   enqueue(c, [line('mid'), line('close'), goAct(edge, { label: 'Leaving' })]);
   setTimeout(() => !G.over && ui.note('badge', 'A warning from the police. Next time he takes you in.', 'bad'), 2600);
@@ -17089,7 +17123,6 @@ function heldUntil() {
 }
 function arrest() {
   // no street to do it on: straight inside
-  addStress(8);
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
   CELL.book = true;
@@ -17211,7 +17244,6 @@ function arrestStart(off) {
   P.run = false;
   P.jog = false;
   if (G.speed > 1) G.speed = 1;
-  addStress(8);
   echo('police', { x: P.x, z: P.z });
   audio.sting('caught');
   Object.assign(ARREST, { on: true, phase: 'cuff', off, t0: G.t, until: heldUntil(), car: null, loadAt: 0, rp: 0 });
@@ -18027,7 +18059,6 @@ function ridicule(n) {
     addSus(b, 10);
     ui.bubble(b, 'laugh', 'speech', 2);
   }
-  addStress(5); // ridiculed, and called a lunatic
   n.danger = Math.max(dangerFloor(n), n.danger - 25);
   echo('ridicule', { x: n.x, z: n.z, who: n.id });
 }
@@ -18282,7 +18313,6 @@ function swingTarget(c, dir, reach) {
 function playerMelee(n) {
   const P = PLAYER;
   if (!P.onMap || R.time < (UI.swingCd || 0) || P.queue.some((a) => a.swing)) return;
-  if (tooShaken()) return shakenNote(); // breaking: your hands won't do it
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
   enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
@@ -18642,7 +18672,7 @@ function witnessTrue(w, n) {
 function youSeeTrue(n) {
   const tf = n.trueForm;
   tf.seenByYou = true;
-  addStress(tf.mode === 'rite' || tf.mode === 'riteOut' ? 8 : 12);
+  psyMark('form');
   G.visionOff = Math.max(G.visionOff, G.t + 120);
   G.shakenUntil = G.t + 120;
   if (n.tell.t < TF_CHANGE + 0.2) tf.sawChange = true;
@@ -18755,7 +18785,6 @@ function killMember(n, how) {
     { by: 'you' },
   );
   cardSoon({ char: n, stamp: how === 'mob' ? 'FINISHED' : 'KILLED' }, () => snapImage(n, rec));
-  addStress(how === 'mob' ? 3 : 6);
   echo('killed', { x: n.x, z: n.z, who: n.id });
   audio.sting('onto');
   if (!alive().length) {
@@ -18847,7 +18876,6 @@ function exposedTick(n, dt) {
         onCatch: (c) => {
           c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
           ui.say(c, pick(['Not here. Not with all of them watching.', 'Later.', 'I know where you sleep.']), 3);
-          addStress(5);
         },
         onLose: () => {},
       }),
@@ -18919,6 +18947,7 @@ function boltHits(b) {
   }
   if (n) ui.bubble(n, 'exclaim', 'speech', 1.4);
   G.lastHitBy = n ? n.id : null;
+  psyMark('fight');
   hurt(b.dmg, true);
 }
 // ───────────── the hit, and what it costs. Health stays hidden while full.
@@ -18932,7 +18961,6 @@ function hurt(v, byThem) {
   if (G.over || !PLAYER.onMap) return;
   G.health = Math.max(0, G.health - v);
   gesture(PLAYER, 'flinch', 0.6, 0, 0.08);
-  addStress(8); // being attacked
   R.pulse = 1;
   ui.float(PLAYER, '−' + v, 'bad');
   audio.sting('caught');
@@ -19185,9 +19213,9 @@ function foeStrike(n, A, held) {
     return;
   }
   const blow = (HURT[G.faction] || 18) * (G.loose ? 1.2 : tf.private ? EVIDENCE.fight.privateBlow : 1);
+  psyMark('fight');
   G.lastHitBy = n.id; // an id, never the person: G is saved whole
   ui.bubble(n, 'exclaim', 'speech', 1.4);
-  addStress(3);
   hurt(Math.round(blow), true);
   if (!G.over && P.onMap) knockBack(P, n, 0.9);
 }
@@ -19270,7 +19298,7 @@ function fightOutcome(n) {
     ui.say(n, pick(COP_HIT), 2.6);
     return arrestStart(n); // no warning for that
   }
-  addStress(2);
+  if (n.trueForm) psyMark('fight');
   G.fights = (G.fights || 0) + 1;
   const tf = n.trueForm;
   if (tf) {
@@ -19404,7 +19432,6 @@ function perceptionTick(dt) {
     if (d < 3.2 && n.sus >= 25 && n.remarkDay !== dayNo() && !n.tell && n.id !== 'lenny' && !asleep(n)) {
       n.remarkDay = dayNo();
       ui.say(n, viewLine(n), 3);
-      if (n.sus >= 85) addStress(2);
     }
   }
 }
@@ -19418,7 +19445,6 @@ function clinicCheck() {
   }
   if (G.clinicDay && G.clinicDay === dayNo() - 1) return gameOver('committed');
   G.clinicDay = dayNo();
-  addStress(8);
   setTimeout(() => {
     ui.note('phone', 'Mom called. People phoned her.', 'bad');
     audio.blip('ring');
@@ -19741,6 +19767,7 @@ function throwLand(th) {
   if (d < 6) HX.shake = Math.max(HX.shake || 0, 0.25);
   if (P.onMap && !G.away && d < RANGED.hit) {
     G.lastHitBy = th.by.id;
+    psyMark('fight');
     hurt(HURT.thrown, true);
     if (!G.over && P.onMap) knockBack(P, th, 0.8);
   } else if (P.onMap && d < 3 && th.arc) ui.float(P, 'Dodged', 'good');
@@ -19822,7 +19849,7 @@ function swarmSting(s) {
   G.health = Math.max(0, G.health - HURT.sting);
   G.sickNext = true;
   G.lastHitBy = s.by.id;
-  addStress(1.5);
+  psyMark('fight');
   R.pulse = Math.max(R.pulse || 0, 0.35);
   ui.float(PLAYER, '−' + HURT.sting, 'bad');
   audio.hx('sting', 0, 0.45);
@@ -19999,7 +20026,6 @@ function awkward(n, kind) {
   if (G.awkCd > 0) return;
   G.awkCd = 15;
   addSus(n, 6);
-  addStress(5);
   ui.bubble(n, 'exclaim', 'speech', 3);
   ui.say(
     n,
@@ -21164,7 +21190,7 @@ function raidTick(n, dt) {
   if (!tg.isPlayer && P.onMap && dp < 6 && G.t - (tf.seenIn || -99) < 1 && !A.broken) {
     A.broken = true;
     A.seen = true;
-    addStress(12);
+    psyMark('form');
     if (mayHuntYou() && chance(0.6)) {
       tf.mode = 'attack';
       tf.t0 = G.t;
@@ -21239,7 +21265,7 @@ function raidTick(n, dt) {
   n.tell.lunge = !n.tell.feed;
   if (P.onMap && visAt(n.x, n.z) > 0.5 && !A.seen) {
     A.seen = true;
-    addStress(12);
+    psyMark('form');
   }
   if (G.t - A.struggle > 8) {
     n.tell.feed = n.tell.lunge = false;
@@ -21761,7 +21787,6 @@ function lureEnd(L, broken, quiet) {
     if (c && c.queue[0] && c.queue[0].label === '…') hardReset(c);
     if (quiet || !st) return;
     ui.say(st, pick(['Where am I?', 'What was I doing?']), 3);
-    addStress(6);
     if (c && c.onMap) {
       R.flash = Math.max(R.flash, 0.4);
       hardReset(c);
@@ -22223,7 +22248,6 @@ function horrorFire(ev) {
       )[0];
       if (d && heardIt('noise', d.x + 0.5, d.z + 0.5)) {
         notifyPing(d.x + 0.5, d.z + 0.5);
-        addStress(4);
       }
       return;
     }
@@ -22456,7 +22480,6 @@ function horrorFire(ev) {
     case 'handle': {
       if (!home) return;
       notifyPing(11.5, 22.5);
-      addStress(8);
       ui.note('lock', 'The door handle is turning', 'bad');
       audio.sting('whisper');
       if (mayHuntYou() && !G.attack) {
@@ -22473,7 +22496,7 @@ function noticeTick() {
   if (!P.onMap) return;
   if (G.movedNote && inRoomSet(P, (r) => r.home) && !G.sleeping) {
     ui.note('home', G.movedNote, 'onto');
-    addStress(5);
+    psyMark('sign'); // THEY were in here
     G.movedNote = null;
   }
   if (G.chalk && G.chalk === G.gatherDay && Math.hypot(P.x - 27.5, P.z - 7) < 4) {
@@ -22840,7 +22863,7 @@ function openUp(o) {
       at: G.t,
     });
     ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
-    addStress(6);
+    if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
     const j = junkIn(o);
@@ -22879,7 +22902,7 @@ function takeStash(it) {
   st.out = false;
   st.lostAt = G.t;
   removeItem(it);
-  addStress(5);
+  if (!st.innocent) psyMark('sign');
   takeProofItem(stashCard(st, o, own));
   setTimeout(() => ui.note('bag', S.what + ' · in your pocket. Someone will miss it.', 'onto'), 900);
 }
@@ -23172,7 +23195,6 @@ function readOddity(st, it) {
   const n = NPC[st.by],
     S = stashDef(st),
     o = OBJ[it.obj];
-  addStress(2);
   if (o) closeUp(o, true);
   if (!n) return;
   addNote(n, 'Read it: ' + S.truth + '.', { by: 'you' });
@@ -23541,7 +23563,6 @@ function knockAct(o, owner) {
       if (!home || owner.slain) return ui.note('knock', 'No answer', '');
       if (sleeping) return ui.note('knock', 'Shuffling. Then nothing.', '');
       if (owner.exposed) {
-        addStress(5);
         audio.sting('whisper');
         return ui.note('knock', 'Through the door: “Go away. While you still can.”', 'bad');
       }
@@ -23599,52 +23620,41 @@ function raidEnter(n) {
   }
 }
 // ───────────── visions
-// From stress 60 the mind starts lying: ear pings with nothing there, shadow figures, a townsperson flickering
-// into a tell for a second, and from 80 a fake overheard line pinned to the board. Fakes never move evidence.
+// Under Psychic 60 the mind starts lying, now and then: a shadow in a dark corner, someone running off at the edge of
+// sight, someone watching you who's gone when you look again. Under 40 it happens more often, and the half-seen changes,
+// the faces that flicker and the pings with nothing there come too. Rare trickery, not a mad world, and a vision never
+// shows up on film (play/photos).
 const VISION_FACTIONS = ['aliens', 'lizards', 'zombies'];
 // until you know a lot (the faction, and one of THEM unmasked) visions show any faction
 const visionFaction = () => (G.factionKnown && G.exposed.length ? G.faction : pick(VISION_FACTIONS));
 function hallucinate(dtReal) {
-  if (SHADE.on) {
-    SHADE.t -= dtReal;
-    if (SHADE.t <= 0) SHADE.on = false;
-    return;
-  }
-  const st = PLAYER.needs.stress;
-  if (G.speed === 0 || G.sleeping || G.away || G.t < G.visionOff) return;
-  if (st >= 40 && st < 60) {
-    // tense: only whispers
+  if (SHADE.on) return visionStep(dtReal);
+  const psy = psychic();
+  if (G.speed === 0 || G.sleeping || G.away || G.t < G.visionOff || psy >= PSY.visions) return;
+  const bad = psy < PSY.shaky;
+  if (!bad) {
+    // uneasy: a whisper now and then
     G.whisperCd -= dtReal;
     if (G.whisperCd <= 0) {
-      G.whisperCd = rand(40, 90);
+      G.whisperCd = rand(50, 110);
       audio.sting('whisper');
     }
-    return;
-  }
-  if (st < 60) return;
-  G.halfCd = (G.halfCd == null ? 6 : G.halfCd) - dtReal;
-  if (G.halfCd <= 0) {
-    G.halfCd = st >= 80 ? rand(5, 12) : rand(10, 22);
-    visionHalf();
+  } else {
+    G.halfCd = (G.halfCd == null ? 8 : G.halfCd) - dtReal;
+    if (G.halfCd <= 0) {
+      G.halfCd = psy < PSY.mute ? rand(8, 16) : rand(14, 28);
+      visionHalf();
+    }
   }
   G.shadeCd -= dtReal;
   if (G.shadeCd > 0) return;
-  const strong = st >= 80;
-  G.shadeCd = rand(16, 38) * (strong ? 0.6 : 1) * (1.5 - (st - 60) / 60);
-  const r = Math.random();
-  if (r < 0.3)
-    return (
-      (st >= 70 &&
-        !HX.scene &&
-        lightGroupOn('street') &&
-        !inRoomSet(PLAYER, () => true) &&
-        chance(0.5) &&
-        visionDoor()) ||
-      visionShade()
-    );
-  if (r < 0.55) return visionPing();
-  if (r < 0.8 || !strong) return visionFlicker() || visionPing();
-  return visionNote();
+  G.shadeCd = bad ? rand(18, 40) * (0.6 + psy / 100) : rand(70, 150);
+  const r = Math.random(),
+    slight = () => pick([visionShade, visionRunner, visionWatcher])() || visionShade();
+  if (!bad || r < 0.55) return slight();
+  if (r < 0.72) return visionPing();
+  if (r < 0.9) return visionFlicker() || visionPing();
+  return (lightGroupOn('street') && !HX.scene && !inRoomSet(PLAYER, () => true) && visionDoor()) || visionShade();
 }
 function visionDoor() {
   const sc = hxRedDoor(true);
@@ -23684,42 +23694,28 @@ function visionFlicker() {
   audio.sting('whisper');
   return true;
 }
-function visionNote() {
-  const subs = suspects().filter((n) => !n.exposed);
-  if (!subs.length) return visionPing();
-  const s = pick(subs),
-    fac = visionFaction();
-  const line = (chance(0.5) ? pick(RUMORS[fac]) : pick(FAKE_LINES)).replace('{s}', s.short);
-  const src = pick(suspects().filter((n) => n !== s && !n.exposed)) || NPC.lenny;
-  addNote(s, '“' + line + '”', { by: src.id, fake: true });
-  ui.note('ear', line, 'onto');
-  audio.sting('whisper');
-  return true;
-}
-function visionShade() {
+// a place in sight, `lo`…`hi` tiles off, where something could stand (dark: only in the dark)
+function visionSpot(lo, hi, dark) {
   const P = PLAYER;
-  let best = null;
   for (let k = 0; k < 60; k++) {
-    const x = Math.floor(P.x + rand(-9, 9)),
-      z = Math.floor(P.z + rand(-9, 9));
+    const x = Math.floor(P.x + rand(-hi, hi)),
+      z = Math.floor(P.z + rand(-hi, hi));
     if (!inb(x, z) || !walkable(x, z)) continue;
     const d = Math.hypot(x - P.x, z - P.z);
-    if (d < 4 || visCur[I(x, z)] < 0.6 || cellLum(I(x, z)) > 0.3) continue;
-    best = [x, z];
-    break;
+    if (d < lo || d > hi || visCur[I(x, z)] < 0.6 || (dark && cellLum(I(x, z)) > 0.3)) continue;
+    return [x + 0.5, z + 0.5];
   }
-  if (!best) return false;
-  if (!SHADE.c) {
-    SHADE.c = {
-      id: 'shade',
-      x: 0,
-      z: 0,
-      y: 0,
-      dir: 0,
-      tdir: 0,
-      onMap: true,
-      shown: 1,
-      look: {
+  return null;
+}
+// a figure for the mind to put there: a shadow, or somebody's shape you half know
+function visionFigure(kind, at) {
+  if (!SHADE.c) SHADE.c = { id: 'shade', y: 0, onMap: true, shown: 1, fx: {}, pose: 'stand', animT: 0, queue: [] };
+  const s = SHADE.c,
+    P = PLAYER;
+  const who = kind !== 'shade' && pick(suspects().filter((n) => !n.slain && !n.gone));
+  s.look = who
+    ? who.look
+    : {
         h: 1.22,
         w: 0.82,
         hair: 'bald',
@@ -23732,26 +23728,68 @@ function visionShade() {
         hatC: [0, 0, 0],
         eyeC: [0.5, 0.5, 0.5],
         mouthC: [0, 0, 0],
-      },
-      J: defaultJ(),
-      fx: {},
-      anim: 'stare',
-      pose: 'stand',
-      animT: 0,
-      queue: [],
-    };
-    SHADE.c.J.uaL = SHADE.c.J.uaR = 0;
-    SHADE.c.J.hp = 0.25;
-  }
-  const s = SHADE.c;
-  s.x = best[0] + 0.5;
-  s.z = best[1] + 0.5;
-  s.dir = s.tdir = Math.atan2(P.x - s.x, P.z - s.z);
-  s.fx = { eye: [0.7, 0.7, 0.7] };
+      };
+  s.J = defaultJ();
+  s.J.uaL = s.J.uaR = 0;
+  s.J.hp = kind === 'shade' ? 0.25 : 0;
+  s.x = at[0];
+  s.z = at[1];
+  s.dir = s.tdir = kind === 'run' ? Math.atan2(s.x - P.x, s.z - P.z) : Math.atan2(P.x - s.x, P.z - s.z);
+  s.anim = kind === 'run' ? 'run' : 'stare';
+  s.fx = kind === 'shade' ? { eye: [0.7, 0.7, 0.7] } : {};
+  SHADE.kind = kind;
   SHADE.on = true;
-  SHADE.t = rand(0.5, 1.1);
   audio.sting('whisper');
   return true;
+}
+// a shadow with eyes in a dark corner, for a breath
+function visionShade() {
+  const at = visionSpot(4, 9, true);
+  if (!at) return false;
+  visionFigure('shade', at);
+  SHADE.t = rand(0.5, 1.1);
+  return true;
+}
+// someone running off, out at the edge of what you can see
+function visionRunner() {
+  const at = visionSpot(6, 11, false);
+  if (!at) return false;
+  visionFigure('run', at);
+  SHADE.t = rand(1.1, 1.6);
+  return true;
+}
+// someone standing there watching you. Look at them, or walk up, and there's nobody.
+function visionWatcher() {
+  const at = visionSpot(7, 12, false);
+  if (!at) return false;
+  visionFigure('watch', at);
+  SHADE.t = 9;
+  return true;
+}
+function visionStep(dtReal) {
+  const s = SHADE.c,
+    P = PLAYER;
+  SHADE.t -= dtReal;
+  if (SHADE.kind === 'run') {
+    // a stride, and away: gone once it's out of sight
+    s.animT += dtReal * 9;
+    const w = Math.sin(s.animT);
+    s.J.thL = w * 0.8;
+    s.J.thR = -w * 0.8;
+    s.J.shL = Math.max(0, -w) * 1.1;
+    s.J.shR = Math.max(0, w) * 1.1;
+    s.J.uaL = -w * 0.7;
+    s.J.uaR = w * 0.7;
+    s.J.torso = 0.25;
+    s.x += Math.sin(s.dir) * 5.5 * dtReal;
+    s.z += Math.cos(s.dir) * 5.5 * dtReal;
+    if (visAt(s.x, s.z) < 0.3) SHADE.t = 0;
+  } else if (SHADE.kind === 'watch') {
+    s.dir = s.tdir = Math.atan2(P.x - s.x, P.z - s.z);
+    const toIt = Math.atan2(s.x - P.x, s.z - P.z);
+    if (Math.abs(angDiff(P.dir, toIt)) < 0.45 || Math.hypot(s.x - P.x, s.z - P.z) < 5) SHADE.t = 0; // looked: nobody
+  }
+  if (SHADE.t <= 0) SHADE.on = false;
 }
 // ───────────────────────── what you can do ─────────────────────────
 const DESK_OWNER = {
@@ -23808,7 +23846,6 @@ function sleepAct(bed, nap, alarmAt) {
     onEnd: (c, a) => {
       if (!nap) {
         G.sleeping = false;
-        if (G.t - G.sleepFrom >= 360) G.stressFloor = Math.max(0, G.stressFloor - 6);
         if (G.t - G.sleepFrom >= 240) G.health = Math.min(100, G.health + 10);
         if (G.dayShown !== dayNo()) ui.dayCard();
       }
@@ -23861,7 +23898,7 @@ function coffeeAct(o) {
     anim: 'drink',
     prop: 'cup',
     need: 'energy',
-    fx: { energy: 140, bladder: -100, stress: 3 },
+    fx: { energy: 140, bladder: -(BLADDER.coffee * 60) / 7 },
   });
 }
 function toiletAct(o) {
@@ -23876,8 +23913,44 @@ function toiletAct(o) {
   });
 }
 function showerAct(o) {
-  return useP(o, 'Shower', 'shower', { dur: 14, anim: 'shower', fx: { stress: -17 } });
+  return useP(o, 'Shower', 'shower', {
+    dur: 14,
+    anim: 'shower',
+    fx: { stress: -17 },
+    onEnd: (c, a, ok) => {
+      if (ok && G.smelly) {
+        G.smelly = false;
+        ui.note('shower', 'Clean again', 'good');
+      }
+    },
+  });
 }
+// a quick one in a hedge or behind the bins. Anyone who sees it finds you weirder, and while you're at it you're easy
+// to notice: not while you're following someone.
+function peeAct(o) {
+  return useP(o, 'Pee', 'toilet', {
+    dur: BLADDER.pee,
+    anim: 'idle',
+    pee: true,
+    need: 'bladder',
+    onStart: (c) => (c.tdir = Math.atan2(o.cx - c.x, o.cz - c.z)),
+    onTick: (c, a) => {
+      for (const n of CHARS) {
+        if (n.isPlayer || n.def.stranger || a.seen?.has(n) || !npcSeesPlayer(n, 9)) continue;
+        (a.seen || (a.seen = new Set())).add(n);
+        addSus(n, BLADDER.peeSus);
+        ui.bubble(n, 'exclaim', 'speech', 2.5);
+      }
+    },
+    onEnd: (c, a, ok) => {
+      if (!ok) return;
+      c.needs.bladder = 100;
+      if (a.seen && a.seen.size) ui.note('toilet', 'In the bushes · ' + a.seen.size + ' saw', 'bad');
+    },
+  });
+}
+// somewhere out of doors you could get away with it: a tree in the park, a dumpster in the alley
+const peeSpot = (o) => (o.type === 'tree' || o.type === 'dumpster') && !roomAt(o.cx, o.cz);
 function warmAct(o) {
   return useP(o, 'Warm up', 'warm', { dur: 30, anim: 'warm', need: 'stress', fx: { stress: -6 } });
 }
@@ -24026,7 +24099,7 @@ function deskWork(slack) {
     slack: !!slack,
     dur: slack ? 45 : null,
     until: slack ? null : () => !isWorkday() || tod() >= 17 * 60,
-    fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5, stress: 1.2 },
+    fx: slack ? { stress: -9, energy: -0.5 } : { energy: -1.5 },
     onStart: () => {
       if (G.awayT > 60 && NPC.hale.onMap && NPC.hale.shown > 0.5 && G.haleSaw) {
         ui.say(NPC.hale, 'Where were you?', 3);
@@ -24057,7 +24130,6 @@ function tvAct(dur) {
     onTick: (c, a, dt) => {
       if (G.aware >= 25 && !a.faces && chance(dt * 0.02)) {
         a.faces = true;
-        addStress(6);
         ui.note('tv', 'Faces in the static. Watching you watch.', 'bad');
         audio.sting('whisper');
       }
@@ -24065,7 +24137,6 @@ function tvAct(dur) {
       if (h >= 0 && h < 4.5 && !a.late && chance(dt * 0.02)) {
         a.late = true;
         if (G.aware >= 40) {
-          addStress(12);
           ui.note('tv', 'Static. Then your name.', 'bad');
           audio.sting('whisper');
         }
@@ -24189,7 +24260,6 @@ function surrender(n, why) {
     'Dropped the act ' + (why === 'beaten' ? 'after a beating' : 'in front of everyone') + '. On its knees, waiting.',
     { by: 'you' },
   );
-  addStress(why === 'beaten' ? 3 : 2);
   echo('exposed', { x: n.x, z: n.z, who: n.id });
   audio.sting('onto');
 }
@@ -24249,7 +24319,7 @@ const SOC = {
     icon: 'ear',
     dur: 15,
     mid: true,
-    fx: { stress: 10 },
+    fx: {},
     res: () => lennyHint(),
   },
   feed: {
@@ -24291,7 +24361,6 @@ function observeAct(n) {
     icon: 'eye',
     dur: 8,
     anim: 'stare',
-    fx: { stress: 4 },
     check: () => (n.onMap && n.shown > 0.5 && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 9 ? null : 'Can’t see them'),
     onTick: (c, a, dt) => {
       c.tdir = Math.atan2(n.x - c.x, n.z - c.z);
@@ -24425,7 +24494,6 @@ function openConfront(n) {
   G.speed = 0;
   n.tdir = Math.atan2(PLAYER.x - n.x, PLAYER.z - n.z);
   PLAYER.tdir = Math.atan2(n.x - PLAYER.x, n.z - PLAYER.z);
-  addStress(3);
   arenaOpen(A);
   // Psychic 20 or less: you might never get as far as the cards
   if (PLAYER.needs.stress >= EVIDENCE.rant.stress && chance(EVIDENCE.rant.p)) {
@@ -24632,7 +24700,6 @@ function counterBeat(A) {
     else if (100 - PLAYER.needs.stress >= C.psy) arenaSay(A, 'you', pick(ARENA_HOLD));
     else {
       move(A, C.lose, 'laugh', 'counter');
-      addStress(C.stress);
       arenaSay(A, 'you', '…');
     }
     if (A.n.faceShot && G.t - A.n.faceShot < C.facedMins) move(A, C.faced, null, 'faced'); // you had a lens in their face only yesterday
@@ -24788,7 +24855,6 @@ function arenaOutcome(A) {
   if (res === 'wrong') {
     bookAware(W.wrong);
     addSus(n, EVIDENCE.wrong.sus);
-    addStress(5);
   } else {
     bookAware(W.fail);
     addDanger(n, 20);
@@ -24966,6 +25032,7 @@ function playerPhoto() {
   if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
+  if (shaky()) return shakenNote('Your hands shake too much for a photo'); // under 40: you can still take things
   cancelAll(P);
   enqueue(
     P,
@@ -25150,7 +25217,6 @@ function takePhoto(tg) {
     const vision = (SHADE.on && SHADE.c && inFrame(SHADE.c.x, SHADE.c.z)) || chars.some((n) => n.vis && !n.tell);
     if (vision) {
       const pr = addPrint({ kind: 'nothing', what: 'Nothing', where: placeName(ax, az) });
-      addStress(3);
       ui.card({ title: 'Nothing', img: printImage(pr), stamp: 'NOTHING' });
     } else {
       const who = tg.char || chars[0] || null;
@@ -25341,7 +25407,6 @@ function objMenu(o) {
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (c.needs.stress > 65) {
-                  addStress(6);
                   ui.note('mirror', 'Your reflection lagged', 'bad');
                   audio.sting('whisper');
                 } else ui.float(c, 'Tired', '');
@@ -25426,7 +25491,6 @@ function objMenu(o) {
                   if (!ok) return;
                   const wrong = G.phoneRing && G.phoneRing.wrong;
                   G.phoneRing = null;
-                  addStress(12);
                   ui.note(
                     'phone',
                     wrong
@@ -25568,7 +25632,7 @@ function objMenu(o) {
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (chance(G.faction === 'aliens' ? 0.45 : 0.15)) {
-                  addStress(6);
+                  if (G.faction === 'aliens') psyMark('sign');
                   ui.note('ear', 'Clicks. Counting.', 'onto');
                   G.leads.push('Server rack clicks in patterns');
                 } else ui.note('ear', 'Just fans', '');
@@ -25615,7 +25679,7 @@ function objMenu(o) {
                 if (G.mailToday) return ui.note('mail', 'Empty', '');
                 G.mailToday = true;
                 if (G.aware >= 40 && chance(0.5)) {
-                  addStress(10);
+                  psyMark('sign');
                   ui.note('mail', 'A photo of your door. From inside.', 'bad');
                   audio.sting('whisper');
                 } else ui.note('mail', pick(MAIL), '');
@@ -25635,7 +25699,7 @@ function objMenu(o) {
             useP(pc, 'Browse', 'pc', {
               dur: 30,
               anim: 'type',
-              fx: { stress: 10, energy: -2 },
+              fx: { energy: -2 },
               onEnd: (c, a, ok) => {
                 if (!ok) return;
                 if (chance(0.45)) {
@@ -25663,7 +25727,7 @@ function objMenu(o) {
                 if (!ok) return;
                 const below = them().find((m) => m.under);
                 if (below && G.faction === 'lizards') {
-                  addStress(6);
+                  psyMark('sign');
                   ui.note('ear', 'Breathing down there. Slow. Warm.', 'onto');
                   G.leads.push('Someone goes down the drain behind Pell’s');
                 } else ui.note('ear', 'Water. Rats.', '');
@@ -25702,7 +25766,6 @@ function objMenu(o) {
             useP(o, 'Dig', 'trash', {
               dur: 6,
               anim: 'dig',
-              fx: { stress: 2 },
               onEnd: (c, a, ok) => {
                 if (ok) digResult(o);
               },
@@ -25710,6 +25773,17 @@ function objMenu(o) {
           ),
         ),
       );
+    // falls through: behind the dumpster, or up against a tree in the park, you could get away with it
+    case 'tree':
+      if (peeSpot(o))
+        ops.push(
+          opt(
+            'Pee',
+            'toilet',
+            Q(() => peeAct(o)),
+            PLAYER.needs.bladder > 80 ? 'Don’t need to' : null,
+          ),
+        );
       break;
     case 'payphone':
       ops.push(
@@ -25809,21 +25883,13 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt('Confront', 'confront', () => openConfront(n), n.sus >= 85 ? 'Not listening' : null)
+      ? opt(
+          'Confront',
+          'confront',
+          () => openConfront(n),
+          tooShaken() ? 'Too shaken' : n.sus >= 85 ? 'Not listening' : null,
+        )
       : opt('Attack', 'fist', () => playerMelee(n));
-  if (tooShaken())
-    return {
-      title: n.trueForm ? '???' : n.def.stranger ? 'Stranger' : n.name,
-      img: n.trueForm ? null : getPortrait(n),
-      icon: 'nerve',
-      sub: 'You can’t face anyone like this',
-      // you can't talk calmly, but you can still shout it at them
-      ops: [opt('Too shaken', 'nerve', null, 'Calm down')].concat(
-        !n.trueForm && !n.def.stranger && !n.exposed && !n.surrendered && n.id !== 'lenny' && earshot(n).length
-          ? [cfOpt()]
-          : [],
-      ),
-    };
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   const hit = (label, icon) => opt(label, icon, () => playerMelee(n));
   // its true form: no menu, the key is the blow. On its knees, there's nothing left to do but wait.
@@ -25900,13 +25966,12 @@ function menuForChar(n) {
 }
 // the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
 function askMenu(n) {
-  const T = (k) => () => enqueue(PLAYER, talkAct(n, k)),
-    st = PLAYER.needs.stress;
+  const T = (k) => () => enqueue(PLAYER, talkAct(n, k));
   return {
     title: n.name,
     img: getPortrait(n),
     ops: [
-      opt('Gossip', 'ear', T('gossip'), st >= 60 ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
+      opt('Gossip', 'ear', T('gossip'), tooShaken() ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
       opt(
         'Come with me',
         'walk',
@@ -26043,7 +26108,7 @@ function bagItem(it) {
   const home = itemHome(it),
     saw = itemSeenWith(it);
   removeItem(it);
-  addStress(3);
+  if (it.by && !it.innocent) psyMark('sign');
   if (it.by) {
     if (!G.factionKnown) revealFaction();
     takeProofItem({
@@ -26159,7 +26224,7 @@ const ITEMS_INV = [
           dur: 2,
           anim: 'drink',
           prop: 'can',
-          fx: { energy: 780, stress: 180, bladder: -300 },
+          fx: { energy: 780, bladder: -300 },
         }),
       );
     },
@@ -26255,7 +26320,6 @@ function needTarget(k) {
         !shift &&
         w === 'out' &&
         day &&
-        !tooShaken() &&
         L &&
         L.onMap &&
         L.pose === 'sit' &&
@@ -27130,9 +27194,9 @@ const BARS = [
     svg: 'M13.6 2 4.8 13.4h6.4L9.9 22l9.3-11.6h-6.5z',
     warn: () => PLAYER.needs.energy < 20,
   },
-  { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 },
+  { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 || G.smelly },
   { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && isWorkday() },
-  { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => PLAYER.needs.stress >= 75 },
+  { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
 // THEIR eye: nothing aimed at you · watching you · framing people, tearing your cards · coming for you every night
@@ -27165,7 +27229,6 @@ function buildHud() {
           ? psySvg('')
           : '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="' + b.svg + '"/></svg>') +
       '</span><span class="bt"><b></b>' +
-      (b.k === 'stress' ? '<i class="flr"></i>' : '') +
       '</span><span class="tr"><i></i><i></i><i></i></span><i class="wx ' +
       (b.red ? 'red' : 'yel') +
       '"></i></button>',
@@ -27184,7 +27247,6 @@ function buildHud() {
       el,
       fill: el.querySelector('b'),
       wx: el.querySelector('.wx'),
-      flr: el.querySelector('.flr'),
       trEl: el.querySelector('.tr'),
       v: null,
       w: null,
@@ -27308,7 +27370,7 @@ function setBar(k, v, tip) {
 // your desk) jolts it: arrows for a moment, more of them the bigger it was. A steady climb or slide that's clearly faster
 // than the day's own drift (eating, sleeping, the job draining while you're away from your desk) shows one or two for as
 // long as it keeps up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't fake it.
-const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -8, stress: -0.6, work: 0 }; // points per game hour, left alone
+const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -10, stress: 1, work: 0 }; // points per game hour, left alone
 function barTrend(k, v) {
   const B = UI.bars[k];
   if (!B || !B.trEl) return;
@@ -27414,20 +27476,21 @@ function updateHud(dtReal) {
   setBar('health', G.health, 'Health ' + Math.round(G.health) + (G.health < 100 ? ' · sleep heals' : ''));
   setBar('hunger', N.hunger, 'Hunger');
   setBar('energy', N.energy, 'Energy');
-  setBar('bladder', N.bladder, 'Bladder');
+  setBar('bladder', N.bladder, 'Bladder' + (G.smelly ? ' · you smell: shower' : ''));
   setBar(
     'stress',
     100 - N.stress,
-    'Psychic · ' +
-      ['steady', 'uneasy', 'shaken', 'breaking · can’t face anyone', 'panic'][stressBand(N.stress)] +
-      (G.stressFloor >= 2 ? ' · can’t get above ' + Math.round(100 - G.stressFloor) : ''),
+    'Psychic ' +
+      Math.round(100 - N.stress) +
+      ' · ' +
+      [
+        'steady',
+        'uneasy · you see things',
+        'shaken · your hands shake: no photos',
+        'breaking · no gossip, no confronting',
+        'panic',
+      ][stressBand(N.stress)],
   );
-  const fl = UI.bars.stress.flr,
-    fv = clamp(G.stressFloor, 0, 100).toFixed(1) + '%';
-  if (fl.dataset.v !== fv) {
-    fl.dataset.v = fv;
-    fl.style.setProperty('--f', fv);
-  } // the hatched end: as high as it can climb now
   // work: it only moves in the shift, and it's the job itself
   const m = tod(),
     atDesk = playerAtDesk();
@@ -28363,7 +28426,7 @@ const ptrs = new Map();
 let drag = null,
   lastTap = { t: 0, x: 0, z: 0 };
 const isTouch = () => matchMedia('(pointer: coarse)').matches;
-const MENU_TYPES = new Set(['desk', 'bossdesk', 'pcdesk', 'shopcounter']);
+const MENU_TYPES = new Set(['desk', 'bossdesk', 'pcdesk', 'shopcounter', 'tree']); // a tree: somewhere to pee
 const BARE_SEATS = new Set(['chair', 'armchair', 'chair_office', 'bench']); // nothing to do with a seat on its own
 const interactive = (o) =>
   !o.t.flat &&
@@ -29179,7 +29242,7 @@ function interact() {
   if (!f) return;
   if (f.char && f.char.trueForm && f.menu.ops.length === 1) return runOpt(f.menu.ops[0]); // its true form: the key is the blow
   if (f.char && f.char.thrall && G.loose) return playerMelee(f.char); // one of THEIRS today: the key is the blow
-  if (f.char && f.char.fleeing && !f.char.def.stranger && !tooShaken()) return playerMelee(f.char); // running from you: the key is the tackle
+  if (f.char && f.char.fleeing && !f.char.def.stranger) return playerMelee(f.char); // running from you: the key is the tackle
   const an = { char: f.char, obj: f.obj, item: f.item },
     xy = anchorXY(an) || [window.innerWidth / 2, window.innerHeight / 2];
   presentMenu(menuForFocus(f), xy[0], xy[1], an, false);
@@ -30813,7 +30876,7 @@ function hxUpdate(dtReal) {
     }
   }
   // the shade a frayed mind puts in the dark gets eyes
-  if (SHADE.on && SHADE.c) {
+  if (SHADE.on && SHADE.c && SHADE.kind === 'shade') {
     const c = SHADE.c,
       hy = 1.6 * c.look.h;
     for (const s of [1, -1])
@@ -32857,7 +32920,7 @@ function poseMix(T, P, w = 1) {
 }
 // ───────────── half-changed, for real: late in THEIR week, at night, the skin doesn't always hold.
 // Only with a clear head: shaken (stress 60+), whatever you see is your own mind (see visionHalf), and the camera knows it.
-const HALF_STRESS = 60;
+const HALF_STRESS = 100 - PSY.shaky; // Psychic under 40: what you see slipping is your own mind
 function halfTick() {
   if (!G.started || G.over || !PLAYER.onMap || PLAYER.needs.stress >= HALF_STRESS) return;
   const h = hourF();
@@ -33888,12 +33951,7 @@ function encPullAct(v) {
     dur: 0.6,
     anim: 'use',
     interruptible: false,
-    check: () =>
-      tooShaken()
-        ? 'Too shaken'
-        : G.enc && G.enc.vic.includes(v.id) && v.riteBy && inReach({ char: v })
-          ? null
-          : 'Too far',
+    check: () => (G.enc && G.enc.vic.includes(v.id) && v.riteBy && inReach({ char: v }) ? null : 'Too far'),
     onStart: (c) => {
       c.tdir = Math.atan2(v.x - c.x, v.z - c.z);
     },
@@ -34095,7 +34153,6 @@ function encMark(E, v, n, seen, kneel) {
   encAftermath(E, v, kneel);
   if (seen) {
     // you watched it happen and did nothing
-    addStress(6);
     const what =
       E.fac === 'aliens'
         ? ' was opened up and put back. Doesn’t remember.'
@@ -37944,7 +38001,6 @@ function escKey(k) {
   f.done = true;
   if (f.n) capPortrait(f.n);
   else audio.hx('sting', 0, 0.35);
-  addStress(3);
   if (f.intel) escIntel();
 }
 function escListen(dt) {
@@ -38569,17 +38625,14 @@ function capOutcome(sp) {
   if (CAP.escNotes) notes.push(...CAP.escNotes);
   G.sickNext = true;
   if (isWorkday() && tod() >= 7 * 60 && tod() < 17 * 60) G.sickDay = true; // the day is lost, but not held against you
-  if (CAP.out) {
-    addStress(6);
-  } else {
-    addStress(12);
+  psyMark('form'); // you saw what THEY are, down there
+  if (!CAP.out) {
     G.visionOff = G.t + 120;
     if (fac === 'aliens') {
       if (CAP.chip || (!G.playerChip && chance(0.5))) {
         G.playerChip = true;
         notes.push(['sick', 'Scar behind the ear', 'bad']);
       } else {
-        G.stressFloor = Math.min(50, G.stressFloor + 5);
         notes.push(['sick', 'Neck aches', 'bad']);
       }
       P.lostDay = dayNo();
@@ -38592,13 +38645,11 @@ function capOutcome(sp) {
       G.inv.pills = 0;
       G.inv.flashlight = false;
       G.inv.flashOn = false;
-      addStress(4);
       notes.push([pf ? 'camera' : 'bag', pf ? 'Photo gone' : had ? 'Pockets emptied' : 'Pockets turned out', 'bad']);
     } else {
       P.needs.hunger = Math.min(P.needs.hunger, 18);
       P.needs.energy = Math.min(P.needs.energy, 30);
       P.limpDay = dayNo();
-      addStress(4);
       notes.push(['sick', 'Bitten', 'bad']);
     }
   }
@@ -39398,7 +39449,6 @@ function huntStart(kind, o = {}) {
   // why tonight: the eye at the top of the screen (THEY know you) or THEIR week, flaring as it starts
   if (HUNT.why === 'aware') UI.heatPulse = 3.5;
   else if (HUNT.why === 'plan') UI.planBump = 3.5;
-  addStress(8);
   audio.init();
   HX.jolt = Math.max(HX.jolt, 0.6);
   return true;
@@ -39962,7 +40012,7 @@ function huntGrab(h) {
   HX.jolt = 1;
   HX.shake = 0.7;
   R.pulse = 1;
-  addStress(4);
+  psyMark('fight'); // in ITS hands
   capFace(h.a, P.x, P.z);
   P.tdir = Math.atan2(h.a.x - P.x, h.a.z - P.z);
   P.poseFn = (T, c) => {
@@ -40273,7 +40323,6 @@ function huntEscaped() {
     P = PLAYER;
   if (kind === 'sleep') G.takenAt = G.t - 1440;
   if (kind === 'ground') G.groundCd = G.t + 180;
-  addStress(6);
   G.aware = Math.min(100, G.aware + 4);
   const spot =
     HUNT.kind === 'sleep'
@@ -41119,8 +41168,7 @@ function freshG(start) {
     awayT: 0,
     workWarned: false,
     sickDay: false,
-    stressFloor: 0,
-    hiStress: 0,
+    smelly: false, // an accident in public: until you shower, people notice you from further off
     sleepFrom: 0,
     visionOff: 0,
     whisperCd: 30,
@@ -42399,7 +42447,7 @@ function worldStep(dtReal, preview) {
 function styleStep(dtReal) {
   const live = G && G.started && PLAYER;
   const st = live ? PLAYER.needs.stress : 0;
-  const tgt = live ? Math.max(sstep(36, 94, st), HX.dread * 0.55, HX.blood * 0.85) : 0.3;
+  const tgt = live ? Math.max(sstep(100 - PSY.shaky, 98, st), HX.dread * 0.55, HX.blood * 0.85) : 0.3;
   STY.k += (tgt - STY.k) * Math.min(1, dtReal * 0.5);
   if (live && st >= 80 && G.speed && !G.sleeping && !G.away && !G.over) {
     STY.beatT -= dtReal;

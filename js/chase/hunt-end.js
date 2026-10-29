@@ -36,7 +36,6 @@ function huntEscaped() {
     P = PLAYER;
   if (kind === 'sleep') G.takenAt = G.t - 1440;
   if (kind === 'ground') G.groundCd = G.t + 180;
-  addStress(6);
   G.aware = Math.min(100, G.aware + 4);
   const spot =
     HUNT.kind === 'sleep'

@@ -332,7 +332,7 @@ function openUp(o) {
       at: G.t,
     });
     ui.note('box', 'Inside: ' + S.desc + '.', 'onto');
-    addStress(6);
+    if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
     const j = junkIn(o);
@@ -371,7 +371,7 @@ function takeStash(it) {
   st.out = false;
   st.lostAt = G.t;
   removeItem(it);
-  addStress(5);
+  if (!st.innocent) psyMark('sign');
   takeProofItem(stashCard(st, o, own));
   setTimeout(() => ui.note('bag', S.what + ' · in your pocket. Someone will miss it.', 'onto'), 900);
 }

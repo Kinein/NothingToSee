@@ -1,10 +1,10 @@
 //@ horror/half-forms-real — Half-changed for real, late in the week
 //@ Defines: HALF_STRESS, halfTick, halfSlip, visionHalf
-//@ Uses:    sim/core, core/util, gfx/renderer, horror/half-forms, them/awareness, town/suspicion, world/vision, horror/layer, horror/visions, audio/sound
+//@ Uses:    sim/core, core/util, gfx/renderer, horror/half-forms, data/tuning, them/awareness, town/suspicion, world/vision, horror/layer, horror/visions, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── half-changed, for real: late in THEIR week, at night, the skin doesn't always hold.
 // Only with a clear head: shaken (stress 60+), whatever you see is your own mind (see visionHalf), and the camera knows it.
-const HALF_STRESS = 60;
+const HALF_STRESS = 100 - PSY.shaky; // Psychic under 40: what you see slipping is your own mind
 function halfTick() {
   if (!G.started || G.over || !PLAYER.onMap || PLAYER.needs.stress >= HALF_STRESS) return;
   const h = hourF();

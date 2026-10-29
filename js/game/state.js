@@ -32,8 +32,7 @@ function freshG(start) {
     awayT: 0,
     workWarned: false,
     sickDay: false,
-    stressFloor: 0,
-    hiStress: 0,
+    smelly: false, // an accident in public: until you shower, people notice you from further off
     sleepFrom: 0,
     visionOff: 0,
     whisperCd: 30,

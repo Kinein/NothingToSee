@@ -1,6 +1,6 @@
 //@ taken/back-up — Back up top
 //@ Defines: capDropSpot, capDrop, capOutcome
-//@ Uses:    taken/taken, sim/core, taken/coming, core/util, player/needs, horror/layer, world/objects, audio/sound, sim/pose, world/paths, …
+//@ Uses:    taken/taken, sim/core, taken/coming, core/util, horror/layer, world/objects, audio/sound, sim/pose, world/paths, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── back up top, as if nothing had happened
 function capDropSpot() {
@@ -132,17 +132,14 @@ function capOutcome(sp) {
   if (CAP.escNotes) notes.push(...CAP.escNotes);
   G.sickNext = true;
   if (isWorkday() && tod() >= 7 * 60 && tod() < 17 * 60) G.sickDay = true; // the day is lost, but not held against you
-  if (CAP.out) {
-    addStress(6);
-  } else {
-    addStress(12);
+  psyMark('form'); // you saw what THEY are, down there
+  if (!CAP.out) {
     G.visionOff = G.t + 120;
     if (fac === 'aliens') {
       if (CAP.chip || (!G.playerChip && chance(0.5))) {
         G.playerChip = true;
         notes.push(['sick', 'Scar behind the ear', 'bad']);
       } else {
-        G.stressFloor = Math.min(50, G.stressFloor + 5);
         notes.push(['sick', 'Neck aches', 'bad']);
       }
       P.lostDay = dayNo();
@@ -155,13 +152,11 @@ function capOutcome(sp) {
       G.inv.pills = 0;
       G.inv.flashlight = false;
       G.inv.flashOn = false;
-      addStress(4);
       notes.push([pf ? 'camera' : 'bag', pf ? 'Photo gone' : had ? 'Pockets emptied' : 'Pockets turned out', 'bad']);
     } else {
       P.needs.hunger = Math.min(P.needs.hunger, 18);
       P.needs.energy = Math.min(P.needs.energy, 30);
       P.limpDay = dayNo();
-      addStress(4);
       notes.push(['sick', 'Bitten', 'bad']);
     }
   }

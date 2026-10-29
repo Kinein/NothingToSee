@@ -9,7 +9,7 @@ const ptrs = new Map();
 let drag = null,
   lastTap = { t: 0, x: 0, z: 0 };
 const isTouch = () => matchMedia('(pointer: coarse)').matches;
-const MENU_TYPES = new Set(['desk', 'bossdesk', 'pcdesk', 'shopcounter']);
+const MENU_TYPES = new Set(['desk', 'bossdesk', 'pcdesk', 'shopcounter', 'tree']); // a tree: somewhere to pee
 const BARE_SEATS = new Set(['chair', 'armchair', 'chair_office', 'bench']); // nothing to do with a seat on its own
 const interactive = (o) =>
   !o.t.flat &&

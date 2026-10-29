@@ -1,54 +1,43 @@
 //@ horror/visions — Visions
-//@ Defines: VISION_FACTIONS, hallucinate, visionDoor, visionPing, visionFlicker, visionNote, visionShade
-//@ Uses:    sim/core, core/util, audio/sound, world/grid, town/cast, horror/layer, world/paths, world/vision, data/lines, horror/half-forms-real, …
+//@ Defines: VISION_FACTIONS, hallucinate, visionDoor, visionPing, visionFlicker, visionSpot, visionFigure, visionShade, visionRunner, visionWatcher, visionStep
+//@ Uses:    sim/core, core/util, world/grid, data/tuning, audio/sound, world/vision, horror/layer, world/paths, town/cast, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── visions
-// From stress 60 the mind starts lying: ear pings with nothing there, shadow figures, a townsperson flickering
-// into a tell for a second, and from 80 a fake overheard line pinned to the board. Fakes never move evidence.
+// Under Psychic 60 the mind starts lying, now and then: a shadow in a dark corner, someone running off at the edge of
+// sight, someone watching you who's gone when you look again. Under 40 it happens more often, and the half-seen changes,
+// the faces that flicker and the pings with nothing there come too. Rare trickery, not a mad world, and a vision never
+// shows up on film (play/photos).
 const VISION_FACTIONS = ['aliens', 'lizards', 'zombies'];
 // until you know a lot (the faction, and one of THEM unmasked) visions show any faction
 const visionFaction = () => (G.factionKnown && G.exposed.length ? G.faction : pick(VISION_FACTIONS));
 function hallucinate(dtReal) {
-  if (SHADE.on) {
-    SHADE.t -= dtReal;
-    if (SHADE.t <= 0) SHADE.on = false;
-    return;
-  }
-  const st = PLAYER.needs.stress;
-  if (G.speed === 0 || G.sleeping || G.away || G.t < G.visionOff) return;
-  if (st >= 40 && st < 60) {
-    // tense: only whispers
+  if (SHADE.on) return visionStep(dtReal);
+  const psy = psychic();
+  if (G.speed === 0 || G.sleeping || G.away || G.t < G.visionOff || psy >= PSY.visions) return;
+  const bad = psy < PSY.shaky;
+  if (!bad) {
+    // uneasy: a whisper now and then
     G.whisperCd -= dtReal;
     if (G.whisperCd <= 0) {
-      G.whisperCd = rand(40, 90);
+      G.whisperCd = rand(50, 110);
       audio.sting('whisper');
     }
-    return;
-  }
-  if (st < 60) return;
-  G.halfCd = (G.halfCd == null ? 6 : G.halfCd) - dtReal;
-  if (G.halfCd <= 0) {
-    G.halfCd = st >= 80 ? rand(5, 12) : rand(10, 22);
-    visionHalf();
+  } else {
+    G.halfCd = (G.halfCd == null ? 8 : G.halfCd) - dtReal;
+    if (G.halfCd <= 0) {
+      G.halfCd = psy < PSY.mute ? rand(8, 16) : rand(14, 28);
+      visionHalf();
+    }
   }
   G.shadeCd -= dtReal;
   if (G.shadeCd > 0) return;
-  const strong = st >= 80;
-  G.shadeCd = rand(16, 38) * (strong ? 0.6 : 1) * (1.5 - (st - 60) / 60);
-  const r = Math.random();
-  if (r < 0.3)
-    return (
-      (st >= 70 &&
-        !HX.scene &&
-        lightGroupOn('street') &&
-        !inRoomSet(PLAYER, () => true) &&
-        chance(0.5) &&
-        visionDoor()) ||
-      visionShade()
-    );
-  if (r < 0.55) return visionPing();
-  if (r < 0.8 || !strong) return visionFlicker() || visionPing();
-  return visionNote();
+  G.shadeCd = bad ? rand(18, 40) * (0.6 + psy / 100) : rand(70, 150);
+  const r = Math.random(),
+    slight = () => pick([visionShade, visionRunner, visionWatcher])() || visionShade();
+  if (!bad || r < 0.55) return slight();
+  if (r < 0.72) return visionPing();
+  if (r < 0.9) return visionFlicker() || visionPing();
+  return (lightGroupOn('street') && !HX.scene && !inRoomSet(PLAYER, () => true) && visionDoor()) || visionShade();
 }
 function visionDoor() {
   const sc = hxRedDoor(true);
@@ -88,42 +77,28 @@ function visionFlicker() {
   audio.sting('whisper');
   return true;
 }
-function visionNote() {
-  const subs = suspects().filter((n) => !n.exposed);
-  if (!subs.length) return visionPing();
-  const s = pick(subs),
-    fac = visionFaction();
-  const line = (chance(0.5) ? pick(RUMORS[fac]) : pick(FAKE_LINES)).replace('{s}', s.short);
-  const src = pick(suspects().filter((n) => n !== s && !n.exposed)) || NPC.lenny;
-  addNote(s, '“' + line + '”', { by: src.id, fake: true });
-  ui.note('ear', line, 'onto');
-  audio.sting('whisper');
-  return true;
-}
-function visionShade() {
+// a place in sight, `lo`…`hi` tiles off, where something could stand (dark: only in the dark)
+function visionSpot(lo, hi, dark) {
   const P = PLAYER;
-  let best = null;
   for (let k = 0; k < 60; k++) {
-    const x = Math.floor(P.x + rand(-9, 9)),
-      z = Math.floor(P.z + rand(-9, 9));
+    const x = Math.floor(P.x + rand(-hi, hi)),
+      z = Math.floor(P.z + rand(-hi, hi));
     if (!inb(x, z) || !walkable(x, z)) continue;
     const d = Math.hypot(x - P.x, z - P.z);
-    if (d < 4 || visCur[I(x, z)] < 0.6 || cellLum(I(x, z)) > 0.3) continue;
-    best = [x, z];
-    break;
+    if (d < lo || d > hi || visCur[I(x, z)] < 0.6 || (dark && cellLum(I(x, z)) > 0.3)) continue;
+    return [x + 0.5, z + 0.5];
   }
-  if (!best) return false;
-  if (!SHADE.c) {
-    SHADE.c = {
-      id: 'shade',
-      x: 0,
-      z: 0,
-      y: 0,
-      dir: 0,
-      tdir: 0,
-      onMap: true,
-      shown: 1,
-      look: {
+  return null;
+}
+// a figure for the mind to put there: a shadow, or somebody's shape you half know
+function visionFigure(kind, at) {
+  if (!SHADE.c) SHADE.c = { id: 'shade', y: 0, onMap: true, shown: 1, fx: {}, pose: 'stand', animT: 0, queue: [] };
+  const s = SHADE.c,
+    P = PLAYER;
+  const who = kind !== 'shade' && pick(suspects().filter((n) => !n.slain && !n.gone));
+  s.look = who
+    ? who.look
+    : {
         h: 1.22,
         w: 0.82,
         hair: 'bald',
@@ -136,24 +111,66 @@ function visionShade() {
         hatC: [0, 0, 0],
         eyeC: [0.5, 0.5, 0.5],
         mouthC: [0, 0, 0],
-      },
-      J: defaultJ(),
-      fx: {},
-      anim: 'stare',
-      pose: 'stand',
-      animT: 0,
-      queue: [],
-    };
-    SHADE.c.J.uaL = SHADE.c.J.uaR = 0;
-    SHADE.c.J.hp = 0.25;
-  }
-  const s = SHADE.c;
-  s.x = best[0] + 0.5;
-  s.z = best[1] + 0.5;
-  s.dir = s.tdir = Math.atan2(P.x - s.x, P.z - s.z);
-  s.fx = { eye: [0.7, 0.7, 0.7] };
+      };
+  s.J = defaultJ();
+  s.J.uaL = s.J.uaR = 0;
+  s.J.hp = kind === 'shade' ? 0.25 : 0;
+  s.x = at[0];
+  s.z = at[1];
+  s.dir = s.tdir = kind === 'run' ? Math.atan2(s.x - P.x, s.z - P.z) : Math.atan2(P.x - s.x, P.z - s.z);
+  s.anim = kind === 'run' ? 'run' : 'stare';
+  s.fx = kind === 'shade' ? { eye: [0.7, 0.7, 0.7] } : {};
+  SHADE.kind = kind;
   SHADE.on = true;
-  SHADE.t = rand(0.5, 1.1);
   audio.sting('whisper');
   return true;
+}
+// a shadow with eyes in a dark corner, for a breath
+function visionShade() {
+  const at = visionSpot(4, 9, true);
+  if (!at) return false;
+  visionFigure('shade', at);
+  SHADE.t = rand(0.5, 1.1);
+  return true;
+}
+// someone running off, out at the edge of what you can see
+function visionRunner() {
+  const at = visionSpot(6, 11, false);
+  if (!at) return false;
+  visionFigure('run', at);
+  SHADE.t = rand(1.1, 1.6);
+  return true;
+}
+// someone standing there watching you. Look at them, or walk up, and there's nobody.
+function visionWatcher() {
+  const at = visionSpot(7, 12, false);
+  if (!at) return false;
+  visionFigure('watch', at);
+  SHADE.t = 9;
+  return true;
+}
+function visionStep(dtReal) {
+  const s = SHADE.c,
+    P = PLAYER;
+  SHADE.t -= dtReal;
+  if (SHADE.kind === 'run') {
+    // a stride, and away: gone once it's out of sight
+    s.animT += dtReal * 9;
+    const w = Math.sin(s.animT);
+    s.J.thL = w * 0.8;
+    s.J.thR = -w * 0.8;
+    s.J.shL = Math.max(0, -w) * 1.1;
+    s.J.shR = Math.max(0, w) * 1.1;
+    s.J.uaL = -w * 0.7;
+    s.J.uaR = w * 0.7;
+    s.J.torso = 0.25;
+    s.x += Math.sin(s.dir) * 5.5 * dtReal;
+    s.z += Math.cos(s.dir) * 5.5 * dtReal;
+    if (visAt(s.x, s.z) < 0.3) SHADE.t = 0;
+  } else if (SHADE.kind === 'watch') {
+    s.dir = s.tdir = Math.atan2(P.x - s.x, P.z - s.z);
+    const toIt = Math.atan2(s.x - P.x, s.z - P.z);
+    if (Math.abs(angDiff(P.dir, toIt)) < 0.45 || Math.hypot(s.x - P.x, s.z - P.z) < 5) SHADE.t = 0; // looked: nobody
+  }
+  if (SHADE.t <= 0) SHADE.on = false;
 }

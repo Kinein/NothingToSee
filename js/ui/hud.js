@@ -1,6 +1,6 @@
 //@ ui/hud — The corner HUD: bars, days, clock, THEIR eye, evidence
 //@ Defines: PSY_PATH, PSY_GROOVES, BARS, EYE_STATES, buildHud, initTips, toggleWalls, setBar, TREND_DRIFT, barTrend, updateHud
-//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, core/util, ui/hud-images, audio/sound, ui/case-board, ui/menus, player/needs, …
+//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, ui/case-board, …
 //@ (header made by tools/map.js; stripped by build.py)
 // the rows down the left: your body, then your job, then your head. The fill is what you have left: full is good, for all of them.
 // (Psychic is the stress dial turned round: 100 − stress. Inside, the game still counts stress.)
@@ -27,9 +27,9 @@ const BARS = [
     svg: 'M13.6 2 4.8 13.4h6.4L9.9 22l9.3-11.6h-6.5z',
     warn: () => PLAYER.needs.energy < 20,
   },
-  { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 },
+  { k: 'bladder', cls: 'bladder', tip: 'Bladder', img: 'toilet', warn: () => PLAYER.needs.bladder < 22 || G.smelly },
   { k: 'work', cls: 'work', tip: 'Work', img: 'work', red: true, warn: () => G.workBar < WORK.low && isWorkday() },
-  { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => PLAYER.needs.stress >= 75 },
+  { k: 'stress', cls: 'psy', tip: 'Psychic', psy: true, warn: () => psychic() < PSY.mute },
 ];
 // THEIR eye: how much THEY know about you, in four steps
 // THEIR eye: nothing aimed at you · watching you · framing people, tearing your cards · coming for you every night
@@ -62,7 +62,6 @@ function buildHud() {
           ? psySvg('')
           : '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="' + b.svg + '"/></svg>') +
       '</span><span class="bt"><b></b>' +
-      (b.k === 'stress' ? '<i class="flr"></i>' : '') +
       '</span><span class="tr"><i></i><i></i><i></i></span><i class="wx ' +
       (b.red ? 'red' : 'yel') +
       '"></i></button>',
@@ -81,7 +80,6 @@ function buildHud() {
       el,
       fill: el.querySelector('b'),
       wx: el.querySelector('.wx'),
-      flr: el.querySelector('.flr'),
       trEl: el.querySelector('.tr'),
       v: null,
       w: null,
@@ -205,7 +203,7 @@ function setBar(k, v, tip) {
 // your desk) jolts it: arrows for a moment, more of them the bigger it was. A steady climb or slide that's clearly faster
 // than the day's own drift (eating, sleeping, the job draining while you're away from your desk) shows one or two for as
 // long as it keeps up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't fake it.
-const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -8, stress: -0.6, work: 0 }; // points per game hour, left alone
+const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -10, stress: 1, work: 0 }; // points per game hour, left alone
 function barTrend(k, v) {
   const B = UI.bars[k];
   if (!B || !B.trEl) return;
@@ -311,20 +309,21 @@ function updateHud(dtReal) {
   setBar('health', G.health, 'Health ' + Math.round(G.health) + (G.health < 100 ? ' · sleep heals' : ''));
   setBar('hunger', N.hunger, 'Hunger');
   setBar('energy', N.energy, 'Energy');
-  setBar('bladder', N.bladder, 'Bladder');
+  setBar('bladder', N.bladder, 'Bladder' + (G.smelly ? ' · you smell: shower' : ''));
   setBar(
     'stress',
     100 - N.stress,
-    'Psychic · ' +
-      ['steady', 'uneasy', 'shaken', 'breaking · can’t face anyone', 'panic'][stressBand(N.stress)] +
-      (G.stressFloor >= 2 ? ' · can’t get above ' + Math.round(100 - G.stressFloor) : ''),
+    'Psychic ' +
+      Math.round(100 - N.stress) +
+      ' · ' +
+      [
+        'steady',
+        'uneasy · you see things',
+        'shaken · your hands shake: no photos',
+        'breaking · no gossip, no confronting',
+        'panic',
+      ][stressBand(N.stress)],
   );
-  const fl = UI.bars.stress.flr,
-    fv = clamp(G.stressFloor, 0, 100).toFixed(1) + '%';
-  if (fl.dataset.v !== fv) {
-    fl.dataset.v = fv;
-    fl.style.setProperty('--f', fv);
-  } // the hatched end: as high as it can climb now
   // work: it only moves in the shift, and it's the job itself
   const m = tod(),
     atDesk = playerAtDesk();

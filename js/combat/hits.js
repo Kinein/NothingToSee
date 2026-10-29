@@ -13,7 +13,6 @@ function hurt(v, byThem) {
   if (G.over || !PLAYER.onMap) return;
   G.health = Math.max(0, G.health - v);
   gesture(PLAYER, 'flinch', 0.6, 0, 0.08);
-  addStress(8); // being attacked
   R.pulse = 1;
   ui.float(PLAYER, '−' + v, 'bad');
   audio.sting('caught');

@@ -161,7 +161,7 @@ function interact() {
   if (!f) return;
   if (f.char && f.char.trueForm && f.menu.ops.length === 1) return runOpt(f.menu.ops[0]); // its true form: the key is the blow
   if (f.char && f.char.thrall && G.loose) return playerMelee(f.char); // one of THEIRS today: the key is the blow
-  if (f.char && f.char.fleeing && !f.char.def.stranger && !tooShaken()) return playerMelee(f.char); // running from you: the key is the tackle
+  if (f.char && f.char.fleeing && !f.char.def.stranger) return playerMelee(f.char); // running from you: the key is the tackle
   const an = { char: f.char, obj: f.obj, item: f.item },
     xy = anchorXY(an) || [window.innerWidth / 2, window.innerHeight / 2];
   presentMenu(menuForFocus(f), xy[0], xy[1], an, false);

@@ -346,7 +346,7 @@ function huntGrab(h) {
   HX.jolt = 1;
   HX.shake = 0.7;
   R.pulse = 1;
-  addStress(4);
+  psyMark('fight'); // in ITS hands
   capFace(h.a, P.x, P.z);
   P.tdir = Math.atan2(h.a.x - P.x, h.a.z - P.z);
   P.poseFn = (T, c) => {

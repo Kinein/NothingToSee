@@ -551,7 +551,7 @@ function hxUpdate(dtReal) {
     }
   }
   // the shade a frayed mind puts in the dark gets eyes
-  if (SHADE.on && SHADE.c) {
+  if (SHADE.on && SHADE.c && SHADE.kind === 'shade') {
     const c = SHADE.c,
       hy = 1.6 * c.look.h;
     for (const s of [1, -1])

@@ -167,7 +167,6 @@ function huntStart(kind, o = {}) {
   // why tonight: the eye at the top of the screen (THEY know you) or THEIR week, flaring as it starts
   if (HUNT.why === 'aware') UI.heatPulse = 3.5;
   else if (HUNT.why === 'plan') UI.planBump = 3.5;
-  addStress(8);
   audio.init();
   HX.jolt = Math.max(HX.jolt, 0.6);
   return true;

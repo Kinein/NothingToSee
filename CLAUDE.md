@@ -62,7 +62,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | How people and creatures are drawn | `js/gfx/people.js` (`drawPerson`), `js/gfx/creatures.js`, `js/gfx/body-parts.js` |
 | Animation, poses, gaits, sitting | `js/sim/pose.js`, `js/sim/body-motion.js`, `js/sim/seat-moves.js` |
 | The action queue every character runs | `js/sim/actions.js` (`mkAct`, `enqueue`, `runAct`) |
-| Player needs (hunger, energy, bladder, stress) | `js/player/needs.js` |
+| Player needs (hunger, energy, bladder, Psychic: big steps `psyMark`, the drain near IT `psyDrain`; numbers in `PSY`, `BLADDER`) | `js/player/needs.js` |
 | Work bar, shifts, being fired, a new day | `js/player/work.js` (`workTick`, `newDay`) |
 | NPC daily schedule, habits, quirks | `js/town/daily-plans.js`, `js/town/routines.js`, `js/town/quirks.js` |
 | What an NPC decides each frame | `js/town/npc-update.js` (`npcUpdate`, `npcThink`) |

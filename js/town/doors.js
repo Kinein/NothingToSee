@@ -75,7 +75,6 @@ function awkward(n, kind) {
   if (G.awkCd > 0) return;
   G.awkCd = 15;
   addSus(n, 6);
-  addStress(5);
   ui.bubble(n, 'exclaim', 'speech', 3);
   ui.say(
     n,

@@ -57,7 +57,6 @@ function escKey(k) {
   f.done = true;
   if (f.n) capPortrait(f.n);
   else audio.hx('sting', 0, 0.35);
-  addStress(3);
   if (f.intel) escIntel();
 }
 function escListen(dt) {

@@ -446,7 +446,6 @@ function horrorFire(ev) {
       )[0];
       if (d && heardIt('noise', d.x + 0.5, d.z + 0.5)) {
         notifyPing(d.x + 0.5, d.z + 0.5);
-        addStress(4);
       }
       return;
     }
@@ -679,7 +678,6 @@ function horrorFire(ev) {
     case 'handle': {
       if (!home) return;
       notifyPing(11.5, 22.5);
-      addStress(8);
       ui.note('lock', 'The door handle is turning', 'bad');
       audio.sting('whisper');
       if (mayHuntYou() && !G.attack) {
@@ -696,7 +694,7 @@ function noticeTick() {
   if (!P.onMap) return;
   if (G.movedNote && inRoomSet(P, (r) => r.home) && !G.sleeping) {
     ui.note('home', G.movedNote, 'onto');
-    addStress(5);
+    psyMark('sign'); // THEY were in here
     G.movedNote = null;
   }
   if (G.chalk && G.chalk === G.gatherDay && Math.hypot(P.x - 27.5, P.z - 7) < 4) {
