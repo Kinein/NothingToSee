@@ -189,7 +189,6 @@ function tamperSeen(o, a, k) {
     }
     if (n.exposed) continue;
     addSus(n, (own ? 2 : 1) * (k > 1 ? 11 : 3));
-    n.rel -= own ? (k > 1 ? 12 : 4) : k > 1 ? 4 : 1;
     if (k > 1 || own) {
       ui.bubble(n, 'exclaim', 'speech', 2.4);
       ui.say(
@@ -237,7 +236,6 @@ function rummageAct(o) {
       const r = roomAt(o.cx, o.cz),
         v = NPC.vic;
       if (r && r.bld === 'shop' && v.onMap && npcSeesPlayer(v, 8) && !v.isPlayer) {
-        v.rel -= 8;
         addSus(v, 4);
         ui.say(v, 'Staff only.', 2.5);
       }

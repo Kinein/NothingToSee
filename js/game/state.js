@@ -104,7 +104,6 @@ function freshG(start) {
     items: [],
     leads: [],
     lennyHint: 0,
-    lennyToday: 0,
     momToday: false,
     momWeek: false,
     mailToday: false,
@@ -155,9 +154,7 @@ function freshG(start) {
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
-    cfDay: {}, // suspect id → the day you last confronted them
     madUntil: 0, // the town called you mad: −1 lean until then
-    grudge: {}, // suspect id → the accused you wronged: their friends lean against you
     watchedUntil: {}, // member id → doubted in public: no business in public places until then
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
@@ -165,7 +162,6 @@ function freshG(start) {
     follower: null, // { id, until }: someone who came with you
     awareExtra: 0, // awareness booked for the next 06:00 by what you did (see EVIDENCE.aware)
     tearTonight: 0, // cards THEY tear from your flat tonight
-    hintsUntil: 0, // after a total success people share more
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
     tail: null, // { id, until, saw }: one of THEIR people a few steps behind you, by day
     tailNext: 0,
@@ -360,7 +356,6 @@ function saveGame() {
       Object.values(NPC).map((n) => [
         n.id,
         {
-          rel: n.rel,
           sus: n.sus,
           rumors: n.rumors,
           notes: n.notes,
@@ -371,9 +366,7 @@ function saveGame() {
           huntAt: n.huntAt || -1e9,
           baitDay: n.baitDay || 0,
           seenRoom: n.seenRoom,
-          gossipDay: n.gossipDay,
-          gossipN: n.gossipN || 0,
-          watchDay: n.watchDay,
+          toldYou: n.toldYou || {},
           microN: n.microN,
           remarkDay: n.remarkDay,
           confronted: !!n.confronted,

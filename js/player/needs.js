@@ -113,7 +113,6 @@ function accident() {
   let seen = 0;
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
-      n.rel -= 8;
       addSus(n, 8);
       seen++;
       ui.bubble(n, 'exclaim', 'speech', 3);
@@ -183,7 +182,6 @@ function breakdown() {
   );
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 8)) {
-      n.rel -= 5;
       addSus(n, 5);
       ui.bubble(n, 'question', 'speech', 3);
     }

@@ -1,6 +1,6 @@
 //@ play/verbs — What you can do: snooping, eating, Lenny, chat
 //@ Defines: DESK_OWNER, chain, nextAlarm, sleepAct, cookChain, snackAct, eatHereAct, vendAct, coffeeAct, toiletAct, showerAct, warmAct, EAT_SEATS, nearSeat, seatedEat, comfortAct, …
-//@ Uses:    sim/core, ui/interface, core/util, sim/actions, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, …
+//@ Uses:    sim/core, ui/interface, sim/actions, core/util, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── what you can do ─────────────────────────
 const DESK_OWNER = {
@@ -287,7 +287,6 @@ function deskWork(slack) {
         const h = NPC.hale;
         if (h.onMap && npcSeesPlayer(h, 5)) {
           G.slackCaught = true;
-          h.rel -= 6;
           addSus(h, 4);
           ui.say(h, 'Is that soup?', 2.5);
         }
@@ -353,18 +352,12 @@ function digResult(o) {
 }
 
 // ── people
-// success depends on the relationship, their suspicion of you, your stress and the tinfoil hat
+// a chat goes well unless they find you weird: from 60 it works far less often. The tinfoil hat doesn't help.
 function socialChance(n) {
-  const st = PLAYER.needs.stress;
-  let p = 0.6 + n.rel / 220 - n.sus / 170 - Math.max(0, st - 40) / 180;
+  let p = 0.85 - n.sus / 200 - (n.sus >= 60 ? 0.2 : 0);
   if (G.inv.foilOn) p -= 0.28;
   return clamp(p, 0.08, 0.95);
 }
-const relFx = (n, v) => {
-  n.rel += v;
-  ui.bubble(n, v > 0 ? 'heart' : 'frown', 'speech', 1.8);
-  ui.float(n, v > 0 ? '+' : '−', v > 0 ? 'good' : 'bad');
-};
 const PLACE_SELF = {
   closet: 'I hide in the supply closet when Hale yells.',
   wc: 'The restroom’s the only quiet place in there.',
@@ -380,28 +373,18 @@ function resolveChat(n, win) {
     addSus(n, win ? -4 : 0);
     return;
   }
-  relFx(n, win ? 4 : -1);
+  // it calms someone who finds you weird: that's all anyone holds about you
   addSus(n, win ? -8 : -2);
-  if (win) addStress(-6);
+  if (win) {
+    addStress(-6);
+    if (n.sus < 60) ui.float(n, 'calmer', 'good');
+  }
   ui.say(n, n.id === 'lenny' ? pick(LENNY_RAMBLE) : chatLine(n), 4.5);
 }
+// what's going round. Words are only clues: a note under whoever they're about. Ask as often as you like; when
+// they've nothing new, they say so. Every time you ask, they (and whoever's listening) find you a bit weirder.
 function resolveGossip(n) {
-  n.gossipN = n.gossipDay === dayNo() ? (n.gossipN || 1) + 1 : 1;
-  n.gossipDay = dayNo();
-  n.rel -= 1;
   addSus(n, 8);
   for (const b of earshot(n)) addSus(b, 4);
-  if (n.id === 'vic' && !n.isThem && G.faction === 'lizards' && chance(0.5) && !bought(n)) {
-    // who buys fish
-    const buyers = shuffle(
-      alive().concat(shuffle(suspects().filter((s) => !s.isThem && s.id !== 'vic' && !s.gone)).slice(0, 1)),
-    ).slice(0, 3);
-    const line = 'Fish? ' + buyers.map((b) => b.short).join(', ') + '. Every week. Raw, some of ’em.';
-    ui.say(n, line, 5);
-    for (const b of buyers) addNote(b, 'Buys fish at Pell’s.', { by: 'vic' });
-    hear(null, line, 'vic');
-    return;
-  }
-  if (tellRumour(n)) return; // what's going round
   gossip(n);
 }

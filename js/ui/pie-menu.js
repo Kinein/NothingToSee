@@ -1,14 +1,8 @@
 //@ ui/pie-menu — The directional pie menu
-//@ Defines: hearts, MENU_KEYS, MENU_XY, openMenu, placeMenu, runOpt, presentMenu, closeMenu
+//@ Defines: MENU_KEYS, MENU_XY, openMenu, placeMenu, runOpt, presentMenu, closeMenu
 //@ Uses:    ui/interface, core/util, audio/sound, ui/menus, sim/actions, town/arrest
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── pie menu
-function hearts(rel) {
-  const n = clamp(Math.round((rel + 50) / 20), 0, 5);
-  let s = '';
-  for (let i = 0; i < 5; i++) s += '<i class="' + (i < n ? 'on' : '') + '"></i>';
-  return '<span class="hearts">' + s + '</span>';
-}
 // the directional menu: up to four actions on W A S D (or the mouse). Two sit left and right; a third goes on top; a fourth below.
 // Slots fill in that order, so an action keeps its key as a menu grows: A, D, W, S.
 const MENU_KEYS = ['a', 'd', 'w', 's'];
@@ -23,16 +17,6 @@ function openMenu(m, x, y, anchor) {
       ? '<span class="pcf"><img alt=""></span>'
       : '<span class="pcf"><span class="pci">' + artIcon(m.icon || 'dots') + '</span></span>') +
     '<b></b>' +
-    (m.rel != null ? hearts(m.rel) : '') +
-    (m.sus != null && m.sus >= 5
-      ? '<span class="psus' +
-        (m.sus >= 60 ? ' hi' : '') +
-        '" data-tip="Suspicion of you">' +
-        svgIcon('eye') +
-        '<span><i style="width:' +
-        Math.round(m.sus) +
-        '%"></i></span></span>'
-      : '') +
     (m.sub ? '<span class="psub"></span>' : '') +
     '</div>';
   if (m.img) pie.querySelector('img').src = m.img;

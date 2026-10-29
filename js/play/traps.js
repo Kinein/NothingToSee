@@ -114,7 +114,6 @@ function springTrap(tr, c) {
   ui.bubble(c, 'exclaim', 'speech', 3);
   if (!c.def.stranger) {
     c.limpDay = dayNo(G.t + 60);
-    c.rel -= 15;
     addSus(c, 10);
   }
   enqueue(

@@ -83,7 +83,6 @@ function knockAct(o, owner) {
       }
       if (owner.id === 'agnes') {
         addStress(-4);
-        owner.rel += 2;
         return ui.note(
           'knock',
           pick(['Agnes: “Busy, dear.”', 'Agnes: “Eat something.”', 'Agnes: “Did you hear that?”']),

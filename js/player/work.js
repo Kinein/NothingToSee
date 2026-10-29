@@ -1,5 +1,5 @@
 //@ player/work — The work bar, shifts, getting fired
-//@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, onTimeCross, newDay
+//@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, goodDay, onTimeCross, newDay
 //@ Uses:    sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
@@ -50,6 +50,12 @@ function workLost() {
   audio.sting('awkward');
   gameOver('fired');
 }
+// a good day's work, at five: the people you work with find you a little less weird
+function goodDay() {
+  if (!isWorkday() || G.sickDay || G.workBar < 75 || G.over) return;
+  for (const n of suspects()) if (!n.gone && (n.plan || []).some((b) => b.a === 'work')) addSus(n, -6);
+  ui.note('work', 'A good day’s work', 'good');
+}
 function onTimeCross(t0, t1) {
   const cross = (m) => Math.floor((t1 - m) / 1440) > Math.floor((t0 - m) / 1440);
   if (cross(0)) newDay();
@@ -71,6 +77,7 @@ function onTimeCross(t0, t1) {
   if (cross(9 * 60) && isWorkday() && !G.sickDay && !playerAtDesk())
     ui.note('work', G.overtimeToday ? 'Overtime · it drains twice as fast' : 'Shift started', 'warn');
   if (cross(180) && dayNo() === G.gatherDay) gatheringOver();
+  if (cross(17 * 60)) goodDay();
   if (cross(17 * 60) && G.sickDay) G.sickDay = false;
   if (cross(22 * 60 + 50) && NPC.vic.onMap && NPC.vic.shown > 0.5) ui.say(NPC.vic, 'Closing up.', 3);
   for (const n of CHARS) if (n.plan) for (const b of n.plan) if (cross(b.s)) n.thinkCd = 0;
@@ -92,7 +99,6 @@ function newDay() {
   G.workWarned = false;
   G.workBar = Math.min(100, G.workBar + 15); // a night's sleep on it: Hale forgets a little
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
-  G.lennyToday = 0;
   G.momToday = false;
   G.mailToday = false;
   G.overtimeToday = false;

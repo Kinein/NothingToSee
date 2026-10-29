@@ -71,7 +71,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `landing` | `0` | them/plan | them/true-form, them/office-night, horror/encounters, chase/they-come, game/last-day, game/loop |
 | `pairs` | `{}` | — | town/npc-update, play/arena, ui/case-board |
 | `bought` | `{}` | — | them/plan, town/npc-update, them/proofs, them/moves, town/suspicion, taken/down-there |
-| `boughtBy` | `{}` | — | them/moves, them/true-form, play/oddities |
+| `boughtBy` | `{}` | — | them/moves, them/true-form, town/talk |
 | `policeBought` | `false` | them/plan | — |
 | `skimAt` | `0` | them/moves | — |
 | `skims` | `0` | them/moves | — |
@@ -108,7 +108,6 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `items` | `[]` | play/items, game/state | them/proofs, them/moves, them/night-attacks, them/office-night, play/stashes, play/traps, play/photos, ui/menus, … |
 | `leads` | `[]` | — | them/servants, town/talk, them/office-night, play/stashes, play/verbs, play/photos, ui/menus, horror/encounter-outcomes |
 | `lennyHint` | `0` | town/talk | — |
-| `lennyToday` | `0` | player/work, play/confront | ui/menus |
 | `momToday` | `false` | player/work, play/verbs | — |
 | `momWeek` | `false` | player/work, play/verbs | — |
 | `mailToday` | `false` | player/work, ui/menus | — |
@@ -149,19 +148,17 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `stageNews` | `null` | them/plan, town/echoes | — |
 | `gatherDay` | `irand(3, 4)` | player/work, them/plan | town/daily-plans, town/talk, horror/director, them/office-night |
 | `gatherTip` | `0` | town/talk, them/office-night | them/plan |
-| `proofs` | `[]` | — | town/npc-update, them/proofs, play/oddities, play/arena, ui/menus, ui/case-board |
+| `proofs` | `[]` | — | town/npc-update, them/proofs, play/arena, ui/menus, ui/case-board |
 | `proofId` | `0` | — | them/proofs |
 | `pinShots` | `{}` | — | them/proofs |
 | `dashed` | `{}` | — | them/proofs |
 | `mark` | `{}` | — | ui/case-board |
-| `odd` | `{}` | play/oddities | play/arena |
+| `odd` | `{}` | play/oddities | town/talk, play/arena |
 | `framed` | `[]` | — | play/oddities, play/arena |
 | `rumours` | `[]` | play/oddities | — |
-| `victimOf` | `{}` | play/oddities | — |
+| `victimOf` | `{}` | play/oddities | town/talk |
 | `recant` | `{}` | — | them/proofs, town/company, play/arena |
-| `cfDay` | `{}` | — | play/arena, ui/menus |
 | `madUntil` | `0` | play/arena | — |
-| `grudge` | `{}` | — | play/arena |
 | `watchedUntil` | `{}` | — | them/awareness, play/arena |
 | `fearUntil` | `0` | play/arena | town/daily-plans |
 | `huntNights` | `0` | player/work, combat/melee | them/true-form, town/company, ui/hud, chase/they-come |
@@ -169,7 +166,6 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `follower` | `null` | town/company | play/arena, ui/menus |
 | `awareExtra` | `0` | them/awareness | — |
 | `tearTonight` | `0` | player/work, play/arena | — |
-| `hintsUntil` | `0` | play/arena | ui/menus |
 | `witVisit` | `null` | town/company | — |
 | `tail` | `null` | town/company | — |
 | `tailNext` | `0` | town/company | — |
@@ -207,6 +203,7 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 | `groundCd` | chase/hunt-end |
 | `houseLit` | game/loop |
 | `lastHitBy` | combat/bolts, combat/hits, combat/melee, combat/throws |
+| `lennyLines` | town/talk |
 | `loose` | game/last-day |
 | `lure` | horror/director, them/office-night, game/state |
 | `on` | them/office-night, game/state |
@@ -229,4 +226,4 @@ Not in `freshG`, so they start undefined. Candidates to add there with a startin
 
 People are plain objects; code reaches them as `n`, `c`, `PLAYER`, `NPC.<id>`, so uses are not traced here.
 
-`id` `name` `short` `role` `isPlayer` `x` `z` `y` `dir` `tdir` `onMap` `shown` `look` `J` `fx` `pose` `anim` `animT` `walkPh` `path` `pi` `moving` `run` `queue` `engaged` `rel` `sus` `danger` `dangerPeak` `rumors` `notes` `snaps` `clues` `seenRoom` `bladder` `urge` `urgeTh` `tell` `prevRoom` `thinkCd`
+`id` `name` `short` `role` `isPlayer` `x` `z` `y` `dir` `tdir` `onMap` `shown` `look` `J` `fx` `pose` `anim` `animT` `walkPh` `path` `pi` `moving` `run` `queue` `engaged` `sus` `danger` `dangerPeak` `rumors` `notes` `snaps` `clues` `seenRoom` `bladder` `urge` `urgeTh` `tell` `prevRoom` `thinkCd`

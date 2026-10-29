@@ -24,7 +24,6 @@ function struck(n) {
   audio.hx('thud', hxPan(n.x, n.z), 0.6);
   ui.float(n, F.hits + '', '');
   addSus(n, first ? 40 : 10);
-  n.rel -= first ? 25 : 8;
   if (first || F.hits === BRAWL.hard) echo('fight', { x: n.x, z: n.z, who: n.id });
   if (first && ear.length) protectAfter(n);
   for (const w of ear) onlook(w, n, F);

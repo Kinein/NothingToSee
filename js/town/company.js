@@ -1,15 +1,15 @@
 //@ town/company — Come with me; the witnesses THEY go after at night, and standing guard for one
 //@ Defines: resolveCome, followAct, endFollow, witnessNight, witnessTick, recant, witnessSaved, tailTick, tailAct
-//@ Uses:    sim/core, ui/interface, core/util, sim/actions, data/tuning, world/paths, sim/movement, town/suspicion, data/lines, them/proofs, …
+//@ Uses:    sim/core, ui/interface, core/util, sim/actions, data/tuning, town/suspicion, world/paths, sim/movement, data/lines, them/proofs, …
 //@ (header made by tools/map.js; stripped by build.py)
-// ───────────── company. Anyone who likes you enough comes with you for an hour, and stands in the crowd when you call
-// someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
+// ───────────── company. Anyone who doesn't find you weird comes with you for an hour, and stands in the crowd when you
+// call someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
 // witness. Lizards buy them off, aliens wipe it out of their heads, the dead make sure. Be outside their door, and it's
 // you THEY meet.
 function resolveCome(n) {
   const F = G.follower && NPC[G.follower.id];
   if (F && F !== n) endFollow(F, true);
-  if (n.rel < EVIDENCE.come.rel || n.sus >= 60 || asleep(n) || n.fleeing) {
+  if (n.sus >= EVIDENCE.come.sus || asleep(n) || n.fleeing) {
     ui.say(n, pick(COME_WITH.no), 3);
     return;
   }
@@ -125,7 +125,8 @@ function recant(w, m) {
 function witnessSaved(id) {
   const w = NPC[id];
   if (!w || w.gone) return;
-  relFx(w, EVIDENCE.saved);
+  addSus(w, -EVIDENCE.saved); // you were there: whatever they thought of you, they don't now
+  ui.bubble(w, 'heart', 'speech', 1.8);
   delete G.recant[id];
   ui.note('people', w.short + ' · safe', 'good');
 }

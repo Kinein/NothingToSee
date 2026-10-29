@@ -65,7 +65,6 @@ function makeChar(def) {
     run: false,
     queue: [],
     engaged: null,
-    rel: def.rel || 0,
     sus: 0,
     danger: 0,
     dangerPeak: 0,

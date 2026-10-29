@@ -3,7 +3,8 @@
 //@ Uses:    sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the confrontation. A short battle, 45 to 75 seconds: THEY lie, you show the card that breaks the lie, and
-// the crowd decides. You bring every card you hold on them; whatever you show is spent. The town is paused throughout.
+// the crowd decides. You bring every card you hold on them; a card is never spent, it stays on the board. The town is
+// paused throughout.
 //   1 Opening · 2 Testimony: five statements, show a card or let it pass · 3 "How well do you know me?" · 4 Counterattack
 //   · 5 Escape attempt (THEM only, the first time the lean reaches +3)
 // The room sets where the crowd's lean starts (−3…+3); where it ends decides it (EVIDENCE.bands). The wrong person always fails.
@@ -55,9 +56,7 @@ function arenaRoom(n) {
       add(E.witness, 'witness', w);
       wits.push(w);
     }
-    if (w.rel >= E.friendRel) add(E.friend, 'friend', w);
     if (closeTo(w, n)) add(E.close, 'close', w);
-    if (Object.keys(G.grudge).some((id) => id !== w.id && closeTo(w, NPC[id] || w))) add(E.grudge, 'grudge', w);
   }
   const st = PLAYER.needs.stress;
   if (st > 80) add(E.psy20, 'unwell');
@@ -187,10 +186,8 @@ function letPass(A) {
   }
   nextStatement(A);
 }
-// the cards you show are gone, whatever happens
+// a card shown is out of your hand for this confrontation, and still on the board after it: cards are never spent
 function spend(A, p) {
-  const i = G.proofs.indexOf(p);
-  if (i >= 0) G.proofs.splice(i, 1);
   A.hand.splice(A.hand.indexOf(p), 1);
   A.spent.push(p);
   A.sel = clamp(A.sel, 0, Math.max(0, A.hand.length - 1));
@@ -422,7 +419,6 @@ function arenaOutcome(A) {
     ear = A.ear.filter((w) => w.onMap),
     heed = ear.filter((w) => !w.isThem && !w.def.stranger),
     W = EVIDENCE.aware;
-  G.cfDay[n.id] = dayNo();
   n.confronted = true;
   // another of THEM in the crowd took note of you
   if (res !== 'total') for (const m of A.hidden) if (m !== n) bookNight(m);
@@ -431,9 +427,7 @@ function arenaOutcome(A) {
   if (res === 'total') {
     // it drops the act: on its knees, the crowd holding it, the grey cars on the way
     n.cfOk = G.t;
-    surrender(n, 'confront');
-    for (const w of suspects()) if (!w.isThem) w.rel += EVIDENCE.success.rel; // they believe you now
-    G.hintsUntil = G.t + 1440;
+    surrender(n, 'confront'); // proven right in public: nobody thinks you're mad now (surrender)
     return;
   }
   if (res === 'partial') {
@@ -470,15 +464,13 @@ function arenaOutcome(A) {
   // a fail: you look mad. The wrong person: a scandal too.
   for (const w of heed) {
     addSus(w, EVIDENCE.fail.sus);
-    relFx(w, EVIDENCE.fail.rel);
     ui.bubble(w, 'laugh', 'speech', 2.5);
   }
   G.madUntil = G.t + EVIDENCE.fail.madDays * 1440;
   G.tearTonight = (G.tearTonight || 0) + 1;
   if (res === 'wrong') {
     bookAware(W.wrong);
-    n.rel += EVIDENCE.wrong.rel;
-    G.grudge[n.id] = 1;
+    addSus(n, EVIDENCE.wrong.sus);
     addStress(5);
   } else {
     bookAware(W.fail);

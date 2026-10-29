@@ -1,6 +1,6 @@
 //@ play/confront — Giving up, the FBI, the talk options
 //@ Defines: GIVE_UP, surrender, fbiTake, SOC, observeAct
-//@ Uses:    sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, play/verbs, …
+//@ Uses:    sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
 // it drops the act for good: true form, on its knees, and the FBI on the way
@@ -106,7 +106,6 @@ function fbiTake(n) {
 const SOC = {
   chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
   gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
-  press: { label: 'Press', icon: 'ear', dur: 6, mid: true, fx: { stress: 3 }, res: (n) => resolvePress(n) },
   come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
@@ -114,11 +113,7 @@ const SOC = {
     dur: 15,
     mid: true,
     fx: { stress: 10 },
-    res: (n) => {
-      G.lennyToday++;
-      n.rel += 3;
-      lennyHint();
-    },
+    res: () => lennyHint(),
   },
   feed: {
     label: 'Give meal',
@@ -127,7 +122,7 @@ const SOC = {
     fx: { stress: -8 },
     res: (n) => {
       G.inv.meal--;
-      relFx(n, 15);
+      ui.bubble(n, 'heart', 'speech', 1.8);
       lennyHint();
     },
   },
@@ -165,7 +160,6 @@ function observeAct(n) {
       c.tdir = Math.atan2(n.x - c.x, n.z - c.z);
       if (!a.noticed && npcSeesPlayer(n, 7) && a.t > 2) {
         a.noticed = true;
-        n.rel -= 3;
         addSus(n, 6);
         ui.bubble(n, 'question', 'speech', 2);
       }
@@ -173,8 +167,7 @@ function observeAct(n) {
       if (!n.onMap || n.shown < 0.3) a.cancel = true;
     },
     onEnd: (c, a, ok) => {
-      if (!ok) return;
-      n.watchDay = dayNo();
+      if (!ok) return; // as often as you like: once you've seen all there is, there's nothing new
       if (!n.isThem) watchedHuman(n);
       G.qwatch = G.qwatch || {};
       const qs = ((G.quirks && G.quirks[n.id]) || []).filter((q) => !G.qwatch[n.id + ':' + q]);

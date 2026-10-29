@@ -138,7 +138,7 @@ const EVIDENCE = {
   halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
   // the arena: the crowd's lean runs −5 (with THEM) … +5 (with you), and starts from the room, held to −3 … +3
   lean: { min: -5, max: 5, startMin: -3, startMax: 3 },
-  start: { friend: 1, friendRel: 40, close: -1, closeRel: 40, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2, grudge: -1 },
+  start: { close: -1, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2 },
   rant: { stress: 80, p: 0.4 }, // Psychic 20 or less: this chance you rant before it starts. Instant Fail
   statements: 5,                // the testimony: one lie per frame, and one true line
   statementSecs: 6,             // real seconds each statement waits for a card
@@ -149,15 +149,15 @@ const EVIDENCE = {
   counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
   escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
   bands: { total: 4, partial: 1, pfail: -1 },   // final lean: +4 up total success · +1…+3 partial · −1…0 partial fail · below: fail
-  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, rel: -30 },
-  fail: { sus: 15, rel: -10, madDays: 2 },
+  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, sus: 30 },
+  fail: { sus: 15, madDays: 2 },
   pfail: { watchMins: 1440, sus: 5 },
-  success: { rel: 10, fearMins: 1440 },
+  success: { fearMins: 1440 },
   aware: { pfail: 15, fail: 25, wrong: 20, success: 15, privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
-  come: { rel: 20, mins: 60 },  // "Come with me": anyone who likes you this much follows you for this long
-  saved: 25,                    // liking from a witness you stood guard for
+  come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long
+  saved: 25,                    // suspicion off a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { sus: 15, aware: 10 },

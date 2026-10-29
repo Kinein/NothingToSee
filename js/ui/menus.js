@@ -1,5 +1,5 @@
 //@ ui/menus — Interaction menus for objects, people, items
-//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, relWord, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
+//@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, askMenu, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
 //@ Uses:    sim/core, play/verbs, ui/interface, sim/actions, core/util, gfx/portraits, play/stashes, player/needs, world/objects, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
@@ -142,7 +142,6 @@ function objMenu(o) {
                   );
                   if (w.length) {
                     const n = pick(w);
-                    n.rel -= 12;
                     addSus(n, 5);
                     ui.say(n, 'My soup!', 2.5);
                   }
@@ -571,12 +570,7 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt(
-          'Confront',
-          'confront',
-          () => openConfront(n),
-          G.cfDay[n.id] === dayNo() ? 'Done today' : n.sus >= 85 ? 'Not listening' : null,
-        )
+      ? opt('Confront', 'confront', () => openConfront(n), n.sus >= 85 ? 'Not listening' : null)
       : opt('Attack', 'fist', () => playerMelee(n));
   if (tooShaken())
     return {
@@ -626,7 +620,7 @@ function menuForChar(n) {
   if (n.exposed && !n.slain) {
     // everyone knows what it is: there's nothing left to say
     ops.push(hit(n.fleeing ? 'Catch' : 'Fight', n.fleeing ? 'walk' : 'fist'));
-    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n)), n.watchDay === dayNo() ? 'Done today' : null));
+    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
     return {
       title: n.name,
       img: getPortrait(n),
@@ -640,21 +634,21 @@ function menuForChar(n) {
       ops,
     };
   }
-  // slots stay put: A Chat · D Ask… (Gossip, Press, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch
+  // slots stay put: A Chat · D Ask… (Gossip, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch.
+  // No daily limits: ask again and you're told there's nothing new.
   ops.push(opt('Chat', 'chat', T('chat')));
   if (n.id === 'lenny') {
-    ops.push(opt('Theories', 'ear', T('lenny'), G.lennyToday >= 2 ? 'Talked out' : null));
+    ops.push(opt('Theories', 'ear', T('lenny')));
     ops.push(opt('Give meal', 'gift', T('feed'), G.inv.meal > 0 ? null : 'No meal'));
   } else {
     ops.push(opt('Ask…', 'ear', () => openMenu(askMenu(n), UI.menuX, UI.menuY, { char: n })));
     if (n.fleeing) ops.push(hit('Catch', 'walk'));
     else ops.push(cfOpt());
-    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n)), n.watchDay === dayNo() ? 'Done today' : null));
+    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
   }
+  // how weird they find you is in the evidence book, not over their head
   return {
     title: n.name,
-    rel: n.rel,
-    sus: n.id === 'lenny' ? null : n.sus,
     img: getPortrait(n),
     sub: G.cleared[n.id]
       ? 'Cleared'
@@ -665,41 +659,23 @@ function menuForChar(n) {
     ops,
   };
 }
-// the second ring: what you ask them. Gossip (what's going round), Press (what they know about THEM), Come with me.
+// the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
 function askMenu(n) {
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k)),
-    st = PLAYER.needs.stress,
-    many = G.hintsUntil > G.t ? 3 : 2; // after a public win people tell you more
+    st = PLAYER.needs.stress;
   return {
     title: n.name,
-    rel: n.rel,
-    sus: n.sus,
     img: getPortrait(n),
     ops: [
-      opt(
-        'Gossip',
-        'ear',
-        T('gossip'),
-        st >= 60
-          ? 'Too shaken'
-          : n.sus >= 60
-            ? 'Won’t gossip with you'
-            : n.gossipDay === dayNo() && (n.gossipN || 1) >= many
-              ? 'Done today'
-              : null,
-      ),
-      opt('Press', 'search', T('press'), st >= 60 ? 'Too shaken' : n.pressDay === dayNo() ? 'Done today' : null),
+      opt('Gossip', 'ear', T('gossip'), st >= 60 ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
       opt(
         'Come with me',
         'walk',
         T('come'),
-        G.follower && G.follower.id === n.id ? 'With you' : n.rel < EVIDENCE.come.rel ? 'Not close enough' : null,
+        G.follower && G.follower.id === n.id ? 'With you' : n.sus >= EVIDENCE.come.sus ? 'Finds you weird' : null,
       ),
     ],
   };
-}
-function relWord(r) {
-  return r > 40 ? 'Friend' : r > 15 ? 'Friendly' : r > -10 ? 'Acquaintance' : r > -35 ? 'Wary' : 'Hostile';
 }
 const ITEM_NAMES = {
   skin: 'Shed skin',

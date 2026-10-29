@@ -85,7 +85,7 @@ STAGE_HOOKS.push((s) => {
     G.policeBought = true;
     const foe = suspects()
       .filter((n) => !n.isThem && !n.gone && !n.exposed && n.id !== 'lenny')
-      .sort((a, b) => b.rel - a.rel)[0];
+      .sort((a, b) => a.sus - b.sus)[0]; // whoever trusts you most
     if (foe && G.victims.length < 2) G.attackFoe = foe.id;
     setTimeout(() => ui.note('cart', 'Half of Pell’s shelves are empty', 'onto'), 4000);
   }

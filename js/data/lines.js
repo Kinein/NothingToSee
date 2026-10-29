@@ -82,13 +82,13 @@ const ODDITY_HOME = {
 };
 const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
 const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];
-const ODDITY_HEARD = ['Heard it at the diner. Everyone’s saying it.', 'I don’t know. Somebody said it. Forget I did.', 'That’s just talk. Nobody actually saw anything.'];
 
-// ── Pressing someone about THEM (play/oddities)
-const PRESS_SAW = ['I saw it. I SAW its face come off. {s}.', 'It was {s}. I watched it change. I’ll say it again.', 'You want to know? It was {s}. I was there.'];
-const PRESS_BOUGHT = ['{s} helped me out. That’s all.', 'I don’t know anything about {s}. Leave it.', '{s}’s been good to me. Why?'];
-const PRESS_VICTIM = ['I don’t remember. {s} was there, I think. Then nothing.', 'There’s a gap. An hour. {s} was the last face.', 'It’s all fog. {s}. Something about {s}.'];
-const PRESS_NONE = ['I don’t know anything.', 'About what?', 'You’re asking the wrong person.', 'Nothing. I’ve seen nothing.'];
+// ── Gossip that used to take pressing: a witness, someone bought, someone THEY got to (town/talk). Running dry.
+const GOSSIP_SAW = ['I saw {s} change. Its face came off. I SAW it.', 'It was {s}. I watched it change. Nobody believes me.', 'Don’t laugh. {s} turned into something. Right in front of me.'];
+const GOSSIP_BOUGHT = ['{s}? Salt of the earth. Helped me out when nobody else would.', 'You want to know who’s decent round here? {s}. That’s who.', '{s}’s been good to me. Better than good.'];
+const GOSSIP_LOST = ['I don’t remember last night. Any of it.', 'Last night’s gone. I woke up and it was just… gone.', 'Funny. I can’t remember last night. Not a thing.'];
+const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.', 'I’ve told you everything I’ve heard.'];
+const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
 const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
 // ── The confrontation (play/arena): THEY lie, a human tells the truth, and it all sounds the same
@@ -181,7 +181,7 @@ const ARENA_WHY = {
 };
 // under the crowd meter: why it started where it did ({w}: someone in the room)
 const ARENA_ROOM = {
-  witness: '{w} saw it', friend: '{w} likes you', close: '{w} is close to them', grudge: '{w} holds a grudge',
+  witness: '{w} saw it', close: '{w} is close to them',
   unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
 };
 // what the town says afterwards, in the hours after ({s}: the accused, {p}: you)

@@ -32,7 +32,7 @@ Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's f
 
 What people say and read: gossip, Lenny, rumours, news, endings. Change the words here
 
-- **Defines (70):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `ODDITY_HEARD` `PRESS_SAW` `PRESS_BOUGHT` `PRESS_VICTIM` `PRESS_NONE` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `COP_WARN` `COP_CHASE` `COP_CATCH` `COP_SLIP` `COP_HIT` `COP_QUIT` `ARENA_RANT` `CONFESS` `MARK_NEWS` `ARENA_END` `ARENA_CROWD` … +10
+- **Defines (70):** `LENNY_HINTS` `LENNY_FACTION` `LENNY_RAMBLE` `RUMORS` `TOPICS` `SNEAK_ABOUT` `SNEAK_TMR` `PAIR_ABOUT` `BLAME` `SMALL` `SLIPS` `TONIGHT` `LENNY_WARN` `WRONG_TALK` `STAGE_NEWS` `WEIRD` `WEIRD_THEM` `MAIL` `NEWS` `FORUM` `SNOOP_MUNDANE` `FAKE_LINES` `JUNK` `ODDITY_HOME` `ODDITY_TIC` `ODDITY_RUMOR` `GOSSIP_SAW` `GOSSIP_BOUGHT` `GOSSIP_LOST` `TOLD_ALL` `LENNY_TOLD` `COME_WITH` `ARENA_OPEN` `ARENA_SAY` `ARENA_FILLER` `ARENA_LIE_BOUGHT` `ARENA_REBUT` `ARENA_BACKED` `ARENA_CLEAR` `ARENA_WRONG` `ARENA_PASS` `ARENA_TRUTH` `ARENA_KNOW` `ARENA_COUNTER` `ARENA_HOLD` `ARENA_ESCAPE` `ARENA_INNOCENT` `ARENA_PLANTED` `ARENA_NOTMINE` `COP_WARN` `COP_CHASE` `COP_CATCH` `COP_SLIP` `COP_HIT` `COP_QUIT` `ARENA_RANT` `CONFESS` `MARK_NEWS` `ARENA_END` `ARENA_CROWD` … +10
 - **→ uses:** —
 - **← used by:** 20
 
@@ -242,7 +242,7 @@ Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 - **→ uses:** core/util, world/grid, taken/taken, town/cell
 - **← used by:** 87
 
-### sim/characters  ·  #28  ·  88 lines
+### sim/characters  ·  #28  ·  87 lines
 
 Character records
 
@@ -292,7 +292,7 @@ The action queue shared by player and NPCs
 
 ## player/
 
-### player/needs  ·  #34  ·  188 lines
+### player/needs  ·  #34  ·  186 lines
 
 The player body: needs, Psychic, accidents, passing out, panic
 
@@ -300,12 +300,12 @@ The player body: needs, Psychic, accidents, passing out, panic
 - **→ uses:** sim/core, ui/interface, sim/actions, data/tuning, core/util, gfx/renderer, world/grid, them/tells, town/suspicion, audio/sound, world/light-map, play/advice, chase/hunt, play/items … +2
 - **← used by:** 35
 
-### player/work  ·  #35  ·  103 lines
+### player/work  ·  #35  ·  109 lines
 
 The work bar, shifts, getting fired
 
-- **Defines (8):** `playerAtDesk` `inOffice` `workBand` `workTick` `workHit` `workLost` `onTimeCross` `newDay`
-- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, player/needs, audio/sound, play/oddities, them/moves … +6
+- **Defines (9):** `playerAtDesk` `inOffice` `workBand` `workTick` `workHit` `workLost` `goodDay` `onTimeCross` `newDay`
+- **→ uses:** sim/core, ui/interface, data/tuning, core/util, them/plan, them/night-attacks, game/state, them/awareness, world/grid, town/arrest, player/needs, audio/sound, town/cast, town/suspicion … +8
 - **← used by:** 6 (town/npc-update, them/moves, play/stashes, play/advice, ui/hud, game/loop)
 
 ## town/
@@ -316,7 +316,7 @@ The people of Wexley and the three factions
 
 - **Defines (12):** `CAST` `FACTIONS` `CREATURE` `TF_CHANGE` `CREATURE_LOOK` `TELL_NOTE` `setupCast` `setupOfficer` `setupPlayer` `suspects` `them` `objOfType`
 - **→ uses:** core/util, sim/core, sim/characters, chase/fbi, world/objects
-- **← used by:** 47
+- **← used by:** 48
 
 ### town/daily-plans  ·  #37  ·  155 lines
 
@@ -326,7 +326,7 @@ Daily plans per role
 - **→ uses:** core/util, sim/core, world/grid, town/quirks
 - **← used by:** 13
 
-### town/routines  ·  #38  ·  238 lines
+### town/routines  ·  #38  ·  236 lines
 
 Habits and secrets: everyone sneaks off once a day
 
@@ -372,7 +372,7 @@ Held in a cell
 
 - **Defines (34):** `CELL` `CELL_YOU` `CELL_ID` `CELL_DOOR_M` `CELL_SKY` `CELL_SKY_E` `CELL_SUN` `CELL_TUBE` `CELL_TUBE_E` `CELL_HAND` `CELL_BOARD` `CELL_CHALK` `CELL_CHALK_E` `awaySpeed` `CELL_POSE` `CELL_COP_POSE` `cellFrame` `cellEnter` `cellExit` `cellPhase` `cellSeat` `cellCopAtDesk` `cellRoute` `cellStep` `cellMood` `cellLights` `CELL_NIGHT` `CELL_NOON` `CELL_GOLD` `cellSky` `cellHand` `cellDraw` `ambushTick` `addNote`
 - **→ uses:** gfx/renderer, sim/core, gfx/station, core/util, world/grid, taken/taken, game/loop, gfx/gl, town/suspicion, world/light-map, audio/sound, world/vision, them/true-form, them/awareness … +11
-- **← used by:** 21
+- **← used by:** 20
 
 ### town/suspicion  ·  #50  ·  84 lines
 
@@ -390,21 +390,21 @@ Fleeing to hideouts
 - **→ uses:** sim/core, sim/actions, ui/interface, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, town/suspicion, combat/melee, sim/movement, gfx/renderer, player/needs … +13
 - **← used by:** 21
 
-### town/doors  ·  #58  ·  91 lines
+### town/doors  ·  #58  ·  90 lines
 
 Broken restroom lock, doors left ajar
 
 - **Defines (7):** `upToNoGood` `ajarChance` `doorFree` `roomSize` `doorPass` `roomWatch` `awkward`
-- **→ uses:** sim/core, data/tuning, core/util, world/grid, ui/interface, world/objects, town/suspicion, town/npc-update, play/raids, play/traps, them/tells, player/needs, audio/sound
+- **→ uses:** sim/core, data/tuning, core/util, world/grid, ui/interface, town/suspicion, world/objects, town/npc-update, play/raids, play/traps, them/tells, player/needs, audio/sound
 - **← used by:** 1 (game/loop)
 
-### town/talk  ·  #59  ·  678 lines
+### town/talk  ·  #59  ·  747 lines
 
 Talk: what people say, and the talking action itself
 
-- **Defines (36):** `partDay` `quirkLine` `sneakLine` `Q_BLOCKS` `quirkNext` `pairCount` `soonK` `tonightBusy` `gatherEve` `fairGame` `gossip` `sayTalk` `quirkTalk` `talkOfQ` `trueTalk` `lieTalk` `mundaneTalk` `selfLine` `slipLine` `chatLine` `noteOnce` `chatPick` `lennyTip` `lennyWarn` `lennySaw` `lennyHint` `lennyLook` `INV_SMELL` `talkTick` `sockRackAt` `quirkDraw` `quirkFx` `hourlyEvents` `spawnStranger` `streetTick` `talkAct`
-- **→ uses:** sim/core, core/util, data/lines, town/quirks, world/grid, town/npc-update, ui/interface, town/echoes, world/objects, gfx/renderer, town/cast, sim/actions, world/vision, town/routines … +14
-- **← used by:** 10
+- **Defines (43):** `partDay` `quirkLine` `sneakLine` `Q_BLOCKS` `quirkNext` `pairCount` `soonK` `tonightBusy` `gatherEve` `fairGame` `toldYou` `gossipLine` `gossip` `sawTalk` `paidTalk` `lostTalk` `fishTalk` `sayTalk` `quirkTalk` `talkOfQ` `trueTalk` `lieTalk` `mundaneTalk` `oddLooking` `selfLine` `slipLine` `chatLine` `noteOnce` `chatPick` `lennyTip` `lennyWarn` `lennySaw` `lennyHint` `lennyLook` `INV_SMELL` `talkTick` `sockRackAt` `quirkDraw` `quirkFx` `hourlyEvents` `spawnStranger` `streetTick` `talkAct`
+- **→ uses:** sim/core, core/util, data/lines, town/quirks, world/grid, ui/interface, town/npc-update, town/cast, town/echoes, world/objects, gfx/renderer, sim/actions, them/moves, world/vision … +15
+- **← used by:** 9
 
 ### town/echoes  ·  #60  ·  260 lines
 
@@ -412,14 +412,14 @@ Echoes: what happened, where, who saw
 
 - **Defines (10):** `ECHO` `ECHO_ORDER` `echo` `placeIn` `whenWord` `flav` `echoLine` `hear` `echoFor` `morningPaper`
 - **→ uses:** sim/core, gfx/renderer, core/util, data/lines, town/suspicion, play/photos
-- **← used by:** 25
+- **← used by:** 23
 
-### town/company  ·  #62  ·  196 lines
+### town/company  ·  #62  ·  197 lines
 
 Come with me; the witnesses THEY go after at night, and standing guard for one
 
 - **Defines (11):** `resolveCome` `followAct` `endFollow` `witnessNight` `witnessDoor` `witnessTick` `recant` `witnessSaved` `theirPeople` `tailTick` `tailAct`
-- **→ uses:** sim/core, ui/interface, core/util, sim/actions, data/tuning, world/paths, sim/movement, town/suspicion, data/lines, them/proofs, them/awareness, town/cast, world/grid, them/moves … +10
+- **→ uses:** sim/core, ui/interface, core/util, sim/actions, data/tuning, town/suspicion, world/paths, sim/movement, data/lines, them/proofs, them/awareness, town/cast, world/grid, them/moves … +9
 - **← used by:** 4 (combat/melee, them/night-attacks, play/stashes, play/confront)
 
 ### town/traffic-weather  ·  #87  ·  99 lines
@@ -454,7 +454,7 @@ Proofs: photos and THEIR things in your hands
 
 - **Defines (35):** `FRAME` `FRAMES` `TELL_FRAME` `SLIP_CLEAR` `ODD_STRONG` `slipClear` `addProof` `slotCard` `dropCard` `cardIn` `frameState` `caseCards` `caseSize` `greyCount` `looseProofs` `dashFrame` `clearDash` `greyFrame` `flipCard` `checkCleared` `assignCard` `unassignCard` `mergeHalves` `dropCardsOn` `tearCard` `proofImage` `proofCard` `marksNear` `photoMarks` `takeProofItem` `takeBait` `returnBait` `backs` `sawRecently` `sawItChange`
 - **→ uses:** sim/core, ui/interface, data/tuning, them/plan, gfx/portraits, town/cast, play/oddities, player/needs, audio/sound, ui/menus, play/photos, town/cell, them/moves
-- **← used by:** 20
+- **← used by:** 21
 
 ### them/awareness  ·  #45  ·  62 lines
 
@@ -462,7 +462,7 @@ THEIR awareness of you, settled at 06:00
 
 - **Defines (12):** `book` `bookPhoto` `bookNight` `bookRemoval` `bookAware` `tonightId` `applyAwareness` `awareWord` `temper` `watchedNow` `alive` `covert`
 - **→ uses:** sim/core, town/cast, core/util, ui/interface, town/echoes, data/tuning
-- **← used by:** 28
+- **← used by:** 27
 
 ### them/moves  ·  #46  ·  543 lines
 
@@ -470,7 +470,7 @@ THEIR morning moves: the Bought, Scatter, Destroy, Protect
 
 - **Defines (25):** `bought` `buy` `unbuyBy` `tryBribe` `misled` `tryUnder` `tryControl` `controlled` `catchControl` `tryScatter` `morningResist` `stealPrint` `abductCheck` `abduct` `lodgeTick` `destroyTick` `protectAfter` `policeTick` `policeSaw` `policeChase` `policeGrab` `policeChaseTick` `policeWarn` `heldUntil` `arrest`
 - **→ uses:** sim/core, core/util, sim/actions, ui/interface, town/npc-update, data/tuning, them/awareness, town/echoes, gfx/world-geometry, audio/sound, data/lines, them/plan, world/grid, town/arrest … +21
-- **← used by:** 24
+- **← used by:** 21
 
 ### them/servants  ·  #47  ·  46 lines
 
@@ -488,7 +488,7 @@ True form: the change, then hunt or flee
 - **→ uses:** sim/core, ui/interface, core/util, town/suspicion, sim/actions, town/cast, town/fleeing, them/plan, gfx/portraits, town/npc-update, audio/sound, combat/melee, world/vision, data/tuning … +22
 - **← used by:** 17
 
-### them/night-attacks  ·  #61  ·  394 lines
+### them/night-attacks  ·  #61  ·  393 lines
 
 Night attacks
 
@@ -522,15 +522,15 @@ Taking hits, knockouts, hospital, limbo
 - **→ uses:** sim/core, ui/interface, taken/taken, sim/actions, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, combat/melee, sim/pose, player/needs, audio/sound … +9
 - **← used by:** 8
 
-### combat/melee  ·  #55  ·  393 lines
+### combat/melee  ·  #55  ·  394 lines
 
 Blows out in the street: THEIR telegraphed strikes, yours, people punching
 
-- **Defines (19):** `fightSnapRec` `privateFight` `crowdHelp` `teleSet` `teleEnd` `lungeChar` `foeWind` `foeCalm` `foeMelee` `foeStrike` `punchAct` `brawl` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `clinicCheck` `privateKill`
-- **→ uses:** sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, player/needs, world/grid, town/arrest, horror/layer, combat/hits, sim/actions, town/cast … +16
-- **← used by:** 20
+- **Defines (20):** `fightSnapRec` `privateFight` `crowdHelp` `teleSet` `teleEnd` `lungeChar` `foeWind` `foeCalm` `foeMelee` `foeStrike` `punchAct` `brawl` `knockBack` `fightOutcome` `earshot` `viewLine` `perceptionTick` `thinkMad` `clinicCheck` `privateKill`
+- **→ uses:** sim/core, data/tuning, ui/interface, core/util, town/suspicion, input/camera, audio/sound, player/needs, world/grid, town/arrest, horror/layer, combat/hits, sim/actions, town/cast … +15
+- **← used by:** 21
 
-### combat/brawl  ·  #56  ·  163 lines
+### combat/brawl  ·  #56  ·  162 lines
 
 Hitting people: the count, onlookers, the police call, out cold
 
@@ -620,7 +620,7 @@ Who's who; encounters: choosing when, where, who, and getting everyone in place
 - **→ uses:** sim/core, core/util, world/grid, gfx/renderer, horror/encounter-outcomes, world/paths, town/npc-update, them/plan, sim/actions, them/awareness, town/cast, world/vision, town/daily-plans, horror/encounter-draw … +3
 - **← used by:** 4 (them/office-night, horror/encounter-outcomes, horror/encounter-draw, game/loop)
 
-### horror/encounter-outcomes  ·  #96  ·  550 lines
+### horror/encounter-outcomes  ·  #96  ·  549 lines
 
 An encounter under way: the rite, being noticed, pulling victims out, how it ends
 
@@ -646,7 +646,7 @@ Items left behind
 - **→ uses:** sim/core, gfx/renderer, gfx/props
 - **← used by:** 14
 
-### play/stashes  ·  #66  ·  595 lines
+### play/stashes  ·  #66  ·  593 lines
 
 Stashes and rummaging
 
@@ -654,15 +654,15 @@ Stashes and rummaging
 - **→ uses:** sim/core, core/util, town/cast, ui/interface, world/objects, town/suspicion, them/proofs, world/grid, play/verbs, data/lines, them/tells, them/awareness, audio/sound, play/items … +14
 - **← used by:** 6 (play/oddities, play/photos, ui/menus, input/camera, game/state, game/loop)
 
-### play/oddities  ·  #67  ·  293 lines
+### play/oddities  ·  #67  ·  179 lines
 
 False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
 
-- **Defines (19):** `ODD_FRAMES` `ownThings` `makeOddities` `oddityIn` `oddPeople` `innocentCard` `oddTruth` `secretSeen` `readOddity` `watchedHuman` `rumourCard` `tellRumour` `markVictim` `contactCard` `resolvePress` `framingMorning` `framingTick` `plantStash` `learnFramed`
-- **→ uses:** sim/core, them/proofs, core/util, data/lines, ui/interface, play/stashes, town/cast, them/moves, world/objects, data/tuning, town/routines, town/cell, player/needs, audio/sound … +8
-- **← used by:** 15
+- **Defines (15):** `ODD_FRAMES` `ownThings` `makeOddities` `oddityIn` `oddPeople` `innocentCard` `oddTruth` `secretSeen` `readOddity` `watchedHuman` `tellRumour` `markVictim` `framingMorning` `framingTick` `plantStash`
+- **→ uses:** sim/core, core/util, them/proofs, play/stashes, data/lines, ui/interface, world/objects, town/cast, data/tuning, town/routines, town/cell, player/needs, audio/sound, play/photos … +4
+- **← used by:** 14
 
-### play/traps  ·  #68  ·  185 lines
+### play/traps  ·  #68  ·  184 lines
 
 Traps
 
@@ -670,7 +670,7 @@ Traps
 - **→ uses:** sim/core, ui/interface, sim/actions, play/items, core/util, town/suspicion, audio/sound, town/echoes, them/tells, them/proofs, town/npc-update, world/objects, world/grid, world/paths … +5
 - **← used by:** 6 (town/npc-update, combat/brawl, town/doors, play/raids, ui/menus, game/loop)
 
-### play/raids  ·  #69  ·  133 lines
+### play/raids  ·  #69  ·  132 lines
 
 Raids: kicking in a door
 
@@ -678,31 +678,31 @@ Raids: kicking in a door
 - **→ uses:** sim/core, ui/interface, core/util, town/suspicion, town/npc-update, play/traps, play/verbs, audio/sound, player/needs, them/tells, data/lines, them/moves, town/echoes, sim/actions … +2
 - **← used by:** 2 (town/doors, ui/menus)
 
-### play/verbs  ·  #71  ·  403 lines
+### play/verbs  ·  #71  ·  386 lines
 
 What you can do: snooping, eating, Lenny, chat
 
-- **Defines (31):** `DESK_OWNER` `chain` `useP` `nextAlarm` `sleepAct` `cookChain` `snackAct` `eatHereAct` `vendAct` `coffeeAct` `toiletAct` `showerAct` `warmAct` `EAT_SEATS` `nearSeat` `seatedEat` `comfortAct` `momAct` `FINDS` `findSomething` `rummageResult` `pillsAct` `deskWork` `tvAct` `binDig` `digResult` `socialChance` `relFx` `PLACE_SELF` `resolveChat` `resolveGossip`
-- **→ uses:** sim/core, ui/interface, core/util, sim/actions, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, town/cast, horror/director, town/talk, chase/they-come … +10
-- **← used by:** 10
+- **Defines (30):** `DESK_OWNER` `chain` `useP` `nextAlarm` `sleepAct` `cookChain` `snackAct` `eatHereAct` `vendAct` `coffeeAct` `toiletAct` `showerAct` `warmAct` `EAT_SEATS` `nearSeat` `seatedEat` `comfortAct` `momAct` `FINDS` `findSomething` `rummageResult` `pillsAct` `deskWork` `tvAct` `binDig` `digResult` `socialChance` `PLACE_SELF` `resolveChat` `resolveGossip`
+- **→ uses:** sim/core, ui/interface, sim/actions, core/util, player/needs, world/objects, town/suspicion, audio/sound, them/plan, world/grid, horror/director, town/talk, chase/they-come, world/paths … +5
+- **← used by:** 8
 
-### play/confront  ·  #72  ·  187 lines
+### play/confront  ·  #72  ·  180 lines
 
 Giving up, the FBI, the talk options
 
 - **Defines (5):** `GIVE_UP` `surrender` `fbiTake` `SOC` `observeAct`
-- **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, play/verbs, chase/fbi, them/tells, audio/sound, them/awareness … +15
+- **→ uses:** sim/core, ui/interface, town/echoes, town/cast, core/util, combat/bolts, sim/actions, town/cell, town/suspicion, chase/fbi, them/tells, audio/sound, them/awareness, gfx/portraits … +15
 - **← used by:** 6 (them/true-form, combat/melee, town/talk, play/arena, ui/menus, chase/fbi)
 
-### play/arena  ·  #73  ·  529 lines
+### play/arena  ·  #73  ·  521 lines
 
 The confrontation: an arena battle in front of the town, and what it leaves on the map
 
 - **Defines (31):** `theirsPerson` `closeTo` `witnessOf` `arenaRoom` `openConfront` `after` `arenaTick` `makeTestimony` `testimony` `nextStatement` `letPass` `spend` `realOn` `showCard` `wrongPerson` `habitFits` `backUp` `makeClaims` `knowBeat` `callClaim` `counterBeat` `checkEscape` `arenaBarTick` `arenaStrike` `move` `arenaEnd` `closeArena` `arenaOutcome` `arenaTalkLater` `arenaTalkTick` `arenaKey`
-- **→ uses:** sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, town/quirks, world/grid, town/suspicion, player/needs … +13
+- **→ uses:** sim/core, data/tuning, ui/arena-view, core/util, data/lines, ui/interface, them/proofs, audio/sound, gfx/world-geometry, them/awareness, town/quirks, town/suspicion, world/grid, player/needs … +12
 - **← used by:** 5 (play/stashes, ui/menus, ui/arena-view, input/targeting, game/loop)
 
-### play/photos  ·  #74  ·  402 lines
+### play/photos  ·  #74  ·  401 lines
 
 Photos: reading what is in frame
 
@@ -720,11 +720,11 @@ Needs to the right thing to do, here; inventory hooks
 
 ## ui/
 
-### ui/menus  ·  #75  ·  966 lines
+### ui/menus  ·  #75  ·  942 lines
 
 Interaction menus for objects, people, items
 
-- **Defines (17):** `opt` `Q` `NO_SHAKE` `shakenFresh` `menuForObject` `fitMenu` `objMenu` `deskMenu` `objStatus` `menuForChar` `askMenu` `relWord` `ITEM_NAMES` `itemName` `menuForItem` `bagItem` `ITEMS_INV`
+- **Defines (16):** `opt` `Q` `NO_SHAKE` `shakenFresh` `menuForObject` `fitMenu` `objMenu` `deskMenu` `objStatus` `menuForChar` `askMenu` `ITEM_NAMES` `itemName` `menuForItem` `bagItem` `ITEMS_INV`
 - **→ uses:** sim/core, play/verbs, ui/interface, sim/actions, core/util, gfx/portraits, play/stashes, player/needs, world/objects, town/cast, data/tuning, world/grid, data/lines, audio/sound … +19
 - **← used by:** 10
 
@@ -752,20 +752,20 @@ The corner HUD: bars, days, clock, THEIR eye, evidence
 - **→ uses:** ui/interface, sim/core, them/plan, gfx/renderer, core/util, ui/hud-images, audio/sound, ui/case-board, ui/menus, player/needs, data/tuning, town/arrest, sim/actions, play/verbs … +4
 - **← used by:** 4 (ui/interface, ui/case-board, input/targeting, game/loop)
 
-### ui/pie-menu  ·  #80  ·  116 lines
+### ui/pie-menu  ·  #80  ·  100 lines
 
 The directional pie menu
 
-- **Defines (8):** `hearts` `MENU_KEYS` `MENU_XY` `openMenu` `placeMenu` `runOpt` `presentMenu` `closeMenu`
+- **Defines (7):** `MENU_KEYS` `MENU_XY` `openMenu` `placeMenu` `runOpt` `presentMenu` `closeMenu`
 - **→ uses:** ui/interface, core/util, audio/sound, ui/menus, sim/actions, town/arrest
-- **← used by:** 15
+- **← used by:** 14
 
-### ui/case-board  ·  #81  ·  442 lines
+### ui/case-board  ·  #81  ·  453 lines
 
 The evidence book: four frames on every suspect, the suspect page, the Whose? tray
 
 - **Defines (22):** `SLOT_TIP` `MARK_STAMP` `openBoard` `drawTop` `cardWhen` `slotHtml` `fillSlotImgs` `stampFor` `drawPols` `drawPrints` `drawHeard` `dragFrom` `dropOn` `pinPrint` `refreshBoard` `drawStrings` `showSuspect` `closeSuspect` `focusPol` `boardKey` `closeBoard` `toggleHelp`
-- **→ uses:** ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, ui/pie-menu
+- **→ uses:** ui/interface, sim/core, them/proofs, world/grid, core/util, town/cast, them/plan, town/quirks, ui/hud, gfx/portraits, combat/melee
 - **← used by:** 4 (ui/interface, ui/hud, input/targeting, game/loop)
 
 ### ui/arena-view  ·  #82  ·  289 lines
@@ -922,7 +922,7 @@ The grey cars: the FBI takes one that gave up
 
 ## game/
 
-### game/state  ·  #111  ·  543 lines
+### game/state  ·  #111  ·  536 lines
 
 Game state, new game, saving, endings
 

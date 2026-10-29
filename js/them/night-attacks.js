@@ -23,8 +23,7 @@ function planNight() {
 function attackTargets() {
   const out = [],
     P = PLAYER;
-  for (const s of suspects())
-    if (!s.isThem && !s.exposed && !s.gone && s.onMap && atHome(s)) out.push([s, 1 + Math.max(0, s.rel) / 20]);
+  for (const s of suspects()) if (!s.isThem && !s.exposed && !s.gone && s.onMap && atHome(s)) out.push([s, 1]);
   if (!theyOut()) {
     if (P.onMap && mayHuntYou()) out.push([P, 2 + G.aware / 40]);
     return out;

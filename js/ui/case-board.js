@@ -57,6 +57,18 @@ function drawTop() {
     )
     .join('');
   fc.dataset.tip = G.factionKnown ? 'What THEY are' : 'Catch one in the act';
+  // how many ordinary people think you're mad: three of them at 06:00 and the clinic writes
+  const mad = $('#bd-mad'),
+    nMad = thinkMad().length;
+  if (mad) {
+    mad.className = nMad >= 3 ? 's2' : nMad >= 1 ? 's1' : '';
+    mad.innerHTML = svgIcon('eye') + '<span>Think you’re mad</span><b></b>';
+    mad.querySelector('b').textContent = Math.min(nMad, 3) + ' of 3';
+    mad.dataset.tip =
+      nMad >= 3
+        ? 'Three people think you’re mad. At 06:00, Mom calls and the clinic writes'
+        : 'People who find you weird enough (60+) to call your mother. Three, and the clinic writes';
+  }
   const eye = $('#bd-eye'),
     es = eyeState();
   eye.className = 's' + es;
@@ -312,7 +324,6 @@ function showSuspect(n) {
     '<button class="x" id="bd-dx" aria-label="Back">' +
     svgIcon('x') +
     '</button><div class="sd-head"><img alt=""><div><b></b><span class="sd-role"></span>' +
-    hearts(n.rel) +
     (n.id !== 'lenny'
       ? '<span class="psus big' +
         (n.sus >= 60 ? ' hi' : '') +

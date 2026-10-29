@@ -186,7 +186,6 @@ function doHabit(n) {
           a.dur = 1;
           ui.bubble(c, 'dots', 'speech', 2);
           addDanger(c, 5);
-          c.rel -= 2;
           return;
         }
         turn(c);
@@ -233,7 +232,6 @@ function secretTick(n, dt) {
   if (!G.started || s.done) return;
   if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) {
     s.caught = true;
-    n.rel -= 6;
     addSus(n, 6);
     ui.bubble(n, 'exclaim', 'speech', 2.5);
     ui.say(n, pick(['You didn’t see this.', 'Don’t tell anyone.', '…Hi.']), 2.6);

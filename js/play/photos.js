@@ -381,7 +381,6 @@ function photoSeen(subj) {
     if (n === subj) {
       if (face) n.faceShot = G.t; // a lens in their face: they'll bring it up if you ever call them out
       addSus(n, face ? 10 : 4);
-      n.rel -= face ? 3 : 1;
       ui.bubble(n, face ? 'exclaim' : 'question', 'speech', 2);
       if (
         n.isThem &&

@@ -1,12 +1,12 @@
 //@ play/oddities — False cards: innocent oddities, rumours, THEIR frame-ups, pressing people, flipping a card grey
-//@ Defines: ODD_FRAMES, makeOddities, innocentCard, oddTruth, secretSeen, readOddity, watchedHuman, rumourCard, tellRumour, markVictim, contactCard, resolvePress, framingMorning, framingTick, plantStash, learnFramed
-//@ Uses:    sim/core, them/proofs, core/util, data/lines, ui/interface, play/stashes, town/cast, them/moves, world/objects, data/tuning, …
+//@ Defines: ODD_FRAMES, makeOddities, innocentCard, oddTruth, secretSeen, readOddity, watchedHuman, tellRumour, markVictim, framingMorning, framingTick, plantStash
+//@ Uses:    sim/core, core/util, them/proofs, play/stashes, data/lines, ui/interface, world/objects, town/cast, data/tuning, town/routines, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── false cards. Most ordinary people carry one secret that makes one fuzzy card in one frame: an envelope in
-// the desk, a habit at a strange hour, a tic, a rumour. Once THEY know you, THEY frame people: a stash in an innocent's
-// things (the only false card that looks clear) and a rumour to go with it. Every false card has a truth behind it;
-// see the truth and the card turns grey.
-const ODD_FRAMES = ['home', 'habit', 'body', 'contact'];
+// the desk, a habit at a strange hour, a tic. Once THEY know you, THEY frame people: a stash in an innocent's things
+// (the only false card that looks clear). Talk is never a card: a rumour going round is only a note under the face it's
+// about. Every false card has a truth behind it; see the truth and the card turns grey.
+const ODD_FRAMES = ['home', 'habit', 'body'];
 // the things in a person's own home or desk you could put your hands in
 const ownThings = (n) =>
   OBJ.filter((o) => shakeable(o) && ownerOf(o) === n.id && !G.stashes.some((s) => s.obj === o.idx && !s.bagged));
@@ -30,10 +30,8 @@ function makeOddities() {
         moveAt: 1e12,
       });
     } else if (f === 'body') od.k = pick(ODDITY_TIC);
-    else if (f === 'contact') {
-      od.k = 'just talk. Nobody saw anything';
-      G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
-    }
+    // people talk about whoever looks odd: half of them have a rumour going round from THEIR day 2
+    if (chance(0.5)) G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
     G.odd[n.id] = od;
   }
 }
@@ -55,7 +53,7 @@ function oddTruth(n) {
     const hb = G.habits[n.id];
     return 'just ' + secretFor(n, hb ? hb.spot : 'alley').note;
   }
-  return od.k;
+  return od.k; // body: the tic
 }
 // a normal person's private secret, caught on film: the print shows exactly what they were up to. Habit is clean.
 function secretSeen(n, spot) {
@@ -88,126 +86,20 @@ function watchedHuman(n) {
   if (greyFrame(n, 'body', { what: 'Just ' + t, pr: { kind: 'plain', who: n.id, what: n.short, icon: 'people' } }))
     ui.note('face', n.short + ' · ' + t, 'good');
 }
-// ── words: rumours become fuzzy Contact cards on whoever they're about
-// loud, sure talk about someone ("I saw X with glowing eyes"). About an ordinary person it's THEIR doing.
-function rumourCard(s, text, teller) {
-  if (!s || s.def.never || s.exposed || s.slain || s.gone || !G.started) return null;
-  const liar = teller && (teller.isThem || bought(teller) || misled(teller));
-  const p = addProof({
-    frame: 'contact',
-    q: 'fuzzy',
-    true: s.isThem ? s.id : liar && teller.isThem ? teller.id : null,
-    pin: s.id,
-    auto: true,
-    src: 'word',
-    rumour: true,
-    planted: !s.isThem || undefined,
-    teller: teller ? teller.id : null,
-    what: '“' + text + '”',
-    where: teller ? teller.short : '',
-    pr: { kind: 'plain', who: teller ? teller.id : s.id, what: teller ? teller.short : s.short, icon: 'chat' },
-  });
-  if (p.kept) proofCard(p);
-  return p;
-}
-// a rumour going round: an innocent's (from THEIR day 2), or the one THEY started about the person THEY framed
+// a rumour going round: about someone who looks odd (from THEIR day 2), or the one THEY started about the person THEY
+// framed. Only words: a note under the face it's about, never a card. Each rumour is passed on once.
 function tellRumour(n) {
   const r = (G.rumours || []).find(
     (x) => !x.told && x.about !== n.id && dayNo() >= (x.from || 1) && NPC[x.about] && !NPC[x.about].gone,
   );
-  if (!r || !chance(0.5)) return false;
-  const s = NPC[r.about],
-    line = r.line.replace(/\{s\}/g, s.short);
+  if (!r || !chance(0.5)) return null;
+  const s = NPC[r.about];
   r.told = true;
-  ui.say(n, line, 5);
-  hear(null, line, n.id);
-  noteOnce(s, '“' + line + '”', { by: n.id });
-  const p = r.innocent
-    ? innocentCard(s, {
-        src: 'word',
-        rumour: true,
-        teller: n.id,
-        what: '“' + line + '”',
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      })
-    : addProof({
-        frame: 'contact',
-        q: 'fuzzy',
-        true: r.by,
-        pin: s.id,
-        auto: true,
-        src: 'word',
-        rumour: true,
-        planted: true,
-        teller: n.id,
-        what: '“' + line + '”',
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      });
-  if (p && p.kept) proofCard(p);
-  return true;
+  return { text: r.line.replace(/\{s\}/g, s.short), subj: s, place: true };
 }
-// ── Press: lean on somebody about what they know. A witness tells you straight; a bought one covers, and tells THEM.
+// someone THEY got to: who did it, and when. They don't remember it, but they can tell you they don't.
 function markVictim(v, by) {
   if (v && by) (G.victimOf || (G.victimOf = {}))[v.id] = { by, at: G.t };
-}
-function contactCard(n, m, q, what, extra) {
-  return addProof(
-    Object.assign(
-      {
-        frame: 'contact',
-        q,
-        true: m.id,
-        auto: true,
-        src: 'word',
-        what,
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      },
-      extra,
-    ),
-  );
-}
-function resolvePress(n) {
-  n.pressDay = dayNo();
-  addSus(n, 8);
-  n.rel -= 3;
-  const say = (pool, m) => ui.say(n, pick(pool).replace(/\{s\}/g, m ? m.short : ''), 4.5);
-  // a rumour they told you about an ordinary person: they own up it was only talk
-  const told = !n.isThem && !bought(n) && G.proofs.find((p) => p.rumour && p.teller === n.id && !p.grey && p.planted);
-  if (told) {
-    say(ODDITY_HEARD);
-    flipCard(told, { what: 'just talk' });
-    ui.note('mouth', NPC[told.pin].short + ' · just talk', 'good');
-    return;
-  }
-  // they saw one of THEM change, and they're willing: a clear Contact card, while they still remember
-  const sawIt = backs(n) && them().find((m) => !m.slain && !m.exposed && sawRecently(n, m));
-  if (sawIt) {
-    say(PRESS_SAW, sawIt);
-    proofCard(contactCard(n, sawIt, 'clear', n.short + ' saw it change', { witness: n.id }));
-    return;
-  }
-  // bought: they cover for whoever paid. And whoever paid hears you asked.
-  const payer = bought(n) && G.boughtBy && NPC[G.boughtBy[n.id]];
-  if (payer && !payer.slain) {
-    say(PRESS_BOUGHT, payer);
-    proofCard(contactCard(n, payer, 'fuzzy', n.short + ' won’t hear a word against ' + payer.short));
-    bookNight(payer);
-    addDanger(payer, 15);
-    return;
-  }
-  // something THEY did to them: a gap, a face
-  const v = G.victimOf && G.victimOf[n.id],
-    m = v && NPC[v.by];
-  if (m && !m.slain && !m.exposed && G.t - v.at < 3 * 1440) {
-    say(PRESS_VICTIM, m);
-    proofCard(contactCard(n, m, 'fuzzy', n.short + ' remembers ' + m.short + '. Barely.'));
-    return;
-  }
-  say(PRESS_NONE);
-  ui.float(n, 'Nothing', '');
 }
 // ── THEIR frame-ups: from awareness 40 THEY pick one human and plant something of THEIRS in their things, and start a
 // rumour. From 70, a second. Catch THEM putting it there and that's a clear Habit card on the one who did it.
@@ -288,10 +180,4 @@ function plantStash(F) {
     out: false,
     moveAt: 1e12,
   });
-}
-// in the arena: you show a card on an ordinary person and they tell the truth. Now the town knows it.
-function learnFramed(p) {
-  flipCard(p, { what: 'planted' });
-  const F = (G.framed || []).find((f) => f.id === p.pin);
-  if (F) F.known = true;
 }

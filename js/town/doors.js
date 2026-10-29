@@ -1,6 +1,6 @@
 //@ town/doors — Broken restroom lock, doors left ajar
 //@ Defines: upToNoGood, ajarChance, doorPass, roomWatch, awkward
-//@ Uses:    sim/core, data/tuning, core/util, world/grid, ui/interface, world/objects, town/suspicion, town/npc-update, play/raids, play/traps, …
+//@ Uses:    sim/core, data/tuning, core/util, world/grid, ui/interface, town/suspicion, world/objects, town/npc-update, play/raids, play/traps, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── awkwardness: the restroom lock is broken
 // ───────────── doors left ajar
@@ -53,7 +53,6 @@ function roomWatch(c) {
         ui.bubble(owner, 'exclaim', 'speech', 3);
         ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
         addSus(owner, 30);
-        owner.rel -= 30;
         G.policeAt = G.policeAt || G.t + rand(8, 18);
         caution(owner, 'breakin');
         return;
@@ -75,7 +74,7 @@ function roomWatch(c) {
 function awkward(n, kind) {
   if (G.awkCd > 0) return;
   G.awkCd = 15;
-  n.rel -= 9;
+  addSus(n, 6);
   addStress(5);
   ui.bubble(n, 'exclaim', 'speech', 3);
   ui.say(

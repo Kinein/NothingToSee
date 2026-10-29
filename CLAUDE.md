@@ -67,12 +67,12 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | NPC daily schedule, habits, quirks | `js/town/daily-plans.js`, `js/town/routines.js`, `js/town/quirks.js` |
 | What an NPC decides each frame | `js/town/npc-update.js` (`npcUpdate`, `npcThink`) |
 | Suspicion, panic, fleeing | `js/town/suspicion.js`, `js/town/fleeing.js` |
-| Talking and gossip | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
+| Talking and gossip (`gossipLine`: clues only, told once each) | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
 | Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
 | Tells, THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
 | Evidence: four frames per suspect, clear/fuzzy/grey/dashed cards | `js/them/proofs.js` (`addProof`, `cardIn`, `frameState`, `greyFrame`) |
-| False cards: innocent oddities, rumours, THEIR frame-ups, Press | `js/play/oddities.js` |
+| False cards: innocent oddities, rumours (talk only, never cards), THEIR frame-ups | `js/play/oddities.js` |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |

@@ -1,6 +1,6 @@
 //@ town/talk — Talk: what people say, and the talking action itself
-//@ Defines: sneakLine, Q_BLOCKS, quirkNext, soonK, gossip, sayTalk, quirkTalk, talkOfQ, trueTalk, lieTalk, mundaneTalk, selfLine, slipLine, chatLine, noteOnce, chatPick, …
-//@ Uses:    sim/core, core/util, data/lines, town/quirks, world/grid, town/npc-update, ui/interface, town/echoes, world/objects, gfx/renderer, …
+//@ Defines: sneakLine, Q_BLOCKS, quirkNext, soonK, gossipLine, gossip, sawTalk, paidTalk, lostTalk, fishTalk, sayTalk, quirkTalk, talkOfQ, trueTalk, lieTalk, mundaneTalk, …
+//@ Uses:    sim/core, core/util, data/lines, town/quirks, world/grid, ui/interface, town/npc-update, town/cast, town/echoes, world/objects, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── talk: what people say. Short, human, and never the whole story.
 // a part of the day, the way people say it: never a clock time
@@ -76,24 +76,76 @@ const tonightBusy = () =>
 const gatherEve = () => (dayNo() === G.gatherDay - 1 && hourF() >= 10) || (dayNo() === G.gatherDay && hourF() < 1.5);
 const fairGame = (s, n) =>
   s && s !== n && !s.gone && !s.slain && !s.exposed && s.def && !s.def.stranger && s.id !== 'lenny';
-function gossip(n) {
+// ── gossip: what people pass on. A clue, never evidence: it goes on the board as a note under whoever it's about, and
+// it often points the wrong way, because people talk about whoever looks odd and the ones THEY got to lie for THEM.
+// Each thing is told you once (the small talk and the loud blame once a day): nothing new, and they say so.
+const toldYou = (n, key) => {
+  const t = n.toldYou && n.toldYou[key];
+  return t != null && (key[0] !== '~' || t === dayNo());
+};
+function gossipLine(n) {
+  const fresh = (r) => r && r.text && !toldYou(n, r.key || r.text);
   if (n.wrongTalk > G.t) {
-    const l = pick(WRONG_TALK);
-    ui.say(n, l, 5);
-    addNote(n, '“' + l + '”', { by: n.id, quote: true });
-    return;
+    const r = { text: pick(WRONG_TALK), key: '~wrong', self: true };
+    if (fresh(r)) return r;
   }
+  for (const f of [sawTalk, paidTalk, lostTalk, fishTalk]) {
+    const r = f(n);
+    if (fresh(r)) return r;
+  }
+  const rum = tellRumour(n); // what's going round
+  if (rum) return Object.assign(rum, { key: 'rumour:' + rum.subj.id + ':' + rum.text });
   const liar = n.isThem || misled(n) || (bought(n) && chance(bought(n) > 1 ? 1 : 0.7));
-  n.recentG = n.recentG || [];
-  let r = null;
-  for (let k = 0; k < 5; k++) {
-    r = (liar ? lieTalk(n) : trueTalk(n)) || mundaneTalk(n);
-    if (!r || !n.recentG.includes(r.text)) break;
+  for (let k = 0; k < 6; k++) {
+    const r = (liar ? lieTalk(n) : trueTalk(n)) || mundaneTalk(n);
+    if (fresh(r)) return r;
   }
-  if (!r) return;
-  n.recentG.push(r.text);
-  if (n.recentG.length > 5) n.recentG.shift();
-  sayTalk(n, r);
+  return null;
+}
+function gossip(n) {
+  const r = gossipLine(n);
+  if (!r) {
+    ui.say(n, pick(TOLD_ALL), 3.5);
+    return false;
+  }
+  (n.toldYou = n.toldYou || {})[r.key || r.text] = r.key && r.key[0] === '~' ? dayNo() : G.t;
+  if (r.self) {
+    ui.say(n, r.text, 5);
+    addNote(n, '“' + r.text + '”', { by: n.id, quote: true });
+  } else sayTalk(n, r);
+  return true;
+}
+// what Press used to dig out, said of its own accord. Someone who saw one of THEM change says so, while it's fresh;
+// someone bought speaks well of whoever paid; someone THEY got to doesn't remember last night.
+function sawTalk(n) {
+  const m = backs(n) && them().find((x) => !x.slain && !x.exposed && sawRecently(n, x));
+  return m ? { text: pick(GOSSIP_SAW).replace(/\{s\}/g, m.short), subj: m, key: 'saw:' + m.id } : null;
+}
+function paidTalk(n) {
+  const payer = !n.isThem && bought(n) && G.boughtBy && NPC[G.boughtBy[n.id]];
+  return payer && !payer.slain
+    ? { text: pick(GOSSIP_BOUGHT).replace(/\{s\}/g, payer.short), subj: payer, key: 'paid:' + payer.id }
+    : null;
+}
+function lostTalk(n) {
+  const v = G.victimOf && G.victimOf[n.id];
+  return v && !n.isThem && G.t - v.at < 3 * 1440
+    ? { text: pick(GOSSIP_LOST), subj: n, key: 'lost:' + v.at, self: true }
+    : null;
+}
+// Vic at Pell's knows who buys fish (with the lizards in town): the buyers, and one ordinary customer
+function fishTalk(n) {
+  if (n.id !== 'vic' || n.isThem || G.faction !== 'lizards' || bought(n) || toldYou(n, '~fish') || chance(0.5))
+    return null;
+  const buyers = shuffle(
+    alive().concat(shuffle(suspects().filter((s) => !s.isThem && s.id !== 'vic' && !s.gone)).slice(0, 1)),
+  ).slice(0, 3);
+  for (const b of buyers) addNote(b, 'Buys fish at Pell’s.', { by: 'vic' });
+  return {
+    text: 'Fish? ' + buyers.map((b) => b.short).join(', ') + '. Every week. Raw, some of ’em.',
+    key: '~fish',
+    loud: true,
+  };
 }
 function sayTalk(n, r) {
   ui.say(n, r.text, 5);
@@ -103,7 +155,6 @@ function sayTalk(n, r) {
     r.subj.rumors++;
   }
   if (r.place || r.loud) hear(null, r.text, n.id);
-  if (r.loud && r.subj) rumourCard(r.subj, r.text, n); // said loud and sure: a fuzzy Contact card on whoever it's about
 }
 // what this person could pass on: things they saw done, or heard about from somebody who did
 function quirkTalk(n) {
@@ -129,16 +180,16 @@ function talkOfQ(n, c) {
   if (q === 'sneak') {
     const hb = G.habits[s.id],
       nx = habitNextAt(s);
-    return hb && nx ? { text: sneakLine(s, hb.spot, nx.at, nx.tmr), subj: s } : null;
+    return hb && nx ? { text: sneakLine(s, hb.spot, nx.at, nx.tmr), subj: s, key: 'q:' + c.key + ':' + dayNo() } : null;
   }
   if (q === 'pair') {
     const o = NPC[c.e.other];
     if (!o) return null;
     const text = pick(PAIR_ABOUT).replace('{a}', s.short).replace('{b}', o.short);
     noteOnce(o, '“' + text + '”', { by: n.id });
-    return { text, subj: s };
+    return { text, subj: s, key: 'q:' + c.key + ':' + dayNo() };
   }
-  return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place };
+  return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place, key: 'q:' + c.key + ':' + dayNo() };
 }
 function trueTalk(n) {
   const T = G.traits[n.id] || {},
@@ -148,8 +199,9 @@ function trueTalk(n) {
     opts.push([
       2.5,
       () => {
-        const l = echoLine(e, true);
-        return l ? { text: hear(e, l, n.id) } : null;
+        const l = echoLine(e, true),
+          s = e.who && NPC[e.who] && !NPC[e.who].def.stranger ? NPC[e.who] : null;
+        return l ? { text: hear(e, l, n.id), subj: s, key: 'echo:' + e.k + ':' + e.t } : null;
       },
     ]);
   const qs = quirkTalk(n);
@@ -158,10 +210,10 @@ function trueTalk(n) {
     opts.push([
       1,
       () => {
-        const s = pick(suspects().filter((x) => fairGame(x, n)));
-        return s ? { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true } : null;
+        const s = oddLooking(n);
+        return s ? { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true, key: '~blame:' + s.id } : null;
       },
-    ]); // the odd ones see things
+    ]); // the odd ones see things, and what they see is whoever looks odd
   opts.push([0.5, () => mundaneTalk(n)]);
   const f = wpick(opts);
   return (f && f()) || null;
@@ -171,8 +223,9 @@ function lieTalk(n) {
   const marks = suspects().filter((x) => fairGame(x, n) && !x.isThem);
   const s = pick(marks);
   if (!s) return null;
-  const r = Math.random();
-  if (r < (n.isThem ? 0.45 : 0.25)) return { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true };
+  const r = Math.random(),
+    key = '~lie:' + s.id;
+  if (r < (n.isThem ? 0.45 : 0.25)) return { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true, key };
   if (r < 0.82) {
     // the same sort of thing anyone says: one of the mark's own habits, or one of THEIRS pinned on the mark
     const own = (G.quirks[s.id] || []).filter((q) => QUIRKS[q].who(s)),
@@ -185,7 +238,7 @@ function lieTalk(n) {
         : theirs.length
           ? pick(theirs)
           : pick(Object.keys(QUIRKS).filter((k) => QUIRKS[k].who(s)));
-    if (q) return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place };
+    if (q) return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place, key };
   }
   const hb = G.habits[s.id],
     nx = chance(0.4) && habitNextAt(s); // sometimes the real time, sometimes one that leads nowhere
@@ -193,13 +246,21 @@ function lieTalk(n) {
   return {
     text: sneakLine(s, hb && chance(0.5) ? hb.spot : pick(HABIT_SPOTS_FOR(s)), at, nx ? nx.tmr : tod() > 19 * 60),
     subj: s,
+    key,
   };
 }
 // nothing in it at all: who owes who, who microwaves fish
 function mundaneTalk(n) {
   const s = pick(suspects().filter((x) => fairGame(x, n)));
   if (!s) return null;
-  return { text: pick(RUMORS.mundane).replace('{s}', s.short), subj: s };
+  return { text: pick(RUMORS.mundane).replace('{s}', s.short), subj: s, key: '~small' };
+}
+// who people talk about: whoever looks odd. Someone with a secret of their own, or habits people notice, more often.
+function oddLooking(n) {
+  const opts = suspects()
+    .filter((x) => fairGame(x, n))
+    .map((x) => [1 + (G.odd && G.odd[x.id] ? 1.5 : 0) + 0.5 * (G.quirks[x.id] || []).length, x]);
+  return opts.length ? wpick(opts) : null;
 }
 
 // ── chat: about themselves. A third of it is nothing at all; the rest says something, never quite what.
@@ -412,8 +473,16 @@ function lennyHint() {
     if (G.leads.length > 6) G.leads.shift();
     return ui.say(NPC.lenny, 'Tonight. 1 a.m. Behind Pell’s. Don’t let ’em see you.', 5);
   }
-  const r = Math.random();
-  const line = G.lennyHint < 3 || r < 0.34 ? lennyTip() : r < 0.67 ? lennyWarn() : lennySaw() || lennyWarn();
+  // no limit on asking: once everything he has today is said, he says so
+  const said = G.lennyLines || (G.lennyLines = {});
+  let line = null;
+  for (let k = 0; k < 6 && !line; k++) {
+    const r = Math.random(),
+      l = G.lennyHint < 3 || r < 0.34 ? lennyTip() : r < 0.67 ? lennyWarn() : lennySaw() || lennyWarn();
+    if (l && said[l] !== dayNo()) line = l;
+  }
+  if (!line) return ui.say(NPC.lenny, pick(LENNY_TOLD), 4);
+  said[line] = dayNo();
   ui.say(NPC.lenny, line, 5.5);
 }
 // what Lenny keeps an eye on, every few minutes, from his bench: whoever's out of doors after five, and after dark

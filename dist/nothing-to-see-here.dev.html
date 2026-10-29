@@ -256,9 +256,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #pie .pci .ic{width:30px;height:30px;color:var(--ink)}
 #pie .pc b{padding:2px 9px;border-radius:7px;background:rgba(10,11,14,.88);font:15px var(--f-type);white-space:nowrap}
 #pie .psub{font-size:12.5px;color:var(--dim);background:rgba(10,11,14,.8);padding:0 7px;border-radius:6px}
-.hearts{display:flex;gap:2px}
-.hearts i{width:9px;height:8px;background:var(--faint);clip-path:path('M4.5 8 0 3.5A2 2 0 0 1 4.5 1a2 2 0 0 1 4.5 2.5z')}
-.hearts i.on{background:#e07a6a}
 .po{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;animation:pop .2s ease-out}
 .po .pi{position:relative;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:rgba(18,20,25,.95);border:1.5px solid var(--line2);box-shadow:0 6px 18px rgba(0,0,0,.5);transition:transform .12s,background .12s,border-color .12s}
 .po .pi .ic{width:23px;height:23px}
@@ -370,6 +367,10 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #bd-faction b{font:italic 700 24px/1 var(--f-disp)}
 #bd-eye{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:rgba(10,8,6,.72);color:#e8dcc0;font:500 15px/1 var(--f-ui);letter-spacing:.08em;white-space:nowrap}
 #bd-eye .ic{width:22px;height:22px}
+#bd-mad{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:rgba(10,8,6,.72);color:#e8dcc0;font:500 15px/1 var(--f-ui);letter-spacing:.06em;white-space:nowrap}
+#bd-mad .ic{width:20px;height:20px;color:var(--dim)}
+#bd-mad b{font-weight:700}
+#bd-mad.s1 .ic,#bd-mad.s1 b{color:var(--sodium)} #bd-mad.s2{color:#ec8a74} #bd-mad.s2 .ic{color:#ec8a74}
 #bd-eye.s2,#bd-eye.s3{color:#ec8a74}
 .bd-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;position:relative}
 .cork.paged .bd-grid{grid-template-columns:minmax(0,1fr) min(400px,44%)}
@@ -831,13 +832,13 @@ svg.na{fill:#cbbdaa;stroke:none}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.10 · updated Oct 29, 2026</p>
+  <p id="version">v1.11 · updated Oct 29, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
   <div class="cork" role="dialog" aria-label="The board">
     <svg id="bd-strings" aria-hidden="true"></svg>
-    <header><h2>The Board</h2><div id="bd-top"><div id="bd-faction"></div><div id="bd-eye"></div></div><button class="x" id="bd-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <header><h2>The Board</h2><div id="bd-top"><div id="bd-faction"></div><div id="bd-mad"></div><div id="bd-eye"></div></div><button class="x" id="bd-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="bd-grid">
       <div class="bd-main"><div id="bd-pols"></div></div>
       <aside id="bd-detail" hidden></aside>
@@ -864,10 +865,12 @@ svg.na{fill:#cbbdaa;stroke:none}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Bars</kbd><span>Click to handle · arrows: what’s pushing it up or down · a pulsing mark is danger</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 10a5 5 0 1 1 10 0c0 3-2.5 4-3 6.5A3 3 0 0 1 9 18M10 10a2 2 0 1 1 4 0c0 1.2-1 1.8-1.8 2.4"/></svg><kbd>Ear</kbd><span>Something happened there</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 4h18v14H3zM8 21l4-3 4 3M8 9l7 3M8 9h.01M15 12h.01"/></svg><kbd>Tab</kbd><span>The evidence book · Home, Habit, Body, Contact: one card each, clear or fuzzy · arrows, E, A/D</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 10a5 5 0 1 1 10 0c0 3-2.5 4-3 6.5A3 3 0 0 1 9 18M10 10a2 2 0 1 1 4 0c0 1.2-1 1.8-1.8 2.4"/></svg><kbd>Gossip</kbd><span>Clues, never cards: a note under whoever it’s about, often the wrong one · ask as often as you like, till they’ve nothing new · each time, they find you a bit weirder</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Weird</kbd><span>All anyone holds about you · Chat, a good day’s work and being proven right bring it down · the book counts who thinks you’re mad: three at 06:00 and the clinic writes</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Rummage</kbd><span>Feel something in there? Open it up before it settles · back shelves hide a trap, a flashlight, pills</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 17h18M5 17l1.5-6 2 4 2-6 1.5 5 1.5-5 2 6 2-4L19 17M12 17v3"/></svg><kbd>THEIR things</kbd><span>Pick them up: a Home card, or trap bait. THEY hate seeing them on you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12h4l2-5 4 10 3-7 2 2h5"/></svg><kbd>Psychic bar</kbd><span>Full is a clear head · hatched end: as high as it can climb now · under 20 you can’t face anyone: no talking, no fighting, only shouting it at them</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards you show are spent · alone, it’s Attack</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4h3l7 4V6L6 10zM16.5 9.5a3.5 3.5 0 0 1 0 5M19 7a7 7 0 0 1 0 10"/></svg><kbd>Confront</kbd><span>In front of whoever’s in earshot: THEY lie, you show the card that breaks it, the crowd decides · cards stay on the board, only THEY can take one · alone, it’s Attack</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.8 1.8 0 0 1 3.6 0V11M10.6 10V6.5a1.8 1.8 0 0 1 3.6 0V10M14.2 10.5V7.5a1.8 1.8 0 0 1 3.6 0v6A7.5 7.5 0 0 1 10.3 21h-.6A5.7 5.7 0 0 1 4 15.3V13a2 2 0 0 1 3-1.7"/></svg><kbd>Space</kbd><span>Hit · a red patch on the ground is where a blow lands: step out of it. Hit IT while it stands there open and it goes down</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Beaten</kbd><span>Knock a true form down in front of people and it gives up · the FBI comes for it · alone, it dies and nobody saw</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
@@ -1282,7 +1285,7 @@ const EVIDENCE = {
   halfFrom: 4,                  // THEIR day from which a slipping face is clear on film by daylight too (before: at night only)
   // the arena: the crowd's lean runs −5 (with THEM) … +5 (with you), and starts from the room, held to −3 … +3
   lean: { min: -5, max: 5, startMin: -3, startMax: 3 },
-  start: { friend: 1, friendRel: 40, close: -1, closeRel: 40, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2, grudge: -1 },
+  start: { close: -1, closePairs: 8, witness: 2, bought: -1, psy40: -1, psy20: -2, mad: -1, trapped: 2 },
   rant: { stress: 80, p: 0.4 }, // Psychic 20 or less: this chance you rant before it starts. Instant Fail
   statements: 5,                // the testimony: one lie per frame, and one true line
   statementSecs: 6,             // real seconds each statement waits for a card
@@ -1293,15 +1296,15 @@ const EVIDENCE = {
   counter: { psy: 50, lose: -1, stress: 5, faced: -1, facedMins: 1440 },
   escapeAt: 3, escapeBlock: 1,  // the first time the lean reaches +3, THEY try to walk out; block it for +1
   bands: { total: 4, partial: 1, pfail: -1 },   // final lean: +4 up total success · +1…+3 partial · −1…0 partial fail · below: fail
-  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, rel: -30 },
-  fail: { sus: 15, rel: -10, madDays: 2 },
+  wrong: { innocent: -2, planted: -1, other: -1, aware: 20, sus: 30 },
+  fail: { sus: 15, madDays: 2 },
   pfail: { watchMins: 1440, sus: 5 },
-  success: { rel: 10, fearMins: 1440 },
+  success: { fearMins: 1440 },
   aware: { pfail: 15, fail: 25, wrong: 20, success: 15, privateKill: 30, hitNoChange: 10, lostFight: 10 },
   huntedNights: 2,              // nights THEY hunt you after you kill one of THEM where nobody saw
   fbiDelay: 25,                 // game minutes from giving up to the grey cars
-  come: { rel: 20, mins: 60 },  // "Come with me": anyone who likes you this much follows you for this long
-  saved: 25,                    // liking from a witness you stood guard for
+  come: { sus: 25, mins: 60 },  // "Come with me": anyone who finds you less weird than this follows you for this long
+  saved: 25,                    // suspicion off a witness you stood guard for
   tail: { every: 90, mins: 60, aware: 5 }, // hunted, by day: one of THEIR people tails you this long, then reports
   // the private way: hitting one of THEM
   hit: { sus: 15, aware: 10 },
@@ -1399,13 +1402,13 @@ const ODDITY_HOME = {
 };
 const ODDITY_TIC = ['just a nervous tic', 'bad eyes. Nothing else', 'an old injury. It plays up', 'too much coffee. That’s all'];
 const ODDITY_RUMOR = ['Someone saw {s} with one of THEM. At night.', '{s} was out by the bins at three. Talking to nobody.', 'They say {s} isn’t who they say they are.', 'Somebody saw {s} go down a manhole. Swear to God.'];
-const ODDITY_HEARD = ['Heard it at the diner. Everyone’s saying it.', 'I don’t know. Somebody said it. Forget I did.', 'That’s just talk. Nobody actually saw anything.'];
 
-// ── Pressing someone about THEM (play/oddities)
-const PRESS_SAW = ['I saw it. I SAW its face come off. {s}.', 'It was {s}. I watched it change. I’ll say it again.', 'You want to know? It was {s}. I was there.'];
-const PRESS_BOUGHT = ['{s} helped me out. That’s all.', 'I don’t know anything about {s}. Leave it.', '{s}’s been good to me. Why?'];
-const PRESS_VICTIM = ['I don’t remember. {s} was there, I think. Then nothing.', 'There’s a gap. An hour. {s} was the last face.', 'It’s all fog. {s}. Something about {s}.'];
-const PRESS_NONE = ['I don’t know anything.', 'About what?', 'You’re asking the wrong person.', 'Nothing. I’ve seen nothing.'];
+// ── Gossip that used to take pressing: a witness, someone bought, someone THEY got to (town/talk). Running dry.
+const GOSSIP_SAW = ['I saw {s} change. Its face came off. I SAW it.', 'It was {s}. I watched it change. Nobody believes me.', 'Don’t laugh. {s} turned into something. Right in front of me.'];
+const GOSSIP_BOUGHT = ['{s}? Salt of the earth. Helped me out when nobody else would.', 'You want to know who’s decent round here? {s}. That’s who.', '{s}’s been good to me. Better than good.'];
+const GOSSIP_LOST = ['I don’t remember last night. Any of it.', 'Last night’s gone. I woke up and it was just… gone.', 'Funny. I can’t remember last night. Not a thing.'];
+const TOLD_ALL = ['I’ve told you everything.', 'That’s all I know. Honest.', 'I’ve told you everything I’ve heard.'];
+const LENNY_TOLD = ['I’ve told you everything. Now go and LOOK.', 'That’s all I got today. Come back tomorrow.', 'You heard me. I’m not saying it twice.'];
 const COME_WITH = { yes: ['Sure. Lead the way.', 'Alright. Where are we going?', 'For an hour. Then I’m off.'], no: ['Not now.', 'I’m busy. Sorry.', 'Maybe later.'], bye: ['Right, I’m off.', 'That’s my hour. See you.', 'I’ve got to go.'] };
 
 // ── The confrontation (play/arena): THEY lie, a human tells the truth, and it all sounds the same
@@ -1498,7 +1501,7 @@ const ARENA_WHY = {
 };
 // under the crowd meter: why it started where it did ({w}: someone in the room)
 const ARENA_ROOM = {
-  witness: '{w} saw it', friend: '{w} likes you', close: '{w} is close to them', grudge: '{w} holds a grudge',
+  witness: '{w} saw it', close: '{w} is close to them',
   unwell: 'you look unwell', mad: 'they think you’re mad', trapped: 'it’s in your trap', // who's THEIRS stays unsaid
 };
 // what the town says afterwards, in the hours after ({s}: the accused, {p}: you)
@@ -10893,7 +10896,6 @@ function makeChar(def) {
     run: false,
     queue: [],
     engaged: null,
-    rel: def.rel || 0,
     sus: 0,
     danger: 0,
     dangerPeak: 0,
@@ -13281,7 +13283,6 @@ function accident() {
   let seen = 0;
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
-      n.rel -= 8;
       addSus(n, 8);
       seen++;
       ui.bubble(n, 'exclaim', 'speech', 3);
@@ -13351,7 +13352,6 @@ function breakdown() {
   );
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 8)) {
-      n.rel -= 5;
       addSus(n, 5);
       ui.bubble(n, 'question', 'speech', 3);
     }
@@ -13406,6 +13406,12 @@ function workLost() {
   audio.sting('awkward');
   gameOver('fired');
 }
+// a good day's work, at five: the people you work with find you a little less weird
+function goodDay() {
+  if (!isWorkday() || G.sickDay || G.workBar < 75 || G.over) return;
+  for (const n of suspects()) if (!n.gone && (n.plan || []).some((b) => b.a === 'work')) addSus(n, -6);
+  ui.note('work', 'A good day’s work', 'good');
+}
 function onTimeCross(t0, t1) {
   const cross = (m) => Math.floor((t1 - m) / 1440) > Math.floor((t0 - m) / 1440);
   if (cross(0)) newDay();
@@ -13427,6 +13433,7 @@ function onTimeCross(t0, t1) {
   if (cross(9 * 60) && isWorkday() && !G.sickDay && !playerAtDesk())
     ui.note('work', G.overtimeToday ? 'Overtime · it drains twice as fast' : 'Shift started', 'warn');
   if (cross(180) && dayNo() === G.gatherDay) gatheringOver();
+  if (cross(17 * 60)) goodDay();
   if (cross(17 * 60) && G.sickDay) G.sickDay = false;
   if (cross(22 * 60 + 50) && NPC.vic.onMap && NPC.vic.shown > 0.5) ui.say(NPC.vic, 'Closing up.', 3);
   for (const n of CHARS) if (n.plan) for (const b of n.plan) if (cross(b.s)) n.thinkCd = 0;
@@ -13448,7 +13455,6 @@ function newDay() {
   G.workWarned = false;
   G.workBar = Math.min(100, G.workBar + 15); // a night's sleep on it: Hale forgets a little
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
-  G.lennyToday = 0;
   G.momToday = false;
   G.mailToday = false;
   G.overtimeToday = false;
@@ -13960,7 +13966,6 @@ function doHabit(n) {
           a.dur = 1;
           ui.bubble(c, 'dots', 'speech', 2);
           addDanger(c, 5);
-          c.rel -= 2;
           return;
         }
         turn(c);
@@ -14007,7 +14012,6 @@ function secretTick(n, dt) {
   if (!G.started || s.done) return;
   if (!s.caught && s.t > 0.4 && npcSeesPlayer(n, 8)) {
     s.caught = true;
-    n.rel -= 6;
     addSus(n, 6);
     ui.bubble(n, 'exclaim', 'speech', 2.5);
     ui.say(n, pick(['You didn’t see this.', 'Don’t tell anyone.', '…Hi.']), 2.6);
@@ -14713,7 +14717,7 @@ STAGE_HOOKS.push((s) => {
     G.policeBought = true;
     const foe = suspects()
       .filter((n) => !n.isThem && !n.gone && !n.exposed && n.id !== 'lenny')
-      .sort((a, b) => b.rel - a.rel)[0];
+      .sort((a, b) => a.sus - b.sus)[0]; // whoever trusts you most
     if (foe && G.victims.length < 2) G.attackFoe = foe.id;
     setTimeout(() => ui.note('cart', 'Half of Pell’s shelves are empty', 'onto'), 4000);
   }
@@ -16578,8 +16582,8 @@ function tryBribe(n) {
       Math.hypot(o.x - n.x, o.z - n.z) < 12,
   );
   if (!near.length) return false;
-  // whoever already distrusts you; once THEY know you, whoever stands with you: your crowd turns
-  near.sort((a, b) => (G.aware >= EVIDENCE.frameAt[0] ? b.rel - a.rel : b.sus - a.sus));
+  // whoever already finds you weird; once THEY know you, whoever still trusts you: your crowd turns
+  near.sort((a, b) => (G.aware >= EVIDENCE.frameAt[0] ? a.sus - b.sus : b.sus - a.sus));
   const o = near[0];
   n.bribeDay = dayNo();
   const a = npcTalkAct(n, o, rand(4, 6));
@@ -19404,10 +19408,11 @@ function perceptionTick(dt) {
     }
   }
 }
-// at 06:00: three or more ordinary people at 60+ means Mom calls and a clinic letter comes; a second morning, the medics
+// the ordinary people who think you're mad: 60+ suspicion of you. The evidence book counts them.
+const thinkMad = () => suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= 60);
+// at 06:00: three of them means Mom calls and a clinic letter comes; still three the next morning, the medics
 function clinicCheck() {
-  const worried = suspects().filter((n) => !n.isThem && !n.exposed && !n.gone && n.sus >= 60);
-  if (worried.length + worried.filter((n) => bought(n) > 1).length < 3) {
+  if (thinkMad().length < 3) {
     G.clinicDay = 0;
     return;
   }
@@ -19451,7 +19456,6 @@ function struck(n) {
   audio.hx('thud', hxPan(n.x, n.z), 0.6);
   ui.float(n, F.hits + '', '');
   addSus(n, first ? 40 : 10);
-  n.rel -= first ? 25 : 8;
   if (first || F.hits === BRAWL.hard) echo('fight', { x: n.x, z: n.z, who: n.id });
   if (first && ear.length) protectAfter(n);
   for (const w of ear) onlook(w, n, F);
@@ -19973,7 +19977,6 @@ function roomWatch(c) {
         ui.bubble(owner, 'exclaim', 'speech', 3);
         ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
         addSus(owner, 30);
-        owner.rel -= 30;
         G.policeAt = G.policeAt || G.t + rand(8, 18);
         caution(owner, 'breakin');
         return;
@@ -19995,7 +19998,7 @@ function roomWatch(c) {
 function awkward(n, kind) {
   if (G.awkCd > 0) return;
   G.awkCd = 15;
-  n.rel -= 9;
+  addSus(n, 6);
   addStress(5);
   ui.bubble(n, 'exclaim', 'speech', 3);
   ui.say(
@@ -20087,24 +20090,76 @@ const tonightBusy = () =>
 const gatherEve = () => (dayNo() === G.gatherDay - 1 && hourF() >= 10) || (dayNo() === G.gatherDay && hourF() < 1.5);
 const fairGame = (s, n) =>
   s && s !== n && !s.gone && !s.slain && !s.exposed && s.def && !s.def.stranger && s.id !== 'lenny';
-function gossip(n) {
+// ── gossip: what people pass on. A clue, never evidence: it goes on the board as a note under whoever it's about, and
+// it often points the wrong way, because people talk about whoever looks odd and the ones THEY got to lie for THEM.
+// Each thing is told you once (the small talk and the loud blame once a day): nothing new, and they say so.
+const toldYou = (n, key) => {
+  const t = n.toldYou && n.toldYou[key];
+  return t != null && (key[0] !== '~' || t === dayNo());
+};
+function gossipLine(n) {
+  const fresh = (r) => r && r.text && !toldYou(n, r.key || r.text);
   if (n.wrongTalk > G.t) {
-    const l = pick(WRONG_TALK);
-    ui.say(n, l, 5);
-    addNote(n, '“' + l + '”', { by: n.id, quote: true });
-    return;
+    const r = { text: pick(WRONG_TALK), key: '~wrong', self: true };
+    if (fresh(r)) return r;
   }
+  for (const f of [sawTalk, paidTalk, lostTalk, fishTalk]) {
+    const r = f(n);
+    if (fresh(r)) return r;
+  }
+  const rum = tellRumour(n); // what's going round
+  if (rum) return Object.assign(rum, { key: 'rumour:' + rum.subj.id + ':' + rum.text });
   const liar = n.isThem || misled(n) || (bought(n) && chance(bought(n) > 1 ? 1 : 0.7));
-  n.recentG = n.recentG || [];
-  let r = null;
-  for (let k = 0; k < 5; k++) {
-    r = (liar ? lieTalk(n) : trueTalk(n)) || mundaneTalk(n);
-    if (!r || !n.recentG.includes(r.text)) break;
+  for (let k = 0; k < 6; k++) {
+    const r = (liar ? lieTalk(n) : trueTalk(n)) || mundaneTalk(n);
+    if (fresh(r)) return r;
   }
-  if (!r) return;
-  n.recentG.push(r.text);
-  if (n.recentG.length > 5) n.recentG.shift();
-  sayTalk(n, r);
+  return null;
+}
+function gossip(n) {
+  const r = gossipLine(n);
+  if (!r) {
+    ui.say(n, pick(TOLD_ALL), 3.5);
+    return false;
+  }
+  (n.toldYou = n.toldYou || {})[r.key || r.text] = r.key && r.key[0] === '~' ? dayNo() : G.t;
+  if (r.self) {
+    ui.say(n, r.text, 5);
+    addNote(n, '“' + r.text + '”', { by: n.id, quote: true });
+  } else sayTalk(n, r);
+  return true;
+}
+// what Press used to dig out, said of its own accord. Someone who saw one of THEM change says so, while it's fresh;
+// someone bought speaks well of whoever paid; someone THEY got to doesn't remember last night.
+function sawTalk(n) {
+  const m = backs(n) && them().find((x) => !x.slain && !x.exposed && sawRecently(n, x));
+  return m ? { text: pick(GOSSIP_SAW).replace(/\{s\}/g, m.short), subj: m, key: 'saw:' + m.id } : null;
+}
+function paidTalk(n) {
+  const payer = !n.isThem && bought(n) && G.boughtBy && NPC[G.boughtBy[n.id]];
+  return payer && !payer.slain
+    ? { text: pick(GOSSIP_BOUGHT).replace(/\{s\}/g, payer.short), subj: payer, key: 'paid:' + payer.id }
+    : null;
+}
+function lostTalk(n) {
+  const v = G.victimOf && G.victimOf[n.id];
+  return v && !n.isThem && G.t - v.at < 3 * 1440
+    ? { text: pick(GOSSIP_LOST), subj: n, key: 'lost:' + v.at, self: true }
+    : null;
+}
+// Vic at Pell's knows who buys fish (with the lizards in town): the buyers, and one ordinary customer
+function fishTalk(n) {
+  if (n.id !== 'vic' || n.isThem || G.faction !== 'lizards' || bought(n) || toldYou(n, '~fish') || chance(0.5))
+    return null;
+  const buyers = shuffle(
+    alive().concat(shuffle(suspects().filter((s) => !s.isThem && s.id !== 'vic' && !s.gone)).slice(0, 1)),
+  ).slice(0, 3);
+  for (const b of buyers) addNote(b, 'Buys fish at Pell’s.', { by: 'vic' });
+  return {
+    text: 'Fish? ' + buyers.map((b) => b.short).join(', ') + '. Every week. Raw, some of ’em.',
+    key: '~fish',
+    loud: true,
+  };
 }
 function sayTalk(n, r) {
   ui.say(n, r.text, 5);
@@ -20114,7 +20169,6 @@ function sayTalk(n, r) {
     r.subj.rumors++;
   }
   if (r.place || r.loud) hear(null, r.text, n.id);
-  if (r.loud && r.subj) rumourCard(r.subj, r.text, n); // said loud and sure: a fuzzy Contact card on whoever it's about
 }
 // what this person could pass on: things they saw done, or heard about from somebody who did
 function quirkTalk(n) {
@@ -20140,16 +20194,16 @@ function talkOfQ(n, c) {
   if (q === 'sneak') {
     const hb = G.habits[s.id],
       nx = habitNextAt(s);
-    return hb && nx ? { text: sneakLine(s, hb.spot, nx.at, nx.tmr), subj: s } : null;
+    return hb && nx ? { text: sneakLine(s, hb.spot, nx.at, nx.tmr), subj: s, key: 'q:' + c.key + ':' + dayNo() } : null;
   }
   if (q === 'pair') {
     const o = NPC[c.e.other];
     if (!o) return null;
     const text = pick(PAIR_ABOUT).replace('{a}', s.short).replace('{b}', o.short);
     noteOnce(o, '“' + text + '”', { by: n.id });
-    return { text, subj: s };
+    return { text, subj: s, key: 'q:' + c.key + ':' + dayNo() };
   }
-  return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place };
+  return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place, key: 'q:' + c.key + ':' + dayNo() };
 }
 function trueTalk(n) {
   const T = G.traits[n.id] || {},
@@ -20159,8 +20213,9 @@ function trueTalk(n) {
     opts.push([
       2.5,
       () => {
-        const l = echoLine(e, true);
-        return l ? { text: hear(e, l, n.id) } : null;
+        const l = echoLine(e, true),
+          s = e.who && NPC[e.who] && !NPC[e.who].def.stranger ? NPC[e.who] : null;
+        return l ? { text: hear(e, l, n.id), subj: s, key: 'echo:' + e.k + ':' + e.t } : null;
       },
     ]);
   const qs = quirkTalk(n);
@@ -20169,10 +20224,10 @@ function trueTalk(n) {
     opts.push([
       1,
       () => {
-        const s = pick(suspects().filter((x) => fairGame(x, n)));
-        return s ? { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true } : null;
+        const s = oddLooking(n);
+        return s ? { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true, key: '~blame:' + s.id } : null;
       },
-    ]); // the odd ones see things
+    ]); // the odd ones see things, and what they see is whoever looks odd
   opts.push([0.5, () => mundaneTalk(n)]);
   const f = wpick(opts);
   return (f && f()) || null;
@@ -20182,8 +20237,9 @@ function lieTalk(n) {
   const marks = suspects().filter((x) => fairGame(x, n) && !x.isThem);
   const s = pick(marks);
   if (!s) return null;
-  const r = Math.random();
-  if (r < (n.isThem ? 0.45 : 0.25)) return { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true };
+  const r = Math.random(),
+    key = '~lie:' + s.id;
+  if (r < (n.isThem ? 0.45 : 0.25)) return { text: pick(BLAME).replace(/\{s\}/g, s.short), subj: s, loud: true, key };
   if (r < 0.82) {
     // the same sort of thing anyone says: one of the mark's own habits, or one of THEIRS pinned on the mark
     const own = (G.quirks[s.id] || []).filter((q) => QUIRKS[q].who(s)),
@@ -20196,7 +20252,7 @@ function lieTalk(n) {
         : theirs.length
           ? pick(theirs)
           : pick(Object.keys(QUIRKS).filter((k) => QUIRKS[k].who(s)));
-    if (q) return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place };
+    if (q) return { text: quirkLine(s, q), subj: s, place: !!QUIRKS[q].place, key };
   }
   const hb = G.habits[s.id],
     nx = chance(0.4) && habitNextAt(s); // sometimes the real time, sometimes one that leads nowhere
@@ -20204,13 +20260,21 @@ function lieTalk(n) {
   return {
     text: sneakLine(s, hb && chance(0.5) ? hb.spot : pick(HABIT_SPOTS_FOR(s)), at, nx ? nx.tmr : tod() > 19 * 60),
     subj: s,
+    key,
   };
 }
 // nothing in it at all: who owes who, who microwaves fish
 function mundaneTalk(n) {
   const s = pick(suspects().filter((x) => fairGame(x, n)));
   if (!s) return null;
-  return { text: pick(RUMORS.mundane).replace('{s}', s.short), subj: s };
+  return { text: pick(RUMORS.mundane).replace('{s}', s.short), subj: s, key: '~small' };
+}
+// who people talk about: whoever looks odd. Someone with a secret of their own, or habits people notice, more often.
+function oddLooking(n) {
+  const opts = suspects()
+    .filter((x) => fairGame(x, n))
+    .map((x) => [1 + (G.odd && G.odd[x.id] ? 1.5 : 0) + 0.5 * (G.quirks[x.id] || []).length, x]);
+  return opts.length ? wpick(opts) : null;
 }
 
 // ── chat: about themselves. A third of it is nothing at all; the rest says something, never quite what.
@@ -20423,8 +20487,16 @@ function lennyHint() {
     if (G.leads.length > 6) G.leads.shift();
     return ui.say(NPC.lenny, 'Tonight. 1 a.m. Behind Pell’s. Don’t let ’em see you.', 5);
   }
-  const r = Math.random();
-  const line = G.lennyHint < 3 || r < 0.34 ? lennyTip() : r < 0.67 ? lennyWarn() : lennySaw() || lennyWarn();
+  // no limit on asking: once everything he has today is said, he says so
+  const said = G.lennyLines || (G.lennyLines = {});
+  let line = null;
+  for (let k = 0; k < 6 && !line; k++) {
+    const r = Math.random(),
+      l = G.lennyHint < 3 || r < 0.34 ? lennyTip() : r < 0.67 ? lennyWarn() : lennySaw() || lennyWarn();
+    if (l && said[l] !== dayNo()) line = l;
+  }
+  if (!line) return ui.say(NPC.lenny, pick(LENNY_TOLD), 4);
+  said[line] = dayNo();
   ui.say(NPC.lenny, line, 5.5);
 }
 // what Lenny keeps an eye on, every few minutes, from his bench: whoever's out of doors after five, and after dark
@@ -20972,8 +21044,7 @@ function planNight() {
 function attackTargets() {
   const out = [],
     P = PLAYER;
-  for (const s of suspects())
-    if (!s.isThem && !s.exposed && !s.gone && s.onMap && atHome(s)) out.push([s, 1 + Math.max(0, s.rel) / 20]);
+  for (const s of suspects()) if (!s.isThem && !s.exposed && !s.gone && s.onMap && atHome(s)) out.push([s, 1]);
   if (!theyOut()) {
     if (P.onMap && mayHuntYou()) out.push([P, 2 + G.aware / 40]);
     return out;
@@ -21345,14 +21416,14 @@ function nightTick(dt) {
     G.attack = null;
   }
 }
-// ───────────── company. Anyone who likes you enough comes with you for an hour, and stands in the crowd when you call
-// someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
+// ───────────── company. Anyone who doesn't find you weird comes with you for an hour, and stands in the crowd when you
+// call someone out (secretly THEM, or bought, they count against you). And THEY know who saw: at night THEY go after a
 // witness. Lizards buy them off, aliens wipe it out of their heads, the dead make sure. Be outside their door, and it's
 // you THEY meet.
 function resolveCome(n) {
   const F = G.follower && NPC[G.follower.id];
   if (F && F !== n) endFollow(F, true);
-  if (n.rel < EVIDENCE.come.rel || n.sus >= 60 || asleep(n) || n.fleeing) {
+  if (n.sus >= EVIDENCE.come.sus || asleep(n) || n.fleeing) {
     ui.say(n, pick(COME_WITH.no), 3);
     return;
   }
@@ -21468,7 +21539,8 @@ function recant(w, m) {
 function witnessSaved(id) {
   const w = NPC[id];
   if (!w || w.gone) return;
-  relFx(w, EVIDENCE.saved);
+  addSus(w, -EVIDENCE.saved); // you were there: whatever they thought of you, they don't now
+  ui.bubble(w, 'heart', 'speech', 1.8);
   delete G.recant[id];
   ui.note('people', w.short + ' · safe', 'good');
 }
@@ -22625,7 +22697,6 @@ function tamperSeen(o, a, k) {
     }
     if (n.exposed) continue;
     addSus(n, (own ? 2 : 1) * (k > 1 ? 11 : 3));
-    n.rel -= own ? (k > 1 ? 12 : 4) : k > 1 ? 4 : 1;
     if (k > 1 || own) {
       ui.bubble(n, 'exclaim', 'speech', 2.4);
       ui.say(
@@ -22673,7 +22744,6 @@ function rummageAct(o) {
       const r = roomAt(o.cx, o.cz),
         v = NPC.vic;
       if (r && r.bld === 'shop' && v.onMap && npcSeesPlayer(v, 8) && !v.isPlayer) {
-        v.rel -= 8;
         addSus(v, 4);
         ui.say(v, 'Staff only.', 2.5);
       }
@@ -23034,10 +23104,10 @@ function searchedHome(o) {
   if (n && !n.isPlayer && dashFrame(n, 'home')) ui.note('home', n.short + ' · nothing at home', '');
 }
 // ───────────── false cards. Most ordinary people carry one secret that makes one fuzzy card in one frame: an envelope in
-// the desk, a habit at a strange hour, a tic, a rumour. Once THEY know you, THEY frame people: a stash in an innocent's
-// things (the only false card that looks clear) and a rumour to go with it. Every false card has a truth behind it;
-// see the truth and the card turns grey.
-const ODD_FRAMES = ['home', 'habit', 'body', 'contact'];
+// the desk, a habit at a strange hour, a tic. Once THEY know you, THEY frame people: a stash in an innocent's things
+// (the only false card that looks clear). Talk is never a card: a rumour going round is only a note under the face it's
+// about. Every false card has a truth behind it; see the truth and the card turns grey.
+const ODD_FRAMES = ['home', 'habit', 'body'];
 // the things in a person's own home or desk you could put your hands in
 const ownThings = (n) =>
   OBJ.filter((o) => shakeable(o) && ownerOf(o) === n.id && !G.stashes.some((s) => s.obj === o.idx && !s.bagged));
@@ -23061,10 +23131,8 @@ function makeOddities() {
         moveAt: 1e12,
       });
     } else if (f === 'body') od.k = pick(ODDITY_TIC);
-    else if (f === 'contact') {
-      od.k = 'just talk. Nobody saw anything';
-      G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
-    }
+    // people talk about whoever looks odd: half of them have a rumour going round from THEIR day 2
+    if (chance(0.5)) G.rumours.push({ about: n.id, line: pick(ODDITY_RUMOR), from: 2, innocent: true });
     G.odd[n.id] = od;
   }
 }
@@ -23086,7 +23154,7 @@ function oddTruth(n) {
     const hb = G.habits[n.id];
     return 'just ' + secretFor(n, hb ? hb.spot : 'alley').note;
   }
-  return od.k;
+  return od.k; // body: the tic
 }
 // a normal person's private secret, caught on film: the print shows exactly what they were up to. Habit is clean.
 function secretSeen(n, spot) {
@@ -23119,126 +23187,20 @@ function watchedHuman(n) {
   if (greyFrame(n, 'body', { what: 'Just ' + t, pr: { kind: 'plain', who: n.id, what: n.short, icon: 'people' } }))
     ui.note('face', n.short + ' · ' + t, 'good');
 }
-// ── words: rumours become fuzzy Contact cards on whoever they're about
-// loud, sure talk about someone ("I saw X with glowing eyes"). About an ordinary person it's THEIR doing.
-function rumourCard(s, text, teller) {
-  if (!s || s.def.never || s.exposed || s.slain || s.gone || !G.started) return null;
-  const liar = teller && (teller.isThem || bought(teller) || misled(teller));
-  const p = addProof({
-    frame: 'contact',
-    q: 'fuzzy',
-    true: s.isThem ? s.id : liar && teller.isThem ? teller.id : null,
-    pin: s.id,
-    auto: true,
-    src: 'word',
-    rumour: true,
-    planted: !s.isThem || undefined,
-    teller: teller ? teller.id : null,
-    what: '“' + text + '”',
-    where: teller ? teller.short : '',
-    pr: { kind: 'plain', who: teller ? teller.id : s.id, what: teller ? teller.short : s.short, icon: 'chat' },
-  });
-  if (p.kept) proofCard(p);
-  return p;
-}
-// a rumour going round: an innocent's (from THEIR day 2), or the one THEY started about the person THEY framed
+// a rumour going round: about someone who looks odd (from THEIR day 2), or the one THEY started about the person THEY
+// framed. Only words: a note under the face it's about, never a card. Each rumour is passed on once.
 function tellRumour(n) {
   const r = (G.rumours || []).find(
     (x) => !x.told && x.about !== n.id && dayNo() >= (x.from || 1) && NPC[x.about] && !NPC[x.about].gone,
   );
-  if (!r || !chance(0.5)) return false;
-  const s = NPC[r.about],
-    line = r.line.replace(/\{s\}/g, s.short);
+  if (!r || !chance(0.5)) return null;
+  const s = NPC[r.about];
   r.told = true;
-  ui.say(n, line, 5);
-  hear(null, line, n.id);
-  noteOnce(s, '“' + line + '”', { by: n.id });
-  const p = r.innocent
-    ? innocentCard(s, {
-        src: 'word',
-        rumour: true,
-        teller: n.id,
-        what: '“' + line + '”',
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      })
-    : addProof({
-        frame: 'contact',
-        q: 'fuzzy',
-        true: r.by,
-        pin: s.id,
-        auto: true,
-        src: 'word',
-        rumour: true,
-        planted: true,
-        teller: n.id,
-        what: '“' + line + '”',
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      });
-  if (p && p.kept) proofCard(p);
-  return true;
+  return { text: r.line.replace(/\{s\}/g, s.short), subj: s, place: true };
 }
-// ── Press: lean on somebody about what they know. A witness tells you straight; a bought one covers, and tells THEM.
+// someone THEY got to: who did it, and when. They don't remember it, but they can tell you they don't.
 function markVictim(v, by) {
   if (v && by) (G.victimOf || (G.victimOf = {}))[v.id] = { by, at: G.t };
-}
-function contactCard(n, m, q, what, extra) {
-  return addProof(
-    Object.assign(
-      {
-        frame: 'contact',
-        q,
-        true: m.id,
-        auto: true,
-        src: 'word',
-        what,
-        where: n.short,
-        pr: { kind: 'plain', who: n.id, what: n.short, icon: 'chat' },
-      },
-      extra,
-    ),
-  );
-}
-function resolvePress(n) {
-  n.pressDay = dayNo();
-  addSus(n, 8);
-  n.rel -= 3;
-  const say = (pool, m) => ui.say(n, pick(pool).replace(/\{s\}/g, m ? m.short : ''), 4.5);
-  // a rumour they told you about an ordinary person: they own up it was only talk
-  const told = !n.isThem && !bought(n) && G.proofs.find((p) => p.rumour && p.teller === n.id && !p.grey && p.planted);
-  if (told) {
-    say(ODDITY_HEARD);
-    flipCard(told, { what: 'just talk' });
-    ui.note('mouth', NPC[told.pin].short + ' · just talk', 'good');
-    return;
-  }
-  // they saw one of THEM change, and they're willing: a clear Contact card, while they still remember
-  const sawIt = backs(n) && them().find((m) => !m.slain && !m.exposed && sawRecently(n, m));
-  if (sawIt) {
-    say(PRESS_SAW, sawIt);
-    proofCard(contactCard(n, sawIt, 'clear', n.short + ' saw it change', { witness: n.id }));
-    return;
-  }
-  // bought: they cover for whoever paid. And whoever paid hears you asked.
-  const payer = bought(n) && G.boughtBy && NPC[G.boughtBy[n.id]];
-  if (payer && !payer.slain) {
-    say(PRESS_BOUGHT, payer);
-    proofCard(contactCard(n, payer, 'fuzzy', n.short + ' won’t hear a word against ' + payer.short));
-    bookNight(payer);
-    addDanger(payer, 15);
-    return;
-  }
-  // something THEY did to them: a gap, a face
-  const v = G.victimOf && G.victimOf[n.id],
-    m = v && NPC[v.by];
-  if (m && !m.slain && !m.exposed && G.t - v.at < 3 * 1440) {
-    say(PRESS_VICTIM, m);
-    proofCard(contactCard(n, m, 'fuzzy', n.short + ' remembers ' + m.short + '. Barely.'));
-    return;
-  }
-  say(PRESS_NONE);
-  ui.float(n, 'Nothing', '');
 }
 // ── THEIR frame-ups: from awareness 40 THEY pick one human and plant something of THEIRS in their things, and start a
 // rumour. From 70, a second. Catch THEM putting it there and that's a clear Habit card on the one who did it.
@@ -23319,12 +23281,6 @@ function plantStash(F) {
     out: false,
     moveAt: 1e12,
   });
-}
-// in the arena: you show a card on an ordinary person and they tell the truth. Now the town knows it.
-function learnFramed(p) {
-  flipCard(p, { what: 'planted' });
-  const F = (G.framed || []).find((f) => f.id === p.pin);
-  if (F) F.known = true;
 }
 // ───────────── traps: steel jaws from Pell's. Whatever steps in stays put, for a while.
 // Bait it with something THEY lost and its owner comes looking. Unbaited, it takes whoever walks by.
@@ -23438,7 +23394,6 @@ function springTrap(tr, c) {
   ui.bubble(c, 'exclaim', 'speech', 3);
   if (!c.def.stranger) {
     c.limpDay = dayNo(G.t + 60);
-    c.rel -= 15;
     addSus(c, 10);
   }
   enqueue(
@@ -23592,7 +23547,6 @@ function knockAct(o, owner) {
       }
       if (owner.id === 'agnes') {
         addStress(-4);
-        owner.rel += 2;
         return ui.note(
           'knock',
           pick(['Agnes: “Busy, dear.”', 'Agnes: “Eat something.”', 'Agnes: “Did you hear that?”']),
@@ -24084,7 +24038,6 @@ function deskWork(slack) {
         const h = NPC.hale;
         if (h.onMap && npcSeesPlayer(h, 5)) {
           G.slackCaught = true;
-          h.rel -= 6;
           addSus(h, 4);
           ui.say(h, 'Is that soup?', 2.5);
         }
@@ -24150,18 +24103,12 @@ function digResult(o) {
 }
 
 // ── people
-// success depends on the relationship, their suspicion of you, your stress and the tinfoil hat
+// a chat goes well unless they find you weird: from 60 it works far less often. The tinfoil hat doesn't help.
 function socialChance(n) {
-  const st = PLAYER.needs.stress;
-  let p = 0.6 + n.rel / 220 - n.sus / 170 - Math.max(0, st - 40) / 180;
+  let p = 0.85 - n.sus / 200 - (n.sus >= 60 ? 0.2 : 0);
   if (G.inv.foilOn) p -= 0.28;
   return clamp(p, 0.08, 0.95);
 }
-const relFx = (n, v) => {
-  n.rel += v;
-  ui.bubble(n, v > 0 ? 'heart' : 'frown', 'speech', 1.8);
-  ui.float(n, v > 0 ? '+' : '−', v > 0 ? 'good' : 'bad');
-};
 const PLACE_SELF = {
   closet: 'I hide in the supply closet when Hale yells.',
   wc: 'The restroom’s the only quiet place in there.',
@@ -24177,29 +24124,19 @@ function resolveChat(n, win) {
     addSus(n, win ? -4 : 0);
     return;
   }
-  relFx(n, win ? 4 : -1);
+  // it calms someone who finds you weird: that's all anyone holds about you
   addSus(n, win ? -8 : -2);
-  if (win) addStress(-6);
+  if (win) {
+    addStress(-6);
+    if (n.sus < 60) ui.float(n, 'calmer', 'good');
+  }
   ui.say(n, n.id === 'lenny' ? pick(LENNY_RAMBLE) : chatLine(n), 4.5);
 }
+// what's going round. Words are only clues: a note under whoever they're about. Ask as often as you like; when
+// they've nothing new, they say so. Every time you ask, they (and whoever's listening) find you a bit weirder.
 function resolveGossip(n) {
-  n.gossipN = n.gossipDay === dayNo() ? (n.gossipN || 1) + 1 : 1;
-  n.gossipDay = dayNo();
-  n.rel -= 1;
   addSus(n, 8);
   for (const b of earshot(n)) addSus(b, 4);
-  if (n.id === 'vic' && !n.isThem && G.faction === 'lizards' && chance(0.5) && !bought(n)) {
-    // who buys fish
-    const buyers = shuffle(
-      alive().concat(shuffle(suspects().filter((s) => !s.isThem && s.id !== 'vic' && !s.gone)).slice(0, 1)),
-    ).slice(0, 3);
-    const line = 'Fish? ' + buyers.map((b) => b.short).join(', ') + '. Every week. Raw, some of ’em.';
-    ui.say(n, line, 5);
-    for (const b of buyers) addNote(b, 'Buys fish at Pell’s.', { by: 'vic' });
-    hear(null, line, 'vic');
-    return;
-  }
-  if (tellRumour(n)) return; // what's going round
   gossip(n);
 }
 // ───────────── what follows a confrontation (play/arena): giving up, the FBI, and the talk options that go with it
@@ -24306,7 +24243,6 @@ function fbiTake(n) {
 const SOC = {
   chat: { label: 'Chat', icon: 'chat', dur: 10, mid: true, fx: {}, res: (n, w) => resolveChat(n, w) },
   gossip: { label: 'Gossip', icon: 'ear', dur: 9, mid: true, fx: {}, res: (n) => resolveGossip(n) },
-  press: { label: 'Press', icon: 'ear', dur: 6, mid: true, fx: { stress: 3 }, res: (n) => resolvePress(n) },
   come: { label: 'Come with me', icon: 'walk', dur: 2, fx: {}, res: (n) => resolveCome(n) },
   lenny: {
     label: 'Theories',
@@ -24314,11 +24250,7 @@ const SOC = {
     dur: 15,
     mid: true,
     fx: { stress: 10 },
-    res: (n) => {
-      G.lennyToday++;
-      n.rel += 3;
-      lennyHint();
-    },
+    res: () => lennyHint(),
   },
   feed: {
     label: 'Give meal',
@@ -24327,7 +24259,7 @@ const SOC = {
     fx: { stress: -8 },
     res: (n) => {
       G.inv.meal--;
-      relFx(n, 15);
+      ui.bubble(n, 'heart', 'speech', 1.8);
       lennyHint();
     },
   },
@@ -24365,7 +24297,6 @@ function observeAct(n) {
       c.tdir = Math.atan2(n.x - c.x, n.z - c.z);
       if (!a.noticed && npcSeesPlayer(n, 7) && a.t > 2) {
         a.noticed = true;
-        n.rel -= 3;
         addSus(n, 6);
         ui.bubble(n, 'question', 'speech', 2);
       }
@@ -24373,8 +24304,7 @@ function observeAct(n) {
       if (!n.onMap || n.shown < 0.3) a.cancel = true;
     },
     onEnd: (c, a, ok) => {
-      if (!ok) return;
-      n.watchDay = dayNo();
+      if (!ok) return; // as often as you like: once you've seen all there is, there's nothing new
       if (!n.isThem) watchedHuman(n);
       G.qwatch = G.qwatch || {};
       const qs = ((G.quirks && G.quirks[n.id]) || []).filter((q) => !G.qwatch[n.id + ':' + q]);
@@ -24390,7 +24320,8 @@ function observeAct(n) {
   });
 }
 // ───────────── the confrontation. A short battle, 45 to 75 seconds: THEY lie, you show the card that breaks the lie, and
-// the crowd decides. You bring every card you hold on them; whatever you show is spent. The town is paused throughout.
+// the crowd decides. You bring every card you hold on them; a card is never spent, it stays on the board. The town is
+// paused throughout.
 //   1 Opening · 2 Testimony: five statements, show a card or let it pass · 3 "How well do you know me?" · 4 Counterattack
 //   · 5 Escape attempt (THEM only, the first time the lean reaches +3)
 // The room sets where the crowd's lean starts (−3…+3); where it ends decides it (EVIDENCE.bands). The wrong person always fails.
@@ -24442,9 +24373,7 @@ function arenaRoom(n) {
       add(E.witness, 'witness', w);
       wits.push(w);
     }
-    if (w.rel >= E.friendRel) add(E.friend, 'friend', w);
     if (closeTo(w, n)) add(E.close, 'close', w);
-    if (Object.keys(G.grudge).some((id) => id !== w.id && closeTo(w, NPC[id] || w))) add(E.grudge, 'grudge', w);
   }
   const st = PLAYER.needs.stress;
   if (st > 80) add(E.psy20, 'unwell');
@@ -24574,10 +24503,8 @@ function letPass(A) {
   }
   nextStatement(A);
 }
-// the cards you show are gone, whatever happens
+// a card shown is out of your hand for this confrontation, and still on the board after it: cards are never spent
 function spend(A, p) {
-  const i = G.proofs.indexOf(p);
-  if (i >= 0) G.proofs.splice(i, 1);
   A.hand.splice(A.hand.indexOf(p), 1);
   A.spent.push(p);
   A.sel = clamp(A.sel, 0, Math.max(0, A.hand.length - 1));
@@ -24809,7 +24736,6 @@ function arenaOutcome(A) {
     ear = A.ear.filter((w) => w.onMap),
     heed = ear.filter((w) => !w.isThem && !w.def.stranger),
     W = EVIDENCE.aware;
-  G.cfDay[n.id] = dayNo();
   n.confronted = true;
   // another of THEM in the crowd took note of you
   if (res !== 'total') for (const m of A.hidden) if (m !== n) bookNight(m);
@@ -24818,9 +24744,7 @@ function arenaOutcome(A) {
   if (res === 'total') {
     // it drops the act: on its knees, the crowd holding it, the grey cars on the way
     n.cfOk = G.t;
-    surrender(n, 'confront');
-    for (const w of suspects()) if (!w.isThem) w.rel += EVIDENCE.success.rel; // they believe you now
-    G.hintsUntil = G.t + 1440;
+    surrender(n, 'confront'); // proven right in public: nobody thinks you're mad now (surrender)
     return;
   }
   if (res === 'partial') {
@@ -24857,15 +24781,13 @@ function arenaOutcome(A) {
   // a fail: you look mad. The wrong person: a scandal too.
   for (const w of heed) {
     addSus(w, EVIDENCE.fail.sus);
-    relFx(w, EVIDENCE.fail.rel);
     ui.bubble(w, 'laugh', 'speech', 2.5);
   }
   G.madUntil = G.t + EVIDENCE.fail.madDays * 1440;
   G.tearTonight = (G.tearTonight || 0) + 1;
   if (res === 'wrong') {
     bookAware(W.wrong);
-    n.rel += EVIDENCE.wrong.rel;
-    G.grudge[n.id] = 1;
+    addSus(n, EVIDENCE.wrong.sus);
     addStress(5);
   } else {
     bookAware(W.fail);
@@ -25297,7 +25219,6 @@ function photoSeen(subj) {
     if (n === subj) {
       if (face) n.faceShot = G.t; // a lens in their face: they'll bring it up if you ever call them out
       addSus(n, face ? 10 : 4);
-      n.rel -= face ? 3 : 1;
       ui.bubble(n, face ? 'exclaim' : 'question', 'speech', 2);
       if (
         n.isThem &&
@@ -25460,7 +25381,6 @@ function objMenu(o) {
                   );
                   if (w.length) {
                     const n = pick(w);
-                    n.rel -= 12;
                     addSus(n, 5);
                     ui.say(n, 'My soup!', 2.5);
                   }
@@ -25889,12 +25809,7 @@ function menuForChar(n) {
   // calling someone out: it needs ears. Alone with them, there's only the other way.
   const cfOpt = () =>
     earshot(n).length
-      ? opt(
-          'Confront',
-          'confront',
-          () => openConfront(n),
-          G.cfDay[n.id] === dayNo() ? 'Done today' : n.sus >= 85 ? 'Not listening' : null,
-        )
+      ? opt('Confront', 'confront', () => openConfront(n), n.sus >= 85 ? 'Not listening' : null)
       : opt('Attack', 'fist', () => playerMelee(n));
   if (tooShaken())
     return {
@@ -25944,7 +25859,7 @@ function menuForChar(n) {
   if (n.exposed && !n.slain) {
     // everyone knows what it is: there's nothing left to say
     ops.push(hit(n.fleeing ? 'Catch' : 'Fight', n.fleeing ? 'walk' : 'fist'));
-    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n)), n.watchDay === dayNo() ? 'Done today' : null));
+    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
     return {
       title: n.name,
       img: getPortrait(n),
@@ -25958,21 +25873,21 @@ function menuForChar(n) {
       ops,
     };
   }
-  // slots stay put: A Chat · D Ask… (Gossip, Press, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch
+  // slots stay put: A Chat · D Ask… (Gossip, Come with me) · W Confront (Attack when you're alone; Catch) · S Watch.
+  // No daily limits: ask again and you're told there's nothing new.
   ops.push(opt('Chat', 'chat', T('chat')));
   if (n.id === 'lenny') {
-    ops.push(opt('Theories', 'ear', T('lenny'), G.lennyToday >= 2 ? 'Talked out' : null));
+    ops.push(opt('Theories', 'ear', T('lenny')));
     ops.push(opt('Give meal', 'gift', T('feed'), G.inv.meal > 0 ? null : 'No meal'));
   } else {
     ops.push(opt('Ask…', 'ear', () => openMenu(askMenu(n), UI.menuX, UI.menuY, { char: n })));
     if (n.fleeing) ops.push(hit('Catch', 'walk'));
     else ops.push(cfOpt());
-    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n)), n.watchDay === dayNo() ? 'Done today' : null));
+    ops.push(opt('Watch', 'eye', () => enqueue(PLAYER, observeAct(n))));
   }
+  // how weird they find you is in the evidence book, not over their head
   return {
     title: n.name,
-    rel: n.rel,
-    sus: n.id === 'lenny' ? null : n.sus,
     img: getPortrait(n),
     sub: G.cleared[n.id]
       ? 'Cleared'
@@ -25983,41 +25898,23 @@ function menuForChar(n) {
     ops,
   };
 }
-// the second ring: what you ask them. Gossip (what's going round), Press (what they know about THEM), Come with me.
+// the second ring: what you ask them. Gossip (what's going round: clues, never cards), Come with me.
 function askMenu(n) {
   const T = (k) => () => enqueue(PLAYER, talkAct(n, k)),
-    st = PLAYER.needs.stress,
-    many = G.hintsUntil > G.t ? 3 : 2; // after a public win people tell you more
+    st = PLAYER.needs.stress;
   return {
     title: n.name,
-    rel: n.rel,
-    sus: n.sus,
     img: getPortrait(n),
     ops: [
-      opt(
-        'Gossip',
-        'ear',
-        T('gossip'),
-        st >= 60
-          ? 'Too shaken'
-          : n.sus >= 60
-            ? 'Won’t gossip with you'
-            : n.gossipDay === dayNo() && (n.gossipN || 1) >= many
-              ? 'Done today'
-              : null,
-      ),
-      opt('Press', 'search', T('press'), st >= 60 ? 'Too shaken' : n.pressDay === dayNo() ? 'Done today' : null),
+      opt('Gossip', 'ear', T('gossip'), st >= 60 ? 'Too shaken' : n.sus >= 60 ? 'Won’t gossip with you' : null),
       opt(
         'Come with me',
         'walk',
         T('come'),
-        G.follower && G.follower.id === n.id ? 'With you' : n.rel < EVIDENCE.come.rel ? 'Not close enough' : null,
+        G.follower && G.follower.id === n.id ? 'With you' : n.sus >= EVIDENCE.come.sus ? 'Finds you weird' : null,
       ),
     ],
   };
-}
-function relWord(r) {
-  return r > 40 ? 'Friend' : r > 15 ? 'Friendly' : r > -10 ? 'Acquaintance' : r > -35 ? 'Wary' : 'Hostile';
 }
 const ITEM_NAMES = {
   skin: 'Shed skin',
@@ -27618,12 +27515,6 @@ function updateHud(dtReal) {
   }
 }
 // ───────────── pie menu
-function hearts(rel) {
-  const n = clamp(Math.round((rel + 50) / 20), 0, 5);
-  let s = '';
-  for (let i = 0; i < 5; i++) s += '<i class="' + (i < n ? 'on' : '') + '"></i>';
-  return '<span class="hearts">' + s + '</span>';
-}
 // the directional menu: up to four actions on W A S D (or the mouse). Two sit left and right; a third goes on top; a fourth below.
 // Slots fill in that order, so an action keeps its key as a menu grows: A, D, W, S.
 const MENU_KEYS = ['a', 'd', 'w', 's'];
@@ -27638,16 +27529,6 @@ function openMenu(m, x, y, anchor) {
       ? '<span class="pcf"><img alt=""></span>'
       : '<span class="pcf"><span class="pci">' + artIcon(m.icon || 'dots') + '</span></span>') +
     '<b></b>' +
-    (m.rel != null ? hearts(m.rel) : '') +
-    (m.sus != null && m.sus >= 5
-      ? '<span class="psus' +
-        (m.sus >= 60 ? ' hi' : '') +
-        '" data-tip="Suspicion of you">' +
-        svgIcon('eye') +
-        '<span><i style="width:' +
-        Math.round(m.sus) +
-        '%"></i></span></span>'
-      : '') +
     (m.sub ? '<span class="psub"></span>' : '') +
     '</div>';
   if (m.img) pie.querySelector('img').src = m.img;
@@ -27788,6 +27669,18 @@ function drawTop() {
     )
     .join('');
   fc.dataset.tip = G.factionKnown ? 'What THEY are' : 'Catch one in the act';
+  // how many ordinary people think you're mad: three of them at 06:00 and the clinic writes
+  const mad = $('#bd-mad'),
+    nMad = thinkMad().length;
+  if (mad) {
+    mad.className = nMad >= 3 ? 's2' : nMad >= 1 ? 's1' : '';
+    mad.innerHTML = svgIcon('eye') + '<span>Think you’re mad</span><b></b>';
+    mad.querySelector('b').textContent = Math.min(nMad, 3) + ' of 3';
+    mad.dataset.tip =
+      nMad >= 3
+        ? 'Three people think you’re mad. At 06:00, Mom calls and the clinic writes'
+        : 'People who find you weird enough (60+) to call your mother. Three, and the clinic writes';
+  }
   const eye = $('#bd-eye'),
     es = eyeState();
   eye.className = 's' + es;
@@ -28043,7 +27936,6 @@ function showSuspect(n) {
     '<button class="x" id="bd-dx" aria-label="Back">' +
     svgIcon('x') +
     '</button><div class="sd-head"><img alt=""><div><b></b><span class="sd-role"></span>' +
-    hearts(n.rel) +
     (n.id !== 'lenny'
       ? '<span class="psus big' +
         (n.sus >= 60 ? ' hi' : '') +
@@ -34097,8 +33989,7 @@ function encThank(E, v, m, idx) {
     );
     return;
   }
-  v.rel = Math.min(100, v.rel + 18);
-  v.sus = Math.max(0, v.sus - 40);
+  v.sus = Math.max(0, v.sus - 40); // you pulled them out of it: you're not the mad one
   v.frightUntil = G.t + 1440;
   ui.say(v, pick(['What… what was I doing?', 'You — you pulled me out of that.', 'That THING. It had me.']), 3);
   if (m && E.phase === 'gather') {
@@ -41300,7 +41191,6 @@ function freshG(start) {
     items: [],
     leads: [],
     lennyHint: 0,
-    lennyToday: 0,
     momToday: false,
     momWeek: false,
     mailToday: false,
@@ -41351,9 +41241,7 @@ function freshG(start) {
     rumours: [], // what's going round: { about, line, from, innocent | by, told }
     victimOf: {}, // person id → { by, at }: the last of THEM to do something to them
     recant: {}, // witnesses THEY got to: bribed, wiped or killed
-    cfDay: {}, // suspect id → the day you last confronted them
     madUntil: 0, // the town called you mad: −1 lean until then
-    grudge: {}, // suspect id → the accused you wronged: their friends lean against you
     watchedUntil: {}, // member id → doubted in public: no business in public places until then
     fearUntil: 0, // after a public change: people go home early
     huntNights: 0, // nights THEY still hunt you after a private kill
@@ -41361,7 +41249,6 @@ function freshG(start) {
     follower: null, // { id, until }: someone who came with you
     awareExtra: 0, // awareness booked for the next 06:00 by what you did (see EVIDENCE.aware)
     tearTonight: 0, // cards THEY tear from your flat tonight
-    hintsUntil: 0, // after a total success people share more
     witVisit: null, // { w, m, at }: tonight one of THEM goes after a witness
     tail: null, // { id, until, saw }: one of THEIR people a few steps behind you, by day
     tailNext: 0,
@@ -41556,7 +41443,6 @@ function saveGame() {
       Object.values(NPC).map((n) => [
         n.id,
         {
-          rel: n.rel,
           sus: n.sus,
           rumors: n.rumors,
           notes: n.notes,
@@ -41567,9 +41453,7 @@ function saveGame() {
           huntAt: n.huntAt || -1e9,
           baitDay: n.baitDay || 0,
           seenRoom: n.seenRoom,
-          gossipDay: n.gossipDay,
-          gossipN: n.gossipN || 0,
-          watchDay: n.watchDay,
+          toldYou: n.toldYou || {},
           microN: n.microN,
           remarkDay: n.remarkDay,
           confronted: !!n.confronted,

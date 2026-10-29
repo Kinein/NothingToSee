@@ -302,8 +302,7 @@ function encThank(E, v, m, idx) {
     );
     return;
   }
-  v.rel = Math.min(100, v.rel + 18);
-  v.sus = Math.max(0, v.sus - 40);
+  v.sus = Math.max(0, v.sus - 40); // you pulled them out of it: you're not the mad one
   v.frightUntil = G.t + 1440;
   ui.say(v, pick(['What… what was I doing?', 'You — you pulled me out of that.', 'That THING. It had me.']), 3);
   if (m && E.phase === 'gather') {
