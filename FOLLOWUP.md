@@ -55,7 +55,11 @@ straight away when start and goal are in different regions. Careful: `walkable` 
   Leave them unless you need to work inside.
 
 ### 5. Evidence, confrontation and hunts: tuning and loose ends
-The four-frame evidence book, false cards, the confrontation (✓/✗, replacing the arena) and the fights-by-situation rules are in
+docs/DESIGN.md (talking, evidence, Psychic and the confrontation) is built, v1.11–v1.17. What it asks for that isn't
+built yet is listed at the end of this section.
+
+The four-frame evidence book (Home, Habit, Body, Biography), innocent oddities, the confrontation (✓/✗, replacing the
+arena) and the fights-by-situation rules are in
 (numbers in `EVIDENCE`, js/data/tuning.js). Still to do:
 - **Playtest the numbers.** The spec's target win chances for fights (private lizard/dead 35–45%, alien 45–55%,
   public with crowd help 70–80%, trapped 85%+) have only been checked by scripted runs, not by hand. Tune

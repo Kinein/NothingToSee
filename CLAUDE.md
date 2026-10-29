@@ -121,3 +121,5 @@ A new field on `G` belongs in `freshG` (game/state.js) with its "unset" value.
 - Randomness that isn't part of the simulation (film grain etc.) must not use `Math.random`, or the seeded
   determinism check breaks.
 - `README.md` has the long version of the layout; `FOLLOWUP.md` lists open tasks.
+- `docs/DESIGN.md` is the agreed redesign of talking, evidence, Psychic and the confrontation, built in v1.11–v1.17.
+  Read it before changing any of those; FOLLOWUP.md lists the parts of it that aren't built yet.
