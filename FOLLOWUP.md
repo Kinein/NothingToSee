@@ -55,6 +55,10 @@ straight away when start and goal are in different regions. Careful: `walkable` 
   Leave them unless you need to work inside.
 
 ### 5. Evidence, confrontation and hunts: tuning and loose ends
+**Mostly superseded by docs/DESIGN.md**, which replaces the arena, clear and fuzzy cards, the Contact frame and the
+Whose? tray. Don't tune those; build the redesign instead (its last sections give the order and the modules). The
+notes below still apply to the fights and hunts.
+
 The four-frame evidence book, false cards, the confrontation arena and the fights-by-situation rules are in
 (numbers in `EVIDENCE`, js/data/tuning.js). Still to do:
 - **Playtest the numbers.** The spec's target win chances (private lizard/dead 35–45%, alien 45–55%, public with

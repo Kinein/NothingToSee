@@ -27,6 +27,7 @@ MAP.md                 per module: what it defines, what it uses, who uses it   
 SYMBOLS.tsv            every top-level name → module and line: grep -w name SYMBOLS.tsv             (generated)
 docs/STATE.md          every field of the game state G: start value, who writes it, who reads it    (generated)
 docs/PERFORMANCE.md    what makes frames slow, what was done about it, how to measure
+docs/DESIGN.md         the agreed redesign of talking, evidence, Psychic and the confrontation (not built yet)
 tools/                 check.py, map.js, state.js, split.js, move.js, smoke.py, regress.py, profile.py, playtest.py, allocs.py
 FOLLOWUP.md            what's left to do, and the rules for doing it
 CLAUDE.md              short guide for AI assistants: rules and where to change what
