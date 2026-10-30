@@ -380,6 +380,7 @@ function protectAfter(n) {
 function policeTick() {
   const P = PLAYER,
     off = NPC.officer;
+  if (wantedTick() || ONRUN.on) return; // wanted: no more talking (town/on-the-run)
   if (!G.policeAt || G.t < G.policeAt || !off || ARREST.on) return;
   if (!P.onMap || off.onMap) {
     if (!P.onMap) G.policeAt = 0;
@@ -404,6 +405,7 @@ function policeTick() {
 function policeSaw(off) {
   const P = PLAYER;
   if (!off.onMap || ARREST.on || G.loose || G.away || !P.onMap || off.queue.some((a) => a.chase === P)) return;
+  if (G.wanted) return pursuitBegin(off, null, false);
   G.policeAt = 0;
   const edge = EDGES[off.x < W / 2 ? 'W' : 'E'][off.z < 15.5 ? 0 : 1],
     warn = !G.policeWarned;
@@ -536,6 +538,7 @@ function heldUntil() {
 }
 function arrest() {
   // no street to do it on: straight inside
+  if (G.wanted) return gameOver('jailed');
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
   CELL.book = true;

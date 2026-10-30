@@ -1,6 +1,6 @@
 //@ game/state — Game state, new game, saving, endings
 //@ Defines: SAVE_KEY, freshG, resetWorld, newGame, syncNPCs, saveGame, readSave, loadGame, gameOver
-//@ Uses:    sim/core, ui/interface, gfx/renderer, town/cast, core/util, world/vision, world/objects, world/grid, town/quirks, game/last-day, …
+//@ Uses:    sim/core, ui/interface, gfx/renderer, core/util, town/cast, world/vision, world/objects, world/grid, town/quirks, game/last-day, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── game state, saving, the loop ─────────────────────────
 const SAVE_KEY = 'nothing-to-see-here-v3'; // the five-day rework: older saves don't carry over
@@ -53,6 +53,9 @@ function freshG(start) {
     filesAt: 0,
     policeAt: 0,
     policeWarned: false, // the officer has had his word with you once: next time he takes you in
+    wanted: 0, // the day you ran from an arrest: from then on he comes for you with his gun out (town/on-the-run)
+    wantedAt: 0, // when he next comes looking
+    overBy: null, // who killed you, for the last picture (game/endings)
     ambushNight: 0,
     health: 100,
     binFood: [],
@@ -188,6 +191,8 @@ function resetWorld() {
   huntClear();
   fbiReset();
   arrestReset();
+  runReset();
+  endReset();
   FRI.hold = null;
   FRI.scorched = false;
   FRI.grace = 0;
@@ -345,9 +350,11 @@ function syncNPCs() {
 }
 function saveGame() {
   if (!G || !G.started || G.over || CAP.on) return;
+  // left in the middle of an arrest: you went quietly, and you're in the cell (wanted, for good)
+  const taken = ARREST.on && ARREST.phase !== 'drop' && !G.away;
   const data = {
     v: 10,
-    G,
+    G: taken ? Object.assign({}, G, { away: { kind: 'held', until: Math.max(ARREST.until, G.t + 60) } }) : G,
     explored: Array.from(explored),
     player: { name: PLAYER.name, x: PLAYER.x, z: PLAYER.z, needs: PLAYER.needs },
     npcs: Object.fromEntries(
@@ -481,6 +488,7 @@ function loadGame(data) {
   }
   if (G.away) PLAYER.onMap = false;
   if (G.policeAt) G.policeAt = 0;
+  if (G.wanted) G.wantedAt = G.t + rand(5, 20); // left while he was after you: he isn't far
   G.attack = null;
   G.control = null;
   G.murmur = null;
@@ -501,12 +509,19 @@ function loadGame(data) {
   cam.zoomT = cam.zoom = CAM_ZOOM;
   cam.yaw = cam.yawT = 0;
   warmPortraits();
+  if (G.wanted && G.away && G.away.kind === 'held') setTimeout(() => gameOver('jailed'), 400); // taken in while wanted
   return true;
 }
+// lost is lost: no going back to the morning. The save goes with the game, and the last picture plays (game/endings).
 function gameOver(kind) {
   if (G.over) return;
   G.over = kind;
   G.speed = 0;
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) {
+    /* storage unavailable */
+  }
   const e = kind === 'taken' || kind === 'plan' || kind === 'killed' ? ENDINGS[kind][G.faction] : ENDINGS[kind];
   UI.aim = null;
   $('#over-title').textContent = e[0];
@@ -526,9 +541,11 @@ function gameOver(kind) {
           ? 'work'
           : kind === 'committed'
             ? 'sick'
-            : kind === 'prison'
+            : kind === 'prison' || kind === 'jailed'
               ? 'lock'
-              : FACTIONS[G.faction].icon,
+              : kind === 'shot'
+                ? 'badge'
+                : FACTIONS[G.faction].icon,
   );
   $('#over').classList.toggle('won', kind === 'won' || kind === 'escaped');
   {
@@ -537,7 +554,5 @@ function gameOver(kind) {
     UI.almostT = null;
   }
   if (FRI.hold) looseRelease(false);
-  $('#over-load').hidden = !readSave() || kind === 'won';
-  $('#over').hidden = false;
-  audio.sting(kind === 'won' || kind === 'escaped' ? 'onto' : 'caught');
+  endBegin(kind);
 }

@@ -5,7 +5,20 @@
 // ───────────── arrested, start to finish, out where you can see it: hands behind your back, the cuffs, a squad car
 // pulling up on Main street with its lights going, the walk to it in front of the officer, the door, the car pulling
 // away. The hours inside go by in the cell (see CELL). Then the car brings you back and lets you out on the kerb.
-const ARREST = { on: false, phase: null, off: null, car: null, t0: 0, until: 0, door: null, loadAt: 0, rp: 0 };
+// Until the car door shuts on you, a fresh Shift and you can run for it (town/on-the-run). Taken in while wanted, the
+// cell is for good.
+const ARREST = {
+  on: false,
+  phase: null,
+  off: null,
+  car: null,
+  t0: 0,
+  until: 0,
+  door: null,
+  loadAt: 0,
+  rp: 0,
+  shiftUp: false,
+};
 let COP_MESH = null;
 function copCarMesh() {
   if (COP_MESH) return COP_MESH;
@@ -45,7 +58,7 @@ function arrestCarIn(x, south, drop) {
   return car;
 }
 function copCarV(c, vT) {
-  if (c !== ARREST.car && !c.leaving) c.leaving = true;
+  if (c !== ARREST.car && c !== ONRUN.car && !c.leaving) c.leaving = true; // left at the kerb while he runs after you
   if (c.leaving) return c.vMax;
   const dist = (c.stopX - c.x) * c.dir;
   if (dist <= 0.1) {
@@ -74,7 +87,17 @@ function arrestStart(off) {
   if (G.speed > 1) G.speed = 1;
   echo('police', { x: P.x, z: P.z });
   audio.sting('caught');
-  Object.assign(ARREST, { on: true, phase: 'cuff', off, t0: G.t, until: heldUntil(), car: null, loadAt: 0, rp: 0 });
+  Object.assign(ARREST, {
+    on: true,
+    phase: 'cuff',
+    off,
+    t0: G.t,
+    until: heldUntil(),
+    car: null,
+    loadAt: 0,
+    rp: 0,
+    shiftUp: false,
+  });
   // turned round, hands behind your back: the cuffs go on
   P.tdir = Math.atan2(P.x - off.x, P.z - off.z);
   hardReset(off);
@@ -204,6 +227,7 @@ function arrestInside() {
   ARREST.phase = null;
   ARREST.car = null;
   ARREST.off = null;
+  if (G.wanted) return gameOver('jailed'); // they know who ran from them last time
   CELL.book = true;
   goAway('held', Math.max(ARREST.until, G.t + 60));
 }
@@ -249,6 +273,7 @@ function arrestTick(dt) {
     arrestReset();
     return;
   }
+  if ((ARREST.phase === 'cuff' || ARREST.phase === 'escort') && runKey()) return;
   if (ARREST.phase === 'cuff') {
     P.moving = false;
     P.anim = 'idle';
@@ -298,6 +323,6 @@ function arrestReset() {
     const i = CARS.indexOf(ARREST.car);
     if (i >= 0) CARS.splice(i, 1);
   }
-  Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0 });
+  Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0, shiftUp: false });
   if (PLAYER) PLAYER.poseFn = null;
 }

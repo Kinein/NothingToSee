@@ -551,6 +551,24 @@ body.capturing #hunt{display:none}
 .aim{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
 .aim i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#ff2a1a;box-shadow:0 0 12px 4px rgba(255,40,20,.7);animation:aimp .35s ease-in-out infinite}
 @keyframes aimp{50%{transform:scale(1.5)}}
+/* the officer's gun on you: a ring that closes as he aims (--k: 0 drawn, 1 the shot); get off the line before it's shut */
+.aim.gun i{left:-24px;top:-24px;width:48px;height:48px;background:none;border:2px solid #fff2d8;box-shadow:0 0 10px 2px rgba(255,236,200,.45),inset 0 0 6px rgba(255,236,200,.35);animation:none;transform:scale(calc(1 - .72 * var(--k,0)));opacity:calc(.55 + .45 * var(--k,0))}
+.aim.gun i::before,.aim.gun i::after{content:'';position:absolute;left:50%;top:50%;background:#fff2d8;transform:translate(-50%,-50%)}
+.aim.gun i::before{width:2px;height:64px}.aim.gun i::after{width:64px;height:2px}
+/* held by the officer: the one key that gets you out */
+.runfor{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;margin:-18px 0 0 -74px;padding:7px 14px 7px 8px;border-radius:9px;background:rgba(14,10,8,.82);border:1px solid rgba(236,138,116,.65);color:#f1e8d2;font:600 15px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;pointer-events:auto;cursor:pointer;box-shadow:0 0 18px rgba(200,64,47,.35);animation:runp 1s ease-in-out infinite}
+.runfor kbd{padding:2px 7px;border-radius:5px;background:rgba(236,138,116,.22);border:1px solid rgba(236,138,116,.6);font:600 13px/18px var(--f-ui);text-transform:none}
+@keyframes runp{50%{box-shadow:0 0 26px rgba(220,70,50,.6)}}
+/* the last picture's caption: like the day card, in and out */
+#endcap{position:fixed;left:50%;top:24%;z-index:5;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0}
+#endcap b{display:block;font:italic 500 clamp(48px,9vw,96px)/1 var(--f-disp);letter-spacing:-.02em;color:#f0e7d2;text-shadow:2px 0 rgba(190,36,28,.32),-1px 0 rgba(60,190,170,.14),0 6px 40px rgba(0,0,0,.9)}
+#endcap span{display:block;margin-top:8px;font:15px var(--f-type);letter-spacing:.24em;text-transform:uppercase;color:var(--sodium);text-shadow:0 2px 10px #000}
+#endcap.go{animation:endcap 5s ease-in-out both}
+@keyframes endcap{0%{opacity:0}18%,72%{opacity:1}100%{opacity:0}}
+/* the card over the last picture: the picture stays in view behind it */
+#over.scene{place-items:end start;padding:max(24px,4vh) max(16px,4vw);background:linear-gradient(90deg,rgba(3,4,6,.82),rgba(3,4,6,.4) 46%,rgba(3,4,6,0) 72%);backdrop-filter:none;-webkit-backdrop-filter:none;animation:fadein 1.2s ease-out both}
+#over.scene .sheet{background:rgba(16,17,21,.86)}
+#over #over-them{margin:-12px 0 24px;font:italic 17px/1.5 var(--f-type);color:#e4a24a}
 #fatal p{max-width:46ch;font:16px/1.5 var(--f-type);color:var(--ink)}
 
 /* the town's own overlays, in the HUD's language: dark tiles, hairline cream frames with corner marks, the body's own icons */
@@ -714,6 +732,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 
 <canvas id="view" class="c-walk" aria-label="The town of Wexley, seen from above"></canvas>
 <div id="fx"></div>
+<div id="endcap" hidden><b></b><span></span></div>
 <div id="tip" hidden></div>
 
 <div id="hud" hidden>
@@ -762,7 +781,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.18 · updated Oct 30, 2026</p>
+  <p id="version">v1.19 · updated Oct 30, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -806,6 +825,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Half-changed</kbd><span>Real only at night, late in THEIR week, with a clear head · shaken, it’s in your head and the camera shows nothing</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Hunted</kbd><span>Get home · break sight · sidestep the red bolt · beaten, you lose a day</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8.3-7 10-4-1.7-7-5-7-10V6zM9 12l2 2 4-4"/></svg><kbd>Arrested</kbd><span>Go quietly and you sit out the hours in a cell · or Shift, while the cuffs go on or on the way to the car, and run · he shoots: sidestep when the ring closes · caught or shot, it’s over · lose him and you’re wanted</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>The eye</kbd><span>What THEY know about you: don’t know you, watch you, know you, hunt you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><kbd>Day bar</kbd><span>THEIR five days · Friday at midnight it’s done</span></div>
     </div>
@@ -820,7 +840,8 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
     <span id="over-kind"></span>
     <h2 id="over-title"></h2>
     <p id="over-body"></p>
-    <div class="btns"><button class="btn primary" id="over-load">Load this morning</button><button class="btn" id="over-new">Start over</button></div>
+    <p id="over-them" hidden></p>
+    <div class="btns"><button class="btn primary" id="over-new">Start over</button></div>
   </div>
 </div>
 <div id="fatal" class="overlay" hidden><p></p></div>
@@ -1140,6 +1161,15 @@ const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies:
 // Step out of it and you slip him; he stumbles for `stumble`. Slip him `slips` times and he gives up, winded.
 // Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
 const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5, grab: 0.8, hold: 1.0, lunge: 0.5, stumble: 2.2, slips: 3 };
+// running from an arrest (town/on-the-run): a fresh Shift while the cuffs go on or on the walk to the car, and you're off.
+// He stands `stumble` game minutes where you shoved him, then runs at `run` (× anybody's run): quicker than you sprint in
+// cuffs (`cuffed` × your sprint), a little slower than you sprint free. He holds fire for `first` minutes (the warning),
+// then with you in sight `near`…`far` tiles off he stops and aims for `aim` (the ring closes on you: get off the line)
+// and fires: a bullet `speed` × a bolt's pace, `hit` off your health, `cd` minutes to the next. Within `reach` he dives
+// for you (the patch on the ground, as ever): in it, you're caught. He sees you out to `sight`. Out of it, he runs to
+// where he saw you last and looks round there for `look`; unseen for `lose` all told, he's lost you. Then you're wanted:
+// he comes looking once a day between the `daily` hours, and the moment he spots you (`spot` tiles).
+const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far: 12, aim: 2.4, speed: 2.6, hit: 40, cd: 4.5, reach: 1.15, sight: 13, look: 7, lose: 16, daily: [9, 17], spot: 9 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -1450,6 +1480,14 @@ const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
+// running from an arrest (town/on-the-run): the shout when you break away, the warning before the first shot, what he says
+// down the sights, the dive, losing you; and once you're wanted, what he shouts when he spots you
+const COP_BOLT  = ['Hey! HEY!', 'Don’t you DARE!', 'Get back here!'];
+const COP_GUN   = ['Stop or I shoot!', 'Last warning! STOP!', 'Freeze! I WILL fire!'];
+const COP_AIM   = ['Don’t move.', 'Hands where I can see them!', 'On the ground!'];
+const COP_DIVE  = ['Got you!', 'Gotcha!', 'Down you go!'];
+const COP_LOST  = ['Where the hell…', 'Come out! I know you’re here!', 'Damn it.'];
+const COP_SPOT  = ['YOU! Stop right there!', 'There you are!', 'Police! Don’t move!'];
 // the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in
 // (play/confront): the same words either way
 const CONFESS = {
@@ -1488,11 +1526,20 @@ const ENDINGS = {
   below: ['Taken below.', 'Under Wexley it is warm and dark. Nobody comes down here.'],
   escaped: ['Out.', 'You ran until Wexley was a glow behind the hills. You never went back. Some nights it still looks for you.'],
   prison: ['Locked up.', 'Three assaults. The judge didn’t want to hear about THEM.'],
+  jailed: ['Locked up.', 'Resisting arrest, then running from it. The judge didn’t want to hear about THEM. The door stays shut.'],
+  shot: ['Shot.', 'Resisting arrest, the report says. Nobody asks what you were running from.'],
   plan: {
     aliens: ['It’s done.', 'The lights came down over Wexley. Nobody looked up.'],
     lizards: ['It’s done.', 'Wexley got very warm, and very quiet.'],
     zombies: ['It’s done.', 'Everyone came in on Monday. Nobody wanted lunch.'],
   },
+};
+// lost on THEIR last day: after your own last picture the town gets one (game/endings), with this caption over it.
+// The words under it on the card are ENDINGS.plan's.
+const THEY_WON = {
+  aliens: ['Midnight', 'Friday · the park'],
+  lizards: ['Midnight', 'Friday · Main street'],
+  zombies: ['Monday', '08:40 · Meridian Records'],
 };
 // a fight in the street (combat/brawl): onlookers egging it on, backing off, calling it in
 const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];
@@ -8740,6 +8787,11 @@ function drawPerson(c) {
         eg,
       );
       drawSpec = 0;
+    } else if (c.shut) {
+      // shut: the lid all the way down, and the line of the lashes
+      const ez = faceZ(s * 0.0295, 0.12);
+      part(Hd, s * 0.0295, 0.1195, ez + 0.004, 0.031, 0.019, 0.019, 'sph', mul3(hskin, 0.86));
+      part(Hd, s * 0.0295, 0.1125, ez + 0.019, 0.026, 0.0035, 0.004, 'box', mul3(hskinD, 0.45));
     } else {
       const ez = faceZ(s * 0.0295, 0.12);
       let wc = ck > 0 ? mix3(EYE_WHITE, [0.6, 0.18, 0.12], ck) : EYE_WHITE;
@@ -8987,6 +9039,10 @@ function drawPerson(c) {
       else if (pp === 'raygun') {
         part(Fa, 0, -0.33 * h, 0.07, 0.055, 0.075, 0.2, 'rbox', [0.3, 0.33, 0.35]);
         part(Fa, 0, -0.32 * h, 0.19, 0.035, 0.035, 0.035, 'sph', [0.5, 1, 0.7], [0.45, 1, 0.65]);
+      } else if (pp === 'pistol') {
+        // the service pistol: a black slide over the grip, the barrel out past the fingers
+        part(Fa, 0, -0.335 * h, 0.04, 0.035, 0.07, 0.05, 'rbox', [0.06, 0.06, 0.065]);
+        part(Fa, 0, -0.31 * h, 0.1, 0.04, 0.045, 0.17, 'box', [0.09, 0.09, 0.1]);
       } else if (pp === 'bat') {
         part(Fa, 0, -0.33 * h - 0.2, 0.03, 0.04, 0.42, 0.04, 'cyl', [0.42, 0.3, 0.18]);
         part(Fa, 0, -0.33 * h - 0.38, 0.03, 0.055, 0.12, 0.055, 'cyl', [0.38, 0.27, 0.16]);
@@ -10172,7 +10228,7 @@ function renderFrame() {
     console.error(e);
   }
   const P = PLAYER;
-  if (P && P.onMap && G.started) {
+  if (P && P.onMap && G.started && !G.over) {
     if (P.path && P.moving) {
       let px = P.x,
         pz = P.z,
@@ -10294,8 +10350,11 @@ function renderFrame() {
         z = b.z - b.dz * back;
       if (b.d - back < 0) break;
       gl.uniform3fv(GL.U.uCenter, [x, 1.2, z]);
-      gl.uniform1f(GL.U.uSize, (k ? 0.5 : 0.75) * (1 - k * 0.15));
-      gl.uniform3fv(GL.U.uColor, k ? [1, 0.18, 0.1] : [1, 0.75, 0.6]);
+      gl.uniform1f(GL.U.uSize, (k ? 0.5 : 0.75) * (1 - k * 0.15) * (b.bullet ? 0.45 : 1));
+      gl.uniform3fv(
+        GL.U.uColor,
+        b.bullet ? (k ? [1, 0.62, 0.25] : [1, 0.95, 0.8]) : k ? [1, 0.18, 0.1] : [1, 0.75, 0.6],
+      );
       gl.uniform1f(GL.U.uAlpha, (k ? 0.7 : 1) * (1 - k * 0.17));
       gl.bindVertexArray(PRIM.quad.vao);
       gl.drawElements(gl.TRIANGLES, PRIM.quad.count, gl.UNSIGNED_INT, 0);
@@ -10422,13 +10481,13 @@ function composite() {
     gl.uniform1f(u.uSat, 0.8);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
-    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
+    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));
     if (u.uStage) {
       gl.uniform1f(u.uStage, R.stageK || 0);
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0)); // a scene's lids, or yours, passed out
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid)); // a scene's lids, or yours, passed out or for good
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
     if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
     gl.uniform1f(u.uNight, HX.night);
@@ -16936,6 +16995,7 @@ function protectAfter(n) {
 function policeTick() {
   const P = PLAYER,
     off = NPC.officer;
+  if (wantedTick() || ONRUN.on) return; // wanted: no more talking (town/on-the-run)
   if (!G.policeAt || G.t < G.policeAt || !off || ARREST.on) return;
   if (!P.onMap || off.onMap) {
     if (!P.onMap) G.policeAt = 0;
@@ -16960,6 +17020,7 @@ function policeTick() {
 function policeSaw(off) {
   const P = PLAYER;
   if (!off.onMap || ARREST.on || G.loose || G.away || !P.onMap || off.queue.some((a) => a.chase === P)) return;
+  if (G.wanted) return pursuitBegin(off, null, false);
   G.policeAt = 0;
   const edge = EDGES[off.x < W / 2 ? 'W' : 'E'][off.z < 15.5 ? 0 : 1],
     warn = !G.policeWarned;
@@ -17092,6 +17153,7 @@ function heldUntil() {
 }
 function arrest() {
   // no street to do it on: straight inside
+  if (G.wanted) return gameOver('jailed');
   echo('police', { x: PLAYER.x, z: PLAYER.z });
   audio.sting('caught');
   CELL.book = true;
@@ -17146,7 +17208,20 @@ function confess(n, beaten) {
 // ───────────── arrested, start to finish, out where you can see it: hands behind your back, the cuffs, a squad car
 // pulling up on Main street with its lights going, the walk to it in front of the officer, the door, the car pulling
 // away. The hours inside go by in the cell (see CELL). Then the car brings you back and lets you out on the kerb.
-const ARREST = { on: false, phase: null, off: null, car: null, t0: 0, until: 0, door: null, loadAt: 0, rp: 0 };
+// Until the car door shuts on you, a fresh Shift and you can run for it (town/on-the-run). Taken in while wanted, the
+// cell is for good.
+const ARREST = {
+  on: false,
+  phase: null,
+  off: null,
+  car: null,
+  t0: 0,
+  until: 0,
+  door: null,
+  loadAt: 0,
+  rp: 0,
+  shiftUp: false,
+};
 let COP_MESH = null;
 function copCarMesh() {
   if (COP_MESH) return COP_MESH;
@@ -17186,7 +17261,7 @@ function arrestCarIn(x, south, drop) {
   return car;
 }
 function copCarV(c, vT) {
-  if (c !== ARREST.car && !c.leaving) c.leaving = true;
+  if (c !== ARREST.car && c !== ONRUN.car && !c.leaving) c.leaving = true; // left at the kerb while he runs after you
   if (c.leaving) return c.vMax;
   const dist = (c.stopX - c.x) * c.dir;
   if (dist <= 0.1) {
@@ -17215,7 +17290,17 @@ function arrestStart(off) {
   if (G.speed > 1) G.speed = 1;
   echo('police', { x: P.x, z: P.z });
   audio.sting('caught');
-  Object.assign(ARREST, { on: true, phase: 'cuff', off, t0: G.t, until: heldUntil(), car: null, loadAt: 0, rp: 0 });
+  Object.assign(ARREST, {
+    on: true,
+    phase: 'cuff',
+    off,
+    t0: G.t,
+    until: heldUntil(),
+    car: null,
+    loadAt: 0,
+    rp: 0,
+    shiftUp: false,
+  });
   // turned round, hands behind your back: the cuffs go on
   P.tdir = Math.atan2(P.x - off.x, P.z - off.z);
   hardReset(off);
@@ -17345,6 +17430,7 @@ function arrestInside() {
   ARREST.phase = null;
   ARREST.car = null;
   ARREST.off = null;
+  if (G.wanted) return gameOver('jailed'); // they know who ran from them last time
   CELL.book = true;
   goAway('held', Math.max(ARREST.until, G.t + 60));
 }
@@ -17390,6 +17476,7 @@ function arrestTick(dt) {
     arrestReset();
     return;
   }
+  if ((ARREST.phase === 'cuff' || ARREST.phase === 'escort') && runKey()) return;
   if (ARREST.phase === 'cuff') {
     P.moving = false;
     P.anim = 'idle';
@@ -17439,7 +17526,7 @@ function arrestReset() {
     const i = CARS.indexOf(ARREST.car);
     if (i >= 0) CARS.splice(i, 1);
   }
-  Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0 });
+  Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0, shiftUp: false });
   if (PLAYER) PLAYER.poseFn = null;
 }
 // ───────────── held: the hours you're held go by in the cells under the town (STATION in world/grid, drawn by
@@ -17452,6 +17539,7 @@ function arrestReset() {
 const CELL = {
   on: false,
   book: false, // set by the arrest: booked on the way in (a save loaded mid-stay starts you on the bench)
+  forever: false, // locked up for good: the last picture of the game (game/endings), and the door doesn't open again
   phase: null,
   t: 0,
   pt: 0,
@@ -17517,7 +17605,7 @@ const CELL_COP_POSE = (T, a) => {
 };
 
 function cellFrame(dt) {
-  const want = !!(G && G.started && !G.over && G.away && G.away.kind === 'held');
+  const want = !!(G && G.started && (CELL.forever || (!G.over && G.away && G.away.kind === 'held')));
   if (want && !CELL.on && !CELL.leave) cellEnter();
   if (!CELL.on) {
     CELL.fade = Math.max(0, CELL.fade - dt * 2);
@@ -17956,6 +18044,419 @@ function addNote(n, text, o) {
   n.notes.push(Object.assign({ t: G.t, text }, o || {}));
   if (n.notes.length > 14) n.notes.shift();
 }
+// ───────────── running from an arrest. While his hands are on you (the cuffs going on, the walk to the car) a fresh
+// Shift and you're off: hands free if the cuffs weren't on yet, behind your back if they were. That's resisting, and now
+// he's allowed to shoot. He runs you down; with you in sight a few strides off he stops and aims (a ring closes on you:
+// get off the line), and close up he dives for you (the patch on the ground, as ever). Caught, it's a cell for good;
+// shot down, that's the end of you. Break his sight long enough and he loses you, and from then on you're wanted: he
+// comes looking once a day, and the moment he spots you it starts again. Your own flat is the one place he won't come in.
+const ONRUN = {
+  on: false,
+  off: null,
+  car: null, // the squad car, left at the kerb with its lights going while he's after you
+  cuffed: false,
+  seenAt: 0,
+  lastX: 0,
+  lastZ: 0,
+  gunAt: 0,
+  aimAt: 0,
+  warned: false,
+  look: 0,
+  lookDir: 0,
+  stunUntil: 0,
+  diveCd: 0,
+  flash: 0,
+  fx: 0,
+  fz: 0,
+  el: null,
+};
+const cuffedNow = () => ONRUN.on && ONRUN.cuffed;
+// his gun hand up, the other under it
+const COP_GUN_POSE = (T, c) => {
+  if (!ONRUN.aimAt || c !== ONRUN.off) return;
+  T.uaR = -1.5;
+  T.faR = -0.05;
+  T.aoR = 0.05;
+  T.uaL = -1.25;
+  T.faL = -0.35;
+  T.hy = 0;
+};
+// the key: Shift, pressed fresh while he has you (holding it from before doesn't count)
+function runKey() {
+  if (!keys.Shift) {
+    ARREST.shiftUp = true;
+    return false;
+  }
+  return ARREST.shiftUp && runForIt();
+}
+function runForIt() {
+  const P = PLAYER,
+    off = ARREST.off;
+  if (!ARREST.on || !off || G.over || !(ARREST.phase === 'cuff' || ARREST.phase === 'escort')) return false;
+  const cuffed = ARREST.phase === 'escort',
+    car = ARREST.car;
+  Object.assign(ARREST, { on: false, phase: null, off: null, car: null, loadAt: 0, shiftUp: false }); // first: the cuffing's own end checks this
+  P.path = null;
+  P.poseFn = cuffed ? CUFFED_POSE : null;
+  hardReset(off);
+  knockBack(off, P, 0.9);
+  pursuitBegin(off, car, cuffed);
+  enqueue(off, waitAct({ label: 'Officer', dur: RESIST.stumble, anim: 'stare', interruptible: false }), true);
+  ui.say(off, pick(COP_BOLT), 2.2);
+  audio.hx('grab', 0, 0.8);
+  HX.shake = Math.max(HX.shake, 0.4);
+  echo('police', { x: P.x, z: P.z });
+  ui.note(
+    'badge',
+    cuffed ? 'Running in cuffs. He’s allowed to shoot now.' : 'You twist free. He’s allowed to shoot now.',
+    'bad',
+  );
+  return true;
+}
+// the chase itself, however it starts: you broke away from him, or he came looking for you, or he spotted you
+function pursuitBegin(off, car, cuffed) {
+  const P = PLAYER;
+  if (!off.onMap) {
+    const edge = EDGES[P.x < W / 2 ? 'W' : 'E'][P.z < 15.5 ? 0 : 1];
+    placeChar(off, edge[0], edge[1]);
+    off.onMap = true;
+    off.shown = 0;
+    off.prevRoom = roomAt(off.x, off.z);
+  }
+  hardReset(off);
+  Object.assign(ONRUN, {
+    on: true,
+    off,
+    car: car || null,
+    cuffed: !!cuffed,
+    seenAt: G.t,
+    lastX: P.x,
+    lastZ: P.z,
+    gunAt: G.t + RESIST.first,
+    aimAt: 0,
+    warned: false,
+    look: 0,
+    stunUntil: 0,
+    diveCd: 0,
+  });
+  G.wanted = G.wanted || dayNo();
+  G.wantedAt = 0;
+  G.policeAt = 0;
+  off.spd = RESIST.run;
+  off.poseFn = COP_GUN_POSE;
+  enqueue(off, pursuitAct());
+  audio.sting('whistle');
+  if (G.speed > 1) G.speed = 1;
+}
+function pursuitAct() {
+  return mkAct({
+    kind: 'wait',
+    label: 'Officer',
+    icon: 'walk',
+    dur: null,
+    anim: 'idle',
+    interruptible: false,
+    chase: PLAYER,
+    prop: 'pistol',
+    onStart: (c, a) => {
+      a.rp = 99;
+    },
+    onTick: (c, a, dt) => pursuitStep(c, a, dt),
+  });
+}
+function pursuitStep(c, a, dt) {
+  const P = PLAYER,
+    S = ONRUN;
+  if (!S.on || S.off !== c || G.over) {
+    a.cancel = true;
+    return;
+  }
+  if (!P.onMap || G.away || CAP.on || HUNT.on || G.loose) return runEnd(); // somebody else has you now
+  const d = Math.hypot(P.x - c.x, P.z - c.z),
+    sees = seesSpot(c, P.x, P.z, RESIST.sight);
+  if (sees) {
+    S.seenAt = G.t;
+    S.lastX = P.x;
+    S.lastZ = P.z;
+    S.look = 0;
+  }
+  if (G.t < S.stunUntil) {
+    c.path = null;
+    c.moving = false;
+    return;
+  }
+  if (copGun(c, d, sees)) return;
+  if (sees && d < RESIST.reach && G.t >= S.diveCd) {
+    c.path = null;
+    c.moving = false;
+    enqueue(c, diveAct(), true);
+    return;
+  }
+  if (!sees) {
+    if (G.t - S.seenAt > RESIST.lose) return runLost(c);
+    if (Math.hypot(S.lastX - c.x, S.lastZ - c.z) < 0.9) {
+      // where he saw you last: a look round
+      if (!S.look) {
+        S.look = G.t;
+        S.lookDir = c.dir;
+        ui.say(c, pick(COP_LOST), 2.4);
+      }
+      c.path = null;
+      c.moving = false;
+      c.tdir = S.lookDir + Math.sin((G.t - S.look) * 0.9) * 1.6;
+      if (G.t - S.look > RESIST.look) runLost(c);
+      return;
+    }
+  }
+  a.rp += dt;
+  if (a.rp > 0.4 || !c.path || c.pi >= c.path.length) {
+    a.rp = 0;
+    const t = nearestWalkable(S.lastX, S.lastZ, c, 2);
+    if (!t || !setPath(c, t[0], t[1])) {
+      // he can't get to where you are (behind your own door): he stands and waits for you to show
+      c.path = null;
+      S.lastX = c.x;
+      S.lastZ = c.z;
+    }
+  }
+  c.spd = RESIST.run;
+  c.run = true;
+  followPath(c, dt);
+}
+// the gun: a ring closing on you while he aims, then the shot. Out of his sight, he lowers it.
+function copGun(c, d, sees) {
+  const S = ONRUN,
+    P = PLAYER;
+  if (S.aimAt) {
+    c.path = null;
+    c.moving = false;
+    c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+    if (!sees) {
+      S.aimAt = 0;
+      if (UI.aim && UI.aim.c === c) UI.aim = null;
+      S.gunAt = G.t + 1.2;
+      return false;
+    }
+    if (G.t - S.aimAt >= RESIST.aim) {
+      S.aimAt = 0;
+      if (UI.aim && UI.aim.c === c) UI.aim = null;
+      S.gunAt = G.t + RESIST.cd;
+      fireBullet(c);
+    }
+    return true;
+  }
+  if (!sees || G.t < S.gunAt || d < RESIST.near || d > RESIST.far || UI.aim) return false;
+  S.aimAt = G.t;
+  UI.aim = { c, gun: true, t0: G.t, dur: RESIST.aim };
+  if (!S.warned) {
+    S.warned = true;
+    ui.say(c, pick(COP_GUN), 2.2);
+  } else if (chance(0.4)) ui.say(c, pick(COP_AIM), 1.8);
+  hxSound('lock', c.x, c.z, 0.7);
+  return true;
+}
+function fireBullet(c) {
+  const P = PLAYER,
+    dx = P.x - c.x,
+    dz = P.z - c.z,
+    l = Math.hypot(dx, dz) || 1;
+  c.tdir = Math.atan2(dx, dz);
+  BOLTS.push({
+    by: c,
+    x: c.x + (dx / l) * 0.5,
+    z: c.z + (dz / l) * 0.5,
+    dx: dx / l,
+    dz: dz / l,
+    d: 0,
+    dmg: RESIST.hit,
+    age: 0,
+    bullet: true,
+  });
+  ONRUN.flash = 1;
+  ONRUN.fx = c.x + (dx / l) * 0.55;
+  ONRUN.fz = c.z + (dz / l) * 0.55;
+  R.flash = Math.max(R.flash, 0.3);
+  HX.shake = Math.max(HX.shake, 0.35);
+  hxSound('shot', c.x, c.z, 1);
+  // everyone who hears it runs for a door
+  for (const w of CHARS)
+    if (
+      !w.isPlayer &&
+      w !== c &&
+      w.onMap &&
+      !w.isThem &&
+      !w.def.stranger &&
+      !w.fleeing &&
+      !w.engaged &&
+      !asleep(w) &&
+      Math.hypot(w.x - c.x, w.z - c.z) < 12
+    )
+      flee(w, { spd: 1 });
+}
+// a bullet that finds you. The last one is the end.
+function bulletHits(b) {
+  const P = PLAYER;
+  R.flash = 0.8;
+  HX.jolt = 1;
+  HX.shake = 0.7;
+  audio.hx('thud', 0, 0.8);
+  hxDecal(P.x + rand(-0.2, 0.2), P.z + rand(-0.2, 0.2), rand(0.16, 0.26), [0.3, 0.015, 0.015, 0.85], 4, 1440);
+  if (G.health - b.dmg <= 0) {
+    G.health = 0;
+    UI.aim = null;
+    BOLTS.length = 0;
+    return gameOver('shot');
+  }
+  hurt(b.dmg, false);
+}
+// close enough to lay hands on you: the patch on the ground is where they close
+function diveAct() {
+  const P = PLAYER,
+    wind = POLICE.grab;
+  return mkAct({
+    kind: 'wait',
+    label: 'Catch', // the reaching arms (GRAB)
+    dur: wind / 0.5,
+    anim: 'punch',
+    interruptible: false,
+    prop: 'pistol',
+    onStart: (n, a) => {
+      a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+      teleSet(n, n.x, n.z, POLICE.hold, wind);
+      ui.say(n, pick(COP_DIVE), 1.6);
+    },
+    onTick: (n, a) => {
+      if (a.landed) return;
+      if (a.t < wind * 0.7) a.dir = Math.atan2(P.x - n.x, P.z - n.z);
+      n.tdir = a.dir;
+      const sx = Math.sin(a.dir),
+        sz = Math.cos(a.dir);
+      teleSet(n, n.x + sx * (POLICE.lunge + 0.3), n.z + sz * (POLICE.lunge + 0.3), POLICE.hold);
+      if (a.t < wind) return;
+      a.landed = true;
+      const T = n.tele;
+      teleEnd(n);
+      lungeChar(n, sx, sz, POLICE.lunge);
+      if (P.onMap && !G.away && !G.over && Math.hypot(P.x - T.x, P.z - T.z) < T.r) return runCaught(n);
+      // you slipped him
+      ONRUN.stunUntil = G.t + POLICE.stumble;
+      ONRUN.diveCd = ONRUN.stunUntil + 1;
+      audio.hx('whoosh', hxPan(n.x, n.z), 0.6);
+      if (P.onMap) ui.float(P, 'Slipped', 'good');
+      ui.say(n, pick(COP_SLIP), 2);
+    },
+  });
+}
+function runCaught(n) {
+  const P = PLAYER;
+  UI.aim = null;
+  BOLTS.length = 0;
+  P.poseFn = CUFFED_POSE;
+  P.path = null;
+  P.moving = false;
+  n.tdir = Math.atan2(P.x - n.x, P.z - n.z);
+  ui.say(n, pick(COP_CATCH), 3);
+  audio.hx('grab', 0, 1);
+  HX.shake = 0.8;
+  gameOver('jailed');
+}
+// your blow, while he's after you: he staggers back a step, and comes on
+function runStruck(n) {
+  ONRUN.stunUntil = G.t + 1.6;
+  knockBack(n, PLAYER, 0.8);
+  gesture(n, 'flinch', 0.5);
+  ui.float(n, '−1', 'good');
+  audio.hx('thud', hxPan(n.x, n.z), 0.8);
+  ui.say(n, pick(COP_HIT), 2);
+}
+// out of his sight long enough: he's lost you. The cuffs come off behind the first bins you find.
+function runLost(c) {
+  const cuffed = ONRUN.cuffed;
+  runEnd();
+  hardReset(c);
+  c.spd = 1;
+  ui.say(c, pick(COP_QUIT), 2.6);
+  enqueue(c, goAct(EDGES[c.x < W / 2 ? 'W' : 'E'][c.z < 15.5 ? 0 : 1], { label: 'Leaving' }));
+  G.wantedAt = dayNo() * 1440 + rand(RESIST.daily[0], RESIST.daily[1]) * 60; // tomorrow, some time in the day
+  addStress(-4);
+  setTimeout(() => {
+    if (!G.over)
+      ui.note(
+        'badge',
+        cuffed
+          ? 'You lost him. You work your hands out of the cuffs. You’re wanted now.'
+          : 'You lost him. You’re wanted now.',
+        'onto',
+      );
+  }, 1200);
+}
+function runEnd() {
+  const S = ONRUN,
+    c = S.off;
+  if (UI.aim && c && UI.aim.c === c) UI.aim = null;
+  if (c) {
+    c.poseFn = null;
+    c.spd = 1;
+    teleEnd(c);
+  }
+  if (S.car) S.car.leaving = true;
+  if (S.cuffed && PLAYER && PLAYER.poseFn === CUFFED_POSE) PLAYER.poseFn = null;
+  Object.assign(S, { on: false, off: null, car: null, cuffed: false, aimAt: 0, look: 0 });
+}
+function runReset() {
+  runEnd();
+  ONRUN.flash = 0;
+  if (ONRUN.el) ONRUN.el.hidden = true;
+}
+// wanted: once a day he comes looking (a while after you're out of your door), and wherever he is, he knows your face
+function wantedTick() {
+  const P = PLAYER,
+    off = NPC.officer;
+  if (!G.wanted || !off || off.slain || off.gone || ONRUN.on || ARREST.on || G.loose || G.over) return false;
+  if (!P.onMap || G.away || G.sleeping || CAP.on || HUNT.on) return false;
+  if (off.onMap && !asleep(off) && seesSpot(off, P.x, P.z, RESIST.spot)) {
+    pursuitBegin(off, null, false);
+    ui.say(off, pick(COP_SPOT), 2.4);
+    ui.bubble(off, 'exclaim', 'speech', 2.5);
+    ui.note('badge', 'The officer has seen you. Run.', 'bad');
+    return true;
+  }
+  if (!G.wantedAt) G.wantedAt = G.t + rand(60, 180);
+  if (G.t < G.wantedAt || off.onMap) return false;
+  if (inRoomSet(P, (r) => r.home)) {
+    G.wantedAt = G.t + rand(30, 90); // a siren goes past the window, and on
+    return false;
+  }
+  pursuitBegin(off, null, false);
+  ui.note('badge', 'A siren. The police are out looking for you. Run.', 'bad');
+  return true;
+}
+// every frame: the shout for the key while he has you, the muzzle flash
+function runFrame(dtR) {
+  ONRUN.flash = Math.max(0, ONRUN.flash - dtR * 9);
+  if (ONRUN.flash > 0.02)
+    hxLight(ONRUN.fx, 1.3, ONRUN.fz, 3.4, [2.4 * ONRUN.flash, 1.7 * ONRUN.flash, 0.7 * ONRUN.flash]);
+  const show = !!(G && G.started && !G.over && ARREST.on && (ARREST.phase === 'cuff' || ARREST.phase === 'escort'));
+  if (!show) {
+    if (ONRUN.el) ONRUN.el.hidden = true;
+    return;
+  }
+  if (!ONRUN.el) {
+    const el = (ONRUN.el = document.createElement('button'));
+    el.className = 'runfor';
+    el.innerHTML = '<kbd>Shift</kbd>Run for it';
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      runForIt();
+    });
+    $('#fx').appendChild(el);
+  }
+  const P = PLAYER,
+    [x, y] = project(P.x, 2.3, P.z);
+  ONRUN.el.hidden = false;
+  ONRUN.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+}
 // ───────────── suspicion
 function addSus(n, v) {
   if (!n || n.isPlayer || !n.def || n.def.stranger) return;
@@ -18290,7 +18791,8 @@ function playerMelee(n) {
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on) return;
+  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on || cuffedNow())
+    return;
   if (huntKey()) return; // its hands on you: Space tears at them like E does
   if (UI.menuOpen) return closeMenu();
   dismissHints();
@@ -18885,7 +19387,7 @@ function boltTick(dt) {
   const P = PLAYER;
   for (let i = BOLTS.length - 1; i >= 0; i--) {
     const b = BOLTS[i],
-      step = CTRL.boltSpeed * dt,
+      step = CTRL.boltSpeed * (b.bullet ? RESIST.speed : 1) * dt,
       k = Math.max(1, Math.ceil(step / 0.12));
     let gone = false;
     b.age += dt;
@@ -18907,6 +19409,7 @@ function boltTick(dt) {
   }
 }
 function boltHits(b) {
+  if (b.bullet) return bulletHits(b); // the officer's (town/on-the-run)
   const n = b.by;
   R.flash = 0.7;
   if (b.abduct && n && n.trueForm) {
@@ -18970,6 +19473,7 @@ function knockOut(byThem) {
       G.loose.upUsed = 1;
       return;
     }
+    G.overBy = foe ? foe.id : null; // it stands over you in the last picture (game/endings)
     return gameOver('killed');
   }
   if (byThem && foe && foe.isThem && (huntDown(foe) || capture('beaten', { foe, reason: 'beaten' }))) return; // THEY don't leave you lying there: get up before it gets to you
@@ -19265,6 +19769,7 @@ function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, true);
   if (n.def.officer && !n.trueForm && !G.loose) {
+    if (ONRUN.on && ONRUN.off === n) return runStruck(n);
     ui.say(n, pick(COP_HIT), 2.6);
     return arrestStart(n); // no warning for that
   }
@@ -24871,7 +25376,7 @@ function photoCone() {
 }
 function playerPhoto() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
+  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on || cuffedNow()) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
   if (shaky()) return shakenNote('Your hands shake too much for a photo'); // under 40: you can still take things
@@ -26786,9 +27291,12 @@ function updateFx(dtReal) {
       UI.aimEl.innerHTML = '<i></i>';
       $('#fx').appendChild(UI.aimEl);
     }
-    const [x, y] = project(PLAYER.x, 1.3, PLAYER.z);
+    const [x, y] = project(PLAYER.x, 1.3, PLAYER.z),
+      A = UI.aim;
     UI.aimEl.hidden = false;
     UI.aimEl.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    UI.aimEl.classList.toggle('gun', !!A.gun); // the officer's: a ring closing as he aims (town/on-the-run)
+    if (A.gun) UI.aimEl.style.setProperty('--k', clamp((G.t - A.t0) / A.dur, 0, 1).toFixed(3));
   } else if (UI.aimEl) UI.aimEl.hidden = true;
   if (UI.dayT != null) {
     UI.dayT += dtReal;
@@ -28108,6 +28616,7 @@ function handleClick(px, py) {
 }
 // what clicking something in reach does (also where a walk to it ends)
 function clickOn(p, px, py, pointer) {
+  if (cuffedNow()) return ui.float(PLAYER, 'Cuffed', 'bad'); // running in cuffs: hands behind your back
   if (p.char) {
     const n = p.char;
     if (n.trueForm) {
@@ -28655,11 +29164,14 @@ function driveTick(dt) {
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
-  const slow = (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow(),
+  const slow =
+      (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) *
+      huntSlow() *
+      (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = key ? speed * dt : Math.min(speed * dt, ROUTE.left); // a route stops on its turns, not past them
-  if (key && run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+  if (key && run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
@@ -28917,7 +29429,8 @@ function pickFocus() {
 function updateFocus(dtReal) {
   routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
-  const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
+  const live =
+    G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping && !cuffedNow();
   if (!live) UI.focus = null;
   else if (!UI.menuOpen && UI.focusT <= 0) {
     UI.focusT = 0.1;
@@ -28978,6 +29491,7 @@ function anchorXY(an) {
 // E / Space
 function interact() {
   if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !PLAYER.onMap || G.away || ARREST.on) return;
+  if (cuffedNow()) return;
   if (huntKey()) return; // tear free, get up, climb out
   if (UI.menuOpen) {
     closeMenu();
@@ -29008,6 +29522,7 @@ function initInput() {
   };
   cv.addEventListener('pointerdown', (e) => {
     audio.init();
+    if (G && G.over) endSkip();
     cv.setPointerCapture(e.pointerId);
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptrs.size === 1)
@@ -29103,7 +29618,14 @@ function initInput() {
       else if (!$('#help').hidden) toggleHelp();
       return;
     }
-    if (G.over) return;
+    if (G.over) {
+      if (!e.repeat) endSkip(); // the last picture: on to the card
+      return;
+    }
+    if (cuffedNow() && (k === 'e' || k === ' ' || k === 'f')) {
+      if (!e.repeat) ui.float(PLAYER, 'Cuffed', 'bad');
+      return;
+    }
     if (UI.menuOpen) {
       if (DIRK[k]) {
         e.preventDefault();
@@ -29838,6 +30360,39 @@ const audio = (() => {
               x.start(t);
               x.stop(t + 0.25);
             });
+          break;
+        case 'shot': {
+          // a pistol in the street: the crack, the thump under it, and the houses throwing it back
+          nz(filt('highpass', 1800, 0.7, g(0.7, 0.001, 0.07)), 0.1);
+          nz(filt('lowpass', 900, 0.8, g(0.55, 0.002, 0.22)), 0.3);
+          osc('sine', 120, g(0.5, 0.002, 0.18), 0.2, 42);
+          for (const [d, k] of [
+            [0.16, 0.22],
+            [0.34, 0.1],
+          ])
+            blip(d, (t) => {
+              const s2 = ctx.createBufferSource();
+              s2.buffer = noiseBuf;
+              const f = ctx.createBiquadFilter();
+              f.type = 'bandpass';
+              f.frequency.value = 700;
+              f.Q.value = 0.6;
+              const gg = ctx.createGain();
+              gg.gain.setValueAtTime(0.0001, t);
+              gg.gain.exponentialRampToValueAtTime(k * vol, t + 0.01);
+              gg.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+              s2.connect(f);
+              f.connect(gg);
+              gg.connect(o);
+              s2.start(t, Math.random());
+              s2.stop(t + 0.35);
+            });
+          break;
+        }
+        case 'ringing':
+          // the ears after it: one high note, going away
+          osc('sine', 4100, g(0.05, 0.05, 3.6), 3.8, 3900);
+          osc('sine', 4170, g(0.025, 0.05, 3.2), 3.4, 3990);
           break;
       }
     },
@@ -39430,6 +39985,7 @@ function huntFrame(dtR) {
   }
   try {
     arrestFrame();
+    runFrame(dtR);
   } catch (e) {
     console.error(e);
   }
@@ -40937,6 +41493,9 @@ function freshG(start) {
     filesAt: 0,
     policeAt: 0,
     policeWarned: false, // the officer has had his word with you once: next time he takes you in
+    wanted: 0, // the day you ran from an arrest: from then on he comes for you with his gun out (town/on-the-run)
+    wantedAt: 0, // when he next comes looking
+    overBy: null, // who killed you, for the last picture (game/endings)
     ambushNight: 0,
     health: 100,
     binFood: [],
@@ -41072,6 +41631,8 @@ function resetWorld() {
   huntClear();
   fbiReset();
   arrestReset();
+  runReset();
+  endReset();
   FRI.hold = null;
   FRI.scorched = false;
   FRI.grace = 0;
@@ -41229,9 +41790,11 @@ function syncNPCs() {
 }
 function saveGame() {
   if (!G || !G.started || G.over || CAP.on) return;
+  // left in the middle of an arrest: you went quietly, and you're in the cell (wanted, for good)
+  const taken = ARREST.on && ARREST.phase !== 'drop' && !G.away;
   const data = {
     v: 10,
-    G,
+    G: taken ? Object.assign({}, G, { away: { kind: 'held', until: Math.max(ARREST.until, G.t + 60) } }) : G,
     explored: Array.from(explored),
     player: { name: PLAYER.name, x: PLAYER.x, z: PLAYER.z, needs: PLAYER.needs },
     npcs: Object.fromEntries(
@@ -41365,6 +41928,7 @@ function loadGame(data) {
   }
   if (G.away) PLAYER.onMap = false;
   if (G.policeAt) G.policeAt = 0;
+  if (G.wanted) G.wantedAt = G.t + rand(5, 20); // left while he was after you: he isn't far
   G.attack = null;
   G.control = null;
   G.murmur = null;
@@ -41385,12 +41949,19 @@ function loadGame(data) {
   cam.zoomT = cam.zoom = CAM_ZOOM;
   cam.yaw = cam.yawT = 0;
   warmPortraits();
+  if (G.wanted && G.away && G.away.kind === 'held') setTimeout(() => gameOver('jailed'), 400); // taken in while wanted
   return true;
 }
+// lost is lost: no going back to the morning. The save goes with the game, and the last picture plays (game/endings).
 function gameOver(kind) {
   if (G.over) return;
   G.over = kind;
   G.speed = 0;
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) {
+    /* storage unavailable */
+  }
   const e = kind === 'taken' || kind === 'plan' || kind === 'killed' ? ENDINGS[kind][G.faction] : ENDINGS[kind];
   UI.aim = null;
   $('#over-title').textContent = e[0];
@@ -41410,9 +41981,11 @@ function gameOver(kind) {
           ? 'work'
           : kind === 'committed'
             ? 'sick'
-            : kind === 'prison'
+            : kind === 'prison' || kind === 'jailed'
               ? 'lock'
-              : FACTIONS[G.faction].icon,
+              : kind === 'shot'
+                ? 'badge'
+                : FACTIONS[G.faction].icon,
   );
   $('#over').classList.toggle('won', kind === 'won' || kind === 'escaped');
   {
@@ -41421,9 +41994,524 @@ function gameOver(kind) {
     UI.almostT = null;
   }
   if (FRI.hold) looseRelease(false);
-  $('#over-load').hidden = !readSave() || kind === 'won';
-  $('#over').hidden = false;
-  audio.sting(kind === 'won' || kind === 'escaped' ? 'onto' : 'caught');
+  endBegin(kind);
+}
+// ───────────────────────── the last picture ─────────────────────────
+// A game that's lost doesn't cut straight to the card. Shot down or killed, you lie where you fell with your eyes shut,
+// the blood spreading and the squad car's lights going round, while your own eyes close on it. Locked up, you're booked
+// and walked down and the door slides shut, and then the days go by in the window, for good. Lost on THEIR last day,
+// the town gets a last picture of its own after yours: what THEY made of Wexley. By then the game is over (G.over) and
+// nothing here touches the simulation: it only moves what you see. A key or a click hurries it on to the card.
+const END = {
+  on: false,
+  kind: '',
+  steps: [],
+  i: 0,
+  t: 0,
+  T: 0,
+  init: false,
+  lid: 0,
+  fade: 0,
+  wide: false,
+  card: false,
+  foe: null,
+  at: null,
+  beat: 0,
+  cellAt: 0,
+  cr: null,
+  yaw0: 0,
+  sfx: 0,
+  cap: 0,
+  mob: [],
+};
+const END_HATCH = [30.5, 15.5]; // lizards: the drain on Main street that opens
+const END_PARK = [37.5, 25.5]; // aliens: where it comes down
+const END_DOOR = [12.5, 13.4]; // zombies: Meridian Records, on Monday
+function endBegin(kind) {
+  const friday = phaseNow() >= WEEK && !['won', 'escaped', 'plan', 'below'].includes(kind);
+  const steps = [];
+  if (kind === 'shot' || kind === 'killed') steps.push('body');
+  else if (kind === 'jailed' || kind === 'prison') steps.push('cell');
+  if (kind === 'plan' || kind === 'below' || friday) steps.push('they');
+  Object.assign(END, { on: true, kind, steps, i: 0, t: 0, T: 0, init: false, lid: 0, fade: 0, card: false, foe: null });
+  END.mob.length = 0;
+  const th = $('#over-them');
+  if (th) {
+    th.hidden = !friday;
+    th.textContent = friday ? ENDINGS.plan[G.faction][1] : '';
+  }
+  if (!steps.length) return endCard();
+  closeMenu();
+  if (UI.caseOpen) closeBoard();
+  $('#hud').hidden = true;
+  HX.letterT = 1;
+}
+function endCard() {
+  if (END.card) return;
+  END.card = true;
+  const o = $('#over');
+  o.classList.toggle('scene', END.steps.length > 0);
+  o.hidden = false;
+  audio.sting(END.kind === 'won' || END.kind === 'escaped' ? 'onto' : 'caught');
+}
+// any key, a click: on to the next picture, or the card
+function endSkip() {
+  if (!END.on || END.card || END.T < 1.5) return; // not the keys you were still mashing when it happened
+  if (END.i < END.steps.length - 1) {
+    END.i++;
+    END.t = 0;
+    END.init = false;
+  } else endCard();
+}
+function endReset() {
+  Object.assign(END, {
+    on: false,
+    kind: '',
+    steps: [],
+    i: 0,
+    t: 0,
+    T: 0,
+    init: false,
+    lid: 0,
+    fade: 0,
+    wide: false,
+    card: false,
+  });
+  END.foe = END.cr = null;
+  END.mob.length = 0;
+  HX.letterT = HX.selT = 0;
+  CELL.forever = false;
+  if (CELL.on) cellExit();
+  CELL.fade = 0;
+  const cap = $('#endcap');
+  if (cap) cap.hidden = true;
+  const o = $('#over');
+  if (o) o.classList.remove('scene');
+}
+// every frame, once it's over
+function endFrame(dt) {
+  if (!END.on || CAP.on) return; // a scene of THEIRS winds itself up first
+  END.t += dt;
+  END.T += dt;
+  const s = END.steps[END.i];
+  if (!s) return endCard();
+  const first = !END.init;
+  END.init = true;
+  const done =
+    s === 'body' ? endBody(dt, END.t, first) : s === 'cell' ? endCell(dt, END.t, first) : endThey(dt, END.t, first);
+  if (done && !END.card) {
+    if (END.i < END.steps.length - 1) {
+      END.i++;
+      END.t = 0;
+      END.init = false;
+    } else endCard(); // the last picture stays on behind the card
+  }
+}
+const endNext = () => END.i < END.steps.length - 1;
+function endStill(c) {
+  c.queue.length = 0;
+  c.path = null;
+  c.moving = false;
+  c.run = false;
+  c.vault = null;
+}
+function endCam(x, z, zoom, dt, k = 1.4) {
+  const e = Math.min(1, dt * k);
+  cam.follow = false;
+  cam.tx += (x - cam.tx) * e;
+  cam.tz += (z - cam.tz) * e;
+  cam.zoomT = zoom;
+}
+// where to point the camera so (x, z) sits right of centre and up a little (kx, ky: shares of the half screen), clear of
+// the card low on the left
+function endAside(x, z, kx, ky) {
+  const rl = Math.hypot(cam.right[0], cam.right[2]) || 1,
+    fl = Math.hypot(cam.fwd[0], cam.fwd[2]) || 1,
+    a = cam.halfW * kx,
+    u = (cam.halfH * ky) / Math.sin(cam.pitch); // along the ground, a step away from the camera climbs the screen
+  return [x - (cam.right[0] / rl) * a - (cam.fwd[0] / fl) * u, z - (cam.right[2] / rl) * a - (cam.fwd[2] / fl) * u];
+}
+// the picture's own lights go in front of the horror layer's (it only draws the first few, nearest first)
+function endLight(x, y, z, r, col) {
+  HX.lights.unshift({ x, y, z, r, col, dark: 0 });
+}
+function endAir(o) {
+  audio.update(
+    Object.assign(
+      {
+        hum: false,
+        outside: true,
+        night: hourF() > 20 || hourF() < 6,
+        stress: 0,
+        rain: G.rainK || 0,
+        car: 0,
+        dread: 0,
+      },
+      o,
+    ),
+  );
+}
+
+// ── shot down, or killed: where you fell
+function endBody(dt, t, first) {
+  const P = PLAYER;
+  if (first) {
+    endStill(P);
+    P.onMap = true;
+    P.pose = 'floorlie';
+    P.anim = 'idle';
+    if (P.poseFn !== CUFFED_POSE) P.poseFn = null;
+    END.at = [P.x - Math.sin(P.dir) * 1.0, P.z - Math.cos(P.dir) * 1.0]; // your chest: lying, you reach back from your feet
+    END.foe =
+      END.kind === 'shot' ? NPC.officer : (G.overBy && (NPC[G.overBy] || CHARS.find((c) => c.id === G.overBy))) || null;
+    if (END.foe && !END.foe.onMap) END.foe = null;
+    if (END.foe) endStill(END.foe);
+    hxDecal(END.at[0], END.at[1], () => 0.16 + 0.8 * sstep(0.3, 7, END.T), [0.4, 0.02, 0.02, 0.95], 4, 1e9, {
+      rot: rand(0, TAU),
+      sx: 1.35,
+      sz: 0.95,
+      seed: rand(1, 9),
+    });
+    BOLTS.length = 0;
+    UI.aim = null;
+    HX.selT = 0.75;
+    cam.yawT = P.dir + (Math.abs(angDiff(cam.yaw, P.dir + Math.PI / 2)) < Math.PI / 2 ? Math.PI / 2 : -Math.PI / 2); // across the body
+    audio.hx('ringing', 0, 1);
+    END.sfx = 0;
+  }
+  const [bx, bz] = END.at;
+  P.shut = t > 1.1;
+  animate(P, dt, dt);
+  // the one who did it comes and stands over you; the officer goes down on one knee
+  const f = END.foe;
+  if (f) {
+    const dx = f.x - bx,
+      dz = f.z - bz,
+      d = Math.hypot(dx, dz) || 1,
+      stand = f.def && f.def.officer ? 1.15 : 1.5;
+    if (t > 0.9 && d > stand + 0.05) {
+      if (hxWalk(f, bx + (dx / d) * stand, bz + (dz / d) * stand, d > 4 ? 2.2 : 1.1, dt)) f.moving = false;
+    } else {
+      f.moving = false;
+      f.tdir = Math.atan2(bx - f.x, bz - f.z);
+      if (f.def && f.def.officer && t > 4 && f.pose !== 'kneel') f.pose = 'kneel';
+    }
+    animate(f, dt, dt);
+  }
+  // everyone else stops, and looks
+  for (const c of CHARS) {
+    if (c === P || c === f || !c.onMap || Math.hypot(c.x - bx, c.z - bz) > 12) continue;
+    if (c.moving || c.path) endStill(c);
+    if (!c.trueForm) c.tdir = Math.atan2(bx - c.x, bz - c.z);
+    animate(c, dt, dt);
+  }
+  // the heart, slower and slower, then nothing
+  const beats = [0.5, 1.5, 2.8, 4.4, 6.3];
+  if (END.sfx < beats.length && t >= beats[END.sfx]) audio.hx('heart', 0, 0.55 - END.sfx++ * 0.09);
+  if (END.kind === 'shot') {
+    const blue = Math.sin(R.time * 9) > 0;
+    endLight(bx + 2.2, 1.8, bz - 1.6, 6.5, blue ? [0.1, 0.22, 0.85] : [0.8, 0.08, 0.06]);
+  }
+  endLight(bx, 2.4, bz, 3.6, [0.55, 0.52, 0.47]); // a streetlamp's worth, so the dark doesn't take you before your eyes do
+  endAir({ stress: 0 });
+  // your eyes: they go, come open a crack for one more look, and go
+  const close = 6.6;
+  if (t < close) {
+    endCam(bx, bz, t < 2.4 ? 2.2 : lerp(2.2, 1.55, sstep(2.4, close, t)), dt, 1.6);
+    cam.yawT += dt * 0.03;
+    END.lid =
+      t < 2.4
+        ? 0
+        : t < 4.2
+          ? 0.78 * sstep(2.4, 4.2, t)
+          : t < 4.9
+            ? 0.78 - 0.3 * sstep(4.2, 4.9, t)
+            : 0.48 + 0.52 * sstep(4.9, close, t);
+    return false;
+  }
+  if (endNext()) {
+    END.lid = 1;
+    return t > close + 0.3;
+  }
+  // and then the street from a little way off, drained of colour: you, and whoever stands over you, clear of the card
+  const [cx, cz] = endAside(bx, bz, 0.42, 0.24);
+  if (END.lid > 0) {
+    END.lid = 0;
+    END.fade = 1;
+    cam.zoom = cam.zoomT = 2.7;
+    cam.tx = cx;
+    cam.tz = cz;
+  }
+  endCam(cx, cz, 2.7, dt, 3);
+  END.fade = 1 - sstep(close + 0.2, close + 1.6, t);
+  cam.yawT += dt * 0.02;
+  return t > close + 1.4;
+}
+
+// ── locked up: booked, walked down, the door; then the days in the window
+function endCell(dt, t, first) {
+  const P = PLAYER;
+  if (first) {
+    END.cellAt = 0;
+    END.beat = P.onMap ? 1.5 : 0; // out in the street: a moment of his hand on you first
+    if (P.onMap) {
+      endStill(P);
+      P.pose = 'stand';
+      P.poseFn = CUFFED_POSE;
+    }
+    BOLTS.length = 0;
+    UI.aim = null;
+  }
+  if (t < END.beat) {
+    endCam(P.x, P.z, 2.3, dt, 2);
+    animate(P, dt, dt);
+    const off = NPC.officer;
+    if (off && off.onMap && Math.hypot(off.x - P.x, off.z - P.z) < 3) {
+      off.moving = false;
+      off.tdir = Math.atan2(P.x - off.x, P.z - off.z);
+      animate(off, dt, dt);
+    }
+    END.fade = sstep(END.beat - 0.55, END.beat, t);
+    endAir();
+    return false;
+  }
+  if (!CELL.forever) {
+    CELL.forever = true;
+    CELL.book = true;
+    P.onMap = false;
+    P.poseFn = null;
+    END.fade = 0;
+    HX.letterT = 0; // the cells have their own frame
+  }
+  if (CELL.phase === 'held' && CELL.clang) {
+    if (!END.cellAt) END.cellAt = t;
+    G.t += lerp(0, 900, sstep(0.6, 3.6, t - END.cellAt)) * dt; // up to fifteen hours a second, and it doesn't stop
+    if (endNext()) END.fade = sstep(5.2, 5.9, t - END.cellAt);
+    return t - END.cellAt > (endNext() ? 5.9 : 4.2);
+  }
+  return false;
+}
+
+// ── THEIR last day, lost: what THEY made of Wexley
+function endThey(dt, t, first) {
+  const fac = G.faction;
+  if (first) theySet(fac);
+  END.fade = 1 - sstep(0.1, 1.6, t);
+  cam.yaw += dt * 0.035;
+  cam.yawT = cam.yaw;
+  [cam.tx, cam.tz] = endAside(END.at[0], END.at[1], 0.2, 0.04);
+  if (fac === 'aliens') theyAliens(dt, t);
+  else if (fac === 'lizards') theyLizards(dt, t);
+  else theyZombies(dt, t);
+  for (const a of END.mob) if (!a.hide) hxAnimate(a, dt); // the horror layer stands still once it's over: these go on
+  const cap = $('#endcap');
+  if (cap && END.cap === 0 && t > 1.2) {
+    END.cap = 1;
+    cap.querySelector('b').textContent = THEY_WON[fac][0];
+    cap.querySelector('span').textContent = THEY_WON[fac][1];
+    cap.hidden = false;
+    cap.classList.remove('go');
+    void cap.offsetWidth;
+    cap.classList.add('go');
+  }
+  if (cap && t > 6.2) cap.hidden = true;
+  return t > 8.6;
+}
+// the stage: nobody left of the day, all of the town in view, the hour THEY took it
+function theySet(fac) {
+  if (CELL.on) {
+    CELL.forever = false;
+    cellExit();
+  }
+  CELL.fade = 0;
+  END.lid = 0;
+  END.fade = 1;
+  END.wide = true;
+  END.cap = 0;
+  for (const c of CHARS) c.onMap = false;
+  CARS.length = 0;
+  BOLTS.length = 0;
+  UI.aim = null;
+  HX.actors.length = 0;
+  HX.decals.length = 0;
+  HX.crafts.length = 0;
+  HX.far.length = 0;
+  HX.scene = null;
+  HX.letterT = 1;
+  HX.selT = 0;
+  explored.fill(1);
+  visTarget.fill(1);
+  visCur.fill(1);
+  MAPS.dirty = true;
+  lightT = 0;
+  lastPlayerCell = -1;
+  G.t = fac === 'zombies' ? (WEEK + 2) * 1440 + 8 * 60 + 40 : WEEK * 1440 - 1;
+  G.rainK = G.wet = fac === 'zombies' ? 0.25 : 0.55;
+  END.mob.length = 0;
+  const at = (END.at = fac === 'aliens' ? END_PARK : fac === 'lizards' ? END_HATCH : END_DOOR);
+  cam.follow = false;
+  cam.zoom = cam.zoomT = fac === 'aliens' ? 10.5 : 8.5;
+  END.yaw0 = cam.yaw = cam.yawT = fac === 'zombies' ? -0.35 : 0.5;
+  // the town: everyone who's left of it, and THEM as THEY really are
+  const folk = CAST.filter(
+    (d) => !d.never && !G.them.includes(d.id) && NPC[d.id] && !NPC[d.id].slain && d.id !== 'officer',
+  )
+    .map((d) => NPC[d.id])
+    .concat(NPC.officer && !NPC.officer.slain ? [NPC.officer] : []);
+  const them = G.them.map((id) => NPC[id]).filter((n) => n && !n.slain);
+  const spot = (cx, cz, r0, r1) => {
+    for (let k = 0; k < 40; k++) {
+      const a = rand(0, TAU),
+        r = rand(r0, r1),
+        x = Math.floor(cx + Math.sin(a) * r),
+        z = Math.floor(cz + Math.cos(a) * r);
+      if (hxOpen(x, z) && z < TOWN_H) return [x + rand(0.25, 0.75), z + rand(0.25, 0.75)];
+    }
+    return [cx + rand(-r1, r1), cz];
+  };
+  folk.forEach((n, i) => {
+    let p;
+    if (fac === 'aliens')
+      p = i < 3 ? spot(at[0], at[1], 3.6, 6) : spot(at[0], at[1], 7, 15); // a few nearly there
+    else if (fac === 'lizards') {
+      const side = i % 2 ? 1 : -1;
+      p = [at[0] + side * (3 + i * 1.6), 14.6 + (i % 3) * 0.7];
+    } else p = [at[0] + 3.5 + i * 1.6, 14.4 + (i % 3) * 0.9];
+    const a = hxActor(n.look, p[0], p[1], { name: n.name, shadow: 0.55, pace: rand(0.85, 1.15), delay: rand(0, 1.6) });
+    if (fac === 'aliens') a.trance = true;
+    if (fac === 'zombies') {
+      a.thrall = 'zombies';
+      a.poseFn = thrallPose;
+    }
+    a.dir = a.tdir = Math.atan2(at[0] - a.x, at[1] - a.z);
+    END.mob.push(a);
+  });
+  them.forEach((n, i) => {
+    let p;
+    if (fac === 'aliens') {
+      const a = (i / Math.max(1, them.length)) * TAU + 0.6;
+      p = [at[0] + Math.sin(a) * 3.6, at[1] + Math.cos(a) * 3.6];
+    } else if (fac === 'lizards') p = [at[0] + (i % 2 ? 1.7 : -1.7), at[1] + (i > 1 ? 1.2 : -1.0)];
+    else p = [at[0] + 4.5 + i * 2.6, 15.9];
+    const a = hxActor(n.look, p[0], p[1], { name: n.name, shadow: 0.6, them: true, pace: 1, delay: 0 });
+    a.tell = { type: 'true', t: TF_CHANGE, fac };
+    a.dir = a.tdir =
+      fac === 'aliens'
+        ? Math.atan2(a.x - at[0], a.z - at[1])
+        : fac === 'lizards'
+          ? Math.atan2(at[0] - a.x, 0.001)
+          : Math.PI;
+    END.mob.push(a);
+  });
+  if (fac === 'aliens') {
+    END.cr = { x: at[0], y: 7.5, z: at[1], spin: 0, glow: 1, tilt: 0.04 };
+    HX.crafts.push(END.cr);
+    audio.hx('thrum', 0, 0.9);
+  } else if (fac === 'lizards') {
+    // the drain, open, and the warm coming up out of it
+    hxDecal(at[0], at[1], 0.95, [0.012, 0.004, 0.002, 0.96], 0, 1e9);
+    audio.hx('hiss', 0, 0.6);
+  } else audio.hx('groan', 0, 0.7);
+  END.sfx = 0;
+}
+// aliens: it sits over the park and they walk into the light, heads down, and go up
+function theyAliens(dt, t) {
+  const [cx, cz] = END_PARK,
+    cr = END.cr;
+  cr.spin += dt * 0.5;
+  cr.y = 7.5 + Math.sin(t * 0.8) * 0.15;
+  HX.beams.push({
+    x: cx,
+    y: cr.y - 0.3,
+    z: cz,
+    r: 2.6,
+    h: cr.y - 0.3,
+    col: [0.42, 1, 0.74],
+    a: 0.6 + 0.08 * Math.sin(t * 3),
+  });
+  endLight(cx, 1.2, cz, 14, [0.45, 1.3, 0.95]);
+  endLight(cx, 5, cz, 8, [0.3, 0.9, 0.6]);
+  for (const a of END.mob) {
+    if (a.them || a.hide) continue;
+    const d = Math.hypot(a.x - cx, a.z - cz);
+    if (t < a.delay) continue;
+    if (d > 1.6 && !a.up) hxWalk(a, cx, cz, 0.62 * a.pace, dt);
+    else {
+      // under it: off the ground, and up
+      a.up = true;
+      a.moving = false;
+      a.y = (a.y || 0) + dt * (0.5 + a.y * 0.35);
+      a.ghost = clamp(a.y / 6, 0, 0.8);
+      if (a.y > 7) a.hide = true;
+    }
+  }
+  if (t > 3.2 * (END.sfx + 1)) {
+    END.sfx++;
+    audio.hx('thrum', 0, 0.7);
+  }
+  endAir({ night: true, dread: 0.5 });
+}
+// lizards: the streetlamps go out, the drain on Main street glows, and they go down it one after another
+function theyLizards(dt, t) {
+  const [hx, hz] = END_HATCH,
+    pul = 0.8 + 0.2 * Math.sin(t * 2.3);
+  for (const st of HX.lampSt.values()) st.dead = 2;
+  HX.blood = 0.9; // the blood-night look, held (the horror layer lets it go once it's over)
+  endLight(hx, 0.3, hz, 9 * pul, [3.4 * pul, 0.95 * pul, 0.22]);
+  endLight(hx - 13, 0.6, hz, 11, [1.1, 0.32, 0.08]);
+  endLight(hx + 13, 0.6, hz, 11, [1.1, 0.32, 0.08]);
+  for (let i = 0; i < 9; i++) {
+    const ph = (t * (0.28 + (i % 3) * 0.06) + i / 9) % 1,
+      a = i * 2.4 + t * 0.4;
+    hxGlint(
+      hx + Math.sin(a) * 0.5,
+      0.1 + ph * 2.6,
+      hz + Math.cos(a) * 0.4,
+      0.1 + 0.06 * (1 - ph),
+      [1, 0.42, 0.12],
+      (1 - ph) * 0.85,
+    );
+  }
+  for (const a of END.mob) {
+    if (a.hide) continue;
+    if (a.them) {
+      a.tdir = Math.atan2(hx - a.x, hz - a.z);
+      continue;
+    }
+    if (t < a.delay) continue;
+    const d = Math.hypot(a.x - hx, a.z - hz);
+    if (d > 0.35 && !a.down) hxWalk(a, hx, hz, 0.75 * a.pace, dt);
+    else {
+      a.down = true;
+      a.moving = false;
+      a.y = (a.y || 0) - dt * 0.9;
+      if (a.y < -2) a.hide = true;
+    }
+  }
+  if (t > 2.6 * (END.sfx + 1)) {
+    END.sfx++;
+    audio.hx(END.sfx % 2 ? 'hiss' : 'drip', 0, 0.5);
+  }
+  endAir({ night: true, dread: 0.35 });
+}
+// zombies: Monday morning, and everyone comes in to work
+function theyZombies(dt, t) {
+  const [dx, dz] = END_DOOR;
+  for (const a of END.mob) {
+    if (t < a.delay) continue;
+    const i = END.mob.indexOf(a),
+      tx = dx + (i % 4) * 0.8 - 1.2,
+      tz = dz + Math.floor(i / 4) * 0.75 + 0.3;
+    if (!hxWalk(a, tx, tz, (a.them ? 0.55 : 0.5) * a.pace, dt)) continue;
+    a.moving = false;
+    a.tdir = Math.PI; // facing the doors, waiting for them to open
+  }
+  if (t > 2.4 * (END.sfx + 1)) {
+    END.sfx++;
+    const a = pick(END.mob);
+    if (a) hxSound('groan', a.x, a.z, 0.6);
+  }
+  endAir({ night: false, dread: 0.2 });
 }
 // ───────────────────────── THEIR last day: hell let loose ─────────────────────────
 // Friday. THEY don't hide any more, nothing waits for the dark, and no door keeps THEM out. Whoever of THEM is left comes
@@ -41998,7 +43086,7 @@ function hurrying() {
 // did: one of THEM loose close by, a blow on its way, someone running you down, anything in the air
 function fightOn() {
   const P = PLAYER;
-  if (HUNT.on || ARREST.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
+  if (HUNT.on || ARREST.on || ONRUN.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
   if (P.queue[0] && P.queue[0].swing) return true;
   for (const c of CHARS) {
     if (c.isPlayer || !c.onMap) continue;
@@ -42227,7 +43315,7 @@ function worldStep(dtReal, preview) {
     lightT = 0.08;
     lastPlayerCell = cell;
     computeLight(PLAYER.onMap ? Math.floor(PLAYER.x) : null, Math.floor(PLAYER.z));
-    if (!preview) computeVision(Math.floor(ex), Math.floor(ez));
+    if (!preview && !END.wide) computeVision(Math.floor(ex), Math.floor(ez)); // the town's last picture sees it all
     MAPS.dirty = true;
   }
   if (!preview && smoothVision(dtReal)) MAPS.dirty = true;
@@ -42321,6 +43409,7 @@ function frame(now) {
     if (!preview)
       try {
         looseFrame(dtReal);
+        endFrame(dtReal); // lost: the last picture, before the card
       } catch (e) {
         console.error(e);
       }
@@ -42387,9 +43476,6 @@ function boot() {
       startPlaying();
       setTimeout(() => ui.dayCard(), 250);
     }
-  };
-  $('#over-load').onclick = () => {
-    if (loadGame(readSave())) startPlaying();
   };
   $('#over-new').onclick = () => {
     $('#over').hidden = true;

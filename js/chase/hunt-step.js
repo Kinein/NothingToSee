@@ -16,6 +16,7 @@ function huntFrame(dtR) {
   }
   try {
     arrestFrame();
+    runFrame(dtR);
   } catch (e) {
     console.error(e);
   }

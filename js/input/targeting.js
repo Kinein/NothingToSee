@@ -89,7 +89,8 @@ function pickFocus() {
 function updateFocus(dtReal) {
   routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
-  const live = G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping;
+  const live =
+    G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping && !cuffedNow();
   if (!live) UI.focus = null;
   else if (!UI.menuOpen && UI.focusT <= 0) {
     UI.focusT = 0.1;
@@ -150,6 +151,7 @@ function anchorXY(an) {
 // E / Space
 function interact() {
   if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !PLAYER.onMap || G.away || ARREST.on) return;
+  if (cuffedNow()) return;
   if (huntKey()) return; // tear free, get up, climb out
   if (UI.menuOpen) {
     closeMenu();
@@ -180,6 +182,7 @@ function initInput() {
   };
   cv.addEventListener('pointerdown', (e) => {
     audio.init();
+    if (G && G.over) endSkip();
     cv.setPointerCapture(e.pointerId);
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptrs.size === 1)
@@ -275,7 +278,14 @@ function initInput() {
       else if (!$('#help').hidden) toggleHelp();
       return;
     }
-    if (G.over) return;
+    if (G.over) {
+      if (!e.repeat) endSkip(); // the last picture: on to the card
+      return;
+    }
+    if (cuffedNow() && (k === 'e' || k === ' ' || k === 'f')) {
+      if (!e.repeat) ui.float(PLAYER, 'Cuffed', 'bad');
+      return;
+    }
     if (UI.menuOpen) {
       if (DIRK[k]) {
         e.preventDefault();

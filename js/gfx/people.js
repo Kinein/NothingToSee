@@ -348,6 +348,11 @@ function drawPerson(c) {
         eg,
       );
       drawSpec = 0;
+    } else if (c.shut) {
+      // shut: the lid all the way down, and the line of the lashes
+      const ez = faceZ(s * 0.0295, 0.12);
+      part(Hd, s * 0.0295, 0.1195, ez + 0.004, 0.031, 0.019, 0.019, 'sph', mul3(hskin, 0.86));
+      part(Hd, s * 0.0295, 0.1125, ez + 0.019, 0.026, 0.0035, 0.004, 'box', mul3(hskinD, 0.45));
     } else {
       const ez = faceZ(s * 0.0295, 0.12);
       let wc = ck > 0 ? mix3(EYE_WHITE, [0.6, 0.18, 0.12], ck) : EYE_WHITE;
@@ -595,6 +600,10 @@ function drawPerson(c) {
       else if (pp === 'raygun') {
         part(Fa, 0, -0.33 * h, 0.07, 0.055, 0.075, 0.2, 'rbox', [0.3, 0.33, 0.35]);
         part(Fa, 0, -0.32 * h, 0.19, 0.035, 0.035, 0.035, 'sph', [0.5, 1, 0.7], [0.45, 1, 0.65]);
+      } else if (pp === 'pistol') {
+        // the service pistol: a black slide over the grip, the barrel out past the fingers
+        part(Fa, 0, -0.335 * h, 0.04, 0.035, 0.07, 0.05, 'rbox', [0.06, 0.06, 0.065]);
+        part(Fa, 0, -0.31 * h, 0.1, 0.04, 0.045, 0.17, 'box', [0.09, 0.09, 0.1]);
       } else if (pp === 'bat') {
         part(Fa, 0, -0.33 * h - 0.2, 0.03, 0.04, 0.42, 0.04, 'cyl', [0.42, 0.3, 0.18]);
         part(Fa, 0, -0.33 * h - 0.38, 0.03, 0.055, 0.12, 0.055, 'cyl', [0.38, 0.27, 0.16]);

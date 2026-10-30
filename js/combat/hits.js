@@ -52,6 +52,7 @@ function knockOut(byThem) {
       G.loose.upUsed = 1;
       return;
     }
+    G.overBy = foe ? foe.id : null; // it stands over you in the last picture (game/endings)
     return gameOver('killed');
   }
   if (byThem && foe && foe.isThem && (huntDown(foe) || capture('beaten', { foe, reason: 'beaten' }))) return; // THEY don't leave you lying there: get up before it gets to you

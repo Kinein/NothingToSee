@@ -1,6 +1,6 @@
 //@ combat/bolts — Projectiles THEY shoot
 //@ Defines: BOLTS, fireBolt, boltTick, boltHits
-//@ Uses:    sim/core, gfx/renderer, data/tuning, world/grid, core/util, audio/sound, world/light-map, town/fleeing, chase/hunt, taken/taken, …
+//@ Uses:    sim/core, data/tuning, gfx/renderer, world/grid, core/util, audio/sound, world/light-map, town/on-the-run, town/fleeing, chase/hunt, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── what THEY shoot at you: a bolt you can see coming, flying at where you stood when it fired. Get off the line.
 const BOLTS = [];
@@ -35,7 +35,7 @@ function boltTick(dt) {
   const P = PLAYER;
   for (let i = BOLTS.length - 1; i >= 0; i--) {
     const b = BOLTS[i],
-      step = CTRL.boltSpeed * dt,
+      step = CTRL.boltSpeed * (b.bullet ? RESIST.speed : 1) * dt,
       k = Math.max(1, Math.ceil(step / 0.12));
     let gone = false;
     b.age += dt;
@@ -57,6 +57,7 @@ function boltTick(dt) {
   }
 }
 function boltHits(b) {
+  if (b.bullet) return bulletHits(b); // the officer's (town/on-the-run)
   const n = b.by;
   R.flash = 0.7;
   if (b.abduct && n && n.trueForm) {

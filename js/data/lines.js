@@ -197,6 +197,14 @@ const COP_CATCH = ['That’s it. Hands behind your back.', 'I told you. You’re
 const COP_SLIP  = ['Hold STILL!', 'Get back here!', 'Slippery, are we?', 'You’re only making it worse!'];
 const COP_HIT   = ['Right. That’s assaulting an officer.', 'You did NOT just do that.', 'On the ground. Now.'];
 const COP_QUIT  = ['Fine. FINE. Next time.', 'I’m too old for this.', 'You’ll keep. I know where you live.'];
+// running from an arrest (town/on-the-run): the shout when you break away, the warning before the first shot, what he says
+// down the sights, the dive, losing you; and once you're wanted, what he shouts when he spots you
+const COP_BOLT  = ['Hey! HEY!', 'Don’t you DARE!', 'Get back here!'];
+const COP_GUN   = ['Stop or I shoot!', 'Last warning! STOP!', 'Freeze! I WILL fire!'];
+const COP_AIM   = ['Don’t move.', 'Hands where I can see them!', 'On the ground!'];
+const COP_DIVE  = ['Got you!', 'Gotcha!', 'Down you go!'];
+const COP_LOST  = ['Where the hell…', 'Come out! I know you’re here!', 'Damn it.'];
+const COP_SPOT  = ['YOU! Stop right there!', 'There you are!', 'Police! Don’t move!'];
 // the truth, beaten out of someone on the blow before they go down (combat/brawl), or when THEY give in
 // (play/confront): the same words either way
 const CONFESS = {
@@ -235,11 +243,20 @@ const ENDINGS = {
   below: ['Taken below.', 'Under Wexley it is warm and dark. Nobody comes down here.'],
   escaped: ['Out.', 'You ran until Wexley was a glow behind the hills. You never went back. Some nights it still looks for you.'],
   prison: ['Locked up.', 'Three assaults. The judge didn’t want to hear about THEM.'],
+  jailed: ['Locked up.', 'Resisting arrest, then running from it. The judge didn’t want to hear about THEM. The door stays shut.'],
+  shot: ['Shot.', 'Resisting arrest, the report says. Nobody asks what you were running from.'],
   plan: {
     aliens: ['It’s done.', 'The lights came down over Wexley. Nobody looked up.'],
     lizards: ['It’s done.', 'Wexley got very warm, and very quiet.'],
     zombies: ['It’s done.', 'Everyone came in on Monday. Nobody wanted lunch.'],
   },
+};
+// lost on THEIR last day: after your own last picture the town gets one (game/endings), with this caption over it.
+// The words under it on the card are ENDINGS.plan's.
+const THEY_WON = {
+  aliens: ['Midnight', 'Friday · the park'],
+  lizards: ['Midnight', 'Friday · Main street'],
+  zombies: ['Monday', '08:40 · Meridian Records'],
 };
 // a fight in the street (combat/brawl): onlookers egging it on, backing off, calling it in
 const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];

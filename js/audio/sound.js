@@ -672,6 +672,39 @@ const audio = (() => {
               x.stop(t + 0.25);
             });
           break;
+        case 'shot': {
+          // a pistol in the street: the crack, the thump under it, and the houses throwing it back
+          nz(filt('highpass', 1800, 0.7, g(0.7, 0.001, 0.07)), 0.1);
+          nz(filt('lowpass', 900, 0.8, g(0.55, 0.002, 0.22)), 0.3);
+          osc('sine', 120, g(0.5, 0.002, 0.18), 0.2, 42);
+          for (const [d, k] of [
+            [0.16, 0.22],
+            [0.34, 0.1],
+          ])
+            blip(d, (t) => {
+              const s2 = ctx.createBufferSource();
+              s2.buffer = noiseBuf;
+              const f = ctx.createBiquadFilter();
+              f.type = 'bandpass';
+              f.frequency.value = 700;
+              f.Q.value = 0.6;
+              const gg = ctx.createGain();
+              gg.gain.setValueAtTime(0.0001, t);
+              gg.gain.exponentialRampToValueAtTime(k * vol, t + 0.01);
+              gg.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+              s2.connect(f);
+              f.connect(gg);
+              gg.connect(o);
+              s2.start(t, Math.random());
+              s2.stop(t + 0.35);
+            });
+          break;
+        }
+        case 'ringing':
+          // the ears after it: one high note, going away
+          osc('sine', 4100, g(0.05, 0.05, 3.6), 3.8, 3900);
+          osc('sine', 4170, g(0.025, 0.05, 3.2), 3.4, 3990);
+          break;
       }
     },
     // THEIR places' own air: a drone in the craft, running water in the drains, flies and something breathing in the nest

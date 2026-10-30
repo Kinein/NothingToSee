@@ -52,6 +52,7 @@ them/moves.js                    # THEIR morning moves: the Bought, Scatter, Des
 them/servants.js                 # THEIR people: who THEY own, THEIR mark from day 4, the truth beaten out
 town/arrest.js                   # Being arrested, shown on the map
 town/cell.js                     # Held in a cell
+town/on-the-run.js               # Running from an arrest: the break, his gun, caught or lost; wanted after that
 town/suspicion.js                # Suspicion and danger per person
 town/fleeing.js                  # Fleeing to hideouts
 them/true-form.js                # True form: the change, then hunt or flee
@@ -116,6 +117,7 @@ chase/hunt-end.js                # How a hunt ends, and how it looks and sounds
 chase/flee.js                    # One of THEM running from you
 chase/fbi.js                     # The grey cars: the FBI takes one that gave up
 game/state.js                    # Game state, new game, saving, endings
+game/endings.js                  # The last picture: where you fell, the cell for good, what THEY made of Wexley
 game/last-day.js                 # Friday: hell let loose
 game/loop.js                     # Per-frame simulation, main loop, boot
 

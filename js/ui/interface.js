@@ -455,9 +455,12 @@ function updateFx(dtReal) {
       UI.aimEl.innerHTML = '<i></i>';
       $('#fx').appendChild(UI.aimEl);
     }
-    const [x, y] = project(PLAYER.x, 1.3, PLAYER.z);
+    const [x, y] = project(PLAYER.x, 1.3, PLAYER.z),
+      A = UI.aim;
     UI.aimEl.hidden = false;
     UI.aimEl.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    UI.aimEl.classList.toggle('gun', !!A.gun); // the officer's: a ring closing as he aims (town/on-the-run)
+    if (A.gun) UI.aimEl.style.setProperty('--k', clamp((G.t - A.t0) / A.dur, 0, 1).toFixed(3));
   } else if (UI.aimEl) UI.aimEl.hidden = true;
   if (UI.dayT != null) {
     UI.dayT += dtReal;

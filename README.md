@@ -54,7 +54,7 @@ other module, exactly as in the original single file:
 | THEM | `them/` `combat/` `horror/` | THEIR week, tells, evidence cards, awareness, true forms, night attacks, the office at night; bolts, hits, blows out in the street, thrown furniture and swarms; the horror director, scenes, half and tenth forms, encounters |
 | Player verbs | `play/` | Items, stashes, traps, raids, snooping, false cards, the confrontation, photos, advice |
 | Set pieces | `taken/` `chase/` | Being taken to THEIR lair and getting out; THEY come for you, chases, the FBI, Friday |
-| Shell | `ui/` `game/` | Menus, notes, HUD, pie menu, case board; game state, saving, endings, the main loop and `boot()` |
+| Shell | `ui/` `game/` | Menus, notes, HUD, pie menu, case board; game state, saving, endings and their last pictures, the main loop and `boot()` |
 
 ## Where things are
 
@@ -70,7 +70,9 @@ other module, exactly as in the original single file:
 | What E does | input/targeting.js (`interact`), then ui/menus.js |
 | Fights | them/true-form.js, combat/*.js |
 | Friday | game/last-day.js (`looseBegin`) |
-| Saving, new game, loading | game/state.js (`saveGame`, `newGame`, `loadGame`) |
+| Saving, new game, loading | game/state.js (`saveGame`, `newGame`, `loadGame`); a lost game deletes the save (`gameOver`) |
+| Running from an arrest, the officer's gun, being wanted | town/on-the-run.js (`runForIt`, `pursuitBegin`, `wantedTick`); numbers in `RESIST` |
+| The last picture before the end card | game/endings.js (`endBegin`, `endBody`, `endCell`, `endThey`) |
 | The frame loop, boot | game/loop.js (`frame`, `boot`) |
 | What gets drawn each frame | gfx/frame.js (`renderFrame`) |
 | HUD look | shell/styles.css, ui/hud.js |

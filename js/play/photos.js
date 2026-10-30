@@ -125,7 +125,7 @@ function photoCone() {
 }
 function playerPhoto() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on) return;
+  if (!G || !G.started || G.over || !P.onMap || UI.caseOpen || UI.scene || ARREST.on || cuffedNow()) return;
   const cur = P.queue[0];
   if (cur && (cur.interruptible === false || cur.photo)) return;
   if (shaky()) return shakenNote('Your hands shake too much for a photo'); // under 40: you can still take things

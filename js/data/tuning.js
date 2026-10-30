@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, NEEDS, PSY, …
+//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, RESIST, NEEDS, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -64,6 +64,15 @@ const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies:
 // Step out of it and you slip him; he stumbles for `stumble`. Slip him `slips` times and he gives up, winded.
 // Out of reach for `giveUp` minutes (a locked door), he takes you anyway.
 const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk: 5, grab: 0.8, hold: 1.0, lunge: 0.5, stumble: 2.2, slips: 3 };
+// running from an arrest (town/on-the-run): a fresh Shift while the cuffs go on or on the walk to the car, and you're off.
+// He stands `stumble` game minutes where you shoved him, then runs at `run` (× anybody's run): quicker than you sprint in
+// cuffs (`cuffed` × your sprint), a little slower than you sprint free. He holds fire for `first` minutes (the warning),
+// then with you in sight `near`…`far` tiles off he stops and aims for `aim` (the ring closes on you: get off the line)
+// and fires: a bullet `speed` × a bolt's pace, `hit` off your health, `cd` minutes to the next. Within `reach` he dives
+// for you (the patch on the ground, as ever): in it, you're caught. He sees you out to `sight`. Out of it, he runs to
+// where he saw you last and looks round there for `look`; unseen for `lose` all told, he's lost you. Then you're wanted:
+// he comes looking once a day between the `daily` hours, and the moment he spots you (`spot` tiles).
+const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far: 12, aim: 2.4, speed: 2.6, hit: 40, cd: 4.5, reach: 1.15, sight: 13, look: 7, lose: 16, daily: [9, 17], spot: 9 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [

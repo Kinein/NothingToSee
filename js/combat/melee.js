@@ -229,6 +229,7 @@ function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
   if (G.loose && n.thrall) return looseHitHelper(n, true);
   if (n.def.officer && !n.trueForm && !G.loose) {
+    if (ONRUN.on && ONRUN.off === n) return runStruck(n);
     ui.say(n, pick(COP_HIT), 2.6);
     return arrestStart(n); // no warning for that
   }

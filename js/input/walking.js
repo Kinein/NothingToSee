@@ -493,11 +493,14 @@ function driveTick(dt) {
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
-  const slow = (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow(),
+  const slow =
+      (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) *
+      huntSlow() *
+      (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = key ? speed * dt : Math.min(speed * dt, ROUTE.left); // a route stops on its turns, not past them
-  if (key && run && !swinging && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+  if (key && run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }

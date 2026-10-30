@@ -12,6 +12,7 @@
 const CELL = {
   on: false,
   book: false, // set by the arrest: booked on the way in (a save loaded mid-stay starts you on the bench)
+  forever: false, // locked up for good: the last picture of the game (game/endings), and the door doesn't open again
   phase: null,
   t: 0,
   pt: 0,
@@ -77,7 +78,7 @@ const CELL_COP_POSE = (T, a) => {
 };
 
 function cellFrame(dt) {
-  const want = !!(G && G.started && !G.over && G.away && G.away.kind === 'held');
+  const want = !!(G && G.started && (CELL.forever || (!G.over && G.away && G.away.kind === 'held')));
   if (want && !CELL.on && !CELL.leave) cellEnter();
   if (!CELL.on) {
     CELL.fade = Math.max(0, CELL.fade - dt * 2);

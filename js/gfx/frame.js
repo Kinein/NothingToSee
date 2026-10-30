@@ -1,6 +1,6 @@
 //@ gfx/frame — renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 //@ Defines: renderFrame, drawMask, pass, bindTex, bloomPasses, composite
-//@ Uses:    gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, …
+//@ Uses:    gfx/gl, gfx/renderer, sim/core, gfx/draw-helpers, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, …
 //@ (header made by tools/map.js; stripped by build.py)
 function renderFrame() {
   resizeCanvas();
@@ -145,7 +145,7 @@ function renderFrame() {
     console.error(e);
   }
   const P = PLAYER;
-  if (P && P.onMap && G.started) {
+  if (P && P.onMap && G.started && !G.over) {
     if (P.path && P.moving) {
       let px = P.x,
         pz = P.z,
@@ -267,8 +267,11 @@ function renderFrame() {
         z = b.z - b.dz * back;
       if (b.d - back < 0) break;
       gl.uniform3fv(GL.U.uCenter, [x, 1.2, z]);
-      gl.uniform1f(GL.U.uSize, (k ? 0.5 : 0.75) * (1 - k * 0.15));
-      gl.uniform3fv(GL.U.uColor, k ? [1, 0.18, 0.1] : [1, 0.75, 0.6]);
+      gl.uniform1f(GL.U.uSize, (k ? 0.5 : 0.75) * (1 - k * 0.15) * (b.bullet ? 0.45 : 1));
+      gl.uniform3fv(
+        GL.U.uColor,
+        b.bullet ? (k ? [1, 0.62, 0.25] : [1, 0.95, 0.8]) : k ? [1, 0.18, 0.1] : [1, 0.75, 0.6],
+      );
       gl.uniform1f(GL.U.uAlpha, (k ? 0.7 : 1) * (1 - k * 0.17));
       gl.bindVertexArray(PRIM.quad.vao);
       gl.drawElements(gl.TRIANGLES, PRIM.quad.count, gl.UNSIGNED_INT, 0);
@@ -395,13 +398,13 @@ function composite() {
     gl.uniform1f(u.uSat, 0.8);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
-    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade));
+    if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));
     if (u.uStage) {
       gl.uniform1f(u.uStage, R.stageK || 0);
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
     if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0)); // a scene's lids, or yours, passed out
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid)); // a scene's lids, or yours, passed out or for good
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
     if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
     gl.uniform1f(u.uNight, HX.night);

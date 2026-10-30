@@ -1,6 +1,6 @@
 //@ game/loop — Per-frame simulation, main loop, boot
 //@ Defines: hurrying, fightOn, stirNear, clockSpeed, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
-//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, sim/actions, game/state, taken/taken, world/grid, data/tuning, core/util, …
+//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, sim/actions, taken/taken, world/grid, data/tuning, game/state, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── per-frame simulation
 let lightT = 0,
@@ -26,7 +26,7 @@ function hurrying() {
 // did: one of THEM loose close by, a blow on its way, someone running you down, anything in the air
 function fightOn() {
   const P = PLAYER;
-  if (HUNT.on || ARREST.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
+  if (HUNT.on || ARREST.on || ONRUN.on || BOLTS.length || THROWN.length || SWARMS.length) return true;
   if (P.queue[0] && P.queue[0].swing) return true;
   for (const c of CHARS) {
     if (c.isPlayer || !c.onMap) continue;
@@ -255,7 +255,7 @@ function worldStep(dtReal, preview) {
     lightT = 0.08;
     lastPlayerCell = cell;
     computeLight(PLAYER.onMap ? Math.floor(PLAYER.x) : null, Math.floor(PLAYER.z));
-    if (!preview) computeVision(Math.floor(ex), Math.floor(ez));
+    if (!preview && !END.wide) computeVision(Math.floor(ex), Math.floor(ez)); // the town's last picture sees it all
     MAPS.dirty = true;
   }
   if (!preview && smoothVision(dtReal)) MAPS.dirty = true;
@@ -349,6 +349,7 @@ function frame(now) {
     if (!preview)
       try {
         looseFrame(dtReal);
+        endFrame(dtReal); // lost: the last picture, before the card
       } catch (e) {
         console.error(e);
       }
@@ -415,9 +416,6 @@ function boot() {
       startPlaying();
       setTimeout(() => ui.dayCard(), 250);
     }
-  };
-  $('#over-load').onclick = () => {
-    if (loadGame(readSave())) startPlaying();
   };
   $('#over-new').onclick = () => {
     $('#over').hidden = true;

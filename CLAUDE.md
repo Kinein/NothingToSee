@@ -68,7 +68,8 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | What an NPC decides each frame | `js/town/npc-update.js` (`npcUpdate`, `npcThink`) |
 | Suspicion, panic, fleeing | `js/town/suspicion.js`, `js/town/fleeing.js` |
 | Talking and gossip (`gossipLine`: clues only, told once each) | `js/town/talk.js` (`talkAct`, `talkTick`), `js/town/echoes.js` |
-| Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
+| Police, arrest, the cells | `js/town/arrest.js`, `js/town/cell.js` (the hours held, played in 3D; `CELL.forever` for the jailed ending); the cell block: `STATION_MAP` in `js/world/grid.js`, `js/gfx/station.js` |
+| Running from an arrest (Shift while the cuffs go on or on the walk to the car), the officer's gun and dive, being wanted | `js/town/on-the-run.js` (`runForIt`, `pursuitBegin`, `copGun`, `wantedTick`); numbers in `RESIST` |
 | THEIR week: phases, stages, midnight progression | `js/them/plan.js` (`PHASES`, `advanceWeek`) |
 | Tells (every slip heard from close by: `slipHeard`), the slipping-off cue (`slipCue`, town/routines), THEIR awareness of you | `js/them/tells.js`, `js/them/awareness.js` (`bookAware`) |
 | Evidence: four frames per suspect (Home, Habit, Body, Biography), one plain card each (✓/✗ only in a confrontation) | `js/them/proofs.js` (`addProof`, `cardIn`, `caseCards`) |
@@ -98,7 +99,8 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Being taken to the lair and escaping | `js/taken/` (`taken.js` capture → `coming.js` → `down-there.js` → `way-out*.js` → `back-up.js`) |
 | THEY come for you, hunts, the FBI | `js/chase/` (`they-come.js`, `hunt*.js`, `flee.js`, `fbi.js`) |
 | Friday finale | `js/game/last-day.js` (`looseBegin`) |
-| New game, saving, loading, endings | `js/game/state.js` (`freshG`, `newGame`, `saveGame`, `loadGame`, `gameOver`) |
+| New game, saving, loading, endings | `js/game/state.js` (`freshG`, `newGame`, `saveGame`, `loadGame`, `gameOver`: a lost game deletes the save, no reloading) |
+| The last picture before the end card: your body, the cell for good, THEIR win on day five | `js/game/endings.js` (`endBegin`, `endBody`, `endCell`, `endThey`); captions `THEY_WON` in data/lines.js |
 | Main loop and boot | `js/game/loop.js` (`simStep`, `worldStep`, `frame`, `boot`) |
 | Dev console tools (`__dev`) | `js/dev/devtools.js` (dev build only) |
 

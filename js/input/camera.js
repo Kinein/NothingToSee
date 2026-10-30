@@ -115,6 +115,7 @@ function handleClick(px, py) {
 }
 // what clicking something in reach does (also where a walk to it ends)
 function clickOn(p, px, py, pointer) {
+  if (cuffedNow()) return ui.float(PLAYER, 'Cuffed', 'bad'); // running in cuffs: hands behind your back
   if (p.char) {
     const n = p.char;
     if (n.trueForm) {

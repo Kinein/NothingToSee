@@ -252,7 +252,8 @@ function playerMelee(n) {
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {
   const P = PLAYER;
-  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on) return;
+  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on || cuffedNow())
+    return;
   if (huntKey()) return; // its hands on you: Space tears at them like E does
   if (UI.menuOpen) return closeMenu();
   dismissHints();

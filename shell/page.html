@@ -11,6 +11,7 @@
 
 <canvas id="view" class="c-walk" aria-label="The town of Wexley, seen from above"></canvas>
 <div id="fx"></div>
+<div id="endcap" hidden><b></b><span></span></div>
 <div id="tip" hidden></div>
 
 <div id="hud" hidden>
@@ -59,7 +60,7 @@
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.18 · updated Oct 30, 2026</p>
+  <p id="version">v1.19 · updated Oct 30, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -103,6 +104,7 @@
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>In ITS grip</kbd><span>Walk up and it stops · come from behind it and E pulls them out · left alone, it stays done</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>Half-changed</kbd><span>Real only at night, late in THEIR week, with a clear head · shaken, it’s in your head and the camera shows nothing</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/></svg><kbd>Hunted</kbd><span>Get home · break sight · sidestep the red bolt · beaten, you lose a day</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8.3-7 10-4-1.7-7-5-7-10V6zM9 12l2 2 4-4"/></svg><kbd>Arrested</kbd><span>Go quietly and you sit out the hours in a cell · or Shift, while the cuffs go on or on the way to the car, and run · he shoots: sidestep when the ring closes · caught or shot, it’s over · lose him and you’re wanted</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><kbd>The eye</kbd><span>What THEY know about you: don’t know you, watch you, know you, hunt you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><kbd>Day bar</kbd><span>THEIR five days · Friday at midnight it’s done</span></div>
     </div>
@@ -117,7 +119,8 @@
     <span id="over-kind"></span>
     <h2 id="over-title"></h2>
     <p id="over-body"></p>
-    <div class="btns"><button class="btn primary" id="over-load">Load this morning</button><button class="btn" id="over-new">Start over</button></div>
+    <p id="over-them" hidden></p>
+    <div class="btns"><button class="btn primary" id="over-new">Start over</button></div>
   </div>
 </div>
 <div id="fatal" class="overlay" hidden><p></p></div>
