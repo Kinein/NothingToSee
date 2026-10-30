@@ -49,6 +49,7 @@ them/tells.js                    # Tells: the small signs THEY give
 them/proofs.js                   # Proofs: photos and THEIR things in your hands
 them/awareness.js                # THEIR awareness of you, settled at 06:00
 them/moves.js                    # THEIR morning moves: the Bought, Scatter, Destroy, Protect
+them/wipe.js                    # THEY destroy a card in person: at your computer, half an hour
 them/servants.js                 # THEIR people: who THEY own, THEIR mark from day 4, the truth beaten out
 town/arrest.js                   # Being arrested, shown on the map
 town/cell.js                     # Held in a cell
@@ -60,6 +61,7 @@ combat/bolts.js                  # Projectiles THEY shoot
 combat/hits.js                   # Taking hits, knockouts, hospital, limbo
 combat/melee.js                  # Blows out in the street: THEIR telegraphed strikes, yours, people punching
 combat/brawl.js                  # Hitting people: the count, onlookers, the police call, out cold
+combat/blood.js                  # Blood: sprayed by blows, onto floors and walls, kept all game; THEIR colours
 combat/throws.js                 # What THEY throw from further off: furniture, swarms; the red patches on the floor
 town/doors.js                    # Broken restroom lock, doors left ajar
 town/talk.js                     # Talk: what people say, and the talking action itself

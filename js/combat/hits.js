@@ -1,6 +1,6 @@
 //@ combat/hits — Taking hits, knockouts, hospital, limbo
 //@ Defines: swing, hurt, knockOut, hospital, goAway, comeBack
-//@ Uses:    sim/core, ui/interface, taken/taken, sim/actions, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, …
+//@ Uses:    sim/core, ui/interface, taken/taken, sim/actions, core/util, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the hit, and what it costs. Health stays hidden while full.
 // someone up close takes a swing at you: shown first, so you can step out of it (punchAct in combat/melee)
@@ -9,8 +9,10 @@ function swing(c, dmg, byThem, again) {
   c.tdir = Math.atan2(PLAYER.x - c.x, PLAYER.z - c.z);
   enqueue(c, punchAct(dmg, byThem, again));
 }
-function hurt(v, byThem) {
+// from: who or what hit you (anything with x and z), for which way the blood goes
+function hurt(v, byThem, from) {
   if (G.over || !PLAYER.onMap) return;
+  if (v >= 5) bleed(PLAYER, from, clamp(v / 18, 0.5, 1.6));
   G.health = Math.max(0, G.health - v);
   gesture(PLAYER, 'flinch', 0.6, 0, 0.08);
   R.pulse = 1;
@@ -42,9 +44,8 @@ function knockOut(byThem) {
   const foe = G.lastHitBy ? NPC[G.lastHitBy] || CHARS.find((c) => c.id === G.lastHitBy) || null : null;
   G.lastHitBy = null;
   if (byThem && foe && foe.isThem && !G.loose) {
-    // beaten by one of THEM: one card gone from your flat, and THEY know you a little better
-    if (tearCard(foe))
-      setTimeout(() => !G.over && ui.note('print', 'A card is gone from your flat. Torn.', 'bad'), 3000);
+    // beaten by one of THEM: THEY come to your computer for a card (them/wipe), and know you a little better
+    wipeLater(foe);
     bookAware(EVIDENCE.aware.lostFight);
   }
   if (G.loose) {

@@ -296,6 +296,8 @@ function chatPick(n) {
     noteOnce(n, '“' + l + '”', { by: n.id, quote: true });
     return l;
   }
+  // a fact about themselves comes up in most chats while they still have one to tell (not at 60+)
+  if (n.sus < 60 && unfound(n, 'chat').length && chance(BIO_FIND.chat)) return chatFact(n);
   if (chance(0.33)) return chance(0.5) ? pick(SMALL) : viewLine(n);
   const opts = [];
   const e = echoFor(n, false);

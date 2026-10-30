@@ -781,7 +781,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.19 · updated Oct 30, 2026</p>
+  <p id="version">v1.20 · updated Oct 30, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1125,6 +1125,7 @@ const CTRL = {
   npcPace: 0.9,      // an ordinary walk, a touch unhurried
   npcRun: 1.46,      // anybody running (a fright, or something not human): two thirds of your sprint
   body: 0.22,        // your radius against walls and furniture: a round body, about shoulder-wide
+  unstick: 1.5,      // body minutes (under a second) pushing against nothing while stuck inside a wall: you're put free
   reachObj: 1.6,     // E reaches a thing when its nearest edge is this close
   reachChar: 2.0,    // …a person, centre to centre
   reachItem: 1.5,    // …something on the floor
@@ -1188,7 +1189,9 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50 };
+// An accident (player/needs accident): `spray` body minutes (about three seconds) out of your control, a pool `pool` tiles
+// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 4.5, pool: 2, wallReach: 1.8, wallOdds: 0.75 };
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };
@@ -1279,6 +1282,16 @@ const EVIDENCE = {
     loseSight: 6,                 // seconds out of its sight, at night, to lose it
   },
 };
+// a card destroyed in person (them/wipe): `after` game minutes from THEIR decision to the visit, `mins` at your computer,
+// come within `scare` tiles and they bolt; no police for a fight with them in your flat, nor `grace` game minutes after
+// blood (combat/blood): `drops` thrown by an ordinary blow, fanned `spread` radians either side of the line of the blow,
+// at `speed` m/s; at most `max` stains kept (the oldest go). A blow you land or take stops everything for `hitStop` real
+// seconds and shakes the camera `shake`. Under `trailAt` health you drip where you walk.
+const BLOOD = { drops: 12, spread: 0.6, speed: [1.8, 4.2], max: 700, hitStop: 0.07, shake: 0.35, trailAt: 40 };
+const WIPE = { after: [120, 480], mins: 30, scare: 4, grace: 10 };
+// Biography facts (play/biography): a chat that has one to tell gives it this often; the day's first paper has `paper`
+// lines about people; Mom tells one on each of the day's first `mom` calls; rummaging their things turns one up this often
+const BIO_FIND = { chat: 0.6, paper: 3, mom: 3, home: 0.9 };
 
 // ── Doors left ajar (town/doors)
 // Someone stepping into a room can forget to pull the door to. It stays half open and you can see in through the gap.
@@ -1545,6 +1558,12 @@ const THEY_WON = {
 const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];
 const BRAWL_SCARED = ['Somebody stop them!', 'Oh God. Oh God.', 'Not again. Not here.'];
 const BRAWL_CALL = ['That’s it, I’m calling the police!', 'Police? Yes. There’s a fight.', 'Police! I need the police!', 'I’m phoning the police. Right now.'];
+// someone at your computer (them/wipe): the note while you're out, the bold one who carries on, the one who bolts
+const WIPE_LINES = {
+  away: ['Your computer just came on. You’re not home.', 'Someone’s at your computer. In your flat. Now.', 'A light in your bedroom window. Your screen.'],
+  bold: ['Go on. Hit me.', 'Nearly done. Sit down.', 'This doesn’t concern you.'],
+  caught: ['The door was open!', 'I was never here.', 'Wrong flat. Sorry. Wrong flat.'],
+};
 const BRAWL_HELP = ['Somebody help!', 'Get OFF me!', 'Are you insane?'];
 // ───────────────────────── the town grid ─────────────────────────
 // One tile = one metre. x grows east, z grows south. Buildings are drawn with
@@ -3112,7 +3131,7 @@ void main(){ vUv = aPos.xz; vec4 w = uModel*vec4(aPos,1.0); vW = w.xyz; gl_Posit
 const DFS = `#version 300 es
 precision highp float;
 in vec2 vUv; in vec3 vW; uniform vec4 uColor; uniform int uShape; uniform sampler2D uVis; uniform vec2 uMap; uniform float uTime;
-uniform float uSeed; uniform sampler2D uLight; uniform float uWetD;
+uniform float uSeed; uniform sampler2D uLight; uniform float uWetD; uniform vec2 uVisOff;
 out vec4 frag;
 float hd(float n){ return fract(sin(n*12.9898 + uSeed*78.233)*43758.5453); }
 // blood that landed: a ragged body, spines where it hit hard, droplets thrown clear
@@ -3136,6 +3155,18 @@ float smear(vec2 p){
   float streak = 0.5 + 0.5*sin(p.y*40.0 + sin(p.x*2.0)*3.0 + uSeed*9.0);
   return a*mix(1.0, streak, smoothstep(0.15, 0.95, t))*smoothstep(1.0, 0.82, abs(p.x));
 }
+// blood up a wall: a splat, and runs from it, down (+y in the quad), each ending in a bead
+float drip(vec2 p){
+  float a = splat(p*1.6 + vec2(0.0, 0.5));
+  for(int i=0;i<5;i++){
+    float fi = float(i), x = (hd(fi + 20.0) - 0.5)*0.42, len = 0.2 + 0.55*hd(fi + 30.0), w = 0.014 + 0.018*hd(fi + 40.0);
+    float t = clamp((p.y + 0.15)/len, 0.0, 1.0), on = step(-0.15, p.y)*step(p.y, len - 0.15);
+    float ww = w*(1.0 - t*0.45);
+    a = max(a, on*smoothstep(ww + 0.008, ww - 0.008, abs(p.x - x)));
+    a = max(a, smoothstep(w*1.5 + 0.01, w*1.5 - 0.01, length(p - vec2(x, len - 0.15))));
+  }
+  return a;
+}
 void main(){
   float r = length(vUv); float a;
   if(uShape==0) a = 1.0 - smoothstep(0.25, 1.0, r);
@@ -3143,11 +3174,14 @@ void main(){
   else if(uShape==3){ float ang = atan(vUv.y, vUv.x); a = smoothstep(0.66,0.74,r)*(1.0-smoothstep(0.86,0.94,r))*step(0.0, sin(ang*8.0 + uTime*1.5)); }
   else if(uShape==4) a = splat(vUv);
   else if(uShape==5) a = smear(vUv);
+  else if(uShape==6) a = drip(vUv);
+  else if(uShape==7) a = smoothstep(1.0, 0.7, r);   // a drop in the air
   else a = (1.0 - smoothstep(0.0, 1.0, r))*(0.6+0.4*sin(uTime*3.0 + r*9.0));
-  float v = texture(uVis, vW.xz/uMap).r;
+  vec2 at = (vW.xz + uVisOff)/uMap;   // on a wall: what the room in front of it sees and how it's lit
+  float v = texture(uVis, at).r;
   vec3 c = uColor.rgb;
   if(uShape >= 4){   // lit like the street it lies on, with a wet sheen where a lamp is close
-    vec3 L = texture(uLight, vW.xz/uMap).rgb*2.0;
+    vec3 L = texture(uLight, at).rgb*2.0;
     c = uColor.rgb*(0.3 + L*1.25) + L*L*0.035*uWetD;
   }
   frag = vec4(c, uColor.a*a*max(v, uShape==1||uShape==3 ? 0.5 : 0.0));
@@ -7248,7 +7282,37 @@ function buildItemMesh(it) {
     g.cyl(0, 0.003, 0, 0.42, 0.42, 0.004, 14, C(0x0e0e0c));
     g.cyl(0, 0.006, 0, 0.24, 0.24, 0.004, 12, C(0x1d2a20), EMIT(0.2));
   } else if (it.kind === 'puddle') {
-    g.sphere(0, 0.0, 0, 0.45, 0.005, 0.32, 10, 3, C(0x8a8a3a), GLASS);
+    const k = it.size || 1; // an accident's pool is two tiles across, and not quite round
+    g.sphere(0, 0.0, 0, 0.45 * k, 0.005, 0.32 * k * (k > 1 ? 1.35 : 1), 12, 3, C(0x8a8a3a), GLASS);
+    if (k > 1) {
+      g.sphere(0.55, 0.001, 0.35, 0.3, 0.004, 0.22, 8, 3, C(0x7d7c33), GLASS);
+      g.sphere(-0.6, 0.001, -0.3, 0.26, 0.004, 0.2, 8, 3, C(0x7d7c33), GLASS);
+    }
+  } else if (it.kind === 'wallpee') {
+    // up the wall for good: a splash and the runs down from it, flat on the wall's face
+    const c = C(0xa09535),
+      o = it.off || 0;
+    let s = it.seed || 1;
+    const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    g.sphere(o, 0.32 + r() * 0.12, 0, 0.3 + r() * 0.12, 0.18 + r() * 0.08, 0.008, 10, 3, c, GLASS);
+    for (let i = 0; i < 4; i++) {
+      const x = o + (r() - 0.5) * 0.45,
+        y = 0.2 + r() * 0.35,
+        h = 0.08 + r() * 0.16;
+      g.bx(x, y - h, 0, 0.018, h, 0.006, c, GLASS);
+      g.sphere(
+        x + (r() - 0.5) * 0.3,
+        y + 0.1 + r() * 0.2,
+        0,
+        0.05 + r() * 0.05,
+        0.04 + r() * 0.04,
+        0.007,
+        6,
+        3,
+        c,
+        GLASS,
+      );
+    }
   } else if (it.kind === 'stain') {
     g.sphere(0, 0.0, 0, 0.62, 0.006, 0.44, 12, 3, C(0x3a0807), GLASS);
     g.sphere(0.3, 0.002, 0.25, 0.22, 0.005, 0.16, 8, 3, C(0x2a0605), GLASS);
@@ -8102,6 +8166,7 @@ const R = {
   th: 0,
   flash: 0,
   pulse: 0,
+  hitStop: 0, // real seconds left of a blow's freeze (combat/blood)
   lampP: new Float32Array(48),
   lampC: new Float32Array(48),
   lampN: 0,
@@ -10209,6 +10274,11 @@ function renderFrame() {
   }
   try {
     hxDrawDecals();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
+    bloodDraw();
   } catch (e) {
     console.error(e);
   }
@@ -13421,6 +13491,9 @@ function psyDrain(dt, room) {
   const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
   if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
 }
+// an accident: you can't hold it. Knees together, hands everywhere, turning on the spot while it goes all over the place
+// (BLADDER.spray body minutes, about three seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to
+// mop up, and whatever wall was close enough gets some too: that never comes off.
 function accident() {
   const P = PLAYER,
     N = P.needs;
@@ -13428,7 +13501,6 @@ function accident() {
   setTimeout(() => (G.accidentLock = false), 3000);
   N.bladder = 100;
   G.smelly = true; // until you shower: people notice you from further off
-  addItem({ kind: 'puddle', x: P.x, z: P.z, rot: Math.random() * 3 });
   let seen = 0;
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
@@ -13439,6 +13511,150 @@ function accident() {
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
   setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
+  // asleep, sitting, in the middle of something you can't leave: it just happens where you are
+  const free = P.onMap && !G.sleeping && !G.away && P.pose === 'stand' && !P.seatTr && !P.vault;
+  if (!free || (P.queue[0] && P.queue[0].interruptible === false)) return accidentPool();
+  hardReset(P);
+  routeStop();
+  enqueue(
+    P,
+    mkAct({
+      kind: 'wait',
+      label: 'Accident',
+      icon: 'toilet',
+      anim: 'idle',
+      dur: BLADDER.spray,
+      interruptible: false,
+      onStart: (c) => {
+        PEE.on = true;
+        PEE.dir0 = c.dir;
+        c.poseFn = peePose;
+        ui.bubble(c, 'exclaim', 'thought', 2.5);
+      },
+      // it gets away from you: a wild sweep one way and back, and round
+      onTick: (c, a) => {
+        c.tdir = PEE.dir0 + Math.sin(a.t * 1.9) * 1.9 + a.t * 0.45;
+        c.moving = false;
+      },
+      onEnd: (c) => {
+        PEE.on = false;
+        if (c.poseFn === peePose) c.poseFn = null;
+        accidentPool();
+      },
+    }),
+  );
+}
+// what's left: the pool on the floor (mop it), and splashes up the walls close by (they stay)
+function accidentPool() {
+  const P = PLAYER;
+  addItem({ kind: 'puddle', x: P.x, z: P.z, rot: rand(0, 3), size: BLADDER.pool });
+  if (!P.onMap) return;
+  // the nearest wall always gets some; any other close enough, now and then
+  const faces = [];
+  for (const [dx, dz] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]) {
+    const f = wallFace(P.x, P.z, dx, dz, BLADDER.wallReach);
+    if (f) faces.push([Math.hypot(f[0] - P.x, f[1] - P.z), f, dx, dz]);
+  }
+  faces.sort((a, b) => a[0] - b[0]);
+  faces.forEach(([, f, dx, dz], i) => {
+    if (i && !chance(BLADDER.wallOdds)) return;
+    addItem({
+      kind: 'wallpee',
+      x: f[0] - dx * 0.025,
+      z: f[1] - dz * 0.025,
+      rot: dx ? Math.PI / 2 : 0,
+      off: rand(-0.3, 0.3),
+      seed: irand(1, 9999),
+    });
+  });
+}
+// the nearest wall straight along (dx, dz) within `reach`: the point on its face, or null (a door, or furniture first)
+function wallFace(x, z, dx, dz, reach) {
+  for (let s = 0.1; s <= reach; s += 0.05) {
+    const px = x + dx * s,
+      pz = z + dz * s,
+      tx = Math.floor(px),
+      tz = Math.floor(pz);
+    if (!inb(tx, tz)) return null;
+    const c = tiles[I(tx, tz)];
+    if (c === 'D' || c === 'L') return null;
+    const wall = WALLISH.has(c);
+    for (const b of solidCells()[I(tx, tz)])
+      if (px >= b[0] && px <= b[2] && pz >= b[1] && pz <= b[3]) return wall && !b.over ? [px, pz] : null; // furniture in the way takes it
+  }
+  return null;
+}
+// knees together, bent over it, both hands down there and no use at all, the whole body jiggling
+function peePose(T, c) {
+  const t = c.animT;
+  T.thL = T.thR = -0.35;
+  T.shL = T.shR = 0.55;
+  T.rootY = (T.rootY || 0) - 0.07 + Math.sin(t * 21) * 0.012;
+  T.torso = 0.32;
+  T.hp = 0.45;
+  T.hr = Math.sin(t * 9) * 0.2;
+  T.uaL = T.uaR = -0.45;
+  T.faL = T.faR = -0.85;
+  T.aoL = T.aoR = -0.1;
+  T.roll = Math.sin(t * 17) * 0.07;
+}
+// the spray, drawn: droplets in an arc from where you stand, splashing where they land. Looks only: its own little
+// random numbers, nothing kept in the game, no allocation once the pool of drops exists.
+const PEE = { on: false, dir0: 0, seed: 1, acc: 0, drops: [] };
+function peeRnd() {
+  PEE.seed = (PEE.seed * 16807) % 2147483647;
+  return PEE.seed / 2147483647;
+}
+function peeFx(dt) {
+  const P = PLAYER;
+  if (!PEE.drops.length)
+    for (let i = 0; i < 80; i++) PEE.drops.push({ on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 });
+  if (PEE.on && P.onMap) {
+    PEE.acc += dt * 90;
+    const fx = Math.sin(P.dir),
+      fz = Math.cos(P.dir);
+    for (const d of PEE.drops) {
+      if (PEE.acc < 1) break;
+      if (d.on) continue;
+      PEE.acc--;
+      const sp = 2.1 + peeRnd() * 1.1,
+        side = (peeRnd() - 0.5) * 0.9;
+      d.on = true;
+      d.x = P.x + fx * 0.16;
+      d.z = P.z + fz * 0.16;
+      d.y = 0.8;
+      d.vx = fx * sp + fz * side;
+      d.vz = fz * sp - fx * side;
+      d.vy = 0.9 + peeRnd() * 1.3;
+    }
+    PEE.acc = Math.min(PEE.acc, 1);
+  }
+  for (const d of PEE.drops) {
+    if (!d.on) continue;
+    d.vy -= 9.8 * dt;
+    const nx = d.x + d.vx * dt,
+      nz = d.z + d.vz * dt,
+      t = tiles[I(Math.floor(nx), Math.floor(nz))];
+    if (WALLISH.has(t) && t !== 'D') {
+      d.vx *= -0.15; // splash back off the wall
+      d.vz *= -0.15;
+    } else {
+      d.x = nx;
+      d.z = nz;
+    }
+    d.y += d.vy * dt;
+    if (d.y <= 0.02) {
+      d.on = false;
+      if (peeRnd() < 0.15) hxDecal(d.x, d.z, 0.06 + peeRnd() * 0.08, [0.5, 0.46, 0.1, 0.5], 0, 90 + peeRnd() * 60);
+      continue;
+    }
+    hxGlint(d.x, d.y, d.z, 0.045, [0.85, 0.75, 0.2], 0.55);
+  }
 }
 // out cold where you fell: the hours go by as fast as in bed (G.sleeping), behind your eyelids (passOutLids), and it
 // rests you worse than a bed does. You come round at half your energy.
@@ -13643,15 +13859,16 @@ function newDay() {
   wreckReset(); // whatever got thrown at you yesterday is back where it stood
   marks();
   if (G.tearTonight > 0) {
-    // after a failed confrontation THEY come into your flat and take a card
+    // after a failed confrontation THEY come to your computer for a card (them/wipe)
     G.tearTonight = 0;
-    if (tearCard(pick(covert()))) setTimeout(() => !G.over && ui.note('print', 'A card is gone. Torn.', 'bad'), 2600);
+    wipeLater(null);
   }
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
+  G.momFacts = 0;
   G.mailToday = false;
   G.overtimeToday = false;
   for (const n of CHARS) if (!n.isPlayer && !n.def.stranger) n.sus = Math.max(0, n.sus - 3);
@@ -16854,15 +17071,15 @@ function tryScatter(n) {
 function morningResist() {
   const d = dayNo();
   G.overtimeToday = G.overtimeDay === d && isWorkday(d);
-  if (G.aware < 50 || d - (G.destroyDay || -9) < 3) return;
+  if (G.aware < 50 || d - (G.destroyDay || -9) < 4) return;
   const care = covert().filter((n) => temper(n) === 'careful'),
     agg = covert().filter((n) => temper(n) === 'aggressive');
   const opts = [];
   if (care.length) opts.push('theft');
   if (agg.length && isWorkday(d)) opts.push('job');
-  if (!opts.length || chance(0.35)) return;
+  if (!opts.length || chance(0.5)) return;
   G.destroyDay = d;
-  if (pick(opts) === 'theft') return stealPrint(pick(care));
+  if (pick(opts) === 'theft') return wipeLater(pick(care)); // someone comes to your computer (them/wipe)
   const m = pick(agg);
   if (chance(0.5))
     G.filesAt = (d - 1) * 1440 + irand(600, 960); // your files vanish some time today
@@ -16875,22 +17092,6 @@ function morningResist() {
     setTimeout(() => ui.note('work', 'Hale: overtime ' + DOW[dow(nd)] + '. No slacking.', 'warn'), 3000);
     echo('overtime', { who: m.id, x: 4, z: 4, seen: ['hale'], quiet: true });
   }
-}
-// a card vanishes from your flat overnight: torn, half of it on the floor; the next day their routine shifts
-function stealPrint(n) {
-  if (!tearCard(n)) return;
-  addNote(n, 'Torn photo on your floor. Half of it gone.', { by: 'you' });
-  const hb = G.habits[n.id];
-  if (hb) {
-    const sh = (chance(0.5) ? 1 : -1) * rand(20, 40);
-    hb.ms = (hb.ms || [hb.m]).map((t) => clamp(Math.round((t + sh) / 5) * 5, 440, 1290));
-    hb.m = hb.ms[0];
-  }
-  setTimeout(() => {
-    ui.note('print', 'A photo is gone. Torn.', 'bad');
-    audio.sting('whisper');
-  }, 2600);
-  echo('theft', { who: n.id, x: 12, z: 21, seen: n.id !== 'agnes' ? ['agnes'] : [], quiet: true });
 }
 function abductCheck() {
   sleepTakeCheck();
@@ -16967,6 +17168,8 @@ function lodgeTick() {
 }
 function destroyTick() {
   lodgeTick();
+  wipeTick();
+  bloodTick();
   if (G.filesAt && G.t >= G.filesAt) {
     G.filesAt = 0;
     if (!inShift()) return;
@@ -17158,6 +17361,145 @@ function arrest() {
   audio.sting('caught');
   CELL.book = true;
   goAway('held', heldUntil());
+}
+// ───────────── a card destroyed in person. Instead of a card just being gone in the morning, one of THEM, or one of THEIR
+// people, lets themselves into your flat while you're out and sits at your computer for half an hour (WIPE.mins), going
+// through your evidence. Walk in on it and they bolt; the bold ones of THEM keep at it until you hit them. A fight with
+// whoever is at your computer is nobody's business but yours: no police while you're in your flat, nor for a moment after.
+// One visit waits at a time (G.wipe). It's saved; the act isn't, so a loaded game starts the visit again later.
+function wipeLater(by) {
+  if (G.wipe || G.loose || !G.proofs.some((p) => p.src !== 'item' && !p.spare)) return false;
+  G.wipe = { phase: 'wait', at: G.t + rand(WIPE.after[0], WIPE.after[1]), pref: by ? by.id : null, by: null };
+  return true;
+}
+// who goes: THEM, or someone THEY own, free to walk over now
+function wipeWho(W) {
+  const free = (n) =>
+    n &&
+    n.onMap &&
+    !n.gone &&
+    n.id !== 'lenny' &&
+    !n.def.officer &&
+    !n.trueForm &&
+    !n.raiding &&
+    !n.breakIn &&
+    !n.hideUntil &&
+    !n.under &&
+    !n.engaged &&
+    !n.fleeing &&
+    !n.surrendered &&
+    !n.trapped &&
+    !n.inRite &&
+    !n.riteBy &&
+    !n.ko &&
+    !(n.tell && n.tell.type !== 'glare' && n.tell.type !== 'half') &&
+    !(G.control && G.control.by === n.id) &&
+    !['clerk', 'gather', 'watch', 'sleep'].includes(curBlock(n).a); // slipping out of work is fine
+  if (W.pref && free(NPC[W.pref])) return NPC[W.pref];
+  const own = suspects().filter((s) => !s.isThem && servantKind(s));
+  return pick(covert().concat(own).filter(free)) || null;
+}
+const wipeAct = (c) => c.queue.find((a) => a.wipe);
+const inFlat = (c) => c.onMap && inRoomSet(c, (r) => r.home);
+// a fight with this one is between the two of you: in your flat, and for WIPE.grace game minutes after either of you left it
+function burglar(n) {
+  const W = G.wipe;
+  return !!(W && W.by === n.id && W.phase !== 'wait' && (inFlat(PLAYER) || inFlat(n) || G.t - W.homeT < WIPE.grace));
+}
+function wipeTick() {
+  const W = G.wipe;
+  if (!W || G.over) return;
+  const P = PLAYER;
+  if (W.phase === 'wait') {
+    if (G.t < W.at) return;
+    if (!G.proofs.some((p) => p.src !== 'item' && !p.spare)) return (G.wipe = null);
+    const h = hourF();
+    const m = h >= 8 && h < 22 && !inFlat(P) && !G.loose && !ARREST.on ? wipeWho(W) : null;
+    if (!m) return (W.at = G.t + rand(30, 90)); // you're in, or nobody's free: later
+    return wipeGo(m, W);
+  }
+  if (inFlat(P) || (NPC[W.by] && inFlat(NPC[W.by]))) W.homeT = G.t;
+  if (W.phase === 'go' && !(NPC[W.by] && wipeAct(NPC[W.by]))) {
+    // pulled off it some other way, or a loaded game: try again later
+    W.phase = 'wait';
+    W.by = null;
+    W.at = G.t + rand(60, 120);
+  }
+  if (W.phase === 'done' && G.t - W.homeT > WIPE.grace) G.wipe = null;
+}
+function wipeGo(m, W) {
+  const pc = OBJ_BY_ID.pcChair || OBJ_BY_ID.pc;
+  W.phase = 'go';
+  W.by = m.id;
+  W.homeT = -1e9;
+  hardReset(m);
+  m.engaged = null;
+  const a = useAct(m, pc, {
+    label: 'At your computer',
+    op: true,
+    anim: 'type',
+    dur: WIPE.mins,
+    maxWait: 10,
+    interruptible: false,
+    onStart: (c) => {
+      W.t0 = G.t;
+      if (!inFlat(PLAYER)) {
+        ui.note('pc', pick(WIPE_LINES.away), 'bad');
+        audio.sting('whisper');
+      }
+    },
+    onTick: (c, a) => wipeWatch(c, a, W),
+    onEnd: (c, a, ok) => wipeEnd(c, a, ok, W),
+  });
+  a.wipe = true;
+  enqueue(m, a);
+}
+// you walk in on it: most bolt, the bold ones of THEM look at you and carry on
+function wipeWatch(c, a, W) {
+  if (a.scared || W.t0 == null) return;
+  const P = PLAYER,
+    d = Math.hypot(P.x - c.x, P.z - c.z);
+  if (!inFlat(P) || d > WIPE.scare || !npcSeesPlayer(c, WIPE.scare + 1)) return;
+  c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+  W.seen = true;
+  if (c.isThem && temper(c) === 'aggressive') {
+    if (a.glared) return;
+    a.glared = true;
+    ui.bubble(c, 'frown', 'speech', 2.5);
+    ui.say(c, pick(WIPE_LINES.bold), 3);
+    addDanger(c, 12);
+    return;
+  }
+  a.scared = true;
+  a.dur = a.t + 0.4;
+}
+function wipeEnd(c, a, ok, W) {
+  if (G.wipe !== W || W.phase === 'done') return;
+  if (W.seen) addNote(c, 'At your computer, in your flat. Going through your evidence.', { by: 'you' });
+  if (a.scared || W.hit) {
+    W.phase = 'done';
+    ui.note('pc', 'Your evidence is safe. This time.', 'good');
+    if (a.scared) setTimeout(() => !G.over && c.onMap && (ui.say(c, pick(WIPE_LINES.caught), 2.5), flee(c)), 0);
+    return;
+  }
+  if (!ok) return; // the check in wipeTick tries again later
+  W.phase = 'done';
+  const pf = tearCard(c);
+  if (pf) {
+    setTimeout(() => {
+      if (G.over) return;
+      ui.note('print', 'A card is gone. Wiped off your computer.', 'bad');
+      audio.sting('whisper');
+    }, 1200);
+    echo('theft', { who: c.id, x: 12, z: 21, seen: c.id !== 'agnes' ? ['agnes'] : [], quiet: true });
+  }
+  // THEY change THEIR habits after: the next day the routine shifts
+  const hb = c.isThem && G.habits[c.id];
+  if (hb) {
+    const sh = (chance(0.5) ? 1 : -1) * rand(20, 40);
+    hb.ms = (hb.ms || [hb.m]).map((t) => clamp(Math.round((t + sh) / 5) * 5, 440, 1290));
+    hb.m = hb.ms[0];
+  }
 }
 // ───────────── THEIR people. Whoever THEY own: the bribed (lizards), the chipped and the controlled (aliens), the bitten
 // (the dead). From day MARK.from on, THEY and all of them wear THEIR mark, which narrows the search but never says which
@@ -18300,14 +18642,13 @@ function bulletHits(b) {
   HX.jolt = 1;
   HX.shake = 0.7;
   audio.hx('thud', 0, 0.8);
-  hxDecal(P.x + rand(-0.2, 0.2), P.z + rand(-0.2, 0.2), rand(0.16, 0.26), [0.3, 0.015, 0.015, 0.85], 4, 1440);
   if (G.health - b.dmg <= 0) {
     G.health = 0;
     UI.aim = null;
     BOLTS.length = 0;
     return gameOver('shot');
   }
-  hurt(b.dmg, false);
+  hurt(b.dmg, false, b.by);
 }
 // close enough to lay hands on you: the patch on the ground is where they close
 function diveAct() {
@@ -19233,6 +19574,7 @@ function killMember(n, how) {
       onEnd: (c) => {
         c.tell = null;
         c.onMap = false;
+        bloodPool(spot[0], spot[1], 0);
         addItem({
           kind: 'stain',
           x: spot[0],
@@ -19421,7 +19763,7 @@ function boltHits(b) {
   if (n) ui.bubble(n, 'exclaim', 'speech', 1.4);
   G.lastHitBy = n ? n.id : null;
   psyMark('fight');
-  hurt(b.dmg, true);
+  hurt(b.dmg, true, n);
 }
 // ───────────── the hit, and what it costs. Health stays hidden while full.
 // someone up close takes a swing at you: shown first, so you can step out of it (punchAct in combat/melee)
@@ -19430,8 +19772,10 @@ function swing(c, dmg, byThem, again) {
   c.tdir = Math.atan2(PLAYER.x - c.x, PLAYER.z - c.z);
   enqueue(c, punchAct(dmg, byThem, again));
 }
-function hurt(v, byThem) {
+// from: who or what hit you (anything with x and z), for which way the blood goes
+function hurt(v, byThem, from) {
   if (G.over || !PLAYER.onMap) return;
+  if (v >= 5) bleed(PLAYER, from, clamp(v / 18, 0.5, 1.6));
   G.health = Math.max(0, G.health - v);
   gesture(PLAYER, 'flinch', 0.6, 0, 0.08);
   R.pulse = 1;
@@ -19463,9 +19807,8 @@ function knockOut(byThem) {
   const foe = G.lastHitBy ? NPC[G.lastHitBy] || CHARS.find((c) => c.id === G.lastHitBy) || null : null;
   G.lastHitBy = null;
   if (byThem && foe && foe.isThem && !G.loose) {
-    // beaten by one of THEM: one card gone from your flat, and THEY know you a little better
-    if (tearCard(foe))
-      setTimeout(() => !G.over && ui.note('print', 'A card is gone from your flat. Torn.', 'bad'), 3000);
+    // beaten by one of THEM: THEY come to your computer for a card (them/wipe), and know you a little better
+    wipeLater(foe);
     bookAware(EVIDENCE.aware.lostFight);
   }
   if (G.loose) {
@@ -19690,7 +20033,7 @@ function foeStrike(n, A, held) {
   psyMark('fight');
   G.lastHitBy = n.id; // an id, never the person: G is saved whole
   ui.bubble(n, 'exclaim', 'speech', 1.4);
-  hurt(Math.round(blow), true);
+  hurt(Math.round(blow), true, n);
   if (!G.over && P.onMap) knockBack(P, n, 0.9);
 }
 // a person's punch: the fist drawn back where you can see it, then thrown. Step back out of it. `again` runs on a miss.
@@ -19724,7 +20067,7 @@ function punchAct(dmg, byThem, again) {
       audio.hx('whoosh', hxPan(c.x, c.z), 0.45);
       if (P.onMap && !G.away && !ARREST.on && Math.hypot(P.x - T.x, P.z - T.z) < T.r) {
         G.lastHitBy = byThem ? c.id : null;
-        hurt(dmg, byThem);
+        hurt(dmg, byThem, c);
         if (!G.over && P.onMap) knockBack(P, c, 0.6);
         return;
       }
@@ -19767,6 +20110,7 @@ function knockBack(c, from, dist) {
 // your swing landed on n
 function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
+  bleed(n, PLAYER, n.trueForm ? 1.3 : 1); // whatever's in its veins (combat/blood)
   if (G.loose && n.thrall) return looseHitHelper(n, true);
   if (n.def.officer && !n.trueForm && !G.loose) {
     if (ONRUN.on && ONRUN.off === n) return runStruck(n);
@@ -19950,7 +20294,9 @@ function brawlOf(n) {
 function struck(n) {
   const F = brawlOf(n),
     ear = earshot(n),
-    first = !F.hits;
+    first = !F.hits,
+    law = !burglar(n); // whoever's at your computer: no police in your own flat (them/wipe)
+  if (!law) G.wipe.hit = true;
   F.hits++;
   F.t = G.t;
   gesture(n, 'flinch', 0.5);
@@ -19958,22 +20304,22 @@ function struck(n) {
   ui.float(n, F.hits + '', '');
   addSus(n, first ? 40 : 10);
   if (first || F.hits === BRAWL.hard) echo('fight', { x: n.x, z: n.z, who: n.id });
-  if (first && ear.length) protectAfter(n);
-  for (const w of ear) onlook(w, n, F);
+  if (first && ear.length && law) protectAfter(n);
+  for (const w of ear) onlook(w, n, F, law);
   if (F.hits >= BRAWL.ko) {
-    if (!F.called) policeFor(n, F, ear, true);
+    if (!F.called && law) policeFor(n, F, ear, true);
     return knockCold(n);
   }
   if (n.isThem && (first || F.hits === BRAWL.hard) && themSheds(n, ear)) return;
   victimReacts(n, F, first);
-  if (F.hits >= BRAWL.hard && !F.called) policeFor(n, F, ear);
+  if (F.hits >= BRAWL.hard && !F.called && law) policeFor(n, F, ear);
   if (F.hits === BRAWL.ko - 1) confess(n, true); // one more and they're out: what comes out now is the truth
 }
 // someone who saw it: the first blow they see, they decide what they make of it; after that it only adds up
-function onlook(w, n, F) {
+function onlook(w, n, F, law = true) {
   if (F.seen[w.id]) return addSus(w, 3);
   F.seen[w.id] = 1;
-  if (w.def.officer) return policeSaw(w);
+  if (w.def.officer) return law && policeSaw(w);
   if (w.def.fbi || w.surrendered || w.trueForm || w.fleeing) return;
   const T = w.isThem ? 'them' : w.def.stranger || !temper(w) ? 'stranger' : temper(w);
   const run = { timid: 0.6, stranger: 0.35, mocker: 0.15, aggressive: 0.05, them: 0.2 }[T],
@@ -19992,7 +20338,7 @@ function onlook(w, n, F) {
     ui.bubble(w, 'exclaim', 'speech', 1.8);
   }
   // nine in ten let a scuffle go
-  if (!F.called && F.hits < BRAWL.hard && chance(BRAWL.callSoft)) callPolice(w, n, F);
+  if (law && !F.called && F.hits < BRAWL.hard && chance(BRAWL.callSoft)) callPolice(w, n, F);
 }
 // it's gone hard: the victim calls it in, unless they're the brave sort or one of THEM; else whoever saw
 function policeFor(n, F, ear, out) {
@@ -20096,6 +20442,245 @@ function knockCold(n) {
       },
     }),
   );
+}
+// ───────────── blood. Only violence spills it, and what's spilled stays for the rest of the game (G.blood). A blow throws
+// drops away from whoever struck it: they fly, land on the floor as splats, and hit walls and run down them. THEIR blood
+// isn't red: the aliens' is blue, the lizards' green, and the dead's a red gone dark. No card ever comes of it; it's there
+// for your gut. The game decides at the moment of the blow where every drop will land (sim randomness, so a saved game
+// keeps it); the flight you see is drawing only.
+// G.blood entries: [x, z, y, kind, size, rot, seed, shape, face]. kind: index into BLOOD_KINDS · shape: 4 splat, 5 smear,
+// 6 runs down a wall · face: 0 the floor, else the wall's outward side, 1 +x, 2 −x, 3 +z, 4 −z.
+const BLOOD_KINDS = ['human', 'dead', 'lizards', 'aliens'];
+const BLOOD_COL = [
+  [0.15, 0.009, 0.009],
+  [0.065, 0.012, 0.008],
+  [0.045, 0.11, 0.016],
+  [0.02, 0.048, 0.17],
+];
+const BLOOD_FACE = [null, [1, 0], [-1, 0], [0, 1], [0, -1]];
+// what runs in someone's veins
+function bloodOf(c) {
+  if (!c || c.isPlayer || !c.isThem) return 0;
+  return G.faction === 'zombies' ? 1 : G.faction === 'lizards' ? 2 : 3;
+}
+// a blow lands on v (from whoever, or whatever, struck it): k is how hard, 1 an ordinary blow
+function bleed(v, from, k = 1) {
+  if (!v || !v.onMap) return;
+  const dx = from ? v.x - from.x : rand(-1, 1),
+    dz = from ? v.z - from.z : rand(-1, 1);
+  bleedAt(v.x, v.z, dx, dz, bloodOf(v), k);
+  if (v.isPlayer || from === PLAYER) {
+    R.hitStop = Math.max(R.hitStop || 0, BLOOD.hitStop * Math.min(1.5, k)); // the blow lands: a beat where it all stops
+    HX.shake = Math.max(HX.shake, BLOOD.shake * k * (v.isPlayer ? 1.6 : 1));
+  }
+}
+// the spray itself, at (x, z), thrown along (dx, dz)
+function bleedAt(x, z, dx, dz, kind, k = 1) {
+  if (!G.blood) G.blood = [];
+  const l = Math.hypot(dx, dz) || 1,
+    a0 = Math.atan2(dx / l, dz / l),
+    n = Math.round(BLOOD.drops * k * rand(0.7, 1.3));
+  for (let i = 0; i < n; i++) {
+    const a = a0 + rand(-BLOOD.spread, BLOOD.spread),
+      sp = rand(BLOOD.speed[0], BLOOD.speed[1]) * Math.sqrt(k),
+      y = rand(0.95, 1.35);
+    bloodDrop(
+      x + Math.sin(a) * 0.15,
+      y,
+      z + Math.cos(a) * 0.15,
+      Math.sin(a) * sp,
+      rand(0.3, 2.4),
+      Math.cos(a) * sp,
+      kind,
+    );
+  }
+  // and some straight down, where it happened
+  bloodStain(x + rand(-0.2, 0.2), z + rand(-0.2, 0.2), 0, kind, rand(0.14, 0.24) * Math.min(1.6, k), 4, 0);
+}
+// a pool where someone went down and stayed down, and the smear where they were dragged
+function bloodPool(x, z, kind, k = 1) {
+  bloodStain(x, z, 0, kind, rand(0.45, 0.65) * k, 4, 0);
+  if (chance(0.6)) bloodStain(x + rand(-0.4, 0.4), z + rand(-0.4, 0.4), 0, kind, rand(0.7, 1.1) * k, 5, 0);
+  for (let i = 0; i < 3; i++) bleedAt(x, z, rand(-1, 1), rand(-1, 1), kind, 0.8);
+}
+function bloodStain(x, z, y, kind, size, shape, face) {
+  const r2 = (v) => Math.round(v * 100) / 100;
+  const s = [r2(x), r2(z), r2(y), kind, r2(size), r2(rand(0, TAU)), irand(1, 99), shape, face];
+  G.blood.push(s);
+  if (G.blood.length > BLOOD.max) G.blood.splice(0, G.blood.length - BLOOD.max); // the oldest wears off first
+  return s;
+}
+// one drop: where it ends up is worked out now, along its arc; it's drawn flying there (bloodFx)
+function bloodDrop(x0, y0, z0, vx, vy, vz, kind) {
+  const size = rand(0.07, 0.17);
+  let px = x0,
+    pz = z0,
+    s = null,
+    t = 0;
+  for (; t < 2; t += 0.02) {
+    const x = x0 + vx * t,
+      y = y0 + vy * t - 4.9 * t * t,
+      z = z0 + vz * t;
+    if (y <= 0) {
+      s = bloodStain(x, z, 0, kind, size, 4, 0);
+      break;
+    }
+    const tx = Math.floor(x),
+      tz = Math.floor(z);
+    if (!inb(tx, tz)) break;
+    const c = tiles[I(tx, tz)];
+    let hit = null;
+    for (const b of solidCells()[I(tx, tz)])
+      if (x >= b[0] && x <= b[2] && z >= b[1] && z <= b[3]) {
+        hit = b;
+        break;
+      }
+    if (hit) {
+      // a wall: it hits flat and runs; anything else (a door, furniture) just takes it
+      if (WALLISH.has(c) && c !== 'D' && c !== 'L' && !hit.over && y > 0.05 && y < 2.2) {
+        const onX = px < hit[0] || px > hit[2],
+          face = onX ? (px < hit[0] ? 2 : 1) : pz < hit[1] ? 4 : 3,
+          wx = onX ? (px < hit[0] ? hit[0] : hit[2]) : x,
+          wz = onX ? z : pz < hit[1] ? hit[1] : hit[3];
+        s = bloodStain(wx, wz, y, kind, size * 2.2, y > 0.35 && chance(0.6) ? 6 : 4, face);
+      } else s = bloodStain(px, pz, 0, kind, size * 1.3, 4, 0); // it runs down the front of it, onto the floor
+      break;
+    }
+    px = x;
+    pz = z;
+  }
+  if (BLOOD_FX.length < 140) {
+    BLOOD_FX.push({ x0, y0, z0, vx, vy, vz, t: 0, T: t, kind, s });
+    if (s) BLOOD_PEND.add(s);
+  }
+}
+// hurt and moving: a drop now and then where you walk (G.health under BLOOD.trailAt). Once a game minute (them/moves).
+function bloodTick() {
+  const P = PLAYER;
+  if (!G.blood || !P.onMap || G.away || G.health >= BLOOD.trailAt || !P.moving) return;
+  if (chance(1 - G.health / BLOOD.trailAt))
+    bloodStain(P.x + rand(-0.1, 0.1), P.z + rand(-0.1, 0.1), 0, 0, rand(0.05, 0.1), 4, 0);
+}
+
+// ── drawing: drops in the air, then everything that has landed. Nothing here touches the game.
+const BLOOD_FX = [];
+const BLOOD_PEND = new Set(); // landed in the game, still in the air on screen
+const BL_M = new Float32Array(16),
+  BL_COL = new Float32Array(4);
+function bloodFx(dt) {
+  for (let i = BLOOD_FX.length - 1; i >= 0; i--) {
+    const d = BLOOD_FX[i];
+    d.t += dt;
+    if (d.t >= d.T) {
+      if (d.s) BLOOD_PEND.delete(d.s);
+      BLOOD_FX.splice(i, 1);
+    }
+  }
+}
+function bloodCol(kind, a) {
+  const c = BLOOD_COL[kind] || BLOOD_COL[0];
+  BL_COL[0] = c[0];
+  BL_COL[1] = c[1];
+  BL_COL[2] = c[2];
+  BL_COL[3] = a;
+  return BL_COL;
+}
+// where the cut-away walls stand right now, as the main shader works it out (gfx/shaders cutAt): a stain higher up a
+// wall than the wall now reaches isn't drawn
+function bloodCutAt(x, y, z, fx, fy, fz, rad) {
+  const V = cam.view;
+  const az = V[2] * x + V[6] * y + V[10] * z + V[14],
+    fz2 = V[2] * fx + V[6] * fy + V[10] * fz + V[14];
+  const d = Math.hypot(
+    V[0] * (x - fx) + V[4] * (y - fy) + V[8] * (z - fz),
+    V[1] * (x - fx) + V[5] * (y - fy) + V[9] * (z - fz),
+  );
+  return sstep(-0.15, 0.55, az - fz2) * (1 - sstep(rad * 0.6, rad, d));
+}
+function bloodWallTop(x, z) {
+  const P = PLAYER,
+    on = G.started && P && P.onMap,
+    px = on ? P.x : cam.tx,
+    pz = on ? P.z : cam.tz,
+    f1x = cam.follow ? px : cam.tx,
+    f1z = cam.follow ? pz : cam.tz;
+  const k = Math.max(
+    bloodCutAt(x, 1, z, f1x, 1, f1z, 7.5 * Math.max(0.8, cam.zoom / 8.5)),
+    bloodCutAt(x, 1, z, px, 1, pz, 3.2),
+    cam.wallsDown,
+  );
+  return lerp(2.8, 0.42, sstep(0.3, 0.75, k));
+}
+function bloodDraw() {
+  if (!G || !G.blood || !cam.view) return;
+  const U = R.decal.U;
+  for (let i = 0; i < G.blood.length; i++) {
+    const s = G.blood[i];
+    if (BLOOD_PEND.has(s)) continue;
+    const [x, z, y, kind, size, rot, seed, shape, face] = s;
+    if (!face) {
+      if (visAt(x, z) < 0.03) continue;
+      drawDecalR(
+        x,
+        z,
+        size,
+        size * (shape === 5 ? 0.45 : 1),
+        rot,
+        bloodCol(kind, 0.86),
+        shape,
+        seed,
+        0.0104 + (i % 40) * 0.00002,
+      );
+      continue;
+    }
+    const n = BLOOD_FACE[face];
+    if (visAt(x + n[0] * 0.6, z + n[1] * 0.6) < 0.03 || y + size * 0.3 > bloodWallTop(x, z)) continue;
+    // flat on the wall: the quad's x along the wall, its z straight down
+    BL_M.fill(0);
+    BL_M[0] = -n[1] * size;
+    BL_M[2] = n[0] * size;
+    BL_M[4] = n[0];
+    BL_M[6] = n[1];
+    BL_M[9] = -size * (shape === 6 ? 1.6 : 1);
+    BL_M[12] = x + n[0] * 0.012;
+    BL_M[13] = y;
+    BL_M[14] = z + n[1] * 0.012;
+    BL_M[15] = 1;
+    gl.uniform2f(U.uVisOff, n[0] * 0.6, n[1] * 0.6);
+    gl.uniformMatrix4fv(U.uModel, false, BL_M);
+    gl.uniform4fv(U.uColor, bloodCol(kind, 0.9));
+    gl.uniform1i(U.uShape, shape);
+    gl.uniform1f(U.uSeed, seed);
+    gl.bindVertexArray(PRIM.quad.vao);
+    gl.drawElements(gl.TRIANGLES, PRIM.quad.count, gl.UNSIGNED_INT, 0);
+  }
+  gl.uniform2f(U.uVisOff, 0, 0);
+  // in the air: small round drops, facing you
+  const rt = cam.right,
+    up = cam.up;
+  for (const d of BLOOD_FX) {
+    const t = d.t,
+      x = d.x0 + d.vx * t,
+      y = d.y0 + d.vy * t - 4.9 * t * t,
+      z = d.z0 + d.vz * t,
+      sz = 0.035;
+    BL_M.fill(0);
+    BL_M[0] = rt[0] * sz;
+    BL_M[1] = rt[1] * sz;
+    BL_M[2] = rt[2] * sz;
+    BL_M[8] = up[0] * sz;
+    BL_M[9] = up[1] * sz;
+    BL_M[10] = up[2] * sz;
+    BL_M[12] = x;
+    BL_M[13] = Math.max(0.02, y);
+    BL_M[14] = z;
+    BL_M[15] = 1;
+    gl.uniformMatrix4fv(U.uModel, false, BL_M);
+    gl.uniform4fv(U.uColor, bloodCol(d.kind, 0.95));
+    gl.uniform1i(U.uShape, 7);
+    gl.bindVertexArray(PRIM.quad.vao);
+    gl.drawElements(gl.TRIANGLES, PRIM.quad.count, gl.UNSIGNED_INT, 0);
+  }
 }
 // ───────────── what THEY do from a few strides off. A lizard tears up the nearest chair or bin, holds it overhead and
 // throws it at where you stood when it let go: a red ring shows where it comes down, so get out of the ring. The dead
@@ -20243,7 +20828,7 @@ function throwLand(th) {
   if (P.onMap && !G.away && d < RANGED.hit) {
     G.lastHitBy = th.by.id;
     psyMark('fight');
-    hurt(HURT.thrown, true);
+    hurt(HURT.thrown, true, { x: th.tx - (th.tx - th.by.x) * 0.1, z: th.tz - (th.tz - th.by.z) * 0.1 });
     if (!G.over && P.onMap) knockBack(P, th, 0.8);
   } else if (P.onMap && d < 3 && th.arc) ui.float(P, 'Dodged', 'good');
   th.done = true;
@@ -20811,6 +21396,8 @@ function chatPick(n) {
     noteOnce(n, '“' + l + '”', { by: n.id, quote: true });
     return l;
   }
+  // a fact about themselves comes up in most chats while they still have one to tell (not at 60+)
+  if (n.sus < 60 && unfound(n, 'chat').length && chance(BIO_FIND.chat)) return chatFact(n);
   if (chance(0.33)) return chance(0.5) ? pick(SMALL) : viewLine(n);
   const opts = [];
   const e = echoFor(n, false);
@@ -21741,8 +22328,10 @@ function raidTick(n, dt) {
   n.path = null;
   n.moving = false;
   n.tdir = Math.atan2(tg.x - n.x, tg.z - n.z);
+  const was = n.tell.lunge;
   n.tell.feed = Math.sin(G.t * 3) > 0;
   n.tell.lunge = !n.tell.feed;
+  if (n.tell.lunge && !was && (G.faction !== 'aliens' || chance(0.35))) bleed(tg, n, 0.8); // every lunge draws blood
   if (P.onMap && visAt(n.x, n.z) > 0.5 && !A.seen) {
     A.seen = true;
     psyMark('form');
@@ -21781,6 +22370,7 @@ function endAttack(A, tg, broken) {
   }
   const spot = [tg.x, tg.z],
     hv = named && HOUSE_OF[tg.id];
+  if (F !== 'aliens') bloodPool(spot[0], spot[1], 0);
   if (hv) {
     (G.smell = G.smell || {})[hv.id] = { k: F, until: G.t + rand(2, 3) * 1440 };
     if (chance(0.5))
@@ -21978,7 +22568,11 @@ function recant(w, m) {
     G.chipped[w.id] = 1;
     w.lostDay = dayNo(G.t + 6 * 60);
     markVictim(w, m.id);
-  } else removeVictim(w, 'killed', witnessDoor(w) || [w.x || 20, w.z || 15]);
+  } else {
+    const at = witnessDoor(w) || [w.x || 20, w.z || 15];
+    removeVictim(w, 'killed', at);
+    bloodPool(at[0], at[1], 0); // on their doorstep, for good (combat/blood)
+  }
   setTimeout(() => {
     if (!G.over)
       ui.note('people', w.short + (why === 'dead' ? ' · gone in the night' : ' won’t talk about it any more'), 'bad');
@@ -23874,7 +24468,7 @@ function makeBios() {
     // or Mom, dealt out so every source has something
     const docs = shuffle(['home', 'paper', 'mom', 'home', 'paper', 'mom']);
     let k = 0;
-    for (const f of facts) if (!f.src) f.src = f.say && chance(0.75) ? 'chat' : docs[k++ % docs.length];
+    for (const f of facts) if (!f.src) f.src = f.say && chance(0.8) ? 'chat' : docs[k++ % docs.length];
     G.bio[n.id] = shuffle(facts);
   }
 }
@@ -23903,22 +24497,30 @@ function homeFact(o) {
     n = id && NPC[id];
   if (!n || n.isPlayer) return false;
   const f = pick(unfound(n, 'home'));
-  if (!f || !chance(0.6)) return false;
+  if (!f || !chance(BIO_FIND.home)) return false;
   return findFact(n, f, 'home');
 }
-// the morning paper: a line about somebody, in among the small print
+// the morning paper: lines about people you know, in among the small print (BIO_FIND.paper of them, the first read of
+// the day; the rest of the paper is the same paper)
 function paperFact() {
-  const opts = suspects().filter((n) => unfound(n, 'paper').length);
-  const n = pick(opts);
-  return n ? findFact(n, pick(unfound(n, 'paper')), 'paper') && n : null;
+  let got = null;
+  for (let i = 0; i < BIO_FIND.paper; i++) {
+    const n = pick(suspects().filter((n) => unfound(n, 'paper').length));
+    if (!n) break;
+    findFact(n, pick(unfound(n, 'paper')), 'paper');
+    got = got || n;
+  }
+  return got;
 }
-// Mom: she knows everybody's mother
+// Mom: she knows everybody's mother. Something true on each of the day's first BIO_FIND.mom calls.
 function momFact() {
+  if ((G.momFacts || 0) >= BIO_FIND.mom) return null;
   const opts = suspects().filter((n) => unfound(n, 'mom').length);
   const n = pick(opts);
   if (!n) return null;
   const f = pick(unfound(n, 'mom'));
   findFact(n, f, 'mom');
+  G.momFacts = (G.momFacts || 0) + 1;
   return 'Mom: “' + n.short + '? ' + f.t + '”';
 }
 // your mark: one fact per person, odd. It's their Biography card. It moves freely until you've called them out.
@@ -24655,8 +25257,8 @@ function momAct(o) {
     onEnd: (c, a, ok) => {
       if (!ok) return;
       addStress(G.momToday ? -3 : -10);
-      // Mom knows everybody's mother: once a day, something true about someone in town
-      const mf = !G.momToday && momFact();
+      // Mom knows everybody's mother: on the day's first few calls, something true about someone in town
+      const mf = momFact();
       ui.note(
         'phone',
         mf ||
@@ -25425,7 +26027,7 @@ function takePhoto(tg) {
   }
   const inFrame = tg.inFrame || ((x, z) => Math.hypot(x - ax, z - az) < 2.4 && visAt(x, z) > 0.35);
   const chars = CHARS.filter((n) => !n.isPlayer && n.onMap && (n === tg.char || (n.shown > 0.5 && inFrame(n.x, n.z))));
-  const items = G.items.filter((it) => it.kind !== 'puddle' && (it === tg.item || inFrame(it.x, it.z)));
+  const items = G.items.filter((it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)));
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
   // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.
@@ -26285,6 +26887,7 @@ const ITEM_NAMES = {
   finger: 'A finger',
   scorch: 'Scorch mark',
   puddle: 'Puddle',
+  wallpee: 'Stain on the wall',
   stain: 'A stain',
   tape: 'Police tape',
   device: 'A small device',
@@ -26359,7 +26962,7 @@ function menuForItem(it) {
       opt(
         'Mop',
         'mop',
-        go('Mop', () => removeItem(it), 6),
+        go('Mop', () => removeItem(it), 6 * (it.size || 1) ** 2),
       ),
     );
   else if (it.kind === 'stash') {
@@ -28915,6 +29518,22 @@ const tileOK = (x, z, who = PLAYER) =>
   inb(x, z) && (slimAt(I(x, z)) ? !WALLISH.has(tiles[I(x, z)]) : walkable(x, z, who));
 const footOK = (x, z) => tileOK(Math.floor(x), Math.floor(z));
 const standOK = (x, z) => footOK(x, z) && !bodyPush(x, z, CTRL.body);
+// the nearest tile centre (within r) where a body can stand
+function freeSpot(x, z, r = 6) {
+  let best = null,
+    bd = 1e9;
+  for (let tz = Math.floor(z) - r; tz <= Math.floor(z) + r; tz++)
+    for (let tx = Math.floor(x) - r; tx <= Math.floor(x) + r; tx++) {
+      const cx = tx + 0.5,
+        cz = tz + 0.5,
+        d = (cx - x) ** 2 + (cz - z) ** 2;
+      if (d < bd && tileOK(tx, tz) && standOK(cx, cz)) {
+        best = [cx, cz];
+        bd = d;
+      }
+    }
+  return best;
+}
 // nudged back out of whatever it overlaps, if that leaves it somewhere it can stand
 function settle(x, z) {
   for (let k = 0; k < 4; k++) {
@@ -29178,6 +29797,13 @@ function driveTick(dt) {
   const go = key ? steerAssist(P, v) : v,
     moved = tryMove(P, go[0] * sp, go[1] * sp);
   if (!key && ROUTE.on) ROUTE.stall = moved < sp * 0.3 ? ROUTE.stall + sp : 0;
+  // stuck inside a wall or a piece of furniture (a scene put you down there) and pushing to get out: freed after a moment
+  P.stuckT = moved < 1e-5 && !standOK(P.x, P.z) ? (P.stuckT || 0) + dt : 0;
+  if (P.stuckT > CTRL.unstick) {
+    P.stuckT = 0;
+    const f = freeSpot(P.x, P.z);
+    if (f) [P.x, P.z] = f;
+  }
   if (!swinging) P.tdir = Math.atan2(v[0], v[1]); // mid-swing you keep facing what you swung at
   P.path = null;
   P.run = run;
@@ -29411,7 +30037,7 @@ function pickFocus() {
     consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)), spentObj(o) ? 1.6 : 0);
   }
   for (const it of G.items) {
-    if (it.kind === 'tape') continue;
+    if (it.kind === 'tape' || it.kind === 'wallpee') continue; // nothing to do about either
     const d = Math.hypot(it.x - P.x, it.z - P.z);
     if (d > CTRL.reachItem + CTRL.holdDist) continue;
     consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z), it.kind === 'opened' ? 0.6 : 0); // what came out first, the mess after
@@ -30984,22 +31610,6 @@ function hxDrawWorld() {
     }
   }
 }
-// old stains nobody cleans: a few at the start, one more most days of THEIR week. The game doesn't know they're there.
-// [x, z, shape (4 splat, 5 smear), size, turn, seed]
-const HX_STAINS = [
-  [27.4, 7.6, 4, 0.75, 0.4, 1.3],
-  [17.6, 13.45, 4, 0.42, 2.1, 2.7],
-  [28.3, 10.4, 5, 1.1, 2.6, 3.1],
-  [35.6, 26.5, 4, 0.6, 1.0, 4.9],
-  [31.5, 16.5, 5, 1.3, 0.1, 5.5],
-  [44.4, 13.5, 4, 0.5, 2.9, 6.2],
-  [28.5, 3.3, 4, 0.7, 1.7, 7.7],
-  [39.3, 27.9, 5, 1.2, 4.0, 8.1],
-  [31.4, 21.7, 4, 0.55, 0.6, 9.4],
-  [8.4, 16.9, 5, 1.0, 3.3, 10.6],
-  [47.6, 18.55, 4, 0.48, 5.0, 11.2],
-  [24.6, 30.2, 4, 0.8, 0.9, 12.8],
-];
 function hxDrawDecals() {
   for (const a of HX.actors)
     if (!a.hide && a.shadow > 0)
@@ -31011,24 +31621,6 @@ function hxDrawDecals() {
         0,
         0.013,
       );
-  if (G.started) {
-    const n = Math.min(HX_STAINS.length, 2 + Math.floor((G.phase || 1) * 2));
-    for (let i = 0; i < n; i++) {
-      const [x, z, sh, sz, rot, seed] = HX_STAINS[i];
-      if (visAt(x, z) > 0.05)
-        drawDecalR(
-          x,
-          z,
-          sz * (sh === 5 ? 1 : 1),
-          sz * (sh === 5 ? 0.45 : 1),
-          rot,
-          [0.1, 0.009, 0.009, 0.8],
-          sh,
-          seed,
-          0.011 + i * 0.0002,
-        );
-    }
-  }
   for (let i = HX.decals.length - 1; i >= 0; i--) {
     const d = HX.decals[i];
     if (G.t > d.until) {
@@ -31160,6 +31752,8 @@ function hxUpdate(dtReal) {
   const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.scene);
   const k = paused ? 0 : !live ? 1 : G.sleeping || G.away ? 0 : [0, 1, 1.3, 1.6][G.speed] || 1;
   const dt = dtReal * k;
+  peeFx(dt); // an accident's spray (player/needs)
+  bloodFx(dt); // drops in the air (combat/blood)
   const h = hourF();
   const nightT = h >= 21 || h < 5 ? 1 : h >= 18.5 ? (h - 18.5) / 2.5 : h < 7 ? 1 - (h - 5) / 2 : 0;
   HX.night += (nightT - HX.night) * Math.min(1, dtReal * 0.8);
@@ -31794,6 +32388,7 @@ function hxFeeding(st) {
         T.blood = true;
         const t0 = G.t;
         hxDecal(kneel[0], kneel[1], () => 0.25 + clamp((G.t - t0) / 10, 0, 1) * 0.85, [0.2, 0.01, 0.015, 0.75], 0, 260);
+        bloodPool(kneel[0], kneel[1], 0, 0.8); // and what stays after
       }
       if (t > 8.6 && !T.look) {
         T.look = true;
@@ -34526,8 +35121,10 @@ function encTakeStranger(E, v, n, kneel) {
         giveUp: 40,
         reach: 1.1,
         onCatch: (c) => {
-          if (E.fac === 'zombies')
+          if (E.fac === 'zombies') {
             addItem({ kind: 'stain', x: c.x, z: c.z, rot: rand(0, TAU), by: null, room: null, at: G.t });
+            bloodPool(c.x, c.z, 0);
+          }
           c.trance = false;
           c.onMap = false;
           c.queue = [];
@@ -38822,7 +39419,10 @@ function capDropSpot() {
   }
   const r = Math.random();
   if (fac === 'aliens') {
-    if (CAP.how === 'sleep' && r < 0.5) return { x: bed.x + 1.5, z: bed.z + 0.5, dir: Math.PI, kind: 'bed' };
+    if (CAP.how === 'sleep' && r < 0.5) {
+      const [x, z] = free(bed.x + 1.5, bed.z + 0.5, 2);
+      return { x, z, dir: Math.PI, kind: 'bed' };
+    }
     const [x, z] = free(r < 0.75 ? 37.5 : rand(12, 40), r < 0.75 ? 28.5 : 16.5);
     return { x, z, dir: rand(0, TAU), kind: 'lawn' };
   }
@@ -38867,11 +39467,9 @@ function capDrop() {
       P.moving = false;
       P.pose = 'stand';
       P.shown = 1;
-      if (sp.kind === 'bed') {
-        const b = OBJ_BY_ID.homeBed;
-        P.x = b.x + 1.5;
-        P.z = b.z + 1;
-      }
+      // never inside a wall or a piece of furniture: out to the nearest spot you can stand on (input/walking)
+      const ok = standOK(P.x, P.z) ? null : freeSpot(P.x, P.z);
+      if (ok) [P.x, P.z] = ok;
       capCut(P.x, P.z, 3.3, CAP.saved.yaw);
       CAP.fillK = darkNow() ? 0.55 : 0; // enough of the street's light to find yourself lying in it
       capFxNow({ fade: 1, lid: 1, daze: 0.75, washK: 0, letter: 1 });
@@ -41028,9 +41626,7 @@ function chaseTrail(n) {
     x = n.x + rand(-0.12, 0.12),
     z = n.z + rand(-0.12, 0.12);
   if (F === 'aliens') hxDecal(x, z, 0.11, [0.25, 0.7, 0.5, 0.45], 0, 50);
-  else if (F === 'lizards')
-    hxDecal(x, z, 0.14, [0.09, 0.12, 0.05, 0.6], 4, 50, { rot: rand(0, TAU), seed: rand(0, 20) });
-  else hxDecal(x, z, 0.13, [0.2, 0.015, 0.015, 0.7], 4, 50, { rot: rand(0, TAU), seed: rand(0, 20) });
+  if (chance(0.6)) bloodStain(x, z, 0, bloodOf(n), rand(0.08, 0.15), 4, 0); // and its blood, for good (combat/blood)
 }
 // the glow: where you last saw the one you're after
 function chaseGoal() {
@@ -41488,6 +42084,7 @@ function freshG(start) {
     sus60: {},
     misled: {},
     destroyDay: -9,
+    wipe: null, // someone coming to your computer for a card (them/wipe)
     overtimeDay: 0,
     overtimeToday: false,
     filesAt: 0,
@@ -41544,9 +42141,11 @@ function freshG(start) {
     exposed: [],
     factionKnown: false,
     items: [],
+    blood: [], // every stain violence has left (combat/blood)
     leads: [],
     lennyHint: 0,
     momToday: false,
+    momFacts: 0,
     momWeek: false,
     mailToday: false,
     thoughtCd: 20,
@@ -43378,7 +43977,9 @@ function frame(now) {
       else if (!UI.caseOpen) capUpdate(dtReal);
     } else if (!G.over && !UI.caseOpen && !UI.scene) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
-      simStep(dtReal);
+      const stop = R.hitStop > 0; // a blow landing: the world all but stops for a beat
+      R.hitStop = Math.max(0, R.hitStop - dtReal);
+      simStep(stop ? dtReal * 0.04 : dtReal);
     }
     if (UI.cf) cfTick(dtReal);
     cfLight(dtReal);

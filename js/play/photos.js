@@ -174,7 +174,7 @@ function takePhoto(tg) {
   }
   const inFrame = tg.inFrame || ((x, z) => Math.hypot(x - ax, z - az) < 2.4 && visAt(x, z) > 0.35);
   const chars = CHARS.filter((n) => !n.isPlayer && n.onMap && (n === tg.char || (n.shown > 0.5 && inFrame(n.x, n.z))));
-  const items = G.items.filter((it) => it.kind !== 'puddle' && (it === tg.item || inFrame(it.x, it.z)));
+  const items = G.items.filter((it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)));
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
   // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.

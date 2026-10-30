@@ -1,6 +1,6 @@
 //@ taken/back-up — Back up top
 //@ Defines: capDropSpot, capDrop, capOutcome
-//@ Uses:    taken/taken, sim/core, taken/coming, core/util, horror/layer, world/objects, audio/sound, sim/pose, world/paths, world/vision, …
+//@ Uses:    taken/taken, sim/core, taken/coming, core/util, horror/layer, input/walking, audio/sound, sim/pose, world/objects, world/paths, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── back up top, as if nothing had happened
 function capDropSpot() {
@@ -26,7 +26,10 @@ function capDropSpot() {
   }
   const r = Math.random();
   if (fac === 'aliens') {
-    if (CAP.how === 'sleep' && r < 0.5) return { x: bed.x + 1.5, z: bed.z + 0.5, dir: Math.PI, kind: 'bed' };
+    if (CAP.how === 'sleep' && r < 0.5) {
+      const [x, z] = free(bed.x + 1.5, bed.z + 0.5, 2);
+      return { x, z, dir: Math.PI, kind: 'bed' };
+    }
     const [x, z] = free(r < 0.75 ? 37.5 : rand(12, 40), r < 0.75 ? 28.5 : 16.5);
     return { x, z, dir: rand(0, TAU), kind: 'lawn' };
   }
@@ -71,11 +74,9 @@ function capDrop() {
       P.moving = false;
       P.pose = 'stand';
       P.shown = 1;
-      if (sp.kind === 'bed') {
-        const b = OBJ_BY_ID.homeBed;
-        P.x = b.x + 1.5;
-        P.z = b.z + 1;
-      }
+      // never inside a wall or a piece of furniture: out to the nearest spot you can stand on (input/walking)
+      const ok = standOK(P.x, P.z) ? null : freeSpot(P.x, P.z);
+      if (ok) [P.x, P.z] = ok;
       capCut(P.x, P.z, 3.3, CAP.saved.yaw);
       CAP.fillK = darkNow() ? 0.55 : 0; // enough of the street's light to find yourself lying in it
       capFxNow({ fade: 1, lid: 1, daze: 0.75, washK: 0, letter: 1 });

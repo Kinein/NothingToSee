@@ -1,6 +1,6 @@
 //@ play/biography — Biography: six facts a suspect, found by chat, rummaging, the paper and Mom; you mark one odd
 //@ Defines: BIO_N, makeBios, findFact, chatFact, homeFact, paperFact, momFact, markFact, BIO_SRC
-//@ Uses:    sim/core, core/util, data/lines, town/cast, them/proofs, ui/interface, play/stashes
+//@ Uses:    sim/core, core/util, data/lines, town/cast, data/tuning, them/proofs, ui/interface, play/stashes
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── biography: a page of about six facts on every suspect in the evidence book, blank lines for the ones you
 // haven't found. Facts come from chatting with the person themselves, rummaging at their place, the newspaper and Mom's
@@ -39,7 +39,7 @@ function makeBios() {
     // or Mom, dealt out so every source has something
     const docs = shuffle(['home', 'paper', 'mom', 'home', 'paper', 'mom']);
     let k = 0;
-    for (const f of facts) if (!f.src) f.src = f.say && chance(0.75) ? 'chat' : docs[k++ % docs.length];
+    for (const f of facts) if (!f.src) f.src = f.say && chance(0.8) ? 'chat' : docs[k++ % docs.length];
     G.bio[n.id] = shuffle(facts);
   }
 }
@@ -68,22 +68,30 @@ function homeFact(o) {
     n = id && NPC[id];
   if (!n || n.isPlayer) return false;
   const f = pick(unfound(n, 'home'));
-  if (!f || !chance(0.6)) return false;
+  if (!f || !chance(BIO_FIND.home)) return false;
   return findFact(n, f, 'home');
 }
-// the morning paper: a line about somebody, in among the small print
+// the morning paper: lines about people you know, in among the small print (BIO_FIND.paper of them, the first read of
+// the day; the rest of the paper is the same paper)
 function paperFact() {
-  const opts = suspects().filter((n) => unfound(n, 'paper').length);
-  const n = pick(opts);
-  return n ? findFact(n, pick(unfound(n, 'paper')), 'paper') && n : null;
+  let got = null;
+  for (let i = 0; i < BIO_FIND.paper; i++) {
+    const n = pick(suspects().filter((n) => unfound(n, 'paper').length));
+    if (!n) break;
+    findFact(n, pick(unfound(n, 'paper')), 'paper');
+    got = got || n;
+  }
+  return got;
 }
-// Mom: she knows everybody's mother
+// Mom: she knows everybody's mother. Something true on each of the day's first BIO_FIND.mom calls.
 function momFact() {
+  if ((G.momFacts || 0) >= BIO_FIND.mom) return null;
   const opts = suspects().filter((n) => unfound(n, 'mom').length);
   const n = pick(opts);
   if (!n) return null;
   const f = pick(unfound(n, 'mom'));
   findFact(n, f, 'mom');
+  G.momFacts = (G.momFacts || 0) + 1;
   return 'Mom: “' + n.short + '? ' + f.t + '”';
 }
 // your mark: one fact per person, odd. It's their Biography card. It moves freely until you've called them out.

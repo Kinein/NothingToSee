@@ -150,7 +150,7 @@ function foeStrike(n, A, held) {
   psyMark('fight');
   G.lastHitBy = n.id; // an id, never the person: G is saved whole
   ui.bubble(n, 'exclaim', 'speech', 1.4);
-  hurt(Math.round(blow), true);
+  hurt(Math.round(blow), true, n);
   if (!G.over && P.onMap) knockBack(P, n, 0.9);
 }
 // a person's punch: the fist drawn back where you can see it, then thrown. Step back out of it. `again` runs on a miss.
@@ -184,7 +184,7 @@ function punchAct(dmg, byThem, again) {
       audio.hx('whoosh', hxPan(c.x, c.z), 0.45);
       if (P.onMap && !G.away && !ARREST.on && Math.hypot(P.x - T.x, P.z - T.z) < T.r) {
         G.lastHitBy = byThem ? c.id : null;
-        hurt(dmg, byThem);
+        hurt(dmg, byThem, c);
         if (!G.over && P.onMap) knockBack(P, c, 0.6);
         return;
       }
@@ -227,6 +227,7 @@ function knockBack(c, from, dist) {
 // your swing landed on n
 function fightOutcome(n) {
   if (G.over || n.surrendered || n.slain) return;
+  bleed(n, PLAYER, n.trueForm ? 1.3 : 1); // whatever's in its veins (combat/blood)
   if (G.loose && n.thrall) return looseHitHelper(n, true);
   if (n.def.officer && !n.trueForm && !G.loose) {
     if (ONRUN.on && ONRUN.off === n) return runStruck(n);

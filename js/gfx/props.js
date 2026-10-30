@@ -82,7 +82,37 @@ function buildItemMesh(it) {
     g.cyl(0, 0.003, 0, 0.42, 0.42, 0.004, 14, C(0x0e0e0c));
     g.cyl(0, 0.006, 0, 0.24, 0.24, 0.004, 12, C(0x1d2a20), EMIT(0.2));
   } else if (it.kind === 'puddle') {
-    g.sphere(0, 0.0, 0, 0.45, 0.005, 0.32, 10, 3, C(0x8a8a3a), GLASS);
+    const k = it.size || 1; // an accident's pool is two tiles across, and not quite round
+    g.sphere(0, 0.0, 0, 0.45 * k, 0.005, 0.32 * k * (k > 1 ? 1.35 : 1), 12, 3, C(0x8a8a3a), GLASS);
+    if (k > 1) {
+      g.sphere(0.55, 0.001, 0.35, 0.3, 0.004, 0.22, 8, 3, C(0x7d7c33), GLASS);
+      g.sphere(-0.6, 0.001, -0.3, 0.26, 0.004, 0.2, 8, 3, C(0x7d7c33), GLASS);
+    }
+  } else if (it.kind === 'wallpee') {
+    // up the wall for good: a splash and the runs down from it, flat on the wall's face
+    const c = C(0xa09535),
+      o = it.off || 0;
+    let s = it.seed || 1;
+    const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    g.sphere(o, 0.32 + r() * 0.12, 0, 0.3 + r() * 0.12, 0.18 + r() * 0.08, 0.008, 10, 3, c, GLASS);
+    for (let i = 0; i < 4; i++) {
+      const x = o + (r() - 0.5) * 0.45,
+        y = 0.2 + r() * 0.35,
+        h = 0.08 + r() * 0.16;
+      g.bx(x, y - h, 0, 0.018, h, 0.006, c, GLASS);
+      g.sphere(
+        x + (r() - 0.5) * 0.3,
+        y + 0.1 + r() * 0.2,
+        0,
+        0.05 + r() * 0.05,
+        0.04 + r() * 0.04,
+        0.007,
+        6,
+        3,
+        c,
+        GLASS,
+      );
+    }
   } else if (it.kind === 'stain') {
     g.sphere(0, 0.0, 0, 0.62, 0.006, 0.44, 12, 3, C(0x3a0807), GLASS);
     g.sphere(0.3, 0.002, 0.25, 0.22, 0.005, 0.16, 8, 3, C(0x2a0605), GLASS);

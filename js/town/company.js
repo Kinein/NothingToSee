@@ -58,7 +58,11 @@ function recant(w, m) {
     G.chipped[w.id] = 1;
     w.lostDay = dayNo(G.t + 6 * 60);
     markVictim(w, m.id);
-  } else removeVictim(w, 'killed', witnessDoor(w) || [w.x || 20, w.z || 15]);
+  } else {
+    const at = witnessDoor(w) || [w.x || 20, w.z || 15];
+    removeVictim(w, 'killed', at);
+    bloodPool(at[0], at[1], 0); // on their doorstep, for good (combat/blood)
+  }
   setTimeout(() => {
     if (!G.over)
       ui.note('people', w.short + (why === 'dead' ? ' · gone in the night' : ' won’t talk about it any more'), 'bad');

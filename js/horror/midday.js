@@ -1,6 +1,6 @@
 //@ horror/midday — Midday scenes
 //@ Defines: hxNoonScene, hxAbduction, hxLick, hxFeeding
-//@ Uses:    horror/layer, core/util, sim/core, gfx/renderer, town/cast, world/grid, them/plan
+//@ Uses:    horror/layer, core/util, sim/core, gfx/renderer, town/cast, world/grid, them/plan, combat/blood
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── midday
 function hxNoonScene() {
@@ -474,6 +474,7 @@ function hxFeeding(st) {
         T.blood = true;
         const t0 = G.t;
         hxDecal(kneel[0], kneel[1], () => 0.25 + clamp((G.t - t0) / 10, 0, 1) * 0.85, [0.2, 0.01, 0.015, 0.75], 0, 260);
+        bloodPool(kneel[0], kneel[1], 0, 0.8); // and what stays after
       }
       if (t > 8.6 && !T.look) {
         T.look = true;

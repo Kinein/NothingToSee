@@ -225,8 +225,8 @@ function momAct(o) {
     onEnd: (c, a, ok) => {
       if (!ok) return;
       addStress(G.momToday ? -3 : -10);
-      // Mom knows everybody's mother: once a day, something true about someone in town
-      const mf = !G.momToday && momFact();
+      // Mom knows everybody's mother: on the day's first few calls, something true about someone in town
+      const mf = momFact();
       ui.note(
         'phone',
         mf ||

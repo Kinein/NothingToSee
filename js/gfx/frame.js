@@ -130,6 +130,11 @@ function renderFrame() {
     console.error(e);
   }
   try {
+    bloodDraw();
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     capDecals();
   } catch (e) {
     console.error(e);

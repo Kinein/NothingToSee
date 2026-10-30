@@ -262,4 +262,10 @@ const THEY_WON = {
 const BRAWL_CHEER = ['Go on! Give it to ’em!', 'Ha! Get in there!', 'Fight! FIGHT!', 'My money’s on you.', 'Ooh, that’s gotta hurt.'];
 const BRAWL_SCARED = ['Somebody stop them!', 'Oh God. Oh God.', 'Not again. Not here.'];
 const BRAWL_CALL = ['That’s it, I’m calling the police!', 'Police? Yes. There’s a fight.', 'Police! I need the police!', 'I’m phoning the police. Right now.'];
+// someone at your computer (them/wipe): the note while you're out, the bold one who carries on, the one who bolts
+const WIPE_LINES = {
+  away: ['Your computer just came on. You’re not home.', 'Someone’s at your computer. In your flat. Now.', 'A light in your bedroom window. Your screen.'],
+  bold: ['Go on. Hit me.', 'Nearly done. Sit down.', 'This doesn’t concern you.'],
+  caught: ['The door was open!', 'I was never here.', 'Wrong flat. Sorry. Wrong flat.'],
+};
 const BRAWL_HELP = ['Somebody help!', 'Get OFF me!', 'Are you insane?'];

@@ -28,6 +28,7 @@ const CTRL = {
   npcPace: 0.9,      // an ordinary walk, a touch unhurried
   npcRun: 1.46,      // anybody running (a fright, or something not human): two thirds of your sprint
   body: 0.22,        // your radius against walls and furniture: a round body, about shoulder-wide
+  unstick: 1.5,      // body minutes (under a second) pushing against nothing while stuck inside a wall: you're put free
   reachObj: 1.6,     // E reaches a thing when its nearest edge is this close
   reachChar: 2.0,    // …a person, centre to centre
   reachItem: 1.5,    // …something on the floor
@@ -91,7 +92,9 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50 };
+// An accident (player/needs accident): `spray` body minutes (about three seconds) out of your control, a pool `pool` tiles
+// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 4.5, pool: 2, wallReach: 1.8, wallOdds: 0.75 };
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };
@@ -182,6 +185,16 @@ const EVIDENCE = {
     loseSight: 6,                 // seconds out of its sight, at night, to lose it
   },
 };
+// a card destroyed in person (them/wipe): `after` game minutes from THEIR decision to the visit, `mins` at your computer,
+// come within `scare` tiles and they bolt; no police for a fight with them in your flat, nor `grace` game minutes after
+// blood (combat/blood): `drops` thrown by an ordinary blow, fanned `spread` radians either side of the line of the blow,
+// at `speed` m/s; at most `max` stains kept (the oldest go). A blow you land or take stops everything for `hitStop` real
+// seconds and shakes the camera `shake`. Under `trailAt` health you drip where you walk.
+const BLOOD = { drops: 12, spread: 0.6, speed: [1.8, 4.2], max: 700, hitStop: 0.07, shake: 0.35, trailAt: 40 };
+const WIPE = { after: [120, 480], mins: 30, scare: 4, grace: 10 };
+// Biography facts (play/biography): a chat that has one to tell gives it this often; the day's first paper has `paper`
+// lines about people; Mom tells one on each of the day's first `mom` calls; rummaging their things turns one up this often
+const BIO_FIND = { chat: 0.6, paper: 3, mom: 3, home: 0.9 };
 
 // ── Doors left ajar (town/doors)
 // Someone stepping into a room can forget to pull the door to. It stays half open and you can see in through the gap.

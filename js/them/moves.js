@@ -1,5 +1,5 @@
 //@ them/moves — THEIR morning moves: the Bought, Scatter, Destroy, Protect
-//@ Defines: buy, unbuyBy, tryBribe, tryUnder, tryControl, controlled, catchControl, tryScatter, morningResist, stealPrint, abductCheck, abduct, lodgeTick, destroyTick, protectAfter, policeTick, …
+//@ Defines: buy, unbuyBy, tryBribe, tryUnder, tryControl, controlled, catchControl, tryScatter, morningResist, abductCheck, abduct, lodgeTick, destroyTick, protectAfter, policeTick, policeSaw, …
 //@ Uses:    sim/core, core/util, sim/actions, ui/interface, town/npc-update, data/tuning, them/awareness, town/echoes, gfx/world-geometry, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the Bought (lizards). Slight: they look past things and make your day worse. Heavy: THEIRS to the end.
@@ -239,15 +239,15 @@ function tryScatter(n) {
 function morningResist() {
   const d = dayNo();
   G.overtimeToday = G.overtimeDay === d && isWorkday(d);
-  if (G.aware < 50 || d - (G.destroyDay || -9) < 3) return;
+  if (G.aware < 50 || d - (G.destroyDay || -9) < 4) return;
   const care = covert().filter((n) => temper(n) === 'careful'),
     agg = covert().filter((n) => temper(n) === 'aggressive');
   const opts = [];
   if (care.length) opts.push('theft');
   if (agg.length && isWorkday(d)) opts.push('job');
-  if (!opts.length || chance(0.35)) return;
+  if (!opts.length || chance(0.5)) return;
   G.destroyDay = d;
-  if (pick(opts) === 'theft') return stealPrint(pick(care));
+  if (pick(opts) === 'theft') return wipeLater(pick(care)); // someone comes to your computer (them/wipe)
   const m = pick(agg);
   if (chance(0.5))
     G.filesAt = (d - 1) * 1440 + irand(600, 960); // your files vanish some time today
@@ -260,22 +260,6 @@ function morningResist() {
     setTimeout(() => ui.note('work', 'Hale: overtime ' + DOW[dow(nd)] + '. No slacking.', 'warn'), 3000);
     echo('overtime', { who: m.id, x: 4, z: 4, seen: ['hale'], quiet: true });
   }
-}
-// a card vanishes from your flat overnight: torn, half of it on the floor; the next day their routine shifts
-function stealPrint(n) {
-  if (!tearCard(n)) return;
-  addNote(n, 'Torn photo on your floor. Half of it gone.', { by: 'you' });
-  const hb = G.habits[n.id];
-  if (hb) {
-    const sh = (chance(0.5) ? 1 : -1) * rand(20, 40);
-    hb.ms = (hb.ms || [hb.m]).map((t) => clamp(Math.round((t + sh) / 5) * 5, 440, 1290));
-    hb.m = hb.ms[0];
-  }
-  setTimeout(() => {
-    ui.note('print', 'A photo is gone. Torn.', 'bad');
-    audio.sting('whisper');
-  }, 2600);
-  echo('theft', { who: n.id, x: 12, z: 21, seen: n.id !== 'agnes' ? ['agnes'] : [], quiet: true });
 }
 function abductCheck() {
   sleepTakeCheck();
@@ -352,6 +336,8 @@ function lodgeTick() {
 }
 function destroyTick() {
   lodgeTick();
+  wipeTick();
+  bloodTick();
   if (G.filesAt && G.t >= G.filesAt) {
     G.filesAt = 0;
     if (!inShift()) return;

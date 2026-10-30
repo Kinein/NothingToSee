@@ -17,7 +17,9 @@ function brawlOf(n) {
 function struck(n) {
   const F = brawlOf(n),
     ear = earshot(n),
-    first = !F.hits;
+    first = !F.hits,
+    law = !burglar(n); // whoever's at your computer: no police in your own flat (them/wipe)
+  if (!law) G.wipe.hit = true;
   F.hits++;
   F.t = G.t;
   gesture(n, 'flinch', 0.5);
@@ -25,22 +27,22 @@ function struck(n) {
   ui.float(n, F.hits + '', '');
   addSus(n, first ? 40 : 10);
   if (first || F.hits === BRAWL.hard) echo('fight', { x: n.x, z: n.z, who: n.id });
-  if (first && ear.length) protectAfter(n);
-  for (const w of ear) onlook(w, n, F);
+  if (first && ear.length && law) protectAfter(n);
+  for (const w of ear) onlook(w, n, F, law);
   if (F.hits >= BRAWL.ko) {
-    if (!F.called) policeFor(n, F, ear, true);
+    if (!F.called && law) policeFor(n, F, ear, true);
     return knockCold(n);
   }
   if (n.isThem && (first || F.hits === BRAWL.hard) && themSheds(n, ear)) return;
   victimReacts(n, F, first);
-  if (F.hits >= BRAWL.hard && !F.called) policeFor(n, F, ear);
+  if (F.hits >= BRAWL.hard && !F.called && law) policeFor(n, F, ear);
   if (F.hits === BRAWL.ko - 1) confess(n, true); // one more and they're out: what comes out now is the truth
 }
 // someone who saw it: the first blow they see, they decide what they make of it; after that it only adds up
-function onlook(w, n, F) {
+function onlook(w, n, F, law = true) {
   if (F.seen[w.id]) return addSus(w, 3);
   F.seen[w.id] = 1;
-  if (w.def.officer) return policeSaw(w);
+  if (w.def.officer) return law && policeSaw(w);
   if (w.def.fbi || w.surrendered || w.trueForm || w.fleeing) return;
   const T = w.isThem ? 'them' : w.def.stranger || !temper(w) ? 'stranger' : temper(w);
   const run = { timid: 0.6, stranger: 0.35, mocker: 0.15, aggressive: 0.05, them: 0.2 }[T],
@@ -59,7 +61,7 @@ function onlook(w, n, F) {
     ui.bubble(w, 'exclaim', 'speech', 1.8);
   }
   // nine in ten let a scuffle go
-  if (!F.called && F.hits < BRAWL.hard && chance(BRAWL.callSoft)) callPolice(w, n, F);
+  if (law && !F.called && F.hits < BRAWL.hard && chance(BRAWL.callSoft)) callPolice(w, n, F);
 }
 // it's gone hard: the victim calls it in, unless they're the brave sort or one of THEM; else whoever saw
 function policeFor(n, F, ear, out) {

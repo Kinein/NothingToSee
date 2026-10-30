@@ -473,8 +473,10 @@ function encTakeStranger(E, v, n, kneel) {
         giveUp: 40,
         reach: 1.1,
         onCatch: (c) => {
-          if (E.fac === 'zombies')
+          if (E.fac === 'zombies') {
             addItem({ kind: 'stain', x: c.x, z: c.z, rot: rand(0, TAU), by: null, room: null, at: G.t });
+            bloodPool(c.x, c.z, 0);
+          }
           c.trance = false;
           c.onMap = false;
           c.queue = [];

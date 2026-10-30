@@ -48,6 +48,7 @@ function freshG(start) {
     sus60: {},
     misled: {},
     destroyDay: -9,
+    wipe: null, // someone coming to your computer for a card (them/wipe)
     overtimeDay: 0,
     overtimeToday: false,
     filesAt: 0,
@@ -104,9 +105,11 @@ function freshG(start) {
     exposed: [],
     factionKnown: false,
     items: [],
+    blood: [], // every stain violence has left (combat/blood)
     leads: [],
     lennyHint: 0,
     momToday: false,
+    momFacts: 0,
     momWeek: false,
     mailToday: false,
     thoughtCd: 20,

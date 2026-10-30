@@ -215,8 +215,10 @@ function raidTick(n, dt) {
   n.path = null;
   n.moving = false;
   n.tdir = Math.atan2(tg.x - n.x, tg.z - n.z);
+  const was = n.tell.lunge;
   n.tell.feed = Math.sin(G.t * 3) > 0;
   n.tell.lunge = !n.tell.feed;
+  if (n.tell.lunge && !was && (G.faction !== 'aliens' || chance(0.35))) bleed(tg, n, 0.8); // every lunge draws blood
   if (P.onMap && visAt(n.x, n.z) > 0.5 && !A.seen) {
     A.seen = true;
     psyMark('form');
@@ -255,6 +257,7 @@ function endAttack(A, tg, broken) {
   }
   const spot = [tg.x, tg.z],
     hv = named && HOUSE_OF[tg.id];
+  if (F !== 'aliens') bloodPool(spot[0], spot[1], 0);
   if (hv) {
     (G.smell = G.smell || {})[hv.id] = { k: F, until: G.t + rand(2, 3) * 1440 };
     if (chance(0.5))

@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
-//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, settle, tryMove, …
-//@ Uses:    world/grid, sim/core, gfx/world-geometry, ui/interface, data/tuning, input/camera, world/objects, gfx/renderer, core/util, sim/actions, …
+//@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, freeSpot, settle, …
+//@ Uses:    world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, core/util, sim/actions, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -244,6 +244,22 @@ const tileOK = (x, z, who = PLAYER) =>
   inb(x, z) && (slimAt(I(x, z)) ? !WALLISH.has(tiles[I(x, z)]) : walkable(x, z, who));
 const footOK = (x, z) => tileOK(Math.floor(x), Math.floor(z));
 const standOK = (x, z) => footOK(x, z) && !bodyPush(x, z, CTRL.body);
+// the nearest tile centre (within r) where a body can stand
+function freeSpot(x, z, r = 6) {
+  let best = null,
+    bd = 1e9;
+  for (let tz = Math.floor(z) - r; tz <= Math.floor(z) + r; tz++)
+    for (let tx = Math.floor(x) - r; tx <= Math.floor(x) + r; tx++) {
+      const cx = tx + 0.5,
+        cz = tz + 0.5,
+        d = (cx - x) ** 2 + (cz - z) ** 2;
+      if (d < bd && tileOK(tx, tz) && standOK(cx, cz)) {
+        best = [cx, cz];
+        bd = d;
+      }
+    }
+  return best;
+}
 // nudged back out of whatever it overlaps, if that leaves it somewhere it can stand
 function settle(x, z) {
   for (let k = 0; k < 4; k++) {
@@ -507,6 +523,13 @@ function driveTick(dt) {
   const go = key ? steerAssist(P, v) : v,
     moved = tryMove(P, go[0] * sp, go[1] * sp);
   if (!key && ROUTE.on) ROUTE.stall = moved < sp * 0.3 ? ROUTE.stall + sp : 0;
+  // stuck inside a wall or a piece of furniture (a scene put you down there) and pushing to get out: freed after a moment
+  P.stuckT = moved < 1e-5 && !standOK(P.x, P.z) ? (P.stuckT || 0) + dt : 0;
+  if (P.stuckT > CTRL.unstick) {
+    P.stuckT = 0;
+    const f = freeSpot(P.x, P.z);
+    if (f) [P.x, P.z] = f;
+  }
   if (!swinging) P.tdir = Math.atan2(v[0], v[1]); // mid-swing you keep facing what you swung at
   P.path = null;
   P.run = run;

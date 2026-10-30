@@ -437,6 +437,7 @@ function killMember(n, how) {
       onEnd: (c) => {
         c.tell = null;
         c.onMap = false;
+        bloodPool(spot[0], spot[1], 0);
         addItem({
           kind: 'stain',
           x: spot[0],

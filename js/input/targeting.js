@@ -71,7 +71,7 @@ function pickFocus() {
     consider({ obj: o }, ex, ez, d, CTRL.reachObj, Math.min(angTo(qx, qz), angTo(o.cx, o.cz)), spentObj(o) ? 1.6 : 0);
   }
   for (const it of G.items) {
-    if (it.kind === 'tape') continue;
+    if (it.kind === 'tape' || it.kind === 'wallpee') continue; // nothing to do about either
     const d = Math.hypot(it.x - P.x, it.z - P.z);
     if (d > CTRL.reachItem + CTRL.holdDist) continue;
     consider({ item: it }, it.x, it.z, d, CTRL.reachItem, angTo(it.x, it.z), it.kind === 'opened' ? 0.6 : 0); // what came out first, the mess after

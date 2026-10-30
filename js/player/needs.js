@@ -1,6 +1,6 @@
 //@ player/needs — The player body: needs, Psychic, accidents, passing out, panic
-//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, passOut, passOutLids, breakdown
-//@ Uses:    sim/core, data/tuning, ui/interface, gfx/renderer, sim/actions, core/util, world/grid, them/tells, town/suspicion, audio/sound, …
+//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, accidentPool, wallFace, peePose, PEE, peeRnd, …
+//@ Uses:    sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, core/util, them/tells, town/suspicion, audio/sound, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the player's body
 // how well a need is doing, 0 bad … 100 fine (stress is the one that counts the other way)
@@ -128,6 +128,9 @@ function psyDrain(dt, room) {
   const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
   if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
 }
+// an accident: you can't hold it. Knees together, hands everywhere, turning on the spot while it goes all over the place
+// (BLADDER.spray body minutes, about three seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to
+// mop up, and whatever wall was close enough gets some too: that never comes off.
 function accident() {
   const P = PLAYER,
     N = P.needs;
@@ -135,7 +138,6 @@ function accident() {
   setTimeout(() => (G.accidentLock = false), 3000);
   N.bladder = 100;
   G.smelly = true; // until you shower: people notice you from further off
-  addItem({ kind: 'puddle', x: P.x, z: P.z, rot: Math.random() * 3 });
   let seen = 0;
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
@@ -146,6 +148,150 @@ function accident() {
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
   setTimeout(() => !G.over && ui.note('shower', 'You smell. People notice you from further off. Shower', 'warn'), 1800);
   audio.sting('awkward');
+  // asleep, sitting, in the middle of something you can't leave: it just happens where you are
+  const free = P.onMap && !G.sleeping && !G.away && P.pose === 'stand' && !P.seatTr && !P.vault;
+  if (!free || (P.queue[0] && P.queue[0].interruptible === false)) return accidentPool();
+  hardReset(P);
+  routeStop();
+  enqueue(
+    P,
+    mkAct({
+      kind: 'wait',
+      label: 'Accident',
+      icon: 'toilet',
+      anim: 'idle',
+      dur: BLADDER.spray,
+      interruptible: false,
+      onStart: (c) => {
+        PEE.on = true;
+        PEE.dir0 = c.dir;
+        c.poseFn = peePose;
+        ui.bubble(c, 'exclaim', 'thought', 2.5);
+      },
+      // it gets away from you: a wild sweep one way and back, and round
+      onTick: (c, a) => {
+        c.tdir = PEE.dir0 + Math.sin(a.t * 1.9) * 1.9 + a.t * 0.45;
+        c.moving = false;
+      },
+      onEnd: (c) => {
+        PEE.on = false;
+        if (c.poseFn === peePose) c.poseFn = null;
+        accidentPool();
+      },
+    }),
+  );
+}
+// what's left: the pool on the floor (mop it), and splashes up the walls close by (they stay)
+function accidentPool() {
+  const P = PLAYER;
+  addItem({ kind: 'puddle', x: P.x, z: P.z, rot: rand(0, 3), size: BLADDER.pool });
+  if (!P.onMap) return;
+  // the nearest wall always gets some; any other close enough, now and then
+  const faces = [];
+  for (const [dx, dz] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]) {
+    const f = wallFace(P.x, P.z, dx, dz, BLADDER.wallReach);
+    if (f) faces.push([Math.hypot(f[0] - P.x, f[1] - P.z), f, dx, dz]);
+  }
+  faces.sort((a, b) => a[0] - b[0]);
+  faces.forEach(([, f, dx, dz], i) => {
+    if (i && !chance(BLADDER.wallOdds)) return;
+    addItem({
+      kind: 'wallpee',
+      x: f[0] - dx * 0.025,
+      z: f[1] - dz * 0.025,
+      rot: dx ? Math.PI / 2 : 0,
+      off: rand(-0.3, 0.3),
+      seed: irand(1, 9999),
+    });
+  });
+}
+// the nearest wall straight along (dx, dz) within `reach`: the point on its face, or null (a door, or furniture first)
+function wallFace(x, z, dx, dz, reach) {
+  for (let s = 0.1; s <= reach; s += 0.05) {
+    const px = x + dx * s,
+      pz = z + dz * s,
+      tx = Math.floor(px),
+      tz = Math.floor(pz);
+    if (!inb(tx, tz)) return null;
+    const c = tiles[I(tx, tz)];
+    if (c === 'D' || c === 'L') return null;
+    const wall = WALLISH.has(c);
+    for (const b of solidCells()[I(tx, tz)])
+      if (px >= b[0] && px <= b[2] && pz >= b[1] && pz <= b[3]) return wall && !b.over ? [px, pz] : null; // furniture in the way takes it
+  }
+  return null;
+}
+// knees together, bent over it, both hands down there and no use at all, the whole body jiggling
+function peePose(T, c) {
+  const t = c.animT;
+  T.thL = T.thR = -0.35;
+  T.shL = T.shR = 0.55;
+  T.rootY = (T.rootY || 0) - 0.07 + Math.sin(t * 21) * 0.012;
+  T.torso = 0.32;
+  T.hp = 0.45;
+  T.hr = Math.sin(t * 9) * 0.2;
+  T.uaL = T.uaR = -0.45;
+  T.faL = T.faR = -0.85;
+  T.aoL = T.aoR = -0.1;
+  T.roll = Math.sin(t * 17) * 0.07;
+}
+// the spray, drawn: droplets in an arc from where you stand, splashing where they land. Looks only: its own little
+// random numbers, nothing kept in the game, no allocation once the pool of drops exists.
+const PEE = { on: false, dir0: 0, seed: 1, acc: 0, drops: [] };
+function peeRnd() {
+  PEE.seed = (PEE.seed * 16807) % 2147483647;
+  return PEE.seed / 2147483647;
+}
+function peeFx(dt) {
+  const P = PLAYER;
+  if (!PEE.drops.length)
+    for (let i = 0; i < 80; i++) PEE.drops.push({ on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0 });
+  if (PEE.on && P.onMap) {
+    PEE.acc += dt * 90;
+    const fx = Math.sin(P.dir),
+      fz = Math.cos(P.dir);
+    for (const d of PEE.drops) {
+      if (PEE.acc < 1) break;
+      if (d.on) continue;
+      PEE.acc--;
+      const sp = 2.1 + peeRnd() * 1.1,
+        side = (peeRnd() - 0.5) * 0.9;
+      d.on = true;
+      d.x = P.x + fx * 0.16;
+      d.z = P.z + fz * 0.16;
+      d.y = 0.8;
+      d.vx = fx * sp + fz * side;
+      d.vz = fz * sp - fx * side;
+      d.vy = 0.9 + peeRnd() * 1.3;
+    }
+    PEE.acc = Math.min(PEE.acc, 1);
+  }
+  for (const d of PEE.drops) {
+    if (!d.on) continue;
+    d.vy -= 9.8 * dt;
+    const nx = d.x + d.vx * dt,
+      nz = d.z + d.vz * dt,
+      t = tiles[I(Math.floor(nx), Math.floor(nz))];
+    if (WALLISH.has(t) && t !== 'D') {
+      d.vx *= -0.15; // splash back off the wall
+      d.vz *= -0.15;
+    } else {
+      d.x = nx;
+      d.z = nz;
+    }
+    d.y += d.vy * dt;
+    if (d.y <= 0.02) {
+      d.on = false;
+      if (peeRnd() < 0.15) hxDecal(d.x, d.z, 0.06 + peeRnd() * 0.08, [0.5, 0.46, 0.1, 0.5], 0, 90 + peeRnd() * 60);
+      continue;
+    }
+    hxGlint(d.x, d.y, d.z, 0.045, [0.85, 0.75, 0.2], 0.55);
+  }
 }
 // out cold where you fell: the hours go by as fast as in bed (G.sleeping), behind your eyelids (passOutLids), and it
 // rests you worse than a bed does. You come round at half your energy.

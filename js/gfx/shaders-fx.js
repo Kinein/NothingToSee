@@ -11,7 +11,7 @@ void main(){ vUv = aPos.xz; vec4 w = uModel*vec4(aPos,1.0); vW = w.xyz; gl_Posit
 const DFS = `#version 300 es
 precision highp float;
 in vec2 vUv; in vec3 vW; uniform vec4 uColor; uniform int uShape; uniform sampler2D uVis; uniform vec2 uMap; uniform float uTime;
-uniform float uSeed; uniform sampler2D uLight; uniform float uWetD;
+uniform float uSeed; uniform sampler2D uLight; uniform float uWetD; uniform vec2 uVisOff;
 out vec4 frag;
 float hd(float n){ return fract(sin(n*12.9898 + uSeed*78.233)*43758.5453); }
 // blood that landed: a ragged body, spines where it hit hard, droplets thrown clear
@@ -35,6 +35,18 @@ float smear(vec2 p){
   float streak = 0.5 + 0.5*sin(p.y*40.0 + sin(p.x*2.0)*3.0 + uSeed*9.0);
   return a*mix(1.0, streak, smoothstep(0.15, 0.95, t))*smoothstep(1.0, 0.82, abs(p.x));
 }
+// blood up a wall: a splat, and runs from it, down (+y in the quad), each ending in a bead
+float drip(vec2 p){
+  float a = splat(p*1.6 + vec2(0.0, 0.5));
+  for(int i=0;i<5;i++){
+    float fi = float(i), x = (hd(fi + 20.0) - 0.5)*0.42, len = 0.2 + 0.55*hd(fi + 30.0), w = 0.014 + 0.018*hd(fi + 40.0);
+    float t = clamp((p.y + 0.15)/len, 0.0, 1.0), on = step(-0.15, p.y)*step(p.y, len - 0.15);
+    float ww = w*(1.0 - t*0.45);
+    a = max(a, on*smoothstep(ww + 0.008, ww - 0.008, abs(p.x - x)));
+    a = max(a, smoothstep(w*1.5 + 0.01, w*1.5 - 0.01, length(p - vec2(x, len - 0.15))));
+  }
+  return a;
+}
 void main(){
   float r = length(vUv); float a;
   if(uShape==0) a = 1.0 - smoothstep(0.25, 1.0, r);
@@ -42,11 +54,14 @@ void main(){
   else if(uShape==3){ float ang = atan(vUv.y, vUv.x); a = smoothstep(0.66,0.74,r)*(1.0-smoothstep(0.86,0.94,r))*step(0.0, sin(ang*8.0 + uTime*1.5)); }
   else if(uShape==4) a = splat(vUv);
   else if(uShape==5) a = smear(vUv);
+  else if(uShape==6) a = drip(vUv);
+  else if(uShape==7) a = smoothstep(1.0, 0.7, r);   // a drop in the air
   else a = (1.0 - smoothstep(0.0, 1.0, r))*(0.6+0.4*sin(uTime*3.0 + r*9.0));
-  float v = texture(uVis, vW.xz/uMap).r;
+  vec2 at = (vW.xz + uVisOff)/uMap;   // on a wall: what the room in front of it sees and how it's lit
+  float v = texture(uVis, at).r;
   vec3 c = uColor.rgb;
   if(uShape >= 4){   // lit like the street it lies on, with a wet sheen where a lamp is close
-    vec3 L = texture(uLight, vW.xz/uMap).rgb*2.0;
+    vec3 L = texture(uLight, at).rgb*2.0;
     c = uColor.rgb*(0.3 + L*1.25) + L*L*0.035*uWetD;
   }
   frag = vec4(c, uColor.a*a*max(v, uShape==1||uShape==3 ? 0.5 : 0.0));

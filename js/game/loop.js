@@ -1,6 +1,6 @@
 //@ game/loop — Per-frame simulation, main loop, boot
 //@ Defines: hurrying, fightOn, stirNear, clockSpeed, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
-//@ Uses:    sim/core, ui/interface, world/light-map, gfx/renderer, sim/actions, taken/taken, world/grid, data/tuning, game/state, core/util, …
+//@ Uses:    sim/core, ui/interface, gfx/renderer, world/light-map, sim/actions, taken/taken, world/grid, data/tuning, game/state, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── per-frame simulation
 let lightT = 0,
@@ -318,7 +318,9 @@ function frame(now) {
       else if (!UI.caseOpen) capUpdate(dtReal);
     } else if (!G.over && !UI.caseOpen && !UI.scene) {
       carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
-      simStep(dtReal);
+      const stop = R.hitStop > 0; // a blow landing: the world all but stops for a beat
+      R.hitStop = Math.max(0, R.hitStop - dtReal);
+      simStep(stop ? dtReal * 0.04 : dtReal);
     }
     if (UI.cf) cfTick(dtReal);
     cfLight(dtReal);

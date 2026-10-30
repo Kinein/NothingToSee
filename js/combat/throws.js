@@ -148,7 +148,7 @@ function throwLand(th) {
   if (P.onMap && !G.away && d < RANGED.hit) {
     G.lastHitBy = th.by.id;
     psyMark('fight');
-    hurt(HURT.thrown, true);
+    hurt(HURT.thrown, true, { x: th.tx - (th.tx - th.by.x) * 0.1, z: th.tz - (th.tz - th.by.z) * 0.1 });
     if (!G.over && P.onMap) knockBack(P, th, 0.8);
   } else if (P.onMap && d < 3 && th.arc) ui.float(P, 'Dodged', 'good');
   th.done = true;

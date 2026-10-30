@@ -20,6 +20,7 @@ const R = {
   th: 0,
   flash: 0,
   pulse: 0,
+  hitStop: 0, // real seconds left of a blow's freeze (combat/blood)
   lampP: new Float32Array(48),
   lampC: new Float32Array(48),
   lampN: 0,

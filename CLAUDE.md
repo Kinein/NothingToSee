@@ -62,7 +62,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | How people and creatures are drawn | `js/gfx/people.js` (`drawPerson`), `js/gfx/creatures.js`, `js/gfx/body-parts.js` |
 | Animation, poses, gaits, sitting | `js/sim/pose.js`, `js/sim/body-motion.js`, `js/sim/seat-moves.js` |
 | The action queue every character runs | `js/sim/actions.js` (`mkAct`, `enqueue`, `runAct`) |
-| Player needs (hunger, energy, bladder, Psychic: big steps `psyMark`, the drain near IT `psyDrain`; numbers in `PSY`, `BLADDER`) | `js/player/needs.js` |
+| Player needs (hunger, energy, bladder, the accident's spray `accident`/`peeFx`, Psychic: big steps `psyMark`, the drain near IT `psyDrain`; numbers in `PSY`, `BLADDER`) | `js/player/needs.js` |
 | Work bar, shifts, being fired, a new day | `js/player/work.js` (`workTick`, `newDay`) |
 | NPC daily schedule, habits, quirks | `js/town/daily-plans.js`, `js/town/routines.js`, `js/town/quirks.js` |
 | What an NPC decides each frame | `js/town/npc-update.js` (`npcUpdate`, `npcThink`) |
@@ -76,9 +76,11 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Biography: six facts a suspect, where they turn up (chat, rummaging, the paper, Mom), your odd mark | `js/play/biography.js` (`makeBios`, `markFact`); the facts: `BIO_*` in data/lines.js |
 | Innocent oddities (lookalikes, habits, tics), rumours (talk only, never cards) | `js/play/oddities.js`; the lookalikes: `ODDITY_HOME` in data/lines.js |
 | THEIR morning moves (bribes, scatter, destroy) | `js/them/moves.js` |
+| A card destroyed in person: someone at your computer for half an hour, scared off or hit with no police | `js/them/wipe.js` (`wipeLater`, `wipeTick`, `burglar`); numbers in `WIPE` |
 | Night attacks, the office after dark | `js/them/night-attacks.js`, `js/them/office-night.js` |
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |
 | Hitting people: hit count, onlookers, police calls, knockouts | `js/combat/brawl.js` (`struck`, `onlook`, `callPolice`, `knockCold`); numbers in `BRAWL` |
+| Blood: the spray from every blow, splats on floors and runs down walls, kept all game (`G.blood`), THEIR colours, the hit-stop | `js/combat/blood.js` (`bleed`, `bleedAt`, `bloodPool`, `bloodDraw`); numbers in `BLOOD`; the splat/drip shapes in `DFS` (gfx/shaders-fx.js) |
 | Horror events and scenes | `js/horror/director.js` (daily plan), `layer.js` (machinery), `midday.js`, `night.js` |
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |

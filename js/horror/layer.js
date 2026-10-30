@@ -1,6 +1,6 @@
 //@ horror/layer — The horror layer: shared machinery
 //@ Defines: HX, HX_FACS, hxReset, hxLamp, hxLook, HX_SHADOW, hxActor, hxKill, snapOrBlend, hxAnimate, hxWalk, hxPan, hxSound, hxDecal, hxLight, hxDark, …
-//@ Uses:    core/util, sim/core, gfx/renderer, gfx/gl, world/grid, world/vision, gfx/draw-helpers, gfx/post, audio/sound, gfx/world-geometry, …
+//@ Uses:    core/util, sim/core, gfx/renderer, gfx/gl, world/grid, world/vision, gfx/post, audio/sound, gfx/world-geometry, gfx/draw-helpers, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the horror layer ─────────────────────────
 // Everything here is for the eyes and the ears. The game never reads any of it: it does not touch the light map,
@@ -356,22 +356,6 @@ function hxDrawWorld() {
     }
   }
 }
-// old stains nobody cleans: a few at the start, one more most days of THEIR week. The game doesn't know they're there.
-// [x, z, shape (4 splat, 5 smear), size, turn, seed]
-const HX_STAINS = [
-  [27.4, 7.6, 4, 0.75, 0.4, 1.3],
-  [17.6, 13.45, 4, 0.42, 2.1, 2.7],
-  [28.3, 10.4, 5, 1.1, 2.6, 3.1],
-  [35.6, 26.5, 4, 0.6, 1.0, 4.9],
-  [31.5, 16.5, 5, 1.3, 0.1, 5.5],
-  [44.4, 13.5, 4, 0.5, 2.9, 6.2],
-  [28.5, 3.3, 4, 0.7, 1.7, 7.7],
-  [39.3, 27.9, 5, 1.2, 4.0, 8.1],
-  [31.4, 21.7, 4, 0.55, 0.6, 9.4],
-  [8.4, 16.9, 5, 1.0, 3.3, 10.6],
-  [47.6, 18.55, 4, 0.48, 5.0, 11.2],
-  [24.6, 30.2, 4, 0.8, 0.9, 12.8],
-];
 function hxDrawDecals() {
   for (const a of HX.actors)
     if (!a.hide && a.shadow > 0)
@@ -383,24 +367,6 @@ function hxDrawDecals() {
         0,
         0.013,
       );
-  if (G.started) {
-    const n = Math.min(HX_STAINS.length, 2 + Math.floor((G.phase || 1) * 2));
-    for (let i = 0; i < n; i++) {
-      const [x, z, sh, sz, rot, seed] = HX_STAINS[i];
-      if (visAt(x, z) > 0.05)
-        drawDecalR(
-          x,
-          z,
-          sz * (sh === 5 ? 1 : 1),
-          sz * (sh === 5 ? 0.45 : 1),
-          rot,
-          [0.1, 0.009, 0.009, 0.8],
-          sh,
-          seed,
-          0.011 + i * 0.0002,
-        );
-    }
-  }
   for (let i = HX.decals.length - 1; i >= 0; i--) {
     const d = HX.decals[i];
     if (G.t > d.until) {
@@ -532,6 +498,8 @@ function hxUpdate(dtReal) {
   const paused = live && (G.speed === 0 || G.over || UI.caseOpen || UI.scene);
   const k = paused ? 0 : !live ? 1 : G.sleeping || G.away ? 0 : [0, 1, 1.3, 1.6][G.speed] || 1;
   const dt = dtReal * k;
+  peeFx(dt); // an accident's spray (player/needs)
+  bloodFx(dt); // drops in the air (combat/blood)
   const h = hourF();
   const nightT = h >= 21 || h < 5 ? 1 : h >= 18.5 ? (h - 18.5) / 2.5 : h < 7 ? 1 - (h - 5) / 2 : 0;
   HX.night += (nightT - HX.night) * Math.min(1, dtReal * 0.8);

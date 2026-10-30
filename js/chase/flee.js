@@ -1,6 +1,6 @@
 //@ chase/flee — One of THEM running from you
 //@ Defines: TRIP_POSE, chaseFrame, chaseTrail, chaseGoal
-//@ Uses:    gfx/world-geometry, sim/core, core/util, horror/layer, world/vision, gfx/renderer, taken/taken, ui/interface, audio/sound
+//@ Uses:    gfx/world-geometry, sim/core, core/util, world/vision, gfx/renderer, horror/layer, combat/blood, taken/taken, ui/interface, audio/sound
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the chase: one of THEM running from you ─────────────────────────
 // It can sprint, but not for long: close on it and it tires, stumbles, slows. Out of sight it leaves a trail, and the
@@ -71,9 +71,7 @@ function chaseTrail(n) {
     x = n.x + rand(-0.12, 0.12),
     z = n.z + rand(-0.12, 0.12);
   if (F === 'aliens') hxDecal(x, z, 0.11, [0.25, 0.7, 0.5, 0.45], 0, 50);
-  else if (F === 'lizards')
-    hxDecal(x, z, 0.14, [0.09, 0.12, 0.05, 0.6], 4, 50, { rot: rand(0, TAU), seed: rand(0, 20) });
-  else hxDecal(x, z, 0.13, [0.2, 0.015, 0.015, 0.7], 4, 50, { rot: rand(0, TAU), seed: rand(0, 20) });
+  if (chance(0.6)) bloodStain(x, z, 0, bloodOf(n), rand(0.08, 0.15), 4, 0); // and its blood, for good (combat/blood)
 }
 // the glow: where you last saw the one you're after
 function chaseGoal() {

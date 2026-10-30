@@ -258,14 +258,13 @@ function bulletHits(b) {
   HX.jolt = 1;
   HX.shake = 0.7;
   audio.hx('thud', 0, 0.8);
-  hxDecal(P.x + rand(-0.2, 0.2), P.z + rand(-0.2, 0.2), rand(0.16, 0.26), [0.3, 0.015, 0.015, 0.85], 4, 1440);
   if (G.health - b.dmg <= 0) {
     G.health = 0;
     UI.aim = null;
     BOLTS.length = 0;
     return gameOver('shot');
   }
-  hurt(b.dmg, false);
+  hurt(b.dmg, false, b.by);
 }
 // close enough to lay hands on you: the patch on the ground is where they close
 function diveAct() {

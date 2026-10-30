@@ -638,6 +638,7 @@ const ITEM_NAMES = {
   finger: 'A finger',
   scorch: 'Scorch mark',
   puddle: 'Puddle',
+  wallpee: 'Stain on the wall',
   stain: 'A stain',
   tape: 'Police tape',
   device: 'A small device',
@@ -712,7 +713,7 @@ function menuForItem(it) {
       opt(
         'Mop',
         'mop',
-        go('Mop', () => removeItem(it), 6),
+        go('Mop', () => removeItem(it), 6 * (it.size || 1) ** 2),
       ),
     );
   else if (it.kind === 'stash') {

@@ -1,6 +1,6 @@
 //@ player/work — The work bar, shifts, getting fired
 //@ Defines: playerAtDesk, inOffice, workTick, workHit, workLost, goodDay, shiftOver, deskShut, onTimeCross, newDay
-//@ Uses:    sim/core, data/tuning, ui/interface, core/util, them/plan, them/night-attacks, game/state, play/plants, them/awareness, world/grid, …
+//@ Uses:    sim/core, data/tuning, ui/interface, them/plan, core/util, them/night-attacks, game/state, play/plants, world/grid, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── work
 function playerAtDesk() {
@@ -111,15 +111,16 @@ function newDay() {
   wreckReset(); // whatever got thrown at you yesterday is back where it stood
   marks();
   if (G.tearTonight > 0) {
-    // after a failed confrontation THEY come into your flat and take a card
+    // after a failed confrontation THEY come to your computer for a card (them/wipe)
     G.tearTonight = 0;
-    if (tearCard(pick(covert()))) setTimeout(() => !G.over && ui.note('print', 'A card is gone. Torn.', 'bad'), 2600);
+    wipeLater(null);
   }
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
   if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
+  G.momFacts = 0;
   G.mailToday = false;
   G.overtimeToday = false;
   for (const n of CHARS) if (!n.isPlayer && !n.def.stranger) n.sus = Math.max(0, n.sus - 3);
