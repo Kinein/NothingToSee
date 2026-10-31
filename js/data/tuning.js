@@ -49,6 +49,7 @@ const CTRL = {
   boltHit: 0.42,     // how close a bolt must pass to you to land
   boltRange: 14,
   knockout: 1440,    // beaten: you sleep for a day
+  mouseYaw: 30,      // mouse controls: the camera turned this many degrees off square to the town, a slant toward isometric
 };
 
 // ── Work and damage (sim/core, player/work, combat/hits)

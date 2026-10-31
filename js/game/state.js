@@ -282,7 +282,7 @@ function newGame(name, preview) {
   cam.tz = preview ? 16 : PLAYER.z;
   cam.follow = !preview;
   cam.zoomT = cam.zoom = preview ? 9.5 : CAM_ZOOM;
-  if (!preview) cam.yaw = cam.yawT = 0; // square to the town: W is north, up the screen and straight along the walls
+  if (!preview) cam.yaw = cam.yawT = squareYaw(); // keys: square to the town, W up the screen along the walls; mouse: slanted
   warmPortraits();
 }
 // put everyone where their day says they should be (start of game, after loading)
@@ -510,7 +510,7 @@ function loadGame(data) {
   cam.tz = PLAYER.z;
   cam.follow = true;
   cam.zoomT = cam.zoom = CAM_ZOOM;
-  cam.yaw = cam.yawT = 0;
+  cam.yaw = cam.yawT = squareYaw();
   warmPortraits();
   if (G.wanted && G.away && G.away.kind === 'held') setTimeout(() => gameOver('jailed'), 400); // taken in while wanted
   return true;

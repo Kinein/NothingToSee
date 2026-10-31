@@ -95,6 +95,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | What E does, keyboard handling | `js/input/targeting.js` (`interact`, `initInput`), then `js/ui/menus.js` |
 | WASD walking, collisions | `js/input/walking.js` |
 | Mouse, camera | `js/input/camera.js`, camera state in `js/gfx/renderer.js` |
+| The two control modes, WASD + keys or mouse (`controls`, `mouseMode`, `setControls`; the mouse's slanted camera `squareYaw`, `CTRL.mouseYaw`; click-to-hit `attackChar` in town/fleeing; the menu's Attack slot `m.hit` in ui/pie-menu) | `js/input/camera.js` |
 | Menus, HUD, pie menu, the evidence book, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
 | HUD markup and all CSS | `shell/page.html`, `shell/styles.css` |
 | Sound | `js/audio/sound.js` (all synthesised with Web Audio) |

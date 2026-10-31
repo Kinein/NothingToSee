@@ -295,6 +295,10 @@ function initInput() {
         }
         return;
       }
+      if (k === ' ' && UI.menuOps.hit) {
+        if (!e.repeat) runOpt(UI.menuOps.hit); // the menu's Attack (mouse controls)
+        return;
+      }
       if (k === 'e' || k === ' ' || k === 'enter') {
         if (!e.repeat) closeMenu();
         return;

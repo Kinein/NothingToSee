@@ -20,13 +20,13 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  199 lines
+### data/tuning  ·  #2  ·  200 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
 - **Defines (34):** `CLOCK` `TALK` `BODY_ACT` `WALK` `SPEEDS` `AWAY_SPEED` `SLEEP_SPEED` `STIR_SLOW` `PHOTO_RANGE` `CTRL` `WORK` `MAD_SUS` `HURT` `POLICE` `RESIST` `NEEDS` `PSY` `BLADDER` `OUT` `BED` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `EVIDENCE` `BLOOD` `WIPE` `BIO_FIND` `AJAR`
 - **→ uses:** —
-- **← used by:** 53
+- **← used by:** 54
 
 ### data/lines  ·  #3  ·  267 lines
 
@@ -390,13 +390,13 @@ Suspicion and danger per person
 - **→ uses:** sim/core, ui/interface, core/util, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, them/proofs, play/confrontation, world/light-map, world/vision, them/true-form, sim/actions … +1
 - **← used by:** 36
 
-### town/fleeing  ·  #53  ·  257 lines
+### town/fleeing  ·  #53  ·  268 lines
 
 Fleeing to hideouts
 
-- **Defines (13):** `HIDEOUTS` `hideoutFor` `flee` `hideAway` `giveUp` `chaseAct` `swingAct` `swingReach` `swingable` `swingFirst` `swingTarget` `playerMelee` `attackKey`
-- **→ uses:** sim/core, sim/actions, ui/interface, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, town/suspicion, combat/melee, sim/movement, gfx/renderer, them/plan … +13
-- **← used by:** 24
+- **Defines (14):** `HIDEOUTS` `hideoutFor` `flee` `hideAway` `giveUp` `chaseAct` `swingAct` `swingReach` `swingable` `swingFirst` `swingTarget` `playerMelee` `attackChar` `attackKey`
+- **→ uses:** sim/core, ui/interface, sim/actions, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, input/walking, town/suspicion, combat/melee, sim/movement, town/cast … +13
+- **← used by:** 26
 
 ### town/doors  ·  #61  ·  89 lines
 
@@ -792,12 +792,12 @@ The corner HUD: bars, days, clock, THEIR eye, evidence
 - **→ uses:** ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, player/work, ui/case-board, ui/menus, town/arrest, sim/actions … +4
 - **← used by:** 4 (ui/interface, ui/case-board, input/targeting, game/loop)
 
-### ui/pie-menu  ·  #85  ·  100 lines
+### ui/pie-menu  ·  #85  ·  106 lines
 
 The directional pie menu
 
 - **Defines (7):** `MENU_KEYS` `MENU_XY` `openMenu` `placeMenu` `runOpt` `presentMenu` `closeMenu`
-- **→ uses:** ui/interface, core/util, audio/sound, ui/menus, sim/actions, town/arrest
+- **→ uses:** ui/interface, ui/menus, core/util, audio/sound, town/fleeing, sim/actions, town/arrest, input/camera
 - **← used by:** 14
 
 ### ui/case-board  ·  #86  ·  408 lines
@@ -818,29 +818,29 @@ How the confrontation looks: the stage light, the cards fanned over IT, the verd
 
 ## input/
 
-### input/camera  ·  #88  ·  170 lines
+### input/camera  ·  #88  ·  201 lines
 
 Input and camera control
 
-- **Defines (17):** `keys` `swallowed` `ptrs` `drag` `lastTap` `isTouch` `MENU_TYPES` `BARE_SEATS` `interactive` `held` `panBy` `pickAt` `dismissHints` `handleClick` `clickOn` `hidesName` `handleHover`
-- **→ uses:** gfx/renderer, ui/interface, sim/core, ui/menus, ui/pie-menu, input/walking, taken/taken, core/util, world/vision, world/grid, play/stashes, world/objects, sim/actions, town/on-the-run … +2
-- **← used by:** 10
+- **Defines (23):** `keys` `swallowed` `ptrs` `drag` `lastTap` `isTouch` `MENU_TYPES` `BARE_SEATS` `interactive` `held` `CONTROLS_KEY` `controls` `mouseMode` `squareYaw` `setControls` `showControls` `panBy` `pickAt` `dismissHints` `handleClick` `clickOn` `hidesName` `handleHover`
+- **→ uses:** gfx/renderer, sim/core, ui/interface, ui/menus, input/walking, ui/pie-menu, taken/taken, core/util, world/vision, world/grid, town/fleeing, play/stashes, data/tuning, input/targeting … +4
+- **← used by:** 12
 
-### input/walking  ·  #89  ·  692 lines
+### input/walking  ·  #89  ·  696 lines
 
 WASD walking relative to the camera
 
 - **Defines (37):** `moveInput` `SOLID_INSET` `SLIM` `FIT_BOX` `fittedBox` `SLIM_AT` `slimAt` `VAULT` `VAULT_AT` `vaultAt` `SOLID` `solidReset` `solidCells` `bodyPush` `tileOK` `footOK` `standOK` `freeSpot` `settle` `tryMove` `steerAssist` `airOK` `vaultFind` `vaultStart` `vaultTick` `driveTick` `ROUTE` `routeStop` `routeAt` `routeGone` `routeEdge` `routeTiles` `routePlan` `routeTo` `routeArrive` `routeStep` `routeMarker`
-- **→ uses:** world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, core/util, sim/actions, world/paths, input/targeting, town/arrest, town/on-the-run … +5
+- **→ uses:** world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, sim/actions, core/util, world/paths, input/targeting, town/arrest, town/on-the-run … +6
 - **← used by:** 11
 
-### input/targeting  ·  #90  ·  349 lines
+### input/targeting  ·  #90  ·  353 lines
 
 What E acts on; keyboard handling
 
 - **Defines (8):** `DEG` `wallBetween` `menuForFocus` `pickFocus` `updateFocus` `anchorXY` `interact` `initInput`
 - **→ uses:** input/camera, ui/interface, sim/core, gfx/renderer, data/tuning, ui/pie-menu, core/util, ui/case-board, chase/hunt, ui/menus, world/grid, town/on-the-run, town/fleeing, town/arrest … +12
-- **← used by:** 4 (town/fleeing, ui/interface, input/walking, game/loop)
+- **← used by:** 5 (town/fleeing, ui/interface, input/camera, input/walking, game/loop)
 
 ## audio/
 
@@ -967,7 +967,7 @@ The grey cars: the FBI takes one that gave up
 Game state, new game, saving, endings
 
 - **Defines (9):** `SAVE_KEY` `freshG` `resetWorld` `newGame` `syncNPCs` `saveGame` `readSave` `loadGame` `gameOver`
-- **→ uses:** sim/core, ui/interface, gfx/renderer, core/util, town/cast, world/vision, world/objects, world/grid, town/quirks, game/last-day, play/stashes, town/arrest, town/routines, data/tuning … +23
+- **→ uses:** sim/core, ui/interface, gfx/renderer, core/util, town/cast, world/vision, world/objects, world/grid, town/quirks, game/last-day, play/stashes, town/arrest, town/routines, data/tuning … +24
 - **← used by:** 14
 
 ### game/endings  ·  #117  ·  517 lines
@@ -986,7 +986,7 @@ Friday: hell let loose
 - **→ uses:** sim/core, world/grid, ui/interface, horror/layer, core/util, sim/actions, gfx/renderer, audio/sound, chase/hunt, them/awareness, town/suspicion, taken/taken, town/cast, combat/melee … +15
 - **← used by:** 10
 
-### game/loop  ·  #119  ·  458 lines
+### game/loop  ·  #119  ·  466 lines
 
 Per-frame simulation, main loop, boot
 

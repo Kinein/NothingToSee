@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
 //@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, freeSpot, settle, …
-//@ Uses:    world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, core/util, sim/actions, …
+//@ Uses:    world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, sim/actions, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -626,6 +626,7 @@ function routeArrive(g) {
   const P = PLAYER,
     [x, z] = routeAt(g);
   P.tdir = Math.atan2(x - P.x, z - P.z);
+  if (g.hit) return playerMelee(g.char); // gone up to hit them: the swing
   const xy = anchorXY(g) || [window.innerWidth / 2, window.innerHeight / 2];
   clickOn(g, xy[0], xy[1], true);
 }
@@ -638,9 +639,10 @@ function routeStep() {
     return (routeStop(), null);
   if (g) {
     if (routeGone(g)) return (routeStop(), null);
-    // someone, or something on the floor: stop once it's within plain reach. A thing: walk all the way to where you'd stand
+    // someone, or something on the floor: stop once it's within plain reach (within a swing, if you're going to hit them).
+    // A thing: walk all the way to where you'd stand
     const [x, z] = routeAt(g),
-      reach = g.char ? CTRL.reachChar : CTRL.reachItem;
+      reach = g.hit ? swingReach() * 0.85 : g.char ? CTRL.reachChar : CTRL.reachItem;
     if (!g.obj && Math.hypot(x - P.x, z - P.z) <= reach && !wallBetween(P.x, P.z, x, z)) {
       routeStop();
       routeArrive(g);
@@ -657,6 +659,8 @@ function routeStep() {
   let pt = ROUTE.pts[ROUTE.pi];
   while (pt && Math.hypot(pt[0] - P.x, pt[1] - P.z) < 0.08) pt = ROUTE.pts[++ROUTE.pi];
   if (!pt) {
+    // at the end of the way, and they've moved on since: after them again, a few times
+    if (g && g.char && !inReach(g) && ROUTE.retry++ < 3 && routePlan(g.char.x, g.char.z, g)) return routeStep();
     routeStop();
     if (g) {
       const e = routeEdge(g, P.x, P.z);
