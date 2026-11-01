@@ -81,8 +81,8 @@ const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far
 // every `gap` body minutes; `give` body minutes to reach you or they give up. Walk `walkOff` further off mid-sentence and
 // it's rude: `rude` suspicion (Hale takes `bossCost` off the work bar for it). THEIR people, and drunks, follow you after,
 // `follow` game minutes, `back` tiles behind. One of THEM only comes once THEIR awareness is `probeAware`. Hale comes to
-// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk.
-const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40 };
+// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk. Nobody comes over again within `again` game minutes.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [

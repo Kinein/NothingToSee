@@ -66,6 +66,7 @@ function approachTick() {
   if (darkNow() && chance(0.5)) return;
   const opts = [];
   for (const n of CHARS) {
+    if (G.t < (n.cameAt || -1e9) + A.again) continue; // not the same face twice running
     if (!approachFree(n) || Math.hypot(n.x - P.x, n.z - P.z) > A.near || !npcSeesPlayer(n, A.near)) continue;
     if (n.def.stranger) {
       if (n.kind === 'drunk') opts.push([1.2, [n, 'drunk']]);
@@ -82,6 +83,7 @@ function approachStart(n, kind) {
   for (const a of n.queue) a.cancel = true; // whatever they were at winds up properly first
   enqueue(n, approachAct(n, kind));
   G.approach = n.id;
+  n.cameAt = G.t;
 }
 const pName = (s) => s.replace(/\{p\}/g, PLAYER.name || 'you');
 // what they've come to say, in order: strings, or a function that says its own (gossip, a chat line)

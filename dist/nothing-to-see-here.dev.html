@@ -1192,8 +1192,8 @@ const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far
 // every `gap` body minutes; `give` body minutes to reach you or they give up. Walk `walkOff` further off mid-sentence and
 // it's rude: `rude` suspicion (Hale takes `bossCost` off the work bar for it). THEIR people, and drunks, follow you after,
 // `follow` game minutes, `back` tiles behind. One of THEM only comes once THEIR awareness is `probeAware`. Hale comes to
-// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk.
-const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40 };
+// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk. Nobody comes over again within `again` game minutes.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -22962,6 +22962,7 @@ function approachTick() {
   if (darkNow() && chance(0.5)) return;
   const opts = [];
   for (const n of CHARS) {
+    if (G.t < (n.cameAt || -1e9) + A.again) continue; // not the same face twice running
     if (!approachFree(n) || Math.hypot(n.x - P.x, n.z - P.z) > A.near || !npcSeesPlayer(n, A.near)) continue;
     if (n.def.stranger) {
       if (n.kind === 'drunk') opts.push([1.2, [n, 'drunk']]);
@@ -22978,6 +22979,7 @@ function approachStart(n, kind) {
   for (const a of n.queue) a.cancel = true; // whatever they were at winds up properly first
   enqueue(n, approachAct(n, kind));
   G.approach = n.id;
+  n.cameAt = G.t;
 }
 const pName = (s) => s.replace(/\{p\}/g, PLAYER.name || 'you');
 // what they've come to say, in order: strings, or a function that says its own (gossip, a chat line)

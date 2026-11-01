@@ -430,7 +430,7 @@ The witnesses THEY go after at night, and standing guard for one; THEIR people t
 - **→ uses:** sim/core, ui/interface, them/proofs, core/util, world/paths, sim/actions, them/awareness, town/cast, world/grid, them/moves, town/suspicion, data/tuning, them/plan, sim/movement … +9
 - **← used by:** 3 (combat/melee, them/night-attacks, play/stashes)
 
-### town/approach  ·  #66  ·  253 lines
+### town/approach  ·  #66  ·  255 lines
 
 People come to you: a word in the street, Hale at your shoulder, THEIR people warning and following you
 
