@@ -978,7 +978,7 @@ Game state, new game, saving, endings
 - **→ uses:** sim/core, ui/interface, gfx/renderer, core/util, town/cast, world/vision, world/objects, world/grid, town/quirks, game/last-day, play/stashes, town/arrest, town/routines, data/tuning … +24
 - **← used by:** 14
 
-### game/endings  ·  #118  ·  640 lines
+### game/endings  ·  #118  ·  641 lines
 
 The last picture: where you fell, the cell for good, what THEY made of Wexley
 

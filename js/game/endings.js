@@ -372,7 +372,8 @@ function endFired(dt, t, first) {
   const mx = (P.x + h.x) / 2,
     mz = (P.z + h.z) / 2,
     pk = FIRED.punch ? sstep(FIRED.punch, FIRED.punch + 0.25, t) * (1 - sstep(FIRED.punch + 1.6, FIRED.punch + 2.6, t)) : 0;
-  endCam(mx, mz, lerp(2.0, 1.45, pk), dt, pk > 0 ? 6 : 1.6);
+  const [ax, az] = endAside(mx, mz, 0, -0.2); // the two of them low in the frame, room above for the words
+  endCam(ax, az, lerp(2.0, 1.45, pk), dt, pk > 0 ? 6 : 1.6);
   if (h.anim === 'yell') cam.yawT += Math.sin(R.time * 31) * 0.002; // the room shakes with it
   return FIRED.punch > 0 && t > FIRED.punch + 2.8;
 }
