@@ -430,27 +430,27 @@ function animTargets(c, dt) {
       T.hp = 0.3;
       break;
     case 'yell': {
-      // red in the face: leaning right in, a finger jabbed at you on every word, the other fist on his hip
+      // red in the face: leaning right in, a finger jabbed up at you on every word, the other fist planted on his hip
       const jab = Math.max(0, Math.sin(t * 7.5)) ** 2;
-      T.torso = 0.13 + jab * 0.07;
-      T.hp = -0.1 + jab * 0.14;
+      T.torso = 0.18 + jab * 0.07;
+      T.hp = -0.12 + jab * 0.14;
       T.hy = osc(1.7, 0.1);
-      T.uaR = -1.3 - jab * 0.2;
-      T.faR = -0.3 + jab * 0.2;
-      T.aoR = 0.05;
-      T.uaL = 0.2;
-      T.faL = -1.7;
-      T.aoL = 0.5;
+      T.uaR = -1.15 - jab * 0.35;
+      T.faR = -1.25 + jab * 0.75;
+      T.aoR = 0.28;
+      T.uaL = 0.35;
+      T.faL = -1.9;
+      T.aoL = 0.75;
       T.rootY = jab * 0.012;
       break;
     }
     case 'shame':
-      // taking it: head down, shoulders in, the hands knotted in front, a flinch now and then
-      T.hp = 0.42 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;
+      // taking it: head hung, shoulders in, the hands knotted low at the belt, a flinch now and then
+      T.hp = 0.5 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;
       T.torso = 0.06;
-      T.uaL = T.uaR = -0.32;
-      T.faL = T.faR = -0.75;
-      T.aoL = T.aoR = -0.06;
+      T.uaL = T.uaR = -0.08;
+      T.faL = T.faR = -0.5;
+      T.aoL = T.aoR = -0.16;
       T.rootY = -0.015;
       break;
   }
