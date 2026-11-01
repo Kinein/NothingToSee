@@ -31,12 +31,15 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `traps` | `[]` | — | play/stashes, play/traps, ui/menus |
 | `broken` | `{}` | — | world/paths, town/doors, play/raids, ui/menus, game/loop |
 | `intruded` | `''` | town/doors, play/raids | — |
-| `workBar` | `WORK.fresh` | player/work, them/moves | play/advice, ui/hud |
+| `approach` | `null` | town/approach | — |
+| `approachAt` | `0` | town/approach | — |
+| `haleAt` | `0` | town/approach | — |
+| `workBar` | `WORK.fresh` | player/work, them/moves, town/approach | play/advice, ui/hud |
 | `workBonusAt` | `-999` | player/work | — |
 | `awayT` | `0` | player/work | play/verbs |
 | `workWarned` | `false` | player/work | — |
 | `sickDay` | `false` | player/work, combat/hits, taken/taken, taken/back-up | sim/core, ui/hud |
-| `smelly` | `false` | player/needs, play/stashes, play/verbs | them/tells, ui/hud |
+| `smelly` | `false` | player/needs, play/stashes, play/verbs | them/tells, town/approach, ui/hud |
 | `sleepFrom` | `0` | play/verbs | — |
 | `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions |
 | `whisperCd` | `30` | horror/visions | — |
@@ -46,7 +49,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `cover` | `{}` | town/quirks | town/talk, game/state |
 | `prints` | `[]` | — | play/photos |
 | `printId` | `0` | — | play/photos |
-| `aware` | `0` | them/awareness, chase/hunt-end | them/tells, them/moves, town/cell, them/true-form, town/talk, them/night-attacks, town/company, horror/director, … |
+| `aware` | `0` | them/awareness, chase/hunt-end | them/tells, them/moves, town/cell, them/true-form, town/talk, them/night-attacks, town/company, town/approach, … |
 | `awareBook` | `{}` | them/awareness | — |
 | `awareRemoved` | `0` | them/awareness | — |
 | `sus60` | `{}` | — | town/suspicion |
@@ -65,7 +68,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `health` | `100` | player/needs, town/on-the-run, combat/hits, combat/throws, play/verbs, chase/hunt-step, chase/hunt-end | combat/blood, ui/hud |
 | `binFood` | `[]` | play/verbs | town/npc-update |
 | `tvBugged` | `null` | — | — |
-| `control` | `null` | them/moves, game/state | sim/actions, them/wipe, them/servants, town/doors, town/company, play/stashes, horror/encounters |
+| `control` | `null` | them/moves, game/state | sim/actions, them/wipe, them/servants, town/doors, town/company, town/approach, play/stashes, horror/encounters |
 | `pickAt` | `-999` | — | — |
 | `hotRooms` | `null` | them/plan | player/needs |
 | `takenAt` | `-1e9` | them/moves, taken/taken, chase/they-come, chase/hunt-end | — |
@@ -170,12 +173,12 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `awareExtra` | `0` | them/awareness | — |
 | `tearTonight` | `0` | player/work | — |
 | `witVisit` | `null` | town/company | — |
-| `tail` | `null` | town/company | — |
+| `tail` | `null` | town/company | town/approach |
 | `tailNext` | `0` | town/company | — |
 | `arenaTalk` | `[]` | play/confrontation | — |
 | `ritualBroke` | `0` | them/tells, play/photos | them/plan |
 | `gatherKnown` | `false` | them/plan | — |
-| `enc` | `null` | horror/encounters, horror/encounter-outcomes, game/state, game/loop | town/npc-update, them/office-night, ui/menus, horror/encounter-draw |
+| `enc` | `null` | horror/encounters, horror/encounter-outcomes, game/state, game/loop | town/npc-update, town/approach, them/office-night, ui/menus, horror/encounter-draw |
 | `encNext` | `0` | horror/encounters | — |
 | `encLast` | `-1e9` | horror/encounter-outcomes | horror/encounters |
 | `encNamed` | `0` | horror/encounters | — |

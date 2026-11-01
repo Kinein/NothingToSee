@@ -1,6 +1,6 @@
 //@ town/doors — Broken restroom lock, doors left ajar
-//@ Defines: upToNoGood, ajarChance, doorPass, roomWatch, awkward
-//@ Uses:    sim/core, data/tuning, core/util, world/grid, ui/interface, town/suspicion, world/objects, town/npc-update, play/raids, play/traps, …
+//@ Defines: upToNoGood, ajarChance, doorPass, roomWatch, homeAgain, caughtInside, awkward
+//@ Uses:    sim/core, data/tuning, core/util, ui/interface, world/grid, town/suspicion, world/objects, play/raids, audio/sound, town/npc-update, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── awkwardness: the restroom lock is broken
 // ───────────── doors left ajar
@@ -41,22 +41,16 @@ function doorPass(c) {
 function roomWatch(c) {
   const r = roomAt(c.x, c.z);
   if (r === c.prevRoom) return;
+  const prev = c.prevRoom;
   c.prevRoom = r;
+  if (!c.isPlayer && r && houseIs(r, c.id) && !(prev && houseIs(prev, c.id))) homeAgain(c);
   if (c.isPlayer && r && (r.house || r.agnes)) {
     // inside somebody's home
     const hid = r.house || 'agnes',
       owner = NPC[hid];
-    if (owner && owner.onMap && atHome(owner) && !owner.trueForm && !owner.slain) {
-      if (owner.isThem && G.broken[hid] > G.t) return raidEnter(owner);
-      if (!owner.isThem && G.broken[hid] > G.t && G.intruded !== hid + dayNo()) {
-        G.intruded = hid + dayNo();
-        ui.bubble(owner, 'exclaim', 'speech', 3);
-        ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
-        addSus(owner, 30);
-        G.policeAt = G.policeAt || G.t + rand(8, 18);
-        caution(owner, 'breakin');
-        return;
-      }
+    if (owner && owner.onMap && atHome(owner) && !owner.trueForm && !owner.slain && G.broken[hid] > G.t) {
+      if (owner.isThem) return raidEnter(owner);
+      if (caughtInside(owner)) return;
     }
   }
   if (!r || !r.private) return;
@@ -70,6 +64,37 @@ function roomWatch(c) {
       break;
     }
   } else if (roomAt(PLAYER.x, PLAYER.z) === r && !c.def.stranger && !c.trueForm && !c.exposed) awkward(c, 'walkin');
+}
+const houseIs = (r, id) => r.house === id || (id === 'agnes' && !!r.agnes);
+// home again, through a front door somebody forced: whoever lives here locks it behind them, so it's shut to you again
+// (one that's been found out leaves it as you left it: it has nowhere left to run). You still in there is another matter.
+function homeAgain(n) {
+  const hid = n.id;
+  if (!(G.broken[hid] > G.t) || n.exposed || n.trueForm || n.slain) return;
+  delete G.broken[hid];
+  const P = PLAYER;
+  if (P.onMap && insideOf(P, hid)) {
+    if (n.isThem) raidEnter(n);
+    else caughtInside(n);
+    return;
+  }
+  if (n.shown > 0.5 && P.onMap && Math.hypot(P.x - n.x, P.z - n.z) < 14) {
+    ui.bubble(n, 'frown', 'speech', 2.5);
+    ui.note('lock', n.short + ' locks the door again', '');
+    audio.hx('lock', 0, 0.6);
+  }
+}
+// an ordinary owner finds you in their home: out, and the police (once a day). False when it's already been said today.
+function caughtInside(owner) {
+  const hid = owner.id;
+  if (G.intruded === hid + dayNo()) return false;
+  G.intruded = hid + dayNo();
+  ui.bubble(owner, 'exclaim', 'speech', 3);
+  ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
+  addSus(owner, 30);
+  G.policeAt = G.policeAt || G.t + rand(8, 18);
+  caution(owner, 'breakin');
+  return true;
 }
 function awkward(n, kind) {
   if (G.awkCd > 0) return;

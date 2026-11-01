@@ -47,6 +47,7 @@ function npcUpdate(n, dt) {
         n.shown = 0;
         n.thinkCd = 0;
         n.prevRoom = roomAt(n.x, n.z);
+        homeAgain(n); // a door you forced while they were out: they lock it again
         return;
       }
       spawnNPC(n, b);

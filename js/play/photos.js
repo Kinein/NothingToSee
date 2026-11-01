@@ -1,6 +1,6 @@
 //@ play/photos — Photos: reading what is in frame
 //@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, photoHintTick, placeCamMark, toggleCam
-//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, world/grid, world/vision, core/util, player/needs, …
+//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, horror/tenth-forms, world/grid, world/vision, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -211,6 +211,12 @@ function takePhoto(tg) {
       filed = true;
       got.add(n);
     }
+  // a walk that's wrong: a print and a note on them, odd and no more
+  for (const n of chars)
+    if (!got.has(n) && photoWalk(n)) {
+      filed = true;
+      got.add(n);
+    }
   // one of THEM in the middle of THEIR business (strong) or of something odd (weak)
   for (const n of chars)
     if (n.odd && !n.odd.photo && G.t <= n.odd.until) {
@@ -354,6 +360,7 @@ const photoWorth = (n) =>
     (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
     (n.secret && !n.secret.done) ||
     (n.trace && !n.trace.photo) ||
+    (!!oddWalk(n) && !walkShot(n) && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 8) ||
     !!n.vis);
 function photoHintTick(dtReal) {
   UI.hintT = (UI.hintT || 0) - dtReal;
