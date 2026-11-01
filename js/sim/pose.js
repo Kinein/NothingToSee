@@ -1,6 +1,6 @@
 //@ sim/pose — Each frame's pose: targets, gestures, door reach, blending, turning, animate
 //@ Defines: animTargets, gesture, applyGestures, doorReach, blendJoints, turnBody, rootSlide, animate, updateShown
-//@ Uses:    core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, sim/characters, sim/seat-moves, them/servants, data/tuning, …
+//@ Uses:    core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, sim/characters, sim/seat-moves, player/needs, them/servants, …
 //@ (header made by tools/map.js; stripped by build.py)
 function animTargets(c, dt) {
   if (c.tell && c.tell.type === 'true' && c.tell.t >= TF_CHANGE * 0.72) return creatureTargets(c);
@@ -44,6 +44,7 @@ function animTargets(c, dt) {
       T.uaL *= 0.6;
       T.uaR *= 0.6;
     }
+    if (c.isPlayer && !(cur && cur.stage === 'run' && cur.anim && cur.anim !== 'idle')) holdWalk(c, T, p, rw);
     if (c.limpDay && G && c.limpDay === dayNo()) {
       T.roll = Math.sin(p) * 0.1;
       T.torso += 0.1;
@@ -188,11 +189,7 @@ function animTargets(c, dt) {
       T.hp = 0.3;
       T.uaL = T.uaR = 0.05;
     }
-    if (c.isPlayer && PLAYER.needs && PLAYER.needs.bladder < 15) {
-      T.thL = -0.15;
-      T.thR = 0.1;
-      T.hr = Math.sin(t * 9) * 0.05;
-    }
+    if (c.isPlayer && (!c.anim || c.anim === 'idle')) holdStand(c, T, t); // holding it (player/needs)
     const tv = Math.abs(c.dirV || 0); // turning on the spot: a couple of small steps round
     if (tv > 1.4) {
       const k = clamp((tv - 1.4) / 2.5, 0, 1),
@@ -431,6 +428,30 @@ function animTargets(c, dt) {
       break;
     case 'pace':
       T.hp = 0.3;
+      break;
+    case 'yell': {
+      // red in the face: leaning right in, a hand jabbed at you on every word, the other thrown out to the side
+      const jab = Math.max(0, Math.sin(t * 7.5)) ** 2;
+      T.torso = 0.18 + jab * 0.07;
+      T.hp = -0.12 + jab * 0.14;
+      T.hy = osc(1.7, 0.1);
+      T.uaR = -1.15 - jab * 0.35;
+      T.faR = -1.25 + jab * 0.75;
+      T.aoR = 0.28;
+      T.uaL = -0.2 - jab * 0.1;
+      T.faL = -0.5;
+      T.aoL = 0.4 + jab * 0.1;
+      T.rootY = jab * 0.012;
+      break;
+    }
+    case 'shame':
+      // taking it: head hung, shoulders in, the hands knotted low at the belt, a flinch now and then
+      T.hp = 0.5 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;
+      T.torso = 0.06;
+      T.uaL = T.uaR = -0.08;
+      T.faL = T.faR = -0.5;
+      T.aoL = T.aoR = -0.16;
+      T.rootY = -0.015;
       break;
   }
   if (c.anim === 'photo') photoPose(c, T, prog);

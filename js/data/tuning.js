@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, RESIST, NEEDS, …
+//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, RESIST, APPROACH, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -76,6 +76,14 @@ const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk:
 // he comes looking once a day between the `daily` hours, and the moment he spots you (`spot` tiles).
 const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far: 12, aim: 2.4, speed: 2.6, hit: 40, cd: 4.5, reach: 1.15, sight: 13, look: 7, lose: 16, daily: [9, 17], spot: 9 };
 
+// people coming to you (town/approach): a check every `every` game minutes for somebody within `near` tiles who can see
+// you (fewer after dark). They call out, walk up (running when more than `runAt` off) and talk once within `reach`, a line
+// every `gap` body minutes; `give` body minutes to reach you or they give up. Walk `walkOff` further off mid-sentence and
+// it's rude: `rude` suspicion (Hale takes `bossCost` off the work bar for it). THEIR people, and drunks, follow you after,
+// `follow` game minutes, `back` tiles behind. One of THEM only comes once THEIR awareness is `probeAware`. Hale comes to
+// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk. Nobody comes over again within `again` game minutes.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
+
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
   { k: 'hunger', n: 'Hunger', icon: 'food', rate: -5.6 },
@@ -93,9 +101,10 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-// An accident (player/needs accident): `spray` body minutes (about three seconds) out of your control, a pool `pool` tiles
-// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 4.5, pool: 2, wallReach: 1.8, wallOdds: 0.75 };
+// An accident (player/needs accident): `spray` body minutes (under two seconds) out of your control, a pool `pool` tiles
+// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time.
+// Under `hold` you're holding it: your idle and your walk show it, more and more toward empty.
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 2.8, pool: 2, wallReach: 1.8, wallOdds: 0.75, hold: 20 };
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };

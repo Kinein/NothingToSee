@@ -1,6 +1,6 @@
 //@ horror/tenth-forms — Tenth forms: barely visible traits
-//@ Defines: TRACE_KINDS, TRACE_NOTE, TRACE_TINT, traceHeadM, EYE_WHITE, SHINE, traceEye, deadWalk, traceTick, startTrace, traceStep, photoTrace
-//@ Uses:    sim/core, core/util, play/oddities, them/plan, them/proofs, play/photos, town/cast, town/suspicion, town/cell
+//@ Defines: TRACE_KINDS, TRACE_NOTE, TRACE_TINT, traceHeadM, EYE_WHITE, SHINE, traceEye, deadWalk, WALK_NOTE, oddWalk, photoWalk, traceTick, startTrace, traceStep, photoTrace
+//@ Uses:    sim/core, core/util, play/photos, play/oddities, town/cell, them/plan, them/proofs, them/servants, ui/interface, town/cast, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the tenth part. Nothing happens: somebody just looks a little more like what they are, for an hour or so.
 // Nothing is added to them and nothing moves wrong. Only what's already there, a shade off: the skin a little grey, the head
@@ -56,6 +56,33 @@ function deadWalk(c, T) {
   T.uaL *= 0.82;
   T.uaR *= 0.82;
   T.hr += sd * 0.02;
+}
+// a walk that's wrong, the kind the photo hint glows for: the dead's sway (THEM, and whoever THEY bit), THEIR mark's
+// lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a print and a note, never a card, and
+// one a day per face.
+const WALK_NOTE = {
+  sway: 'Walks wrong. A sway, one knee stiff.',
+  lurch: 'Lurching. Arms hanging out in front.',
+  trance: 'Sleepwalking. Eyes open, going somewhere.',
+};
+function oddWalk(n) {
+  if (!n || n.isPlayer || !n.moving || n.trueForm || n.exposed || n.slain) return '';
+  if (n.trance) return 'trance';
+  if (!G || G.faction !== 'zombies') return '';
+  if (markOf(n)) return 'lurch';
+  return n.isThem || n.thrall === 'zombies' ? 'sway' : '';
+}
+const walkKey = (n) => n.id + ':walk:' + dayNo();
+const walkShot = (n) => !!(G.traceShot && G.traceShot[walkKey(n)]);
+function photoWalk(n) {
+  const k = oddWalk(n);
+  if (!k || walkShot(n) || Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) > 8) return false;
+  (G.traceShot = G.traceShot || {})[walkKey(n)] = 1;
+  const where = placeName(n.x, n.z);
+  addPrint({ kind: 'plain', who: n.id, what: n.short + ' · ' + WALK_NOTE[k].split('.')[0], icon: 'walk', where, t: n.animT });
+  if (n.def && !n.def.stranger) addNote(n, 'Photo: ' + WALK_NOTE[k], { by: 'you' });
+  ui.note('walk', (n.def && n.def.stranger ? 'Someone' : n.short) + ' · ' + WALK_NOTE[k], 'onto');
+  return true;
 }
 const aloneNow = (n) => !CHARS.some((c) => c !== n && !c.isPlayer && c.onMap && Math.hypot(c.x - n.x, c.z - n.z) < 5);
 // once a game minute: anyone of THEM on their own, or walking somewhere, may start to show it

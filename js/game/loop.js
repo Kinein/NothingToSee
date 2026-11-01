@@ -113,6 +113,7 @@ function simStep(dtReal, spdOver) {
         if (!G.loose) {
           ambushTick();
           streetTick();
+          approachTick();
           horrorTick();
           nightTick();
           sleepTakeCheck();

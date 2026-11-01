@@ -1,6 +1,6 @@
 //@ player/needs — The player body: needs, Psychic, accidents, passing out, panic
-//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, accidentPool, wallFace, peePose, PEE, peeRnd, …
-//@ Uses:    sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, core/util, them/tells, town/suspicion, audio/sound, …
+//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, accidentPool, wallFace, peePose, holdStand, holdWalk, …
+//@ Uses:    core/util, sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, data/lines, audio/sound, them/tells, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the player's body
 // how well a need is doing, 0 bad … 100 fine (stress is the one that counts the other way)
@@ -128,9 +128,10 @@ function psyDrain(dt, room) {
   const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
   if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
 }
-// an accident: you can't hold it. Knees together, hands everywhere, turning on the spot while it goes all over the place
-// (BLADDER.spray body minutes, about three seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to
-// mop up, and whatever wall was close enough gets some too: that never comes off.
+// an accident: you can't hold it. A jolt up onto your toes, then a frantic little dance on the spot, knees knocking,
+// hands everywhere, spinning while it goes all over the place, and at the end the shudder of giving up (BLADDER.spray
+// body minutes, under two seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to mop up, and
+// whatever wall was close enough gets some too: that never comes off.
 function accident() {
   const P = PLAYER,
     N = P.needs;
@@ -142,7 +143,7 @@ function accident() {
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
       addSus(n, 8);
-      seen++;
+      if (!seen++) setTimeout(() => !G.over && ui.say(n, pick(ACCIDENT_SEEN), 2.6), 700);
       ui.bubble(n, 'exclaim', 'speech', 3);
     }
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
@@ -163,19 +164,26 @@ function accident() {
       dur: BLADDER.spray,
       interruptible: false,
       onStart: (c) => {
-        PEE.on = true;
+        PEE.k = 0;
         PEE.dir0 = c.dir;
         c.poseFn = peePose;
-        ui.bubble(c, 'exclaim', 'thought', 2.5);
+        ui.bubble(c, 'exclaim', 'thought', 1.2);
+        ui.say(c, pick(ACCIDENT_SAY), 1.6);
       },
-      // it gets away from you: a wild sweep one way and back, and round
+      // the jolt, the dance (a wild sweep one way and back, and round), the shudder
       onTick: (c, a) => {
-        c.tdir = PEE.dir0 + Math.sin(a.t * 1.9) * 1.9 + a.t * 0.45;
+        const k = clamp(a.t / a.dur, 0, 1);
+        PEE.k = k;
+        const was = PEE.on;
+        PEE.on = k > 0.12 && k < 0.86;
+        if (PEE.on && !was) audio.hx('splash', 0, 0.8);
+        if (k < 0.86) c.tdir = PEE.dir0 + Math.sin(a.t * 4.2) * 1.5 + Math.max(0, a.t - 0.3) * 1.4;
         c.moving = false;
       },
       onEnd: (c) => {
         PEE.on = false;
         if (c.poseFn === peePose) c.poseFn = null;
+        ui.say(c, pick(ACCIDENT_AFTER), 2.2);
         accidentPool();
       },
     }),
@@ -226,23 +234,113 @@ function wallFace(x, z, dx, dz, reach) {
   }
   return null;
 }
-// knees together, bent over it, both hands down there and no use at all, the whole body jiggling
+// the accident's body, by how far along it is (PEE.k): up on the toes with the arms flung out; then knees together, bent
+// over it, both hands down there and no use at all, hopping from foot to foot; then the shoulders drop and a shiver runs
+// through you, the head back, done
 function peePose(T, c) {
-  const t = c.animT;
-  T.thL = T.thR = -0.35;
-  T.shL = T.shR = 0.55;
-  T.rootY = (T.rootY || 0) - 0.07 + Math.sin(t * 21) * 0.012;
-  T.torso = 0.32;
+  const t = c.animT,
+    k = PEE.k,
+    jolt = sstep(0, 0.05, k) * (1 - sstep(0.09, 0.16, k)),
+    give = sstep(0.84, 0.93, k),
+    hop = Math.max(0, Math.sin(t * 15)),
+    hop2 = Math.max(0, -Math.sin(t * 15));
+  T.thL = -0.3 - hop * 0.45;
+  T.thR = -0.3 - hop2 * 0.45;
+  T.shL = 0.5 + hop * 0.7;
+  T.shR = 0.5 + hop2 * 0.7;
+  T.rootY = (T.rootY || 0) - 0.06 + Math.abs(Math.sin(t * 15)) * 0.045;
+  T.torso = 0.34 + Math.sin(t * 15) * 0.04;
   T.hp = 0.45;
-  T.hr = Math.sin(t * 9) * 0.2;
+  T.hr = Math.sin(t * 9) * 0.22;
   T.uaL = T.uaR = -0.45;
   T.faL = T.faR = -0.85;
   T.aoL = T.aoR = -0.1;
-  T.roll = Math.sin(t * 17) * 0.07;
+  T.roll = Math.sin(t * 15) * 0.09;
+  if (jolt > 0) {
+    T.thL = lerp(T.thL, 0, jolt);
+    T.thR = lerp(T.thR, 0, jolt);
+    T.shL = lerp(T.shL, 0, jolt);
+    T.shR = lerp(T.shR, 0, jolt);
+    T.rootY = lerp(T.rootY, 0.07, jolt);
+    T.torso = lerp(T.torso, -0.08, jolt);
+    T.hp = lerp(T.hp, -0.3, jolt);
+    T.uaL = lerp(T.uaL, -0.5, jolt);
+    T.uaR = lerp(T.uaR, -0.5, jolt);
+    T.faL = lerp(T.faL, -0.3, jolt);
+    T.faR = lerp(T.faR, -0.3, jolt);
+    T.aoL = lerp(T.aoL, 0.9, jolt);
+    T.aoR = lerp(T.aoR, 0.9, jolt);
+    T.roll *= 1 - jolt;
+  }
+  if (give > 0) {
+    const sh = Math.sin(t * 38) * 0.03 * (1 - sstep(0.95, 1, k));
+    T.thL = lerp(T.thL, -0.08, give);
+    T.thR = lerp(T.thR, -0.08, give);
+    T.shL = lerp(T.shL, 0.18, give);
+    T.shR = lerp(T.shR, 0.18, give);
+    T.rootY = lerp(T.rootY, -0.02, give);
+    T.torso = lerp(T.torso, -0.04, give);
+    T.hp = lerp(T.hp, -0.32, give);
+    T.hr = lerp(T.hr, 0.12, give);
+    T.uaL = lerp(T.uaL, 0.02, give);
+    T.uaR = lerp(T.uaR, 0.02, give);
+    T.faL = lerp(T.faL, -0.15, give);
+    T.faR = lerp(T.faR, -0.15, give);
+    T.aoL = lerp(T.aoL, 0.12, give);
+    T.aoR = lerp(T.aoR, 0.12, give);
+    T.roll = lerp(T.roll, sh, give);
+  }
+}
+// holding it, with the last of your will (bladder under BLADDER.hold): standing, the knees pressed together and the
+// weight shifting from foot to foot, a hand down there, looking round for a toilet; walking or jogging, short quick steps
+// with the knees in, bent over it, one hand clamped there. Only your idle and your walk: everything else plays as ever.
+const holdingK = (c) =>
+  c.isPlayer && PLAYER.needs && G && !G.sleeping ? sstep(BLADDER.hold, BLADDER.hold * 0.25, PLAYER.needs.bladder) : 0;
+function holdStand(c, T, t) {
+  const k = holdingK(c);
+  if (k <= 0) return;
+  const sq = Math.sin(t * (3 + 4 * k)),
+    cross = Math.sin(t * 1.9);
+  T.thL = lerp(T.thL, -0.2 - Math.max(0, sq) * 0.22 + cross * 0.08, k);
+  T.thR = lerp(T.thR, -0.2 - Math.max(0, -sq) * 0.22 - cross * 0.08, k);
+  T.shL = lerp(T.shL, 0.32 + Math.max(0, sq) * 0.35, k);
+  T.shR = lerp(T.shR, 0.32 + Math.max(0, -sq) * 0.35, k);
+  T.rootY = lerp(T.rootY, -0.04 + Math.abs(sq) * 0.018, k);
+  T.roll = lerp(T.roll, sq * 0.035, k);
+  T.torso = lerp(T.torso, 0.2 + Math.abs(sq) * 0.03, k);
+  T.uaL = lerp(T.uaL, -0.42, k);
+  T.uaR = lerp(T.uaR, -0.4, k);
+  T.faL = lerp(T.faL, -0.85, k);
+  T.faR = lerp(T.faR, -0.8, k);
+  T.aoL = lerp(T.aoL, -0.1, k);
+  T.aoR = lerp(T.aoR, -0.08, k);
+  T.hp = lerp(T.hp, 0.12, k);
+  T.hy = lerp(T.hy, Math.sin(t * 1.3) * 0.55, k); // where's the toilet
+  T.hr = lerp(T.hr, Math.sin(t * 9) * 0.05, k);
+}
+function holdWalk(c, T, p, rw) {
+  const k = holdingK(c);
+  if (k <= 0) return;
+  const s = Math.sin(p);
+  T.thL = lerp(T.thL, T.thL * 0.5 - 0.12, k); // short steps, the knees kept in
+  T.thR = lerp(T.thR, T.thR * 0.5 - 0.12, k);
+  T.shL = lerp(T.shL, T.shL * 0.75 + 0.18, k);
+  T.shR = lerp(T.shR, T.shR * 0.75 + 0.18, k);
+  T.torso = lerp(T.torso, 0.3 + rw * 0.08, k);
+  T.twist *= 1 - 0.7 * k;
+  T.roll = lerp(T.roll, s * (0.06 + rw * 0.04), k); // a waddle, side to side
+  T.uaL = lerp(T.uaL, -0.45, k); // one hand clamped down there
+  T.faL = lerp(T.faL, -0.9, k);
+  T.aoL = lerp(T.aoL, -0.12, k);
+  T.uaR = lerp(T.uaR, -0.3 + s * 0.35 * (0.4 + rw), k); // the other flapping for balance
+  T.faR = lerp(T.faR, -0.9 - rw * 0.4, k);
+  T.aoR = lerp(T.aoR, 0.2 + rw * 0.15, k);
+  T.hp = lerp(T.hp, 0.18 + Math.sin(p * 2) * 0.03, k);
+  T.hy = lerp(T.hy, Math.sin(c.animT * 1.6) * 0.3, k);
 }
 // the spray, drawn: droplets in an arc from where you stand, splashing where they land. Looks only: its own little
 // random numbers, nothing kept in the game, no allocation once the pool of drops exists.
-const PEE = { on: false, dir0: 0, seed: 1, acc: 0, drops: [] };
+const PEE = { on: false, k: 0, dir0: 0, seed: 1, acc: 0, drops: [] };
 function peeRnd() {
   PEE.seed = (PEE.seed * 16807) % 2147483647;
   return PEE.seed / 2147483647;

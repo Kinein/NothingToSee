@@ -68,6 +68,7 @@ town/talk.js                     # Talk: what people say, and the talking action
 town/echoes.js                   # Echoes: what happened, where, who saw
 them/night-attacks.js            # Night attacks
 town/company.js                  # The witnesses THEY go after at night, and standing guard for one; THEIR people tailing you
+town/approach.js                 # People come to you: a word in the street, Hale at your shoulder, THEIR people warning and following you
 horror/director.js               # Horror director: daily events by THEIR phase
 them/office-night.js             # The office after dark
 play/items.js                    # Items left behind

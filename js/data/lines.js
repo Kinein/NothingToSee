@@ -253,6 +253,69 @@ const ENDINGS = {
 };
 // lost on THEIR last day: after your own last picture the town gets one (game/endings), with this caption over it.
 // The words under it on the card are ENDINGS.plan's.
+// the accident (player/needs accident): what you say as it goes, what you say after, what the first one who saw it says
+const ACCIDENT_SAY = ['Nonononono—', 'Not now not now not NOW—', 'Hold it hold it hold it—', 'Oh no. Oh no no no.'];
+const ACCIDENT_AFTER = ['…', '…Nobody saw that.', '…Oops.', 'Well. That happened.'];
+const ACCIDENT_SEEN = ['Oh my GOD.', 'Ew! EW!', 'Is that… are you…?', 'In PUBLIC?!', 'I’m going to need a minute.'];
+// people who come up to you (town/approach): the call from a way off, then what each kind has come to say
+const APPROACH_LINES = {
+  call: {
+    chat: ['Hey! {p}!', 'Oh, {p}! Got a minute?', 'Hang on, {p}!', 'Yoo-hoo! {p}!'],
+    probe: ['{p}. A word.', 'There you are, {p}.', 'Oh, {p}. Just who I wanted.'],
+    warn: ['Hey. You.', '{p}. Stop there.', 'Wait.'],
+    lost: ['Excuse me! Sorry—', 'Hi! Sorry, quick question—'],
+    drunk: ['Heyyy! HEY! You!', 'Buddy! Pal! Wait up!', 'YOU! I know YOU!'],
+    boss: ['{p}! A WORD!', 'Hey! {p}! YES, YOU!'],
+  },
+  chat: {
+    open: ['Thought it was you.', 'How are you holding up?', 'Haven’t seen you about much.', 'You doing all right?'],
+    smell: ['No offence, but… have you showered?', 'Is that… you? That smell?', 'You might want to go home and change.'],
+    talked: ['People are talking about you, you know.', 'You’ve been acting a bit odd lately. People notice.', 'Folks say you’ve been snooping about.'],
+    tired: ['You look awful. Sleeping at all?', 'You look like you haven’t slept in a week.'],
+    close: ['Anyway. Take care of yourself.', 'Right, I’ll let you get on.', 'Well. Don’t be a stranger.', 'Look after yourself, eh?'],
+  },
+  probe: {
+    open: ['Sleeping all right, {p}?', 'You’ve been busy this week.', 'Funny how I keep running into you.', 'Everyone’s been talking about you. Did you know?'],
+    know: ['We know where you go at night.', 'Your door doesn’t lock properly, does it?', 'Some people just can’t leave things alone.', 'All those questions. All those pictures.'],
+    close: ['See you around, {p}.', 'Take care. Really.', 'Get some rest. While you can.', 'We’ll talk again.'],
+  },
+  warn: {
+    bribed: ['Do yourself a favour. Drop it.', 'There’s money in keeping quiet, you know.', 'Leave the nice people alone.'],
+    chipped: ['Stop. Asking. Questions.', 'Everything is fine. Everything is fine.', 'Go home. Go home. Go home.'],
+    bitten: ['Hnn. Leave it… alone.', 'So hungry. Go home.', 'You smell… warm.'],
+    them: ['Leave it alone.'],
+    all: ['Leave it alone.', 'You don’t know what you’re doing.', 'This is your last warning.', 'They see everything you do.'],
+  },
+  lost: {
+    ask: ['Is this Wexley? I’m looking for the station.', 'Which way’s Main street?', 'Is it always this quiet here?', 'Is it true what they say about this town?'],
+    close: ['Right. Thanks anyway.', 'Great. Thanks. I think.', 'Okay. I’ll just… keep walking.'],
+  },
+  drunk: {
+    mid: ['You’re a good person. You know that?', 'I love this town. I HATE this town.', 'Have you seen my car? It’s blue. Or red.', 'The lamps are WATCHING us. Shh.', 'You’re my best friend. What’s your name?'],
+    bye: ['Fine! FINE! Be like that!', '*hic*', 'Where’d everybody go?'],
+  },
+  boss: {
+    mid: ['Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!', 'The Hendricks file isn’t going to write itself!', 'I don’t pay you to WANDER!'],
+    close: ['Desk. NOW.', 'Back to work. NOW!', 'Don’t make me come and find you again.'],
+  },
+  rude: {
+    chat: ['…Okay then.', 'Charming.', 'Rude.', 'Nice talking to you too.'],
+    probe: ['Run along, then.', 'You can’t walk away forever.'],
+    warn: ['Walk away. We’ll follow.'],
+    lost: ['Thanks a lot!', 'Friendly place.'],
+    drunk: ['Hey! I wasn’t FINISHED!', 'Come back! I love you!'],
+    boss: ['Don’t you WALK AWAY FROM ME!', 'I’m TALKING to you!'],
+  },
+};
+// Hale, when the work bar runs out (game/endings endFired): where he finds you, what he yells, the word you get in
+const HALE_FIRED = {
+  open: ['THERE you are!', 'Oh, look who decided to show up!', 'Do you know what TIME it is?!'],
+  out: ['THERE you are! I’ve been looking ALL OVER!', 'Out HERE?! On MY time?!', 'Oh, having a nice little walk, are we?!'],
+  mid: ['Half the day! Where WERE you?!', 'The Hendricks file! On my desk! YESTERDAY!', 'You think this place runs ITSELF?!', 'I covered for you! ALL WEEK!', 'Three phone calls! THREE!', 'Your chair’s been empty since NINE!'],
+  you: ['But I—', 'I can explain—', 'Something’s going on in this town—'],
+  back: ['I don’t want to HEAR it!', 'Not another WORD!', 'Save it!'],
+  end: ['You’re FIRED!', 'YOU. ARE. FIRED!', 'Clear out your desk. You’re FIRED!'],
+};
 const THEY_WON = {
   aliens: ['Midnight', 'Friday · the park'],
   lizards: ['Midnight', 'Friday · Main street'],

@@ -1,6 +1,6 @@
 //@ game/endings — The last picture: where you fell, the cell for good, what THEY made of Wexley
-//@ Defines: END, END_HATCH, END_PARK, END_DOOR, endBegin, endCard, endSkip, endReset, endFrame, endStill, endCam, endAside, endLight, endAir, endBody, endCell, …
-//@ Uses:    gfx/renderer, sim/core, horror/layer, core/util, town/cell, ui/interface, audio/sound, sim/pose, town/cast, them/plan, …
+//@ Defines: END, END_HATCH, END_PARK, END_DOOR, endBegin, endCard, endSkip, endReset, endFrame, endStill, endCam, endAside, endLight, endAir, endBody, FIRED, …
+//@ Uses:    gfx/renderer, core/util, sim/core, horror/layer, town/cell, ui/interface, audio/sound, sim/pose, town/cast, them/plan, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the last picture ─────────────────────────
 // A game that's lost doesn't cut straight to the card. Shot down or killed, you lie where you fell with your eyes shut,
@@ -37,6 +37,7 @@ function endBegin(kind) {
   const friday = phaseNow() >= WEEK && !['won', 'escaped', 'plan', 'below'].includes(kind);
   const steps = [];
   if (kind === 'shot' || kind === 'killed') steps.push('body');
+  else if (kind === 'fired' && haleCan()) steps.push('fired');
   else if (kind === 'jailed' || kind === 'prison') steps.push('cell');
   if (kind === 'plan' || kind === 'below' || friday) steps.push('they');
   Object.assign(END, { on: true, kind, steps, i: 0, t: 0, T: 0, init: false, lid: 0, fade: 0, card: false, foe: null });
@@ -104,7 +105,13 @@ function endFrame(dt) {
   const first = !END.init;
   END.init = true;
   const done =
-    s === 'body' ? endBody(dt, END.t, first) : s === 'cell' ? endCell(dt, END.t, first) : endThey(dt, END.t, first);
+    s === 'body'
+      ? endBody(dt, END.t, first)
+      : s === 'cell'
+        ? endCell(dt, END.t, first)
+        : s === 'fired'
+          ? endFired(dt, END.t, first)
+          : endThey(dt, END.t, first);
   if (done && !END.card) {
     if (END.i < END.steps.length - 1) {
       END.i++;
@@ -252,6 +259,125 @@ function endBody(dt, t, first) {
   END.fade = 1 - sstep(close + 0.2, close + 1.6, t);
   cam.yawT += dt * 0.02;
   return t > close + 1.4;
+}
+
+// ── fired: Hale comes and finds you, wherever you got to, and has his say in front of everyone. Loudly. He storms up
+// from wherever he can be seen coming, jabs a finger at you on every word, and you stand there and take it.
+const FIRED = { lines: [], i: 0, at: 0, spot: null, punch: 0 };
+const haleCan = () => {
+  const h = NPC.hale;
+  return !!(h && !h.slain && !h.gone && !h.trueForm && !h.exposed && !h.under && PLAYER.onMap && !G.away);
+};
+// where he ends up (a step in front of you) and where he comes from (in sight of that, up to a few tiles off)
+function haleMarks(P, h) {
+  const ok = (x, z) => walkable(Math.floor(x), Math.floor(z), h);
+  let spot = null;
+  for (const da of [0, 0.6, -0.6, 1.3, -1.3, Math.PI]) {
+    const a = P.dir + da,
+      x = P.x + Math.sin(a) * 1.2,
+      z = P.z + Math.cos(a) * 1.2;
+    if (ok(x, z)) {
+      spot = [x, z];
+      break;
+    }
+  }
+  spot = spot || [P.x + Math.sin(P.dir) * 1.1, P.z + Math.cos(P.dir) * 1.1];
+  const fx = Math.floor(spot[0]),
+    fz = Math.floor(spot[1]);
+  if (h.onMap && Math.hypot(h.x - spot[0], h.z - spot[1]) < 10 && losClear(Math.floor(h.x), Math.floor(h.z), fx, fz))
+    return { spot, from: [h.x, h.z] };
+  const a0 = Math.atan2(spot[0] - P.x, spot[1] - P.z);
+  for (const r of [5, 4, 3, 2])
+    for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6]) {
+      const x = P.x + Math.sin(a0 + da) * r,
+        z = P.z + Math.cos(a0 + da) * r;
+      if (ok(x, z) && losClear(Math.floor(x), Math.floor(z), fx, fz)) return { spot, from: [x, z] };
+    }
+  return { spot, from: spot };
+}
+function endFired(dt, t, first) {
+  const P = PLAYER,
+    h = NPC.hale;
+  if (first) {
+    endStill(P);
+    P.anim = 'idle';
+    PEE.on = false;
+    if (P.poseFn === peePose) P.poseFn = null;
+    endStill(h);
+    h.engaged = null;
+    h.seatTr = null;
+    h.pose = 'stand';
+    h.y = 0;
+    h.tell = null;
+    const m = haleMarks(P, h);
+    h.x = m.from[0];
+    h.z = m.from[1];
+    h.onMap = true;
+    FIRED.spot = m.spot;
+    FIRED.i = 0;
+    FIRED.at = 0;
+    FIRED.punch = 0;
+    const L = HALE_FIRED,
+      mid = pick(L.mid);
+    FIRED.lines = [
+      [h, pick(inOffice() ? L.open : L.out)],
+      [h, mid],
+      [h, pick(L.mid.filter((l) => l !== mid))],
+      [P, pick(L.you)],
+      [h, pick(L.back)],
+      [h, pick(L.end)],
+    ];
+    END.foe = h;
+    cam.yawT = P.dir + Math.PI / 2; // side on to the two of you
+  }
+  const [sx, sz] = FIRED.spot;
+  // he storms up
+  const there = Math.hypot(h.x - sx, h.z - sz) < 0.06;
+  if (!there) {
+    hxWalk(h, sx, sz, 2.6, dt);
+    h.anim = 'idle';
+  } else {
+    h.moving = false;
+    h.tdir = Math.atan2(P.x - h.x, P.z - h.z);
+  }
+  if (Math.hypot(P.x - h.x, P.z - h.z) < 6) P.tdir = Math.atan2(h.x - P.x, h.z - P.z);
+  // and lets you have it, a line at a time; you get one word in
+  if ((there || t > 4) && FIRED.i < FIRED.lines.length && t >= FIRED.at) {
+    const [who, line] = FIRED.lines[FIRED.i++],
+      last = FIRED.i === FIRED.lines.length;
+    ui.say(who, line, last ? 4 : 2.1);
+    ui.bubble(who, who === P ? 'question' : 'exclaim', 'speech', last ? 4 : 2);
+    audio.sting(last ? 'caught' : 'awkward');
+    if (last) FIRED.punch = t;
+    FIRED.at = t + (who === P ? 1.3 : last ? 0 : 1.9);
+    if (FIRED.i === 1) FIRED.at = t + 1.6;
+  }
+  const cur = FIRED.i > 0 ? FIRED.lines[FIRED.i - 1] : null,
+    youSpeak = !!cur && cur[0] === P && t < FIRED.at; // he lets you open your mouth
+  h.anim = there && cur && !youSpeak ? 'yell' : 'idle';
+  P.anim = youSpeak ? 'talk' : cur ? 'shame' : 'idle';
+  h.shown += (1 - h.shown) * Math.min(1, dt * 7); // he's in the picture, whatever the light
+  animate(P, dt, dt);
+  animate(h, dt, dt);
+  // the whole place stops, and looks
+  for (const c of CHARS) {
+    if (c === P || c === h || !c.onMap || Math.hypot(c.x - P.x, c.z - P.z) > 10) continue;
+    if (c.moving || c.path) endStill(c);
+    if (!c.trueForm && c.pose !== 'sit') c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+    animate(c, dt, dt);
+  }
+  endLight((P.x + h.x) / 2, 2.4, (P.z + h.z) / 2, 3.8, [0.6, 0.57, 0.5]);
+  endAir({});
+  // in close on the two of you; on the last word the camera jumps in on it
+  const mx = (P.x + h.x) / 2,
+    mz = (P.z + h.z) / 2,
+    pk = FIRED.punch ? sstep(FIRED.punch, FIRED.punch + 0.25, t) * (1 - sstep(FIRED.punch + 1.6, FIRED.punch + 2.6, t)) : 0;
+  // after it, off to the right of where the card comes up, a little further back
+  const off = FIRED.punch && t > FIRED.punch + 1.8,
+    [ax, az] = off ? endAside(mx, mz, 0.42, 0.05) : endAside(mx, mz, 0, -0.2); // low in the frame: room for the words
+  endCam(ax, az, off ? 2.4 : lerp(2.0, 1.45, pk), dt, pk > 0 && !off ? 6 : 1.6);
+  if (h.anim === 'yell') cam.yawT += Math.sin(R.time * 31) * 0.002; // the room shakes with it
+  return FIRED.punch > 0 && t > FIRED.punch + 2.8;
 }
 
 // ── locked up: booked, walked down, the door; then the days in the window

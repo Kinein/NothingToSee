@@ -795,7 +795,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.21 · updated Oct 31, 2026</p>
+  <p id="version">v1.22 · updated Nov 1, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1187,6 +1187,14 @@ const POLICE = { start: 1.1, top: 1.6, ramp: 40, giveUp: 120, whistle: 14, talk:
 // he comes looking once a day between the `daily` hours, and the moment he spots you (`spot` tiles).
 const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far: 12, aim: 2.4, speed: 2.6, hit: 40, cd: 4.5, reach: 1.15, sight: 13, look: 7, lose: 16, daily: [9, 17], spot: 9 };
 
+// people coming to you (town/approach): a check every `every` game minutes for somebody within `near` tiles who can see
+// you (fewer after dark). They call out, walk up (running when more than `runAt` off) and talk once within `reach`, a line
+// every `gap` body minutes; `give` body minutes to reach you or they give up. Walk `walkOff` further off mid-sentence and
+// it's rude: `rude` suspicion (Hale takes `bossCost` off the work bar for it). THEIR people, and drunks, follow you after,
+// `follow` game minutes, `back` tiles behind. One of THEM only comes once THEIR awareness is `probeAware`. Hale comes to
+// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk. Nobody comes over again within `again` game minutes.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
+
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
   { k: 'hunger', n: 'Hunger', icon: 'food', rate: -5.6 },
@@ -1204,9 +1212,10 @@ const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
-// An accident (player/needs accident): `spray` body minutes (about three seconds) out of your control, a pool `pool` tiles
-// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time
-const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 4.5, pool: 2, wallReach: 1.8, wallOdds: 0.75 };
+// An accident (player/needs accident): `spray` body minutes (under two seconds) out of your control, a pool `pool` tiles
+// across to mop; the nearest wall within `wallReach` tiles gets a splash that never comes off, any other `wallOdds` of the time.
+// Under `hold` you're holding it: your idle and your walk show it, more and more toward empty.
+const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeSeen: 1.8, peeAt: 50, spray: 2.8, pool: 2, wallReach: 1.8, wallOdds: 0.75, hold: 20 };
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };
@@ -1564,6 +1573,69 @@ const ENDINGS = {
 };
 // lost on THEIR last day: after your own last picture the town gets one (game/endings), with this caption over it.
 // The words under it on the card are ENDINGS.plan's.
+// the accident (player/needs accident): what you say as it goes, what you say after, what the first one who saw it says
+const ACCIDENT_SAY = ['Nonononono—', 'Not now not now not NOW—', 'Hold it hold it hold it—', 'Oh no. Oh no no no.'];
+const ACCIDENT_AFTER = ['…', '…Nobody saw that.', '…Oops.', 'Well. That happened.'];
+const ACCIDENT_SEEN = ['Oh my GOD.', 'Ew! EW!', 'Is that… are you…?', 'In PUBLIC?!', 'I’m going to need a minute.'];
+// people who come up to you (town/approach): the call from a way off, then what each kind has come to say
+const APPROACH_LINES = {
+  call: {
+    chat: ['Hey! {p}!', 'Oh, {p}! Got a minute?', 'Hang on, {p}!', 'Yoo-hoo! {p}!'],
+    probe: ['{p}. A word.', 'There you are, {p}.', 'Oh, {p}. Just who I wanted.'],
+    warn: ['Hey. You.', '{p}. Stop there.', 'Wait.'],
+    lost: ['Excuse me! Sorry—', 'Hi! Sorry, quick question—'],
+    drunk: ['Heyyy! HEY! You!', 'Buddy! Pal! Wait up!', 'YOU! I know YOU!'],
+    boss: ['{p}! A WORD!', 'Hey! {p}! YES, YOU!'],
+  },
+  chat: {
+    open: ['Thought it was you.', 'How are you holding up?', 'Haven’t seen you about much.', 'You doing all right?'],
+    smell: ['No offence, but… have you showered?', 'Is that… you? That smell?', 'You might want to go home and change.'],
+    talked: ['People are talking about you, you know.', 'You’ve been acting a bit odd lately. People notice.', 'Folks say you’ve been snooping about.'],
+    tired: ['You look awful. Sleeping at all?', 'You look like you haven’t slept in a week.'],
+    close: ['Anyway. Take care of yourself.', 'Right, I’ll let you get on.', 'Well. Don’t be a stranger.', 'Look after yourself, eh?'],
+  },
+  probe: {
+    open: ['Sleeping all right, {p}?', 'You’ve been busy this week.', 'Funny how I keep running into you.', 'Everyone’s been talking about you. Did you know?'],
+    know: ['We know where you go at night.', 'Your door doesn’t lock properly, does it?', 'Some people just can’t leave things alone.', 'All those questions. All those pictures.'],
+    close: ['See you around, {p}.', 'Take care. Really.', 'Get some rest. While you can.', 'We’ll talk again.'],
+  },
+  warn: {
+    bribed: ['Do yourself a favour. Drop it.', 'There’s money in keeping quiet, you know.', 'Leave the nice people alone.'],
+    chipped: ['Stop. Asking. Questions.', 'Everything is fine. Everything is fine.', 'Go home. Go home. Go home.'],
+    bitten: ['Hnn. Leave it… alone.', 'So hungry. Go home.', 'You smell… warm.'],
+    them: ['Leave it alone.'],
+    all: ['Leave it alone.', 'You don’t know what you’re doing.', 'This is your last warning.', 'They see everything you do.'],
+  },
+  lost: {
+    ask: ['Is this Wexley? I’m looking for the station.', 'Which way’s Main street?', 'Is it always this quiet here?', 'Is it true what they say about this town?'],
+    close: ['Right. Thanks anyway.', 'Great. Thanks. I think.', 'Okay. I’ll just… keep walking.'],
+  },
+  drunk: {
+    mid: ['You’re a good person. You know that?', 'I love this town. I HATE this town.', 'Have you seen my car? It’s blue. Or red.', 'The lamps are WATCHING us. Shh.', 'You’re my best friend. What’s your name?'],
+    bye: ['Fine! FINE! Be like that!', '*hic*', 'Where’d everybody go?'],
+  },
+  boss: {
+    mid: ['Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!', 'The Hendricks file isn’t going to write itself!', 'I don’t pay you to WANDER!'],
+    close: ['Desk. NOW.', 'Back to work. NOW!', 'Don’t make me come and find you again.'],
+  },
+  rude: {
+    chat: ['…Okay then.', 'Charming.', 'Rude.', 'Nice talking to you too.'],
+    probe: ['Run along, then.', 'You can’t walk away forever.'],
+    warn: ['Walk away. We’ll follow.'],
+    lost: ['Thanks a lot!', 'Friendly place.'],
+    drunk: ['Hey! I wasn’t FINISHED!', 'Come back! I love you!'],
+    boss: ['Don’t you WALK AWAY FROM ME!', 'I’m TALKING to you!'],
+  },
+};
+// Hale, when the work bar runs out (game/endings endFired): where he finds you, what he yells, the word you get in
+const HALE_FIRED = {
+  open: ['THERE you are!', 'Oh, look who decided to show up!', 'Do you know what TIME it is?!'],
+  out: ['THERE you are! I’ve been looking ALL OVER!', 'Out HERE?! On MY time?!', 'Oh, having a nice little walk, are we?!'],
+  mid: ['Half the day! Where WERE you?!', 'The Hendricks file! On my desk! YESTERDAY!', 'You think this place runs ITSELF?!', 'I covered for you! ALL WEEK!', 'Three phone calls! THREE!', 'Your chair’s been empty since NINE!'],
+  you: ['But I—', 'I can explain—', 'Something’s going on in this town—'],
+  back: ['I don’t want to HEAR it!', 'Not another WORD!', 'Save it!'],
+  end: ['You’re FIRED!', 'YOU. ARE. FIRED!', 'Clear out your desk. You’re FIRED!'],
+};
 const THEY_WON = {
   aliens: ['Midnight', 'Friday · the park'],
   lizards: ['Midnight', 'Friday · Main street'],
@@ -11994,6 +12066,7 @@ function animTargets(c, dt) {
       T.uaL *= 0.6;
       T.uaR *= 0.6;
     }
+    if (c.isPlayer && !(cur && cur.stage === 'run' && cur.anim && cur.anim !== 'idle')) holdWalk(c, T, p, rw);
     if (c.limpDay && G && c.limpDay === dayNo()) {
       T.roll = Math.sin(p) * 0.1;
       T.torso += 0.1;
@@ -12138,11 +12211,7 @@ function animTargets(c, dt) {
       T.hp = 0.3;
       T.uaL = T.uaR = 0.05;
     }
-    if (c.isPlayer && PLAYER.needs && PLAYER.needs.bladder < 15) {
-      T.thL = -0.15;
-      T.thR = 0.1;
-      T.hr = Math.sin(t * 9) * 0.05;
-    }
+    if (c.isPlayer && (!c.anim || c.anim === 'idle')) holdStand(c, T, t); // holding it (player/needs)
     const tv = Math.abs(c.dirV || 0); // turning on the spot: a couple of small steps round
     if (tv > 1.4) {
       const k = clamp((tv - 1.4) / 2.5, 0, 1),
@@ -12381,6 +12450,30 @@ function animTargets(c, dt) {
       break;
     case 'pace':
       T.hp = 0.3;
+      break;
+    case 'yell': {
+      // red in the face: leaning right in, a hand jabbed at you on every word, the other thrown out to the side
+      const jab = Math.max(0, Math.sin(t * 7.5)) ** 2;
+      T.torso = 0.18 + jab * 0.07;
+      T.hp = -0.12 + jab * 0.14;
+      T.hy = osc(1.7, 0.1);
+      T.uaR = -1.15 - jab * 0.35;
+      T.faR = -1.25 + jab * 0.75;
+      T.aoR = 0.28;
+      T.uaL = -0.2 - jab * 0.1;
+      T.faL = -0.5;
+      T.aoL = 0.4 + jab * 0.1;
+      T.rootY = jab * 0.012;
+      break;
+    }
+    case 'shame':
+      // taking it: head hung, shoulders in, the hands knotted low at the belt, a flinch now and then
+      T.hp = 0.5 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;
+      T.torso = 0.06;
+      T.uaL = T.uaR = -0.08;
+      T.faL = T.faR = -0.5;
+      T.aoL = T.aoR = -0.16;
+      T.rootY = -0.015;
       break;
   }
   if (c.anim === 'photo') photoPose(c, T, prog);
@@ -13506,9 +13599,10 @@ function psyDrain(dt, room) {
   const rate = fast ? PSY.fast : slow ? PSY.slow : 0;
   if (rate) setNeed('stress', P.needs.stress + (rate * dt) / 60);
 }
-// an accident: you can't hold it. Knees together, hands everywhere, turning on the spot while it goes all over the place
-// (BLADDER.spray body minutes, about three seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to
-// mop up, and whatever wall was close enough gets some too: that never comes off.
+// an accident: you can't hold it. A jolt up onto your toes, then a frantic little dance on the spot, knees knocking,
+// hands everywhere, spinning while it goes all over the place, and at the end the shudder of giving up (BLADDER.spray
+// body minutes, under two seconds, and the keys do nothing). It leaves a pool of BLADDER.pool tiles to mop up, and
+// whatever wall was close enough gets some too: that never comes off.
 function accident() {
   const P = PLAYER,
     N = P.needs;
@@ -13520,7 +13614,7 @@ function accident() {
   for (const n of CHARS)
     if (!n.isPlayer && n.onMap && npcSeesPlayer(n, 7)) {
       addSus(n, 8);
-      seen++;
+      if (!seen++) setTimeout(() => !G.over && ui.say(n, pick(ACCIDENT_SEEN), 2.6), 700);
       ui.bubble(n, 'exclaim', 'speech', 3);
     }
   ui.note('toilet', seen ? 'Accident · ' + seen + ' saw' : 'Accident', 'bad');
@@ -13541,19 +13635,26 @@ function accident() {
       dur: BLADDER.spray,
       interruptible: false,
       onStart: (c) => {
-        PEE.on = true;
+        PEE.k = 0;
         PEE.dir0 = c.dir;
         c.poseFn = peePose;
-        ui.bubble(c, 'exclaim', 'thought', 2.5);
+        ui.bubble(c, 'exclaim', 'thought', 1.2);
+        ui.say(c, pick(ACCIDENT_SAY), 1.6);
       },
-      // it gets away from you: a wild sweep one way and back, and round
+      // the jolt, the dance (a wild sweep one way and back, and round), the shudder
       onTick: (c, a) => {
-        c.tdir = PEE.dir0 + Math.sin(a.t * 1.9) * 1.9 + a.t * 0.45;
+        const k = clamp(a.t / a.dur, 0, 1);
+        PEE.k = k;
+        const was = PEE.on;
+        PEE.on = k > 0.12 && k < 0.86;
+        if (PEE.on && !was) audio.hx('splash', 0, 0.8);
+        if (k < 0.86) c.tdir = PEE.dir0 + Math.sin(a.t * 4.2) * 1.5 + Math.max(0, a.t - 0.3) * 1.4;
         c.moving = false;
       },
       onEnd: (c) => {
         PEE.on = false;
         if (c.poseFn === peePose) c.poseFn = null;
+        ui.say(c, pick(ACCIDENT_AFTER), 2.2);
         accidentPool();
       },
     }),
@@ -13604,23 +13705,113 @@ function wallFace(x, z, dx, dz, reach) {
   }
   return null;
 }
-// knees together, bent over it, both hands down there and no use at all, the whole body jiggling
+// the accident's body, by how far along it is (PEE.k): up on the toes with the arms flung out; then knees together, bent
+// over it, both hands down there and no use at all, hopping from foot to foot; then the shoulders drop and a shiver runs
+// through you, the head back, done
 function peePose(T, c) {
-  const t = c.animT;
-  T.thL = T.thR = -0.35;
-  T.shL = T.shR = 0.55;
-  T.rootY = (T.rootY || 0) - 0.07 + Math.sin(t * 21) * 0.012;
-  T.torso = 0.32;
+  const t = c.animT,
+    k = PEE.k,
+    jolt = sstep(0, 0.05, k) * (1 - sstep(0.09, 0.16, k)),
+    give = sstep(0.84, 0.93, k),
+    hop = Math.max(0, Math.sin(t * 15)),
+    hop2 = Math.max(0, -Math.sin(t * 15));
+  T.thL = -0.3 - hop * 0.45;
+  T.thR = -0.3 - hop2 * 0.45;
+  T.shL = 0.5 + hop * 0.7;
+  T.shR = 0.5 + hop2 * 0.7;
+  T.rootY = (T.rootY || 0) - 0.06 + Math.abs(Math.sin(t * 15)) * 0.045;
+  T.torso = 0.34 + Math.sin(t * 15) * 0.04;
   T.hp = 0.45;
-  T.hr = Math.sin(t * 9) * 0.2;
+  T.hr = Math.sin(t * 9) * 0.22;
   T.uaL = T.uaR = -0.45;
   T.faL = T.faR = -0.85;
   T.aoL = T.aoR = -0.1;
-  T.roll = Math.sin(t * 17) * 0.07;
+  T.roll = Math.sin(t * 15) * 0.09;
+  if (jolt > 0) {
+    T.thL = lerp(T.thL, 0, jolt);
+    T.thR = lerp(T.thR, 0, jolt);
+    T.shL = lerp(T.shL, 0, jolt);
+    T.shR = lerp(T.shR, 0, jolt);
+    T.rootY = lerp(T.rootY, 0.07, jolt);
+    T.torso = lerp(T.torso, -0.08, jolt);
+    T.hp = lerp(T.hp, -0.3, jolt);
+    T.uaL = lerp(T.uaL, -0.5, jolt);
+    T.uaR = lerp(T.uaR, -0.5, jolt);
+    T.faL = lerp(T.faL, -0.3, jolt);
+    T.faR = lerp(T.faR, -0.3, jolt);
+    T.aoL = lerp(T.aoL, 0.9, jolt);
+    T.aoR = lerp(T.aoR, 0.9, jolt);
+    T.roll *= 1 - jolt;
+  }
+  if (give > 0) {
+    const sh = Math.sin(t * 38) * 0.03 * (1 - sstep(0.95, 1, k));
+    T.thL = lerp(T.thL, -0.08, give);
+    T.thR = lerp(T.thR, -0.08, give);
+    T.shL = lerp(T.shL, 0.18, give);
+    T.shR = lerp(T.shR, 0.18, give);
+    T.rootY = lerp(T.rootY, -0.02, give);
+    T.torso = lerp(T.torso, -0.04, give);
+    T.hp = lerp(T.hp, -0.32, give);
+    T.hr = lerp(T.hr, 0.12, give);
+    T.uaL = lerp(T.uaL, 0.02, give);
+    T.uaR = lerp(T.uaR, 0.02, give);
+    T.faL = lerp(T.faL, -0.15, give);
+    T.faR = lerp(T.faR, -0.15, give);
+    T.aoL = lerp(T.aoL, 0.12, give);
+    T.aoR = lerp(T.aoR, 0.12, give);
+    T.roll = lerp(T.roll, sh, give);
+  }
+}
+// holding it, with the last of your will (bladder under BLADDER.hold): standing, the knees pressed together and the
+// weight shifting from foot to foot, a hand down there, looking round for a toilet; walking or jogging, short quick steps
+// with the knees in, bent over it, one hand clamped there. Only your idle and your walk: everything else plays as ever.
+const holdingK = (c) =>
+  c.isPlayer && PLAYER.needs && G && !G.sleeping ? sstep(BLADDER.hold, BLADDER.hold * 0.25, PLAYER.needs.bladder) : 0;
+function holdStand(c, T, t) {
+  const k = holdingK(c);
+  if (k <= 0) return;
+  const sq = Math.sin(t * (3 + 4 * k)),
+    cross = Math.sin(t * 1.9);
+  T.thL = lerp(T.thL, -0.2 - Math.max(0, sq) * 0.22 + cross * 0.08, k);
+  T.thR = lerp(T.thR, -0.2 - Math.max(0, -sq) * 0.22 - cross * 0.08, k);
+  T.shL = lerp(T.shL, 0.32 + Math.max(0, sq) * 0.35, k);
+  T.shR = lerp(T.shR, 0.32 + Math.max(0, -sq) * 0.35, k);
+  T.rootY = lerp(T.rootY, -0.04 + Math.abs(sq) * 0.018, k);
+  T.roll = lerp(T.roll, sq * 0.035, k);
+  T.torso = lerp(T.torso, 0.2 + Math.abs(sq) * 0.03, k);
+  T.uaL = lerp(T.uaL, -0.42, k);
+  T.uaR = lerp(T.uaR, -0.4, k);
+  T.faL = lerp(T.faL, -0.85, k);
+  T.faR = lerp(T.faR, -0.8, k);
+  T.aoL = lerp(T.aoL, -0.1, k);
+  T.aoR = lerp(T.aoR, -0.08, k);
+  T.hp = lerp(T.hp, 0.12, k);
+  T.hy = lerp(T.hy, Math.sin(t * 1.3) * 0.55, k); // where's the toilet
+  T.hr = lerp(T.hr, Math.sin(t * 9) * 0.05, k);
+}
+function holdWalk(c, T, p, rw) {
+  const k = holdingK(c);
+  if (k <= 0) return;
+  const s = Math.sin(p);
+  T.thL = lerp(T.thL, T.thL * 0.5 - 0.12, k); // short steps, the knees kept in
+  T.thR = lerp(T.thR, T.thR * 0.5 - 0.12, k);
+  T.shL = lerp(T.shL, T.shL * 0.75 + 0.18, k);
+  T.shR = lerp(T.shR, T.shR * 0.75 + 0.18, k);
+  T.torso = lerp(T.torso, 0.3 + rw * 0.08, k);
+  T.twist *= 1 - 0.7 * k;
+  T.roll = lerp(T.roll, s * (0.06 + rw * 0.04), k); // a waddle, side to side
+  T.uaL = lerp(T.uaL, -0.45, k); // one hand clamped down there
+  T.faL = lerp(T.faL, -0.9, k);
+  T.aoL = lerp(T.aoL, -0.12, k);
+  T.uaR = lerp(T.uaR, -0.3 + s * 0.35 * (0.4 + rw), k); // the other flapping for balance
+  T.faR = lerp(T.faR, -0.9 - rw * 0.4, k);
+  T.aoR = lerp(T.aoR, 0.2 + rw * 0.15, k);
+  T.hp = lerp(T.hp, 0.18 + Math.sin(p * 2) * 0.03, k);
+  T.hy = lerp(T.hy, Math.sin(c.animT * 1.6) * 0.3, k);
 }
 // the spray, drawn: droplets in an arc from where you stand, splashing where they land. Looks only: its own little
 // random numbers, nothing kept in the game, no allocation once the pool of drops exists.
-const PEE = { on: false, dir0: 0, seed: 1, acc: 0, drops: [] };
+const PEE = { on: false, k: 0, dir0: 0, seed: 1, acc: 0, drops: [] };
 function peeRnd() {
   PEE.seed = (PEE.seed * 16807) % 2147483647;
   return PEE.seed / 2147483647;
@@ -15468,6 +15659,7 @@ function npcUpdate(n, dt) {
         n.shown = 0;
         n.thinkCd = 0;
         n.prevRoom = roomAt(n.x, n.z);
+        homeAgain(n); // a door you forced while they were out: they lock it again
         return;
       }
       spawnNPC(n, b);
@@ -21078,22 +21270,16 @@ function doorPass(c) {
 function roomWatch(c) {
   const r = roomAt(c.x, c.z);
   if (r === c.prevRoom) return;
+  const prev = c.prevRoom;
   c.prevRoom = r;
+  if (!c.isPlayer && r && houseIs(r, c.id) && !(prev && houseIs(prev, c.id))) homeAgain(c);
   if (c.isPlayer && r && (r.house || r.agnes)) {
     // inside somebody's home
     const hid = r.house || 'agnes',
       owner = NPC[hid];
-    if (owner && owner.onMap && atHome(owner) && !owner.trueForm && !owner.slain) {
-      if (owner.isThem && G.broken[hid] > G.t) return raidEnter(owner);
-      if (!owner.isThem && G.broken[hid] > G.t && G.intruded !== hid + dayNo()) {
-        G.intruded = hid + dayNo();
-        ui.bubble(owner, 'exclaim', 'speech', 3);
-        ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
-        addSus(owner, 30);
-        G.policeAt = G.policeAt || G.t + rand(8, 18);
-        caution(owner, 'breakin');
-        return;
-      }
+    if (owner && owner.onMap && atHome(owner) && !owner.trueForm && !owner.slain && G.broken[hid] > G.t) {
+      if (owner.isThem) return raidEnter(owner);
+      if (caughtInside(owner)) return;
     }
   }
   if (!r || !r.private) return;
@@ -21107,6 +21293,37 @@ function roomWatch(c) {
       break;
     }
   } else if (roomAt(PLAYER.x, PLAYER.z) === r && !c.def.stranger && !c.trueForm && !c.exposed) awkward(c, 'walkin');
+}
+const houseIs = (r, id) => r.house === id || (id === 'agnes' && !!r.agnes);
+// home again, through a front door somebody forced: whoever lives here locks it behind them, so it's shut to you again
+// (one that's been found out leaves it as you left it: it has nowhere left to run). You still in there is another matter.
+function homeAgain(n) {
+  const hid = n.id;
+  if (!(G.broken[hid] > G.t) || n.exposed || n.trueForm || n.slain) return;
+  delete G.broken[hid];
+  const P = PLAYER;
+  if (P.onMap && insideOf(P, hid)) {
+    if (n.isThem) raidEnter(n);
+    else caughtInside(n);
+    return;
+  }
+  if (n.shown > 0.5 && P.onMap && Math.hypot(P.x - n.x, P.z - n.z) < 14) {
+    ui.bubble(n, 'frown', 'speech', 2.5);
+    ui.note('lock', n.short + ' locks the door again', '');
+    audio.hx('lock', 0, 0.6);
+  }
+}
+// an ordinary owner finds you in their home: out, and the police (once a day). False when it's already been said today.
+function caughtInside(owner) {
+  const hid = owner.id;
+  if (G.intruded === hid + dayNo()) return false;
+  G.intruded = hid + dayNo();
+  ui.bubble(owner, 'exclaim', 'speech', 3);
+  ui.say(owner, pick(['GET OUT OF MY HOUSE!', 'I’m calling the police!']), 3);
+  addSus(owner, 30);
+  G.policeAt = G.policeAt || G.t + rand(8, 18);
+  caution(owner, 'breakin');
+  return true;
 }
 function awkward(n, kind) {
   if (G.awkCd > 0) return;
@@ -22680,6 +22897,261 @@ function tailAct(n) {
       followPath(c, dt);
     },
   });
+}
+// ───────────── people come to you. Not everything waits for you to start it: now and then somebody comes over on their
+// own. A neighbour with something to tell you, Hale when your chair's been empty too long, one of THEM to ask how you're
+// sleeping, one of THEIR people to tell you to leave it alone (and then to follow you about for a while), a stranger
+// asking the way, a drunk who's decided you're his best friend. They call out, walk up and have their say. Stand and hear
+// them out, or walk off: they take that badly. Talk to them yourself (E) and it's an ordinary chat instead.
+// One at a time, never in a fight, a chase, a scene, or with you in handcuffs.
+function approachFree(n) {
+  if (n.isPlayer || !n.onMap || asleep(n) || n.engaged || n.pose !== 'stand' || n.seatTr || n.y) return false;
+  if (n.fleeing || n.trueForm || n.exposed || n.surrendered || n.slain || n.gone || n.under || n.hideUntil) return false;
+  if (n.tell || n.secret || n.odd || n.raiding || n.breakIn || n.hunting || n.trance || n.cornered > G.t - 30) return false;
+  if (n.def.officer || n.id === 'lenny' || (G.tail && G.tail.id === n.id) || (G.control && G.control.who === n.id))
+    return false;
+  const a = n.queue[0];
+  return !(a && (a.interruptible === false || a.habit || a.op || a.kind === 'talk' || a.approach));
+}
+const approachQuiet = () => {
+  const P = PLAYER;
+  return (
+    !G.started ||
+    G.over ||
+    !P.onMap ||
+    G.away ||
+    G.sleeping ||
+    G.loose ||
+    G.enc ||
+    ARREST.on ||
+    HUNT.on ||
+    CAP.on ||
+    CELL.on ||
+    UI.cf ||
+    fightOn() ||
+    !!(P.queue[0] && P.queue[0].interruptible === false)
+  );
+};
+// once a game minute
+function approachTick() {
+  if (approachQuiet()) return;
+  const P = PLAYER,
+    A = APPROACH;
+  if (G.approach) {
+    const n = NPC[G.approach] || CHARS.find((c) => c.id === G.approach);
+    if (n && n.onMap && n.queue.some((a) => a.approach && !a.done)) return;
+    G.approach = null;
+  }
+  // Hale first: in the shift, your chair empty and the bar going, he comes and finds you in the office
+  const h = NPC.hale;
+  if (
+    inShift() &&
+    G.workBar < WORK.low &&
+    !playerAtDesk() &&
+    inOffice() &&
+    G.t >= G.haleAt &&
+    h &&
+    approachFree(h) &&
+    (roomAt(h.x, h.z) || {}).bld === 'office'
+  ) {
+    G.haleAt = G.t + A.boss;
+    return approachStart(h, 'boss');
+  }
+  if (G.t < G.approachAt) return;
+  G.approachAt = G.t + rand(A.every[0], A.every[1]);
+  if (darkNow() && chance(0.5)) return;
+  const opts = [];
+  for (const n of CHARS) {
+    if (G.t < (n.cameAt || -1e9) + A.again) continue; // not the same face twice running
+    if (!approachFree(n) || Math.hypot(n.x - P.x, n.z - P.z) > A.near || !npcSeesPlayer(n, A.near)) continue;
+    if (n.def.stranger) {
+      if (n.kind === 'drunk') opts.push([1.2, [n, 'drunk']]);
+      else if (n.kind === 'walker') opts.push([0.5, [n, 'lost']]);
+    } else if (n.isThem) {
+      if (G.aware >= A.probeAware && theirDay() < 5) opts.push([1 + G.aware / 100, [n, 'probe']]);
+    } else if (servantKind(n) && theirDay() < 5) opts.push([1.2, [n, 'warn']]);
+    else if (n.def.plan && n.sus < MAD_SUS) opts.push([1, [n, 'chat']]);
+  }
+  const pk = opts.length && wpick(opts);
+  if (pk) approachStart(pk[0], pk[1]);
+}
+function approachStart(n, kind) {
+  for (const a of n.queue) a.cancel = true; // whatever they were at winds up properly first
+  enqueue(n, approachAct(n, kind));
+  G.approach = n.id;
+  n.cameAt = G.t;
+}
+const pName = (s) => s.replace(/\{p\}/g, PLAYER.name || 'you');
+// what they've come to say, in order: strings, or a function that says its own (gossip, a chat line)
+function approachLines(n, kind) {
+  const L = APPROACH_LINES,
+    P = PLAYER,
+    out = [];
+  if (kind === 'chat') {
+    out.push(pick(L.chat.open));
+    if (G.smelly) out.push(pick(L.chat.smell));
+    else if (n.sus >= 40) out.push(pick(L.chat.talked));
+    else if (P.needs.energy < 25) out.push(pick(L.chat.tired));
+    // they came over to tell you something: what they've heard, or a word about themselves
+    out.push(() => (chance(0.6) && !tooShaken() && gossip(n)) || ui.say(n, chatLine(n), 4));
+    out.push(pick(L.chat.close));
+  } else if (kind === 'probe') {
+    out.push(pick(L.probe.open));
+    const mid = pick(G.aware >= 50 ? L.probe.know : WEIRD_THEM);
+    out.push(() => {
+      ui.say(n, mid, 3.6);
+      noteOnce(n, '“' + mid + '”', { by: n.id, quote: true });
+      psyMark('near'); // the way it looks at you while it says it
+    });
+    out.push(pick(L.probe.close));
+  } else if (kind === 'warn') {
+    const k = servantKind(n),
+      W = L.warn[k] || L.warn.bribed;
+    out.push(pick(W));
+    out.push(pick(L.warn.all));
+  } else if (kind === 'lost') {
+    out.push(pick(L.lost.ask));
+    out.push(pick(L.lost.close));
+  } else if (kind === 'drunk') {
+    const a = pick(L.drunk.mid);
+    out.push(a, pick(L.drunk.mid.filter((l) => l !== a)));
+  } else if (kind === 'boss') {
+    out.push(pick(L.boss.mid), pick(L.boss.close));
+  }
+  return out;
+}
+function approachAct(n, kind) {
+  return mkAct({
+    kind: 'wait',
+    label: kind === 'boss' ? 'Coming for you' : 'Coming over',
+    icon: 'people',
+    dur: null,
+    anim: 'idle',
+    approach: kind,
+    until: (c, a) => !!a.done,
+    onStart: (c, a) => {
+      a.ph = 'come';
+      a.rp = 99;
+      a.bt = 0;
+      a.next = 0;
+      a.li = 0;
+      a.lastT = G.t;
+      a.lines = approachLines(c, kind);
+    },
+    onTick: (c, a, dt) => approachStep(c, a, dt, kind),
+  });
+}
+function approachEnd(c, a, line) {
+  if (line && c.shown > 0.4) ui.say(c, pName(line), 2.4);
+  a.done = true;
+  c.path = null;
+  c.moving = false;
+  c.run = false;
+  c.thinkCd = 0;
+  if (G.approach === c.id) G.approach = null;
+  // a stranger was only passing through: on out of town, the nearer way
+  if (c.def.stranger) {
+    const e = EDGES.W.concat(EDGES.E).sort((p, q) => Math.hypot(p[0] - c.x, p[1] - c.z) - Math.hypot(q[0] - c.x, q[1] - c.z));
+    enqueue(c, goAct(e[0], { label: 'Walking' }));
+  }
+}
+function approachStep(c, a, dt, kind) {
+  const P = PLAYER,
+    A = APPROACH,
+    L = APPROACH_LINES;
+  if (a.done) return;
+  // you talked to them yourself in the meantime (their act stood still while you did): that was the chat
+  if (G.t - a.lastT > 1 && a.ph !== 'follow') return approachEnd(c, a, null);
+  a.lastT = G.t;
+  if (approachQuiet() || !c.onMap) return approachEnd(c, a, null);
+  const d = Math.hypot(P.x - c.x, P.z - c.z),
+    bd = dt * BODY;
+  a.bt += bd;
+  if (a.ph === 'come') {
+    if (!a.called && npcSeesPlayer(c, A.near)) {
+      a.called = true;
+      ui.say(c, pName(pick(L.call[kind])), 2.4);
+      ui.bubble(c, kind === 'probe' || kind === 'warn' ? 'eye' : 'exclaim', 'speech', 2.2);
+      if (kind === 'boss') audio.sting('awkward');
+    }
+    if (a.bt > A.give || d > A.near + 6) return approachEnd(c, a, kind === 'drunk' ? '…Where’d he go?' : null);
+    if (d < A.reach) {
+      a.ph = 'talk';
+      a.bt = 0;
+      a.next = 0.6;
+      c.path = null;
+      c.moving = false;
+      return;
+    }
+    a.rp += dt;
+    if (a.rp > 0.8 || !c.path || c.pi >= c.path.length) {
+      a.rp = 0;
+      const t = nearestWalkable(P.x, P.z, c, 2);
+      if (!t || !setPath(c, t[0], t[1])) return approachEnd(c, a, null);
+    }
+    c.run = d > A.runAt && kind !== 'probe' && kind !== 'drunk';
+    followPath(c, dt);
+    c.anim = 'idle';
+    return;
+  }
+  if (a.ph === 'talk') {
+    c.path = null;
+    c.moving = false;
+    c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+    c.anim = kind === 'boss' ? 'yell' : 'talk';
+    if (d > A.reach + A.walkOff) {
+      // you walked off on them
+      if (kind === 'chat') addSus(c, A.rude);
+      if (kind === 'boss') G.workBar = Math.max(1, G.workBar - A.bossCost);
+      const bye = L.rude[kind] || L.rude.chat;
+      if (kind === 'warn' || kind === 'drunk') {
+        ui.say(c, pName(pick(bye)), 2.4);
+        a.ph = 'follow';
+        a.until = G.t + rand(A.follow[0], A.follow[1]);
+        return;
+      }
+      return approachEnd(c, a, pick(bye));
+    }
+    if (a.bt < a.next) return;
+    const l = a.lines[a.li++];
+    if (l == null) {
+      if (kind === 'warn' || kind === 'drunk') {
+        a.ph = 'follow';
+        a.until = G.t + rand(A.follow[0], A.follow[1]);
+        if (kind === 'warn') noteOnce(c, 'Came up to you: leave it alone. Then followed you about.', { by: 'you' });
+        return;
+      }
+      return approachEnd(c, a, null);
+    }
+    if (typeof l === 'function') l();
+    else ui.say(c, pName(l), 3.4);
+    if (kind === 'boss') ui.bubble(c, 'exclaim', 'speech', 2);
+    a.next = a.bt + A.gap;
+    return;
+  }
+  // following you about, a few steps behind: stops when you do, stares when you turn round
+  if (G.t > a.until || d > A.near + 8) return approachEnd(c, a, kind === 'drunk' ? pick(L.drunk.bye) : null);
+  c.anim = 'idle';
+  if (d < A.back) {
+    c.path = null;
+    c.moving = false;
+    c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+    const facing = Math.abs(angDiff(P.dir, Math.atan2(c.x - P.x, c.z - P.z))) < 0.6;
+    if (facing && G.t >= (a.stareCd || 0)) {
+      a.stareCd = G.t + 25;
+      if (kind === 'drunk') ui.say(c, pick(L.drunk.mid), 3);
+      else ui.bubble(c, 'dots', 'speech', 2.4);
+    }
+    return;
+  }
+  a.rp += dt;
+  if (a.rp > 0.8 || !c.path || c.pi >= c.path.length) {
+    a.rp = 0;
+    const t = nearestWalkable(P.x, P.z, c, 3);
+    if (!t || !setPath(c, t[0], t[1])) return approachEnd(c, a, null);
+  }
+  c.run = d > A.runAt + 2 && kind !== 'drunk';
+  followPath(c, dt);
 }
 // ───────────── the horror director: a few events a day from four kinds, more as THEIR plan grows
 // stray signs point the right way more often than not, never always: the town is strange in more than one way
@@ -26090,6 +26562,12 @@ function takePhoto(tg) {
       filed = true;
       got.add(n);
     }
+  // a walk that's wrong: a print and a note on them, odd and no more
+  for (const n of chars)
+    if (!got.has(n) && photoWalk(n)) {
+      filed = true;
+      got.add(n);
+    }
   // one of THEM in the middle of THEIR business (strong) or of something odd (weak)
   for (const n of chars)
     if (n.odd && !n.odd.photo && G.t <= n.odd.until) {
@@ -26233,6 +26711,7 @@ const photoWorth = (n) =>
     (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
     (n.secret && !n.secret.done) ||
     (n.trace && !n.trace.photo) ||
+    (!!oddWalk(n) && !walkShot(n) && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 8) ||
     !!n.vis);
 function photoHintTick(dtReal) {
   UI.hintT = (UI.hintT || 0) - dtReal;
@@ -34019,6 +34498,33 @@ function deadWalk(c, T) {
   T.uaL *= 0.82;
   T.uaR *= 0.82;
   T.hr += sd * 0.02;
+}
+// a walk that's wrong, the kind the photo hint glows for: the dead's sway (THEM, and whoever THEY bit), THEIR mark's
+// lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a print and a note, never a card, and
+// one a day per face.
+const WALK_NOTE = {
+  sway: 'Walks wrong. A sway, one knee stiff.',
+  lurch: 'Lurching. Arms hanging out in front.',
+  trance: 'Sleepwalking. Eyes open, going somewhere.',
+};
+function oddWalk(n) {
+  if (!n || n.isPlayer || !n.moving || n.trueForm || n.exposed || n.slain) return '';
+  if (n.trance) return 'trance';
+  if (!G || G.faction !== 'zombies') return '';
+  if (markOf(n)) return 'lurch';
+  return n.isThem || n.thrall === 'zombies' ? 'sway' : '';
+}
+const walkKey = (n) => n.id + ':walk:' + dayNo();
+const walkShot = (n) => !!(G.traceShot && G.traceShot[walkKey(n)]);
+function photoWalk(n) {
+  const k = oddWalk(n);
+  if (!k || walkShot(n) || Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) > 8) return false;
+  (G.traceShot = G.traceShot || {})[walkKey(n)] = 1;
+  const where = placeName(n.x, n.z);
+  addPrint({ kind: 'plain', who: n.id, what: n.short + ' · ' + WALK_NOTE[k].split('.')[0], icon: 'walk', where, t: n.animT });
+  if (n.def && !n.def.stranger) addNote(n, 'Photo: ' + WALK_NOTE[k], { by: 'you' });
+  ui.note('walk', (n.def && n.def.stranger ? 'Someone' : n.short) + ' · ' + WALK_NOTE[k], 'onto');
+  return true;
 }
 const aloneNow = (n) => !CHARS.some((c) => c !== n && !c.isPlayer && c.onMap && Math.hypot(c.x - n.x, c.z - n.z) < 5);
 // once a game minute: anyone of THEM on their own, or walking somewhere, may start to show it
@@ -42134,6 +42640,9 @@ function freshG(start) {
     traps: [],
     broken: {},
     intruded: '',
+    approach: null, // who's coming over to you right now (town/approach)
+    approachAt: 0, // the next look round for somebody to come over
+    haleAt: 0, // Hale comes to find you again no sooner than this
     workBar: WORK.fresh,
     workBonusAt: -999,
     awayT: 0,
@@ -42701,6 +43210,7 @@ function endBegin(kind) {
   const friday = phaseNow() >= WEEK && !['won', 'escaped', 'plan', 'below'].includes(kind);
   const steps = [];
   if (kind === 'shot' || kind === 'killed') steps.push('body');
+  else if (kind === 'fired' && haleCan()) steps.push('fired');
   else if (kind === 'jailed' || kind === 'prison') steps.push('cell');
   if (kind === 'plan' || kind === 'below' || friday) steps.push('they');
   Object.assign(END, { on: true, kind, steps, i: 0, t: 0, T: 0, init: false, lid: 0, fade: 0, card: false, foe: null });
@@ -42768,7 +43278,13 @@ function endFrame(dt) {
   const first = !END.init;
   END.init = true;
   const done =
-    s === 'body' ? endBody(dt, END.t, first) : s === 'cell' ? endCell(dt, END.t, first) : endThey(dt, END.t, first);
+    s === 'body'
+      ? endBody(dt, END.t, first)
+      : s === 'cell'
+        ? endCell(dt, END.t, first)
+        : s === 'fired'
+          ? endFired(dt, END.t, first)
+          : endThey(dt, END.t, first);
   if (done && !END.card) {
     if (END.i < END.steps.length - 1) {
       END.i++;
@@ -42916,6 +43432,125 @@ function endBody(dt, t, first) {
   END.fade = 1 - sstep(close + 0.2, close + 1.6, t);
   cam.yawT += dt * 0.02;
   return t > close + 1.4;
+}
+
+// ── fired: Hale comes and finds you, wherever you got to, and has his say in front of everyone. Loudly. He storms up
+// from wherever he can be seen coming, jabs a finger at you on every word, and you stand there and take it.
+const FIRED = { lines: [], i: 0, at: 0, spot: null, punch: 0 };
+const haleCan = () => {
+  const h = NPC.hale;
+  return !!(h && !h.slain && !h.gone && !h.trueForm && !h.exposed && !h.under && PLAYER.onMap && !G.away);
+};
+// where he ends up (a step in front of you) and where he comes from (in sight of that, up to a few tiles off)
+function haleMarks(P, h) {
+  const ok = (x, z) => walkable(Math.floor(x), Math.floor(z), h);
+  let spot = null;
+  for (const da of [0, 0.6, -0.6, 1.3, -1.3, Math.PI]) {
+    const a = P.dir + da,
+      x = P.x + Math.sin(a) * 1.2,
+      z = P.z + Math.cos(a) * 1.2;
+    if (ok(x, z)) {
+      spot = [x, z];
+      break;
+    }
+  }
+  spot = spot || [P.x + Math.sin(P.dir) * 1.1, P.z + Math.cos(P.dir) * 1.1];
+  const fx = Math.floor(spot[0]),
+    fz = Math.floor(spot[1]);
+  if (h.onMap && Math.hypot(h.x - spot[0], h.z - spot[1]) < 10 && losClear(Math.floor(h.x), Math.floor(h.z), fx, fz))
+    return { spot, from: [h.x, h.z] };
+  const a0 = Math.atan2(spot[0] - P.x, spot[1] - P.z);
+  for (const r of [5, 4, 3, 2])
+    for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6]) {
+      const x = P.x + Math.sin(a0 + da) * r,
+        z = P.z + Math.cos(a0 + da) * r;
+      if (ok(x, z) && losClear(Math.floor(x), Math.floor(z), fx, fz)) return { spot, from: [x, z] };
+    }
+  return { spot, from: spot };
+}
+function endFired(dt, t, first) {
+  const P = PLAYER,
+    h = NPC.hale;
+  if (first) {
+    endStill(P);
+    P.anim = 'idle';
+    PEE.on = false;
+    if (P.poseFn === peePose) P.poseFn = null;
+    endStill(h);
+    h.engaged = null;
+    h.seatTr = null;
+    h.pose = 'stand';
+    h.y = 0;
+    h.tell = null;
+    const m = haleMarks(P, h);
+    h.x = m.from[0];
+    h.z = m.from[1];
+    h.onMap = true;
+    FIRED.spot = m.spot;
+    FIRED.i = 0;
+    FIRED.at = 0;
+    FIRED.punch = 0;
+    const L = HALE_FIRED,
+      mid = pick(L.mid);
+    FIRED.lines = [
+      [h, pick(inOffice() ? L.open : L.out)],
+      [h, mid],
+      [h, pick(L.mid.filter((l) => l !== mid))],
+      [P, pick(L.you)],
+      [h, pick(L.back)],
+      [h, pick(L.end)],
+    ];
+    END.foe = h;
+    cam.yawT = P.dir + Math.PI / 2; // side on to the two of you
+  }
+  const [sx, sz] = FIRED.spot;
+  // he storms up
+  const there = Math.hypot(h.x - sx, h.z - sz) < 0.06;
+  if (!there) {
+    hxWalk(h, sx, sz, 2.6, dt);
+    h.anim = 'idle';
+  } else {
+    h.moving = false;
+    h.tdir = Math.atan2(P.x - h.x, P.z - h.z);
+  }
+  if (Math.hypot(P.x - h.x, P.z - h.z) < 6) P.tdir = Math.atan2(h.x - P.x, h.z - P.z);
+  // and lets you have it, a line at a time; you get one word in
+  if ((there || t > 4) && FIRED.i < FIRED.lines.length && t >= FIRED.at) {
+    const [who, line] = FIRED.lines[FIRED.i++],
+      last = FIRED.i === FIRED.lines.length;
+    ui.say(who, line, last ? 4 : 2.1);
+    ui.bubble(who, who === P ? 'question' : 'exclaim', 'speech', last ? 4 : 2);
+    audio.sting(last ? 'caught' : 'awkward');
+    if (last) FIRED.punch = t;
+    FIRED.at = t + (who === P ? 1.3 : last ? 0 : 1.9);
+    if (FIRED.i === 1) FIRED.at = t + 1.6;
+  }
+  const cur = FIRED.i > 0 ? FIRED.lines[FIRED.i - 1] : null,
+    youSpeak = !!cur && cur[0] === P && t < FIRED.at; // he lets you open your mouth
+  h.anim = there && cur && !youSpeak ? 'yell' : 'idle';
+  P.anim = youSpeak ? 'talk' : cur ? 'shame' : 'idle';
+  h.shown += (1 - h.shown) * Math.min(1, dt * 7); // he's in the picture, whatever the light
+  animate(P, dt, dt);
+  animate(h, dt, dt);
+  // the whole place stops, and looks
+  for (const c of CHARS) {
+    if (c === P || c === h || !c.onMap || Math.hypot(c.x - P.x, c.z - P.z) > 10) continue;
+    if (c.moving || c.path) endStill(c);
+    if (!c.trueForm && c.pose !== 'sit') c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
+    animate(c, dt, dt);
+  }
+  endLight((P.x + h.x) / 2, 2.4, (P.z + h.z) / 2, 3.8, [0.6, 0.57, 0.5]);
+  endAir({});
+  // in close on the two of you; on the last word the camera jumps in on it
+  const mx = (P.x + h.x) / 2,
+    mz = (P.z + h.z) / 2,
+    pk = FIRED.punch ? sstep(FIRED.punch, FIRED.punch + 0.25, t) * (1 - sstep(FIRED.punch + 1.6, FIRED.punch + 2.6, t)) : 0;
+  // after it, off to the right of where the card comes up, a little further back
+  const off = FIRED.punch && t > FIRED.punch + 1.8,
+    [ax, az] = off ? endAside(mx, mz, 0.42, 0.05) : endAside(mx, mz, 0, -0.2); // low in the frame: room for the words
+  endCam(ax, az, off ? 2.4 : lerp(2.0, 1.45, pk), dt, pk > 0 && !off ? 6 : 1.6);
+  if (h.anim === 'yell') cam.yawT += Math.sin(R.time * 31) * 0.002; // the room shakes with it
+  return FIRED.punch > 0 && t > FIRED.punch + 2.8;
 }
 
 // ── locked up: booked, walked down, the door; then the days in the window
@@ -43843,6 +44478,7 @@ function simStep(dtReal, spdOver) {
         if (!G.loose) {
           ambushTick();
           streetTick();
+          approachTick();
           horrorTick();
           nightTick();
           sleepTakeCheck();
