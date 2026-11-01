@@ -91,6 +91,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
 | "Come with me", witnesses THEY visit at night | `js/town/company.js` |
+| People who come up to you on their own (a word, Hale shouting you back to your desk, THEM probing, THEIR people warning then following, strangers, drunks) | `js/town/approach.js` (`approachTick`, `approachAct`); numbers in `APPROACH`, lines in `APPROACH_LINES` |
 | Autopilot / "what should I do" advice | `js/play/advice.js` |
 | What E does, keyboard handling | `js/input/targeting.js` (`interact`, `initInput`), then `js/ui/menus.js` |
 | WASD walking, collisions | `js/input/walking.js` |
@@ -103,7 +104,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | THEY come for you, hunts, the FBI | `js/chase/` (`they-come.js`, `hunt*.js`, `flee.js`, `fbi.js`) |
 | Friday finale | `js/game/last-day.js` (`looseBegin`) |
 | New game, saving, loading, endings | `js/game/state.js` (`freshG`, `newGame`, `saveGame`, `loadGame`, `gameOver`: a lost game deletes the save, no reloading) |
-| The last picture before the end card: your body, the cell for good, THEIR win on day five | `js/game/endings.js` (`endBegin`, `endBody`, `endCell`, `endThey`); captions `THEY_WON` in data/lines.js |
+| The last picture before the end card: your body, the cell for good, THEIR win on day five | `js/game/endings.js` (`endBegin`, `endBody`, `endCell`, `endFired`: Hale yells you out of the job, `endThey`); captions `THEY_WON` in data/lines.js |
 | Main loop and boot | `js/game/loop.js` (`simStep`, `worldStep`, `frame`, `boot`) |
 | Dev console tools (`__dev`) | `js/dev/devtools.js` (dev build only) |
 
