@@ -75,6 +75,7 @@ other module, exactly as in the original single file:
 | The last picture before the end card | game/endings.js (`endBegin`, `endBody`, `endCell`, `endThey`) |
 | The frame loop, boot | game/loop.js (`frame`, `boot`) |
 | What gets drawn each frame | gfx/frame.js (`renderFrame`) |
+| The art style, cartoon to horror (`LOOK`, `lookTarget`) | gfx/look.js |
 | HUD look | shell/styles.css, ui/hud.js |
 
 For anything else: `grep -w theName SYMBOLS.tsv`, then MAP.md for that module's neighbours.

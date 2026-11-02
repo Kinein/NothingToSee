@@ -130,7 +130,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
 | `over` | `null` | game/state | gfx/frame, player/needs, player/work, them/plan, them/moves, them/wipe, town/arrest, town/cell, … |
-| `started` | `false` | game/state | gfx/draw-helpers, gfx/frame, player/needs, town/routines, town/quirks, them/plan, town/npc-update, them/tells, … |
+| `started` | `false` | game/state | gfx/look, gfx/draw-helpers, gfx/frame, player/needs, town/routines, town/quirks, them/plan, town/npc-update, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |
 | `habits` | `{}` | town/routines, game/state | town/daily-plans, town/quirks, them/wipe, town/talk, play/oddities |

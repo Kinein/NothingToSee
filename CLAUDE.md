@@ -59,6 +59,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Lights, line of sight, what the player can see | `js/world/light-map.js`, `js/world/vision.js` |
 | Pathfinding, who may walk where | `js/world/paths.js` (`findPath`, `walkable`) |
 | Shaders, bloom, what's drawn each frame | `js/gfx/shaders*.js`, `js/gfx/post.js`, `js/gfx/frame.js` (`renderFrame`) |
+| The art style: a cartoon town (fill light, clean walls, toon-shaded people with an ink edge, the picture-book grade) that turns into the horror when something bad happens (`LOOK.h`; what turns it: `lookTarget`). Render only, the game's light map never sees it | `js/gfx/look.js`; the shader side: `uLook`/`uFill`, grime `GR`, the rot `corrupt` in gfx/shaders.js, the grade in gfx/post.js |
 | How people and creatures are drawn | `js/gfx/people.js` (`drawPerson`), `js/gfx/creatures.js`, `js/gfx/body-parts.js` |
 | Animation, poses, gaits, sitting | `js/sim/pose.js`, `js/sim/body-motion.js`, `js/sim/seat-moves.js` |
 | The action queue every character runs | `js/sim/actions.js` (`mkAct`, `enqueue`, `runAct`) |

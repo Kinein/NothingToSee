@@ -1,6 +1,6 @@
 //@ gfx/frame — renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 //@ Defines: renderFrame, drawMask, pass, bindTex, bloomPasses, composite
-//@ Uses:    gfx/gl, gfx/renderer, sim/core, gfx/draw-helpers, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, …
+//@ Uses:    gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 function renderFrame() {
   resizeCanvas();
@@ -25,8 +25,8 @@ function renderFrame() {
   }
   gl.bindFramebuffer(gl.FRAMEBUFFER, R.msFb);
   gl.viewport(0, 0, w, h);
-  const fog = FOG_COL;
-  gl.clearColor(fog[0] * 0.5, fog[1] * 0.5, fog[2] * 0.5, 1);
+  const fog = LOOK.fog;
+  gl.clearColor(fog[0] * 0.8, fog[1] * 0.8, fog[2] * 0.8, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
@@ -400,7 +400,8 @@ function composite() {
     gl.uniform1f(u.uFlash, R.flash);
     gl.uniform1f(u.uPulse, R.pulse);
     gl.uniform1f(u.uSleep, R.sleepK * 0.75);
-    gl.uniform1f(u.uSat, 0.8);
+    gl.uniform1f(u.uSat, lerp(0.8, 1.16, LOOK.toon));
+    gl.uniform4fv(u.uLook, LOOK.vec);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));

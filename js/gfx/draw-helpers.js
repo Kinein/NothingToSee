@@ -1,6 +1,6 @@
 //@ gfx/draw-helpers — Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and tints
 //@ Defines: emitFor, lumBi, longShadow, DECAL_ID, DECAL_M, DECAL_J, DECAL_S, drawDecal, drawDecalR, useMain, gatherLamps, moodColor, glowCol, glowK, lampTint, FRUSTUM, …
-//@ Uses:    gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, sim/pose, gfx/post, horror/layer, town/traffic-weather, …
+//@ Uses:    gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, sim/pose, gfx/post, horror/layer, gfx/look, …
 //@ (header made by tools/map.js; stripped by build.py)
 // which glowing parts are switched on right now
 function emitFor(m) {
@@ -127,7 +127,9 @@ function useMain(mode) {
   gl.uniform3fv(U.uFocus2, pl);
   gl.uniform1f(U.uCutR, 7.5 * Math.max(0.8, cam.zoom / 8.5));
   gl.uniform1f(U.uWallsDown, cam.wallsDown);
-  gl.uniform3fv(U.uFog, FOG_COL);
+  gl.uniform3fv(U.uFog, LOOK.fog);
+  gl.uniform4fv(U.uLook, LOOK.vec);
+  gl.uniform3fv(U.uFill, LOOK.fill);
   gl.uniform1i(U.uMode, mode);
   const fl = Math.hypot(cam.fwd[0], cam.fwd[2]) || 1;
   gl.uniform1f(U.uWet, G ? G.wet || 0 : 0);

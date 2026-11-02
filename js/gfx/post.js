@@ -44,8 +44,10 @@ uniform float uNight; uniform float uDread; uniform float uDanger; uniform float
 uniform float uStK; uniform float uSBeat;
 uniform float uFade; uniform float uDaze; uniform float uLid; uniform vec3 uWash; uniform float uWashK;
 uniform float uStage; uniform vec2 uSpot;
+uniform vec4 uLook;   // gfx/look: x how much cartoon is left, y how far it has turned to horror
 out vec4 frag;
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
+float lt0(vec3 c){ return dot(c, vec3(0.299,0.587,0.114)); }
 vec3 shoulder(vec3 c){ vec3 t = max(c - 0.6, 0.0); return min(c, 0.6) + 0.4*(1.0 - exp(-t/0.4)); }
 void main(){
   vec2 uv = vUv;
@@ -55,7 +57,8 @@ void main(){
   // a jolt tears the picture sideways in a few bands, like a tape catching
   if(jt > 0.002){ float fr = floor(uTime*24.0); float band = step(0.8, h21(vec2(floor(uv.y*28.0), fr))); uv.x += band*jt*0.035*(h21(vec2(fr, 3.1)) - 0.5); }
   vec2 d = uv - 0.5;
-  float ca = 0.0019 + bad*0.006 + uDread*0.0035 + uDanger*0.004 + jt*0.012;
+  float toon = uLook.x, hor = uLook.y;
+  float ca = 0.0019*(1.0 - toon*0.9) + bad*0.006 + uDread*0.0035 + uDanger*0.004 + jt*0.012;
   vec3 col;
   col.r = texture(uScene, uv + d*ca).r;
   col.g = texture(uScene, uv).g;
@@ -72,16 +75,19 @@ void main(){
   }
   if(any(isnan(col)) || any(isinf(col))) col = vec3(0.0);
   col = max(col, vec3(0.0));
-  col = shoulder(col*1.2);
+  col = shoulder(col*mix(1.2, 1.3, toon));
   float l = dot(col, vec3(0.299,0.587,0.114));
   col = mix(vec3(l), col, uSat - bad*0.12 - uDread*0.1);
-  // grade: shadows sink toward a cold blue-teal, highlights go the colour of old sodium and nicotine
-  col *= mix(vec3(0.68, 0.87, 1.0), vec3(1.08, 0.97, 0.8), smoothstep(0.015, 0.5, l));
+  // grade: shadows sink toward a cold blue-teal, highlights go the colour of old sodium and nicotine. The cartoon's grade
+  // is gentler: a little cool in the shade, a little warm in the light, like a picture book
+  col *= mix(mix(vec3(0.68, 0.87, 1.0), vec3(1.08, 0.97, 0.8), smoothstep(0.015, 0.5, l)),
+             mix(vec3(0.9, 0.95, 1.1), vec3(1.05, 1.0, 0.93), smoothstep(0.02, 0.5, l)), toon);
   col = max(col - 0.003, 0.0)*1.01;
   { float lt = dot(col, vec3(0.299,0.587,0.114));
-    col = mix(col, col*col*(3.0-2.0*col), 0.4*smoothstep(0.05, 0.32, lt));   // contrast in the mids, not by burying the shadows
+    col = mix(col, col*col*(3.0-2.0*col), (0.4 - toon*0.12)*smoothstep(0.05, 0.32, lt));   // contrast in the mids, not by burying the shadows
     col = mix(pow(col, vec3(0.78)), col, smoothstep(0.0, 0.3, lt)); }        // a toe: the dark keeps its shape
-  col *= mix(vec3(1.0), vec3(0.84, 0.92, 1.08), uNight*0.5);
+  col += vec3(0.008, 0.011, 0.026)*toon*(1.0 - smoothstep(0.0, 0.18, lt0(col)));   // the cartoon's darkest dark is navy, not black
+  col *= mix(vec3(1.0), mix(vec3(0.84, 0.92, 1.08), vec3(0.8, 0.9, 1.14), toon), uNight*0.5);
   col = mix(col, col*vec3(1.25, 0.7, 0.66), uBlood*0.22);
   // stress: the town drains to ink and teal. What keeps its colour is the sodium and the blood.
   if(uStK > 0.002){
@@ -97,6 +103,12 @@ void main(){
   float l2 = dot(col, vec3(0.299,0.587,0.114));
   float red = max(clamp((col.r - max(col.g, col.b))*5.0 - 0.05, 0.0, 1.0), smoothstep(0.55, 0.95, l2));
   col = mix(col, mix(vec3(l2)*vec3(0.92,0.97,1.04), col*vec3(1.25,0.85,0.85), red), uSel);
+  // the horror, last over everything: the picture goes the colour of meat and sinks, the dark itself turns red
+  { float lh = dot(col, vec3(0.299,0.587,0.114));
+    col = mix(col, vec3(lh)*vec3(1.75, 0.42, 0.36) + col*vec3(0.25, 0.1, 0.1), hor*hor*0.6);
+    col = mix(col, col*vec3(1.3, 0.62, 0.55), hor*0.3);
+    col += vec3(0.035, 0.002, 0.002)*hor*(1.0 - smoothstep(0.0, 0.25, lh));
+    col *= 1.0 - hor*0.1; }
   // outlines from the mask: red = hover, green = goal
   if(uHasMask == 1){
     vec2 mt = 1.0/vec2(textureSize(uMask, 0));
@@ -121,7 +133,7 @@ void main(){
   }
   // vignette, sleep, pulse, flash, grain
   float v = smoothstep(1.02, 0.2, length(d*vec2(1.0, 0.92))*(1.0 + bad*0.25 + uDread*0.25 + uDanger*0.3));
-  col *= mix(0.56 - uNight*0.1, 1.0, v);
+  col *= mix(mix(0.56 - uNight*0.1, 0.84 - uNight*0.06, toon), 1.0, v);
   col = mix(col, col*vec3(0.32,0.38,0.62), uSleep);
   col += vec3(0.55,0.06,0.03)*uPulse*(1.15 - v);
   // something close: the edges throb red with your heart
@@ -136,10 +148,10 @@ void main(){
   col *= 1.0 - (uDread*0.05 + jt*0.12)*step(0.5, fract(gl_FragCoord.y*0.5));
   col = mix(col, vec3(1.0,0.98,0.93), uFlash);
   float g = h21(vUv*uRes + vec2(fract(uTime*13.1)*97.0, fract(uTime*7.7)*61.0)) - 0.5;
-  col += g*(0.03 + bad*0.05 + uDread*0.02)*(1.15 - min(l, 1.0)*0.4);
+  col += g*(0.03*(1.0 - toon*0.8) + bad*0.05 + uDread*0.02)*(1.15 - min(l, 1.0)*0.4);
   // dust and the odd scratch on the film
   float sc = step(0.9985, h21(vec2(floor(vUv.x*uRes.x*0.5), floor(uTime*18.0))))*step(0.6, h21(vec2(floor(uTime*18.0), 2.0)));
-  col += sc*0.05*(0.4 + uDread);
+  col += sc*0.05*(0.4*(1.0 - toon) + uDread);
   // coming round and going under: the lids, a wash of light, the dark
   if(uLid > 0.001){
     float op = 1.0 - uLid, hh = op*(0.62 + 0.3*(1.0 - pow(abs(vUv.x - 0.5)*2.0, 2.0))), dy = abs(vUv.y - 0.5);

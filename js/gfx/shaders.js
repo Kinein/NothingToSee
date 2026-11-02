@@ -38,7 +38,11 @@ uniform vec4 uXP[8]; uniform vec4 uXC[8]; uniform int uXN; uniform float uDread;
 // the lamps themselves, for what the light map can't do: a hot heart under each head, and their reflections in the wet
 uniform vec4 uLP[12]; uniform vec4 uLC[12]; uniform int uLN; uniform float uRain; uniform float uHaze; uniform float uStK;
 uniform float uChar; uniform vec3 uRimC;
+// the look (gfx/look): x how much cartoon is left, y how far it has turned to horror, z night, w how far the rot has spread;
+// uFill is the cartoon's soft fill light, render only
+uniform vec4 uLook; uniform vec3 uFill;
 out vec4 frag;
+float GR = 1.0;   // grime: stains, tide marks, soot and cracks. Next to nothing in the cartoon; all of it, and more, in the horror
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 // rain landing in standing water: rings that spread and fade, as a tilt of the surface
 vec2 ripples(vec2 p, float t){
@@ -61,7 +65,8 @@ float bayer4(vec2 p){ ivec2 q = ivec2(mod(p, 4.0)); int i = q.x + q.y*4;
   float m[16] = float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.); return (m[i]+0.5)/16.0; }
 float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
   return mix(mix(h21(i),h21(i+vec2(1,0)),f.x), mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x), f.y); }
-vec3 lightAt(vec2 p){ vec3 L = texture(uLight, p/uMap).rgb*2.0; return L/(1.0+max(L-1.05,vec3(0.0))*0.85); }
+vec3 lightAt(vec2 p){ vec3 L = texture(uLight, p/uMap).rgb*2.0; L /= 1.0+max(L-1.05,vec3(0.0))*0.85;
+  return L*mix(vec3(1.0), vec3(1.1, 1.0, 0.86), uLook.x*0.8); }   // the cartoon's lamps burn warm, the way a home looks lit
 // ── surfaces: every wall, floor and some furniture carries a material id (ext.y = 2 + id). The pattern is drawn here, in
 // world space, so a wall can have paper and a skirting board and a tide mark without a single extra vertex.
 // a soft line on every integer of x, w wide; it fades instead of shimmering once it gets thinner than a pixel
@@ -73,11 +78,11 @@ vec3 wallFinish(vec3 c, float s, float y, float skirt){
   float sk = 1.0 - smoothstep(0.105, 0.115, y);
   c = mix(c, c*vec3(0.5,0.47,0.44)*skirt + vec3(0.03,0.025,0.02)*(1.0 - skirt), sk);
   c *= 1.0 + 0.22*band(y, 0.105, 0.125);
-  c *= mix(0.8, 1.0, smoothstep(0.08, 0.75, y));
+  c *= mix(1.0 - 0.2*min(GR, 1.2), 1.0, smoothstep(0.08, 0.75, y));
   float st = vn(vec2(s*0.7 + 7.0, y*0.45)) + 0.3*vn(vec2(s*3.1, y*2.4 + 3.0));
-  float tide = smoothstep(0.98, 1.06, st)*(0.4 + 0.6*smoothstep(1.3, 2.4, y));
-  c *= mix(1.0, 0.88, tide)*mix(1.0, 0.93, band(st, 1.055, 1.075)*step(1.0, y));
-  c *= 1.0 - 0.06*(vn(vec2(s*6.0, y*5.0)) - 0.5);
+  float tide = smoothstep(0.98, 1.06, st)*(0.4 + 0.6*smoothstep(1.3, 2.4, y))*GR;
+  c *= mix(1.0, 0.88, tide)*mix(1.0, 0.93, band(st, 1.055, 1.075)*step(1.0, y)*GR);
+  c *= 1.0 - 0.06*max(GR, 0.35)*(vn(vec2(s*6.0, y*5.0)) - 0.5);
   return c*mix(vec3(1.0), vec3(1.04, 0.98, 0.9), tide*0.5);
 }
 vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
@@ -119,7 +124,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       c = mix(c, tc, lo);
       c *= mix(0.84, 1.0, smoothstep(0.0, 0.5, y));
       float st = vn(vec2(s*1.1, y*0.8));
-      return c*mix(1.0, 0.85, smoothstep(0.8, 0.9, st)*(1.0 - lo));
+      return c*mix(1.0, 0.85, smoothstep(0.8, 0.9, st)*(1.0 - lo)*GR);
     }
     if(id < 5.5){            // brick: running bond, mortar, every brick its own colour, soot gathered at the foot
       float bh = 0.14, bl = 0.3;
@@ -133,7 +138,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       bc = mix(bc, c*0.55 + vec3(0.03), pl);
       bc *= 1.0 - 0.18*band(y, 0.35, 0.38);
       float streak = vn(vec2(s*7.0, y*0.4))*vn(vec2(s*2.3, 1.0));
-      return bc*(1.0 - 0.25*smoothstep(0.35, 0.6, streak)*smoothstep(2.6, 0.6, y));
+      return bc*(1.0 - 0.25*GR*smoothstep(0.35, 0.6, streak)*smoothstep(2.6, 0.6, y));
     }
     if(id < 6.5){            // clapboard: each board throws a thin shadow on the one below
       float bh = 0.17, q = fract((y - 0.36)/bh);
@@ -142,7 +147,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       bc *= 1.0 - 0.3*gridL(s*0.62 + 0.3, 0.008);
       float pl = 1.0 - smoothstep(0.35, 0.36, y);
       bc = mix(bc, c*vec3(0.5, 0.5, 0.52), pl);
-      return bc*(1.0 - 0.2*smoothstep(0.55, 0.75, vn(vec2(s*3.0, y*0.5))));
+      return bc*(1.0 - 0.2*GR*smoothstep(0.55, 0.75, vn(vec2(s*3.0, y*0.5))));
     }
     if(id < 7.5){            // painted plaster: roller marks, patches of newer paint
       c *= 1.0 + 0.05*(vn(vec2(s*1.6, y*1.6)) - 0.5) + 0.04*step(0.78, vn(vec2(s*0.7 + 11.0, y*0.9)));
@@ -168,7 +173,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       float gr = vn(vec2((p.x + off)*1.6, p.y*42.0))*0.6 + vn(vec2((p.x + off)*0.5, p.y*90.0))*0.4;
       c *= 1.0 + (gr - 0.5)*0.22*fadeF(p.y*42.0);
       c *= 1.0 - 0.45*gridL(p.y/w, 0.05) - 0.4*gridL((p.x + off)/1.25, 0.004);
-      return c*(1.0 - 0.1*smoothstep(0.55, 0.85, vn(p*0.9)));
+      return c*(1.0 - 0.1*GR*smoothstep(0.55, 0.85, vn(p*0.9)));
     }
     if(id < 11.5){           // carpet tiles laid against the grain of their neighbours; worn paths, coffee
       vec2 ti = floor(p*2.0);
@@ -177,7 +182,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       c *= 0.97 + 0.07*dir + (pile - 0.5)*0.16*fadeF(p.x*60.0);
       c *= 1.0 - 0.12*max(gridL(p.x*2.0, 0.02), gridL(p.y*2.0, 0.02));
       float spill = smoothstep(0.82, 0.86, vn(p*1.7 + 4.0));
-      return c*(1.0 - 0.25*spill);
+      return c*(1.0 - 0.25*spill*GR);
     }
     if(id < 12.5 || id > 18.5){   // floor tiles: grout, chipped corners, a grey bloom of old mop water
       float sz = id < 12.5 ? 1.0 : 2.0;
@@ -185,15 +190,15 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       c *= 0.95 + 0.1*h21(ti + 1.7);
       c = mix(c, c*0.55 + vec3(0.02), max(gridL(p.x*sz, 0.03), gridL(p.y*sz, 0.03)));
       float mop = vn(p*0.8 + 2.0);
-      return c*(1.0 - 0.18*smoothstep(0.6, 0.9, mop))*(1.0 + 0.05*(vn(p*7.0) - 0.5));
+      return c*(1.0 - 0.18*GR*smoothstep(0.6, 0.9, mop))*(1.0 + 0.05*(vn(p*7.0) - 0.5));
     }
     if(id < 13.5){           // concrete: blotches, hairline cracks, oil
       float m = vn(p*1.3)*0.6 + vn(p*5.0)*0.4;
       c *= 0.88 + 0.24*m;
       vec2 jq = p*0.9 + 9.0 + 0.22*vec2(vn(p*7.0), vn(p*7.0 + 3.3));
       float cr = abs(vn(jq) - 0.5);
-      c *= 1.0 - 0.3*(1.0 - smoothstep(0.002, 0.006, cr))*smoothstep(0.45, 0.6, vn(p*0.31 + 2.0))*fadeF(p.x*0.9);
-      return c*(1.0 - 0.3*smoothstep(0.78, 0.84, vn(p*0.6 + 3.0)));
+      c *= 1.0 - 0.3*GR*(1.0 - smoothstep(0.002, 0.006, cr))*smoothstep(0.45, 0.6, vn(p*0.31 + 2.0))*fadeF(p.x*0.9);
+      return c*(1.0 - 0.3*GR*smoothstep(0.78, 0.84, vn(p*0.6 + 3.0)));
     }
     if(id < 14.5){           // asphalt: aggregate, patched squares, tar-sealed cracks
       c *= 0.92 + 0.16*vn(p*13.0)*fadeF(p.x*13.0) + 0.06*vn(p*2.0);
@@ -202,7 +207,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       c *= 1.0 - 0.14*pa;
       vec2 jq = p*0.55 + 1.0 + 0.18*vec2(vn(p*6.0), vn(p*6.0 + 5.1));
       float cr = abs(vn(jq) - 0.5);
-      return c*(1.0 - 0.32*(1.0 - smoothstep(0.0015, 0.0045, cr))*smoothstep(0.5, 0.66, vn(p*0.27 + 4.0))*fadeF(p.x*0.55));
+      return c*(1.0 - 0.32*min(GR + 0.3, 1.3)*(1.0 - smoothstep(0.0015, 0.0045, cr))*smoothstep(0.5, 0.66, vn(p*0.27 + 4.0))*fadeF(p.x*0.55));
     }
     if(id < 15.5){           // grass: clumps, bare earth, blades
       float cl = vn(p*1.2)*0.6 + vn(p*4.5)*0.4;
@@ -219,7 +224,7 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
       c *= 0.94 + 0.1*h21(sl + 5.0);
       c *= 1.0 + 0.08*(vn(p*16.0) - 0.5)*fadeF(p.x*16.0);
       float gum = step(0.995, h21(floor(p*9.0)));
-      return c*(1.0 - 0.35*gum);
+      return c*(1.0 - 0.35*gum*GR);
     }
     {                         // a runner: a border and a lozenge down the middle, the pile flattened where people walk
       vec2 f = abs(fract(p*vec2(1.5, 1.5)) - 0.5);
@@ -366,11 +371,39 @@ vec3 matApply(float id, vec3 b, vec3 P, vec3 n){
   }
 
 }
+// the rot, when it comes: a bruise spreading over walls and floors, veins through it that climb the walls from the
+// floor up and pulse, cracks across the floor. amt 0 is none. VG is how much of this pixel is vein, for their glow.
+float VG = 0.0;
+vec3 corrupt(vec3 c, vec3 P, vec3 n, float amt){
+  if(amt < 0.004) return c;
+  bool vert = abs(n.y) < 0.5;
+  float s = abs(n.x) > abs(n.z) ? P.z : P.x;
+  vec2 q = vert ? vec2(s, P.y*0.85) : P.xz;
+  float cov = vn(q*0.32 + 3.7)*0.65 + vn(q*0.9 + 1.3)*0.35;
+  float reach = vert ? 1.0 - smoothstep(amt*3.4 - 0.7, amt*3.4 + 0.25, P.y) : 1.0;
+  float m = smoothstep(0.78 - amt*0.62, 0.9 - amt*0.62, cov)*reach;   // no early out here: fadeF needs every pixel of the quad
+  float v1 = 1.0 - smoothstep(0.0, 0.028 + 0.02*amt, abs(vn(q*1.9 + 2.0) - 0.5));
+  float v2 = (1.0 - smoothstep(0.0, 0.022, abs(vn(q*4.7 + 7.0) - 0.5)))*smoothstep(0.35, 0.75, vn(q*1.3 + 5.0));
+  float vein = max(v1*fadeF(q.x*1.9), v2*0.85*fadeF(q.x*4.7));
+  if(!vert){   // the floor splits: dark cracks along another family of lines, thinner
+    float cr = 1.0 - smoothstep(0.0, 0.012, abs(vn(q*1.1 + 11.0) - 0.5));
+    c = mix(c, c*0.25, cr*m*0.85*fadeF(q.x*1.1));
+  }
+  c = mix(c, c*vec3(0.62, 0.34, 0.3) + vec3(0.035, 0.002, 0.002), smoothstep(0.0, 0.7, m)*(0.45 + 0.25*amt));
+  float vm = vein*m;
+  c = mix(c, vec3(0.2, 0.012, 0.012), vm);
+  VG = vm*amt;
+  return c;
+}
 void main(){
   if(uMode==3){ frag = vec4(uMaskCol, 1.0); return; }
   vec3 n = normalize(vN);
   vec3 base = vC*uTint;
+  GR = mix(0.14, 1.3, uLook.y);
   if(vE.y > 1.5) base = matApply(floor(vE.y - 1.5), base, vW, n);
+  if(uMode==0 && uChar < 0.5 && vE.y > 1.5 && vE.y < 21.5) base = corrupt(base, vW, n, uLook.w);
+  // the cartoon's colours: a touch richer and lighter than life; they drain back as the horror comes
+  if(uMode==0){ float bl = dot(base, vec3(0.3,0.59,0.11)); base = max(mix(vec3(bl), base, 1.0 + 0.32*uLook.x), 0.0)*(1.0 + 0.08*uLook.x); }
   if(uMode==1 || uMode==2){
     vec3 col;
     if(uMode==1){
@@ -396,7 +429,10 @@ void main(){
   { vec3 Lx = max(L - uSky, vec3(0.0)); L += Lx*(mix(0.66, 1.08, smoothstep(0.1, 0.9, Lk)) - 1.0); }
   float shade = 0.80 + 0.20*n.y + 0.10*dot(n.xz, vec2(0.55,-0.83));
   float ao = mix(0.78, 1.0, smoothstep(0.0, 0.45, vW.y));
-  vec3 col = base*(L*shade*ao + vec3(0.02,0.026,0.04));
+  // the cartoon's fill: a soft light from everywhere, strongest from above, so every room reads like a doll's house
+  float hemi = 0.7 + 0.3*n.y + 0.12*dot(n.xz, vec2(0.55,-0.83));
+  vec3 fillL = uFill*hemi*mix(0.84, 1.0, ao);
+  vec3 col = base*(L*shade*ao + fillL + vec3(0.02,0.026,0.04));
   if(uChar > 0.5){
     // people are lit as things standing in the light, not as floor: the light comes from somewhere (the slope of the
     // light map, and the nearest lamps by hand), and a figure in the dark still has an edge
@@ -415,11 +451,16 @@ void main(){
       lam += uLC[q].rgb*max(dot(n, dv/dl), 0.0)*(lr*lr/(lr*lr + dl*dl*1.4))*smoothstep(lr*1.6, lr*0.4, dl);
     }
     float lit = clamp(dot(Lc, lw)*3.0, 0.0, 1.0);
-    col = base*(Lc*k*ao + lam*0.55*lit + vec3(0.022,0.028,0.042));
+    // cartoon people: two tones, a lit side and a shadow side with a soft edge between, and the fill from up front
+    float kt = (0.58 + 0.42*smoothstep(-0.06, 0.12, ndl))*(0.86 + 0.14*n.y);
+    k = mix(k, kt*1.04, uLook.x*0.6);
+    vec3 kd = normalize(vec3(0.0, 1.0, 0.0) + uViewDir*0.75 + vec3(uViewDir.z, 0.0, -uViewDir.x)*0.35);
+    float fk = 0.56 + 0.44*smoothstep(-0.04, 0.16, dot(n, kd));
+    col = base*(Lc*k*ao + lam*0.55*lit + uFill*fk*1.12 + vec3(0.022,0.028,0.042));
   }
   if(vE.y > 0.5 && vE.y < 1.5){
     vec3 L2 = lightAt(vW.xz - n.xz*0.3);
-    col = base*0.30*L*shade + L2*vec3(0.62,0.56,0.45)*0.55 + base*0.06;
+    col = base*0.30*L*shade + L2*vec3(0.62,0.56,0.45)*0.55 + base*0.06 + base*fillL*0.6;
   }
   // wet ground: puddles that hold a mirror, rough asphalt that smears the lamps into streaks, rain rings in both
   float mid = vE.y > 1.5 ? floor(vE.y - 1.5) : -1.0;
@@ -488,7 +529,10 @@ void main(){
   }
   col += base*vE.x*uEmitMul*uEmitK + uEmit*uEmitK*0.8;
   col += uHi*(vec3(0.07,0.065,0.05) + base*0.3);
-  if(uChar > 0.5){ float fr = pow(1.0 - clamp(dot(n, uViewDir), 0.0, 1.0), 2.2); col += uRimC*fr*(0.35 + 0.65*clamp(n.y + 0.55, 0.0, 1.0)); }
+  if(uChar > 0.5){ float ndv = clamp(dot(n, uViewDir), 0.0, 1.0), fr = pow(1.0 - ndv, 2.2); col += uRimC*fr*(0.35 + 0.65*clamp(n.y + 0.55, 0.0, 1.0));
+    col *= 1.0 - (1.0 - smoothstep(0.08, 0.3, ndv))*0.5*uLook.x; }   // an ink line round the edge, as if drawn
+  // the rot's veins pulse, a dull red that shows in the dark
+  if(VG > 0.001){ float pu = 0.5 + 0.5*sin(uTime*2.4 + vW.x*0.7 + vW.z*0.5); col += vec3(0.5, 0.03, 0.018)*VG*(0.3 + 0.7*pu); }
   float vis = max(V.r, uVisMin); float mem = V.g*(1.0-uDyn);
   // the dark is not empty: slow crawling fog, faster and redder when the night turns bad
   float tsp = 1.0 + uDread*1.8;
@@ -499,6 +543,9 @@ void main(){
   fogc = mix(fogc, fogc*vec3(2.3,0.62,0.55) + vec3(0.012,0.0,0.0)*nz2, max(uDread*0.75, uBlood*0.55));
   float lum = dot(base, vec3(0.3,0.59,0.11));
   vec3 memc = (vec3(lum)*0.75 + base*0.25)*vec3(0.13,0.16,0.23) + fogc*0.45;
+  // the cartoon's dark is calm: a still navy where you've never been; rooms you remember drawn plainly, dimmer and bluer
+  fogc = mix(fogc, uFog*(0.82 + 0.3*nz), uLook.x);
+  memc = mix(memc, (vec3(lum)*0.35 + base*0.65)*(uFill*0.62 + vec3(0.05,0.06,0.1))*hemi + uFog*0.4, uLook.x);
   vec3 hid = mix(fogc, memc, mem);
   hid = hid*(1.0 - dk*0.6) + xl*0.2;
   col = mix(hid, col, vis);
