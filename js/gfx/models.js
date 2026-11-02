@@ -139,6 +139,9 @@ const MODELS = {
         g.cyl(x, y, 0.315, 0.018, 0.018, 0.012, 8, C(c));
     }
   },
+  fridge_office(g, o) {
+    MODELS.fridge(g, o);
+  },
   counter(g, o) {
     const off = o.x > 15 && o.z < 13,
       body = o.z > 18 ? C(0x5d4632) : C(0x6f6e66),

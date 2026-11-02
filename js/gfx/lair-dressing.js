@@ -228,7 +228,8 @@ function buildObject(o) {
     tf = DIRS[o.face];
   m.model = M4.mul(M4.trans(o.cx + tf[0] * tk, 0, o.cz + tf[1] * tk), M4.rotY(FACE_ANG[o.face]));
   m.center = [o.cx + tf[0] * tk, 1.0, o.cz + tf[1] * tk];
-  if (o.t.thin || o.type === 'tree') m.cut = 2;
+  // a lamp, tree or plant fades out in front of you; tall furniture is squashed down like a wall
+  if (o.t.thin || o.t.fade || o.type === 'tree') m.cut = 2;
   else if (o.t.tall) m.cut = 1;
   m.obj = o;
   o.mesh = m;

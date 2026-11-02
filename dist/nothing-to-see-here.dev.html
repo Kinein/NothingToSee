@@ -795,7 +795,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.23 · updated Nov 2, 2026</p>
+  <p id="version">v1.24 · updated Nov 2, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -2157,8 +2157,8 @@ const OT = {
   bossdesk: { n: 'Big desk', cw: 2, h: 1.1, kind: 'deco' },
   chair_office: { n: 'Office chair', h: 1.05, kind: 'sit', seatY: 0.5 },
   bookshelf: { n: 'Bookshelf', cw: 2, h: 2.0, kind: 'deco', sight: 1, tall: 1 },
-  plant: { n: 'Rubber plant', h: 1.4, kind: 'deco', tall: 1 },
-  palm: { n: 'Potted palm', h: 1.4, kind: 'deco', tall: 1 },
+  plant: { n: 'Rubber plant', h: 1.4, kind: 'deco', tall: 1, fade: 1 },
+  palm: { n: 'Potted palm', h: 1.4, kind: 'deco', tall: 1, fade: 1 },
   watercooler: { n: 'Water cooler', h: 1.35, kind: 'use' },
   printer: { n: 'Printer', h: 1.1, kind: 'use' },
   coffee: { n: 'Coffee machine', h: 1.35, kind: 'use' },
@@ -5952,6 +5952,9 @@ const MODELS = {
         g.cyl(x, y, 0.315, 0.018, 0.018, 0.012, 8, C(c));
     }
   },
+  fridge_office(g, o) {
+    MODELS.fridge(g, o);
+  },
   counter(g, o) {
     const off = o.x > 15 && o.z < 13,
       body = o.z > 18 ? C(0x5d4632) : C(0x6f6e66),
@@ -7262,7 +7265,8 @@ function buildObject(o) {
     tf = DIRS[o.face];
   m.model = M4.mul(M4.trans(o.cx + tf[0] * tk, 0, o.cz + tf[1] * tk), M4.rotY(FACE_ANG[o.face]));
   m.center = [o.cx + tf[0] * tk, 1.0, o.cz + tf[1] * tk];
-  if (o.t.thin || o.type === 'tree') m.cut = 2;
+  // a lamp, tree or plant fades out in front of you; tall furniture is squashed down like a wall
+  if (o.t.thin || o.t.fade || o.type === 'tree') m.cut = 2;
   else if (o.t.tall) m.cut = 1;
   m.obj = o;
   o.mesh = m;

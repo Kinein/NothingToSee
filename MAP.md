@@ -136,7 +136,7 @@ What hangs on the walls: art, signs, neon
 - **→ uses:** gfx/world-geometry, core/util, gfx/gl, world/grid, gfx/post, world/light-map
 - **← used by:** 3 (gfx/lair-dressing, gfx/station, gfx/renderer)
 
-### gfx/models  ·  #13  ·  953 lines
+### gfx/models  ·  #13  ·  956 lines
 
 Furniture and object models (front = +z)
 
@@ -152,7 +152,7 @@ Models for things inside THEIR lairs
 - **→ uses:** gfx/world-geometry, core/util, gfx/gl, world/grid, gfx/body-parts, gfx/models
 - **← used by:** 1 (gfx/lair-dressing)
 
-### gfx/lair-dressing  ·  #15  ·  232 lines
+### gfx/lair-dressing  ·  #15  ·  233 lines
 
 Lair lights: halos, shafts, wall pieces
 
