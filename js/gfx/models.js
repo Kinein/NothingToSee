@@ -1,8 +1,54 @@
 //@ gfx/models — Furniture and object models (front = +z)
-//@ Defines: MODELS
+//@ Defines: leafBlade, terracottaPot, deskPlant, MODELS
 //@ Uses:    gfx/world-geometry, core/util, gfx/gl, gfx/props
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── object models (canonical: front = +z)
+// ── leaves. One blade along +z from the origin: pointed at both ends, folded along a raised midrib, arching down
+// toward the tip, darker at the stem and lighter at the tip. Drawn both sides (the renderer doesn't cull).
+function leafBlade(g, len, wid, arch, col, tip, N = 5) {
+  const P = (t, s) => {
+    const w = wid * Math.pow(Math.sin(Math.PI * Math.min(1, t * 0.95 + 0.05)), 0.75);
+    return [s * w, -arch * t * t * len + (s === 0 ? wid * 0.22 : 0), t * len];
+  };
+  for (let k = 0; k < N; k++) {
+    const t0 = k / N,
+      t1 = (k + 1) / N,
+      c0 = mix3(col, tip, t0),
+      c1 = mix3(col, tip, t1);
+    for (const s of [-1, 1]) {
+      const a = P(t0, 0),
+        b = P(t1, 0),
+        c = P(t1, s),
+        d = P(t0, s);
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]],
+        v = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+      let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      const l = Math.hypot(n[0], n[1], n[2]) || 1;
+      n = n[1] < 0 ? [-n[0] / l, -n[1] / l, -n[2] / l] : [n[0] / l, n[1] / l, n[2] / l];
+      g.quad(a, b, c, d, n, col, undefined, [c0, c1, c1, c0]);
+    }
+  }
+}
+// a terracotta pot, rolled rim, dark earth: r is the rim's radius, h the height
+function terracottaPot(g, r, h, col = C(0xb3643c)) {
+  g.cyl(0, 0, 0, r * 0.72, r * 0.92, h * 0.86, 14, col);
+  g.cyl(0, h * 0.82, 0, r, r, h * 0.18, 14, mul3(col, 1.12));
+  g.cyl(0, h * 0.81, 0, r * 0.74, r * 0.74, 0.004, 14, mul3(col, 0.62)); // the shadow under the rim
+  g.cyl(0, h * 0.96, 0, r * 0.9, r * 0.9, 0.02, 14, C(0x3a2616));
+}
+// a leafy plant that sits on a desk: a few broad heart-shaped leaves, some trailing over the pot
+function deskPlant(g, x, y, z, seed) {
+  g.xf(M4.trans(x, y, z), () => {
+    terracottaPot(g, 0.065, 0.1, C(0xc07a4a));
+    for (let k = 0; k < 9; k++) {
+      const a = k * 2.4 + seed * 6,
+        el = k < 6 ? -0.5 - (k % 3) * 0.25 : 0.55;
+      g.xf(M4.mul(M4.trans(0, 0.1, 0), M4.mul(M4.rotY(a), M4.rotX(el))), () =>
+        leafBlade(g, 0.1 + (k % 3) * 0.02, 0.045, 0.4, C(0x2f7a34), C(0x7fc25a), 3),
+      );
+    }
+  });
+}
 const MODELS = {
   bed(g, o) {
     const fr = COL.woodD,
@@ -396,6 +442,7 @@ const MODELS = {
       for (let k = 0; k < 4; k++)
         g.bx((k % 2) * 0.02, k * 0.008, 0, 0.21, 0.008, 0.28, mul3(C(0xe2ded2), 1 - k * 0.03), XM('print'));
     });
+    if (o.mine || h(13) < 0.6) deskPlant(g, 0.8, y, 0.08, h(14)); // something green to look at
     if (!o.mine) {
       g.cyl(0.8, y, -0.25, 0.04, 0.04, 0.1, 8, pick(PRODUCTS));
       g.cyl(0.8, y + 0.095, -0.25, 0.033, 0.033, 0.005, 8, C(0x2a1a10));
@@ -466,28 +513,83 @@ const MODELS = {
     }
   },
   plant(g, o) {
-    const pot = C(0x6a4a36);
-    g.cyl(0, 0, 0, 0.17, 0.22, 0.38, 12, pot);
-    g.cyl(0, 0.36, 0, 0.225, 0.225, 0.045, 12, mul3(pot, 0.85));
-    g.cyl(0, 0.37, 0, 0.2, 0.2, 0.022, 12, C(0x2a1e14));
-    g.cyl(0, 0.38, 0, 0.022, 0.014, 0.75, 5, C(0x3a4a2a));
-    const lf = C(0x2c4a2a);
-    for (let k = 0; k < 13; k++) {
+    // a rubber plant: a stem with big glossy oval leaves all the way up, the young ones at the top paler
+    terracottaPot(g, 0.21, 0.4);
+    g.cyl(0, 0.38, 0, 0.024, 0.014, 0.82, 6, C(0x4a5a2e));
+    for (let k = 0; k < 17; k++) {
       const a = k * 2.4 + hash2(o.x, o.z, k) * 0.5,
-        el = 0.25 + (k % 4) * 0.2,
-        y = 0.48 + k * 0.055,
-        L = 0.16 + (k % 3) * 0.04;
-      g.xf(M4.mul(M4.trans(0, y, 0), M4.mul(M4.rotY(a), M4.rotX(el))), () => {
-        g.sphere(0, 0, L, 0.075, 0.012, L, 7, 3, mul3(lf, 0.75 + 0.1 * (k % 4)));
-        g.bx(0, 0.011, L, 0.006, 0.004, L * 1.6, mul3(lf, 1.4));
+        el = -0.55 + (k % 4) * 0.28 - k * 0.012,
+        y = 0.46 + k * 0.045,
+        L = 0.2 + (k % 3) * 0.05 - k * 0.004,
+        young = k / 16;
+      g.xf(M4.mul(M4.trans(0, y, 0), M4.mul(M4.rotY(a), M4.rotX(el))), () =>
+        leafBlade(g, L, 0.085, 0.3, mix3(C(0x1f5a2a), C(0x3f8a3c), young), mix3(C(0x3c8a3a), C(0x8acb5c), young), 4),
+      );
+    }
+  },
+  palm(g, o) {
+    // a potted palm: a dozen fronds arching out and over, leaflets in pairs down each, shorter toward the tip
+    const h = (k) => hash2(o.x, o.z, k);
+    terracottaPot(g, 0.25, 0.44);
+    for (let f = 0; f < 11; f++) {
+      const a = f * 2.4 + h(f) * 0.6,
+        el = 0.55 + (f % 3) * 0.25 + h(f + 20) * 0.2,
+        L = 0.72 + h(f + 40) * 0.28,
+        dk = 0.85 + h(f + 60) * 0.3;
+      g.xf(M4.mul(M4.trans(0, 0.42, 0), M4.mul(M4.rotY(a), M4.rotX(-el))), () => {
+        const N = 9;
+        for (let i = 0; i < N; i++) {
+          const u = (i + 1) / (N + 1),
+            // the rachis bends over: each step tilts further down than the last
+            z = u * L,
+            y = -0.55 * u * u * L,
+            len = 0.3 * (1 - 0.55 * u) + 0.05,
+            base = mul3(C(0x2a6a2e), dk),
+            tip = mul3(C(0x74b84e), dk);
+          if (i < N - 1)
+            g.xf(M4.mul(M4.trans(0, y, z), M4.rotX(Math.atan(1.1 * u))), () =>
+              g.bx(0, 0, L / (N + 1) / 2, 0.012, 0.012, L / (N + 1) + 0.01, C(0x5a7a34)),
+            );
+          for (const sd of [-1, 1])
+            g.xf(M4.mul(M4.trans(0, y, z), M4.mul(M4.rotY(sd * 1.05), M4.rotX(0.35 + u * 0.4))), () =>
+              leafBlade(g, len, 0.032, 0.35, base, tip, 3),
+            );
+        }
       });
     }
   },
   watercooler(g) {
-    g.bx(0, 0, -0.05, 0.36, 0.92, 0.36, C(0xcfcbc0));
-    g.cyl(0, 0.92, -0.05, 0.15, 0.15, 0.42, 10, C(0x5c8fb8), GLASS);
-    g.bx(0.08, 0.7, 0.14, 0.04, 0.05, 0.04, C(0x3a6aa8));
-    g.bx(-0.08, 0.7, 0.14, 0.04, 0.05, 0.04, C(0xa83a3a));
+    // a white cabinet with a recess for the taps, a drip tray, a stack of paper cups on the side, and the big blue
+    // jug upside down on top, two ridges round it and the water catching the light
+    const body = C(0xe8e5dc),
+      trim = C(0xb8b5ac),
+      blue = C(0x4f9fdc),
+      z = -0.04;
+    g.frustum(0, 0, z, 0.38, 0.38, 0.37, 0.37, 0.05, C(0x8a8780));
+    g.frustum(0, 0.05, z, 0.36, 0.36, 0.33, 0.33, 0.87, body);
+    g.bx(0, 0.92, z, 0.34, 0.03, 0.34, trim);
+    g.bx(0, 0.46, z + 0.168, 0.25, 0.32, 0.012, C(0xa9a69d)); // the recess
+    g.bx(0, 0.46, z + 0.19, 0.24, 0.025, 0.07, C(0x34383c)); // the drip tray, and its grille
+    for (let k = -2; k <= 2; k++) g.bx(k * 0.045, 0.486, z + 0.19, 0.008, 0.002, 0.06, C(0x6a6e72));
+    for (const [x, c] of [
+      [-0.06, C(0x2f7fd8)],
+      [0.06, C(0xd8403a)],
+    ]) {
+      g.bx(x, 0.68, z + 0.19, 0.05, 0.06, 0.05, c);
+      g.bx(x, 0.64, z + 0.205, 0.02, 0.04, 0.02, C(0xd0ccc2));
+    }
+    g.bx(0, 0.82, z + 0.168, 0.2, 0.05, 0.012, C(0x5a6a7a)); // a little label: COLD · HOT
+    g.cyl(0.215, 0.5, z, 0.038, 0.038, 0.34, 10, C(0xf4f2ec)); // the paper cups
+    g.cyl(0.215, 0.47, z, 0.03, 0.04, 0.04, 10, C(0xf4f2ec));
+    g.cyl(0.2, 0.84, z, 0.012, 0.012, 0.03, 6, trim);
+    // the jug
+    g.cyl(0, 0.95, z, 0.13, 0.11, 0.04, 14, trim);
+    g.cyl(0, 0.99, z, 0.05, 0.05, 0.05, 12, blue, EMIT(0.04));
+    g.cyl(0, 1.04, z, 0.05, 0.158, 0.06, 16, blue, EMIT(0.04));
+    g.cyl(0, 1.1, z, 0.158, 0.158, 0.22, 16, blue, EMIT(0.04));
+    g.sphere(0, 1.32, z, 0.158, 0.05, 0.158, 16, 5, blue, EMIT(0.04));
+    for (const y of [1.15, 1.25]) g.cyl(0, y, z, 0.162, 0.162, 0.014, 16, C(0x4a98d2), EMIT(0.04));
+    g.bx(0.08, 1.2, z + 0.13, 0.03, 0.14, 0.02, C(0xd8f0ff), EMIT(0.25)); // where the light catches it
   },
   printer(g) {
     g.bx(0, 0, 0, 0.7, 0.7, 0.6, C(0x4a4a48));

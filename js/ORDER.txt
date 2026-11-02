@@ -24,6 +24,7 @@ world/light-map.js               # Line of sight helpers and the per-cell light 
 world/vision.js                  # What the player can see: field of view and explored cells
 world/paths.js                   # A* pathfinding, 8-way, no corner cutting
 gfx/renderer.js                  # Renderer state, camera, frame setup
+gfx/look.js                      # The look: a cartoon town, and how far it has turned into the horror right now (render only)
 gfx/people.js                    # Drawing a person: body, face, hair, clothes and the small details
 gfx/creatures.js                 # True forms on their own rig: tongues, cracks, sloughed skin, creature poses
 gfx/draw-helpers.js              # Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and tints

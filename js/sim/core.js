@@ -1,5 +1,5 @@
 //@ sim/core — Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
-//@ Defines: PLAN_MAX, DOW, DOW_LONG, CHARS, PLAYER, NPC, FOG_COL, SHADE, CAL0, MONTHS, shopOpen, officeLit, inRoomSet, NO_TINT, NEON_OFF, lightGroupOn, …
+//@ Defines: PLAN_MAX, DOW, DOW_LONG, CHARS, PLAYER, NPC, SHADE, CAL0, MONTHS, shopOpen, officeLit, inRoomSet, NO_TINT, NEON_OFF, lightGroupOn, SKY_KEYS, …
 //@ Uses:    core/util, world/grid, taken/taken, town/cell
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── simulation core ─────────────────────────
@@ -10,7 +10,6 @@ let G = null;
 const CHARS = [];
 let PLAYER = null;
 const NPC = {};
-let FOG_COL = [0.03, 0.035, 0.06];
 const SHADE = { on: false, c: null, t: 0, kind: 'shade' }; // a vision: shade · run · watch (horror/visions)
 
 const dayNo = (t = G.t) => Math.floor(t / 1440) + 1;

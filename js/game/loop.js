@@ -1,6 +1,6 @@
 //@ game/loop — Per-frame simulation, main loop, boot
 //@ Defines: hurrying, fightOn, stirNear, clockSpeed, simStep, worldStep, styleStep, frame, showTitle, startPlaying, boot
-//@ Uses:    sim/core, ui/interface, gfx/renderer, world/light-map, sim/actions, taken/taken, world/grid, data/tuning, game/state, core/util, …
+//@ Uses:    sim/core, ui/interface, gfx/renderer, world/light-map, sim/actions, taken/taken, world/grid, data/tuning, game/state, horror/layer, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── per-frame simulation
 let lightT = 0,
@@ -245,8 +245,6 @@ function simStep(dtReal, spdOver) {
 }
 function worldStep(dtReal, preview) {
   SKY = skyAt(hourF());
-  const sl = SKY[0] * 0.3 + SKY[1] * 0.59 + SKY[2] * 0.11;
-  FOG_COL = mix3([0.011, 0.013, 0.026], [0.038, 0.042, 0.054], clamp(sl / 0.6, 0, 1));
   lightT -= dtReal;
   const eye = CAP.on && CAP.eye ? CAP.eye : CELL.on ? CELL.eye : null,
     ex = eye ? eye[0] : PLAYER.x,
@@ -356,6 +354,7 @@ function frame(now) {
       } catch (e) {
         console.error(e);
       }
+    lookStep(dtReal); // how far the picture has turned from the cartoon to the horror (gfx/look)
     updateCamera(dtReal);
     renderFrame();
     if (!preview) {

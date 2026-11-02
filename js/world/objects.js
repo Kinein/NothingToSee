@@ -37,6 +37,7 @@ const OT = {
   chair_office: { n: 'Office chair', h: 1.05, kind: 'sit', seatY: 0.5 },
   bookshelf: { n: 'Bookshelf', cw: 2, h: 2.0, kind: 'deco', sight: 1, tall: 1 },
   plant: { n: 'Rubber plant', h: 1.4, kind: 'deco', tall: 1 },
+  palm: { n: 'Potted palm', h: 1.4, kind: 'deco', tall: 1 },
   watercooler: { n: 'Water cooler', h: 1.35, kind: 'use' },
   printer: { n: 'Printer', h: 1.1, kind: 'use' },
   coffee: { n: 'Coffee machine', h: 1.35, kind: 'use' },
@@ -298,6 +299,18 @@ Object.assign(OT, {
   for (const [x, z] of D.at('B')) PLACE.push(['lx_body', x, z, 0]);
   for (const [x, z] of D.at('J')) PLACE.push(['lx_junk', x, z, 0]);
 })();
+// potted palms in the corners of the office and the two flats, to make them homelier. Appended last, so every older
+// object keeps its index (saves point at them). Corners only: nothing stands in front of them, no doorway beside them.
+for (const [x, z] of [
+  [24, 6],
+  [2, 11],
+  [24, 11],
+  [10, 20],
+  [10, 25],
+  [15, 20],
+  [15, 25],
+])
+  PLACE.push(['palm', x, z, 0]);
 
 const OBJ = []; // live object instances
 const objAt = new Int16Array(W * H).fill(-1);

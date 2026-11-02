@@ -1,6 +1,6 @@
 //@ gfx/frame — renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 //@ Defines: renderFrame, drawMask, pass, bindTex, bloomPasses, composite
-//@ Uses:    gfx/gl, gfx/renderer, sim/core, gfx/draw-helpers, horror/layer, world/vision, world/grid, ui/interface, taken/taken, gfx/post, …
+//@ Uses:    gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, core/util, …
 //@ (header made by tools/map.js; stripped by build.py)
 function renderFrame() {
   resizeCanvas();
@@ -25,8 +25,8 @@ function renderFrame() {
   }
   gl.bindFramebuffer(gl.FRAMEBUFFER, R.msFb);
   gl.viewport(0, 0, w, h);
-  const fog = FOG_COL;
-  gl.clearColor(fog[0] * 0.5, fog[1] * 0.5, fog[2] * 0.5, 1);
+  const fog = LOOK.fog;
+  gl.clearColor(fog[0] * 0.8, fog[1] * 0.8, fog[2] * 0.8, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
@@ -36,7 +36,9 @@ function renderFrame() {
   useMain(0);
   updateFrustum(cam.VP);
   drawMesh(R.floor);
+  gl.uniform1f(U.uWorld, 1);
   drawMesh(R.walls);
+  gl.uniform1f(U.uWorld, 0);
   drawMesh(R.marks);
   for (const m of R.doorMeshes) {
     m.model = doorMatrix(m.door);
@@ -115,7 +117,7 @@ function renderFrame() {
   gl.bindTexture(gl.TEXTURE_2D, R.tLight);
   gl.uniform1i(D.U.uLight, 0);
   gl.uniform1f(D.U.uSeed, 0);
-  gl.uniform1f(D.U.uWetD, G ? G.wet || 0 : 0);
+  gl.uniform1f(D.U.uWetD, LOOK.wet);
   for (const c of CHARS)
     if (c.onMap && c.shown > 0.02 && !c.capHide) {
       drawDecal(drawX(c), drawZ(c), 0.44, [0, 0, 0, 0.55 * c.shown], 0, (c.y || 0) + 0.012);
@@ -395,12 +397,13 @@ function composite() {
     bindTex(2, R.mask.tex, u.uMask);
     gl.uniform2f(u.uRes, R.canvas.width, R.canvas.height);
     gl.uniform1f(u.uTime, R.time);
-    gl.uniform1f(u.uBloomK, R.hdr ? 0.3 : 0.38);
+    gl.uniform1f(u.uBloomK, (R.hdr ? 0.3 : 0.38) + 0.1 * LOOK.toon); // the cartoon glows a little
     gl.uniform1f(u.uBad, bad);
     gl.uniform1f(u.uFlash, R.flash);
     gl.uniform1f(u.uPulse, R.pulse);
     gl.uniform1f(u.uSleep, R.sleepK * 0.75);
-    gl.uniform1f(u.uSat, 0.8);
+    gl.uniform1f(u.uSat, lerp(0.8, 1.16, LOOK.toon));
+    gl.uniform4fv(u.uLook, LOOK.vec);
     gl.uniform1f(u.uStK, STY.k);
     gl.uniform1f(u.uSBeat, STY.beat);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));
@@ -415,7 +418,7 @@ function composite() {
     gl.uniform1f(u.uNight, HX.night);
     gl.uniform1f(u.uDread, HX.dread);
     gl.uniform1f(u.uDanger, HX.danger);
-    gl.uniform1f(u.uSel, HX.sel);
+    gl.uniform1f(u.uSel, Math.max(HX.sel, LOOK.sel)); // drain all but the red: a scene's, or the turned town's
     gl.uniform1f(u.uLetter, HX.letter);
     gl.uniform1f(u.uJolt, HX.jolt);
     gl.uniform1f(u.uBlood, HX.blood);
