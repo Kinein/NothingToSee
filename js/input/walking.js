@@ -63,6 +63,7 @@ const SLIM = new Set([
   'hydrant',
   'floorlamp',
   'plant',
+  'palm',
   'fence4',
   'fence3',
   'chair',

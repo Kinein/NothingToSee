@@ -46,7 +46,7 @@ Town tile grid, houses, THEIR lairs under the town, buildings and rooms
 - **→ uses:** —
 - **← used by:** 77
 
-### world/objects  ·  #5  ·  386 lines
+### world/objects  ·  #5  ·  399 lines
 
 Object placement on the grid, doors, edges, ritual and watch spots
 
@@ -88,7 +88,7 @@ WebGL2 helpers: buffers, programs, textures, framebuffers
 - **→ uses:** gfx/world-geometry, core/util
 - **← used by:** 24
 
-### gfx/shaders  ·  #7  ·  549 lines
+### gfx/shaders  ·  #7  ·  588 lines
 
 The main world shader (vertex + fragment): surfaces, lamps, fog of war, the horror layer
 
@@ -104,7 +104,7 @@ Effect shaders: floor decals and blood, halos, light shafts, beams, rain, dust
 - **→ uses:** —
 - **← used by:** 2 (gfx/renderer, taken/lair-life)
 
-### gfx/post  ·  #9  ·  318 lines
+### gfx/post  ·  #9  ·  323 lines
 
 Post-processing: bloom chain and composite; primitive meshes
 
@@ -126,7 +126,7 @@ Walls, floors, materials and windows built from the grid
 
 - **Defines (22):** `C` `COL` `MAT` `XM` `FLOOR_MAT` `PRODUCTS` `FLOOR` `sideCell` `floorColor` `solidAt` `aoAt` `buildFloor` `WALL_H` `WT` `wallFaceColor` `wallFaceMat` `wallExt` `buildWalls` `EXT_DOORS` `buildMarks` `buildDoors` `doorMatrix`
 - **→ uses:** world/grid, core/util, world/objects, game/loop, gfx/gl, gfx/post, gfx/lair-dressing
-- **← used by:** 19
+- **← used by:** 20
 
 ### gfx/wall-dressing  ·  #12  ·  769 lines
 
@@ -136,11 +136,11 @@ What hangs on the walls: art, signs, neon
 - **→ uses:** gfx/world-geometry, core/util, gfx/gl, world/grid, gfx/post, world/light-map
 - **← used by:** 3 (gfx/lair-dressing, gfx/station, gfx/renderer)
 
-### gfx/models  ·  #13  ·  851 lines
+### gfx/models  ·  #13  ·  953 lines
 
 Furniture and object models (front = +z)
 
-- **Defines (1):** `MODELS`
+- **Defines (4):** `leafBlade` `terracottaPot` `deskPlant` `MODELS`
 - **→ uses:** gfx/world-geometry, core/util, gfx/gl, gfx/props
 - **← used by:** 5 (gfx/lair-models, gfx/lair-dressing, gfx/station, input/walking, taken/lair-life)
 
@@ -182,14 +182,14 @@ Renderer state, camera, frame setup
 
 - **Defines (24):** `R` `CAM_ZOOM` `cam` `initRender` `initParticles` `QUALITY` `qualityTick` `resizeCanvas` `ensureTargets` `updateCamera` `screenRay` `rayGround` `rayBox` `project` `U` `ZERO3` `setMeshUniforms` `drawMesh` `drawHi` `drawSpec` `PART_M` `PART_J` `part` `partR`
 - **→ uses:** gfx/gl, gfx/post, core/util, gfx/shaders-fx, world/vision, gfx/world-geometry, world/light-map, world/grid, horror/layer, world/objects, gfx/shaders, gfx/lair-dressing, gfx/wall-dressing, gfx/station
-- **← used by:** 66
+- **← used by:** 67
 
-### gfx/look  ·  #22  ·  57 lines
+### gfx/look  ·  #22  ·  108 lines
 
 The look: a cartoon town, and how far it has turned into the horror right now (render only)
 
-- **Defines (8):** `LOOK` `FILL_NIGHT` `FILL_HORROR` `FILL_WARM` `FOG_TOON` `FOG_HORROR` `lookTarget` `lookStep`
-- **→ uses:** core/util, horror/layer, world/light-map, sim/core, taken/taken, game/last-day, them/plan
+- **Defines (12):** `LOOK` `FILL_NIGHT` `FILL_WARM` `FILL_DREAD_DAY` `FILL_DREAD_NIGHT` `FOG_TOON` `FOG_NOIR_NIGHT` `FOG_NOIR_DAY` `DOOR_RED` `lookTarget` `lookStep` `lookDoors`
+- **→ uses:** core/util, horror/layer, sim/core, world/light-map, gfx/renderer, taken/taken, game/last-day, them/plan, gfx/world-geometry
 - **← used by:** 3 (gfx/draw-helpers, gfx/frame, game/loop)
 
 ### gfx/people  ·  #23  ·  616 lines
@@ -208,20 +208,20 @@ True forms on their own rig: tongues, cracks, sloughed skin, creature poses
 - **→ uses:** gfx/renderer, core/util, ui/menus, gfx/people, gfx/gl, town/cast, sim/pose, sim/characters, sim/core
 - **← used by:** 2 (gfx/people, sim/pose)
 
-### gfx/draw-helpers  ·  #25  ·  275 lines
+### gfx/draw-helpers  ·  #25  ·  276 lines
 
 Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and tints
 
 - **Defines (20):** `emitFor` `lumBi` `longShadow` `DECAL_ID` `DECAL_M` `DECAL_J` `DECAL_S` `drawDecal` `drawDecalR` `useMain` `gatherLamps` `moodColor` `nrm3` `glowCol` `glowK` `lampTint` `FRUSTUM` `updateFrustum` `meshInView` `charInView`
-- **→ uses:** gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, sim/pose, gfx/post, horror/layer, gfx/look, town/traffic-weather, world/objects, player/needs
+- **→ uses:** gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, sim/pose, gfx/post, gfx/look, horror/layer, town/traffic-weather, world/objects, player/needs
 - **← used by:** 8
 
-### gfx/frame  ·  #26  ·  425 lines
+### gfx/frame  ·  #26  ·  427 lines
 
 renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 
 - **Defines (6):** `renderFrame` `drawMask` `pass` `bindTex` `bloomPasses` `composite`
-- **→ uses:** gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, core/util, gfx/post, world/light-map, gfx/people, gfx/look … +11
+- **→ uses:** gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, core/util, gfx/look, gfx/post, world/light-map, gfx/people … +11
 - **← used by:** 3 (ui/interface, game/loop, dev/devtools)
 
 ### gfx/portraits  ·  #27  ·  342 lines
@@ -842,7 +842,7 @@ Input and camera control
 - **→ uses:** gfx/renderer, sim/core, ui/interface, ui/menus, input/walking, ui/pie-menu, taken/taken, core/util, world/vision, world/grid, town/fleeing, play/stashes, data/tuning, input/targeting … +4
 - **← used by:** 12
 
-### input/walking  ·  #91  ·  696 lines
+### input/walking  ·  #91  ·  697 lines
 
 WASD walking relative to the camera
 

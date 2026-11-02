@@ -101,14 +101,14 @@ void main(){
   }
   // the stylish bit: drain the world, keep the red
   float l2 = dot(col, vec3(0.299,0.587,0.114));
-  float red = max(clamp((col.r - max(col.g, col.b))*5.0 - 0.05, 0.0, 1.0), smoothstep(0.55, 0.95, l2));
+  // red is red by how much of the colour it is, not how bright: a dark pool of blood keeps its colour too
+  float red = max(clamp((col.r - max(col.g, col.b))/(col.r + 0.015)*1.8 - 0.55, 0.0, 1.0)*smoothstep(0.004, 0.03, col.r), smoothstep(0.55, 0.95, l2));
   col = mix(col, mix(vec3(l2)*vec3(0.92,0.97,1.04), col*vec3(1.25,0.85,0.85), red), uSel);
-  // the horror, last over everything: the picture goes the colour of meat and sinks, the dark itself turns red
+  // the horror, last over everything: the shadows sink and swallow what's in them; what red there is burns
   { float lh = dot(col, vec3(0.299,0.587,0.114));
-    col = mix(col, vec3(lh)*vec3(1.75, 0.42, 0.36) + col*vec3(0.25, 0.1, 0.1), hor*hor*0.6);
-    col = mix(col, col*vec3(1.3, 0.62, 0.55), hor*0.3);
-    col += vec3(0.035, 0.002, 0.002)*hor*(1.0 - smoothstep(0.0, 0.25, lh));
-    col *= 1.0 - hor*0.1; }
+    col *= mix(1.0, 0.6 + 0.4*smoothstep(0.0, 0.32, lh), hor);
+    float rd = clamp((col.r - max(col.g, col.b))*4.0, 0.0, 1.0);
+    col = mix(col, col*vec3(1.22, 0.9, 0.9), rd*hor*0.6); }
   // outlines from the mask: red = hover, green = goal
   if(uHasMask == 1){
     vec2 mt = 1.0/vec2(textureSize(uMask, 0));
@@ -132,8 +132,9 @@ void main(){
     col = mix(col, col*mix(0.16, 1.18, lit)*mix(vec3(1.0), vec3(1.06,0.98,0.84), lit), uStage);
   }
   // vignette, sleep, pulse, flash, grain
-  float v = smoothstep(1.02, 0.2, length(d*vec2(1.0, 0.92))*(1.0 + bad*0.25 + uDread*0.25 + uDanger*0.3));
-  col *= mix(mix(0.56 - uNight*0.1, 0.84 - uNight*0.06, toon), 1.0, v);
+  float v = smoothstep(1.02, 0.2, length(d*vec2(1.0, 0.92))*(1.0 + bad*0.25 + uDread*0.25 + uDanger*0.3 + hor*0.22));
+  // the cartoon's edges go soft and warm, like an old photo of home; the horror's go black
+  col *= mix(mix(vec3(0.56 - uNight*0.1), vec3(0.88, 0.84, 0.78) - uNight*0.06, toon), vec3(1.0), v);
   col = mix(col, col*vec3(0.32,0.38,0.62), uSleep);
   col += vec3(0.55,0.06,0.03)*uPulse*(1.15 - v);
   // something close: the edges throb red with your heart
@@ -146,9 +147,13 @@ void main(){
   col *= 1.0 - uDread*0.16*(1.0 - v);
   col *= 1.0 - uDread*0.05*step(0.94, h21(vec2(floor(uTime*11.0), 7.0)));
   col *= 1.0 - (uDread*0.05 + jt*0.12)*step(0.5, fract(gl_FragCoord.y*0.5));
+  // when it has really turned, the picture itself fails now and then, a beat of near-dark like the power going, and
+  // the dark at the edges breathes
+  col *= 1.0 - step(0.968, h21(vec2(floor(uTime*7.0), 13.0)))*smoothstep(0.65, 1.0, hor)*0.6;
+  col *= 1.0 - hor*hor*0.18*(0.5 + 0.5*sin(uTime*1.7))*(1.0 - v);
   col = mix(col, vec3(1.0,0.98,0.93), uFlash);
   float g = h21(vUv*uRes + vec2(fract(uTime*13.1)*97.0, fract(uTime*7.7)*61.0)) - 0.5;
-  col += g*(0.03*(1.0 - toon*0.8) + bad*0.05 + uDread*0.02)*(1.15 - min(l, 1.0)*0.4);
+  col += g*(0.03*(1.0 - toon*0.8) + bad*0.05 + uDread*0.02 + hor*0.025)*(1.15 - min(l, 1.0)*0.4);
   // dust and the odd scratch on the film
   float sc = step(0.9985, h21(vec2(floor(vUv.x*uRes.x*0.5), floor(uTime*18.0))))*step(0.6, h21(vec2(floor(uTime*18.0), 2.0)));
   col += sc*0.05*(0.4*(1.0 - toon) + uDread);
