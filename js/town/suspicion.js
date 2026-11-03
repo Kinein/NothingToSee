@@ -1,17 +1,31 @@
 //@ town/suspicion — Suspicion and danger per person
-//@ Defines: addSus, addDanger, seesSpot, reactTo, ridicule, hitBack
-//@ Uses:    sim/core, ui/interface, core/util, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, them/proofs, play/confrontation, …
+//@ Defines: addSus, snapAt, addDanger, seesSpot, reactTo, ridicule, hitBack
+//@ Uses:    sim/core, ui/interface, core/util, them/awareness, data/tuning, town/fleeing, world/grid, combat/melee, town/echoes, town/arrest, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── suspicion
 function addSus(n, v) {
   if (!n || n.isPlayer || !n.def || n.def.stranger) return;
   const b0 = n.sus;
   if (v > 0 && G.bought && G.bought[n.id]) v *= 1.5;
-  n.sus = clamp(n.sus + v, 0, 100);
+  n.sus = clamp(n.sus + v, 0, !n.isThem && temper(n) ? SUS_SNAP : 100); // past 100: ordinary people only
   if (n.isThem && b0 < 60 && n.sus >= 60 && !G.sus60[n.id]) {
     G.sus60[n.id] = 1;
     book(n).sus = 1;
   }
+  snapAt(n);
+}
+// an ordinary person who's had enough of you (suspicion at SUS_SNAP): the moment they can see you, they snap, by temper,
+// and it falls back to 100. Walking near them does nothing: only the odd things they've seen and heard you do get them here.
+function snapAt(n) {
+  const P = PLAYER;
+  if (n.sus < SUS_SNAP || n.isThem || !canPanic(n) || n.fleeing || n.trueForm || n.engaged || asleep(n)) return;
+  if (!P.onMap || G.away || G.over || ARREST.on || CELL.on || HUNT.on || CAP.on || !npcSeesPlayer(n, 9)) return;
+  n.sus = 100;
+  n.reactAt = G.t;
+  const t = temper(n);
+  if (t === 'aggressive') return hitBack(n);
+  if (t === 'mocker') return ridicule(n);
+  flee(n);
 }
 const asleep = (n) => !!(n.queue[0] && n.queue[0].anim === 'sleep' && n.queue[0].stage === 'run');
 
@@ -27,8 +41,8 @@ function addDanger(n, v) {
   const before = n.danger;
   n.danger = clamp(n.danger + v, dangerFloor(n), 100);
   n.dangerPeak = Math.max(n.dangerPeak || 0, n.danger);
-  if (n.trueForm || n.fleeing || n.hideUntil) return;
-  if (n.isThem && n.danger >= 90 && before < 90) return reactTo(n, 'cornered');
+  if (n.trueForm || n.fleeing || n.hideUntil || !n.isThem) return; // ordinary people snap at suspicion instead (snapAt)
+  if (n.danger >= 90 && before < 90) return reactTo(n, 'cornered');
   if (n.danger >= 70 && before < 70) reactTo(n);
 }
 // can w see the spot (no need to face it: something like that, you notice)
@@ -45,16 +59,10 @@ function seesSpot(w, x, z, maxD = 10) {
 // ordinary people who can see someone right now
 const bystanders = (n, maxD = 10) =>
   CHARS.filter((w) => w !== n && !w.isPlayer && !w.isThem && w.onMap && !w.fleeing && seesSpot(w, n.x, n.z, maxD));
-// the Fight or flight flow: normal people by temper; THEM by how cornered they are
+// the Fight or flight flow for THEM, by how cornered they are (normal people: snapAt)
 function reactTo(n, why) {
   if (G.t - (n.reactAt || -999) < 60 && why !== 'cornered' && why !== 'pinned') return;
   n.reactAt = G.t;
-  if (!n.isThem) {
-    const T = G.traits[n.id] || {};
-    if (T.temper === 'aggressive') return hitBack(n);
-    if (T.temper === 'mocker') return ridicule(n);
-    return flee(n);
-  }
   if ((n.danger >= 90 || why === 'pinned') && trueForm(n, why)) return; // too early, too light, in the street: it keeps its face and acts it out
   if (holding(n) < 3) return ridicule(n);
   flee(n);

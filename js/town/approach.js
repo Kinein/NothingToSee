@@ -105,7 +105,7 @@ function approachLines(n, kind) {
     out.push(() => {
       ui.say(n, mid, 3.6);
       noteOnce(n, '“' + mid + '”', { by: n.id, quote: true });
-      psyMark('near'); // the way it looks at you while it says it
+      psyMark('sign'); // the way it looks at you while it says it: a slight sign
     });
     out.push(pick(L.probe.close));
   } else if (kind === 'warn') {

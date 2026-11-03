@@ -20,11 +20,11 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  209 lines
+### data/tuning  ·  #2  ·  212 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
-- **Defines (35):** `CLOCK` `TALK` `BODY_ACT` `WALK` `SPEEDS` `AWAY_SPEED` `SLEEP_SPEED` `STIR_SLOW` `PHOTO_RANGE` `CTRL` `WORK` `MAD_SUS` `HURT` `POLICE` `RESIST` `APPROACH` `NEEDS` `PSY` `BLADDER` `OUT` `BED` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `EVIDENCE` `BLOOD` `WIPE` `BIO_FIND` `AJAR`
+- **Defines (36):** `CLOCK` `TALK` `BODY_ACT` `WALK` `SPEEDS` `AWAY_SPEED` `SLEEP_SPEED` `STIR_SLOW` `PHOTO_RANGE` `CTRL` `WORK` `MAD_SUS` `SUS_SNAP` `HURT` `POLICE` `RESIST` `APPROACH` `NEEDS` `PSY` `BLADDER` `OUT` `BED` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `EVIDENCE` `BLOOD` `WIPE` `BIO_FIND` `AJAR`
 - **→ uses:** —
 - **← used by:** 55
 
@@ -372,7 +372,7 @@ Being arrested, shown on the map
 
 - **Defines (17):** `ARREST` `COP_MESH` `copCarMesh` `arrested` `arrestCarIn` `copCarV` `arrestStart` `arrestCuffed` `arrestEscortTick` `arrestLoad` `arrestRide` `arrestInside` `arrestRelease` `arrestDropOff` `arrestTick` `arrestFrame` `arrestReset`
 - **→ uses:** sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, gfx/gl, world/paths, gfx/renderer, world/grid, town/on-the-run, them/moves, ui/interface, town/npc-update … +18
-- **← used by:** 22
+- **← used by:** 23
 
 ### town/cell  ·  #51  ·  515 lines
 
@@ -380,7 +380,7 @@ Held in a cell
 
 - **Defines (34):** `CELL` `CELL_YOU` `CELL_ID` `CELL_DOOR_M` `CELL_SKY` `CELL_SKY_E` `CELL_SUN` `CELL_TUBE` `CELL_TUBE_E` `CELL_HAND` `CELL_BOARD` `CELL_CHALK` `CELL_CHALK_E` `awaySpeed` `CELL_POSE` `CELL_COP_POSE` `cellFrame` `cellEnter` `cellExit` `cellPhase` `cellSeat` `cellCopAtDesk` `cellRoute` `cellStep` `cellMood` `cellLights` `CELL_NIGHT` `CELL_NOON` `CELL_GOLD` `cellSky` `cellHand` `cellDraw` `ambushTick` `addNote`
 - **→ uses:** gfx/renderer, sim/core, gfx/station, core/util, world/grid, taken/taken, game/loop, gfx/gl, town/suspicion, world/light-map, data/tuning, audio/sound, world/vision, them/true-form … +11
-- **← used by:** 21
+- **← used by:** 22
 
 ### town/on-the-run  ·  #52  ·  412 lines
 
@@ -390,12 +390,12 @@ Running from an arrest: the break, his gun, caught or lost; wanted after that
 - **→ uses:** sim/core, ui/interface, data/tuning, core/util, town/arrest, horror/layer, data/lines, sim/actions, combat/melee, audio/sound, town/suspicion, gfx/renderer, chase/fbi, world/grid … +15
 - **← used by:** 12
 
-### town/suspicion  ·  #53  ·  84 lines
+### town/suspicion  ·  #53  ·  92 lines
 
 Suspicion and danger per person
 
-- **Defines (12):** `addSus` `asleep` `holding` `pinned` `dangerFloor` `canPanic` `addDanger` `seesSpot` `bystanders` `reactTo` `ridicule` `hitBack`
-- **→ uses:** sim/core, ui/interface, core/util, world/grid, town/fleeing, combat/melee, town/echoes, them/awareness, them/proofs, play/confrontation, world/light-map, world/vision, them/true-form, sim/actions … +1
+- **Defines (13):** `addSus` `snapAt` `asleep` `holding` `pinned` `dangerFloor` `canPanic` `addDanger` `seesSpot` `bystanders` `reactTo` `ridicule` `hitBack`
+- **→ uses:** sim/core, ui/interface, core/util, them/awareness, data/tuning, town/fleeing, world/grid, combat/melee, town/echoes, town/arrest, town/cell, chase/hunt, taken/taken, them/tells … +6
 - **← used by:** 37
 
 ### town/fleeing  ·  #54  ·  268 lines
@@ -470,7 +470,7 @@ Tells: the small signs THEY give
 
 - **Defines (12):** `npcSeesPlayer` `roomHasOthers` `tryTell` `beginTell` `notifyPing` `endTell` `tellTick` `applyTellAnim` `awardTell` `caughtWatching` `ritualCaught` `revealFaction`
 - **→ uses:** sim/core, core/util, town/cast, world/grid, ui/interface, town/npc-update, audio/sound, world/objects, sim/actions, player/needs, world/vision, gfx/renderer, town/suspicion, them/awareness … +12
-- **← used by:** 23
+- **← used by:** 24
 
 ### them/proofs  ·  #45  ·  100 lines
 
@@ -554,7 +554,7 @@ Taking hits, knockouts, hospital, limbo
 - **→ uses:** sim/core, ui/interface, taken/taken, sim/actions, core/util, gfx/renderer, town/fleeing, town/echoes, data/tuning, chase/hunt-step, sim/characters, combat/melee, combat/blood, sim/pose … +9
 - **← used by:** 9
 
-### combat/melee  ·  #58  ·  394 lines
+### combat/melee  ·  #58  ·  397 lines
 
 Blows out in the street: THEIR telegraphed strikes, yours, people punching
 
@@ -876,7 +876,7 @@ Being taken: the capture
 
 - **Defines (47):** `CAP` `CAP_ESCAPE` `camBounds` `capSeg` `capOnce` `capUI` `capLine` `capSay` `capTime` `capTimeOff` `capReason` `capPrompt` `capGoal` `capPortrait` `capSayAt` `capBub` `capSkipShown` `capActor` `sceneActor` `capYou` `capKill` `capAnimate` `capWalk` `capFace` `capLook` `xfp` `greyPts` `greyEyes` `capRod` `capVictim` `capCut` `capCam` `capFx` `capFxNow` `capClearFocus` `capture` `capNext` `capFinish` `capUpdate` `capLate` `capFill` `capAudio` `capBlack` `capHours` `capEye` `capEnterLair` `lairDoors`
 - **→ uses:** sim/core, gfx/renderer, core/util, world/grid, ui/interface, horror/layer, audio/sound, game/loop, world/vision, world/objects, taken/coming, taken/way-out-play, sim/characters, sim/pose … +21
-- **← used by:** 29
+- **← used by:** 30
 
 ### taken/coming  ·  #106  ·  1115 lines
 
@@ -942,7 +942,7 @@ When THEY come for you: the hunters, their tuning, how each kind of hunt starts
 
 - **Defines (17):** `HUNT` `HUNT_WHO` `HUNT_SPD` `HUNT_SRCH` `HUNT_SEE` `HUNT_LOSE` `HUNT_GRAB` `BED_SPOT` `WIN_IN` `WIN_OUT` `BLDG_OUT` `huntActor` `huntH` `huntLive` `huntStart` `HUNT_SETUP` `huntBeam`
 - **→ uses:** sim/core, audio/sound, horror/layer, core/util, taken/coming, ui/interface, taken/taken, world/paths, chase/they-come, sim/characters, town/arrest, chase/hunt-end, them/awareness, ui/pie-menu … +5
-- **← used by:** 15
+- **← used by:** 16
 
 ### chase/hunt-step  ·  #114  ·  622 lines
 

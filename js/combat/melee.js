@@ -319,7 +319,10 @@ function perceptionTick(dt) {
   const P = PLAYER;
   for (const n of suspects()) {
     if (n.exposed || n.trueForm) continue;
+    if (!n.isThem) snapAt(n); // had enough of you while you were out of sight: now they see you
+    // shadowing one of THEM frays it (ordinary people don't mind: walking near them is nothing)
     if (
+      n.isThem &&
       canPanic(n) &&
       P.onMap &&
       n.moving &&

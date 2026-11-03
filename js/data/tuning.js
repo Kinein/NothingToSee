@@ -1,5 +1,5 @@
 //@ data/tuning — Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
-//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, HURT, POLICE, RESIST, APPROACH, …
+//@ Defines: CLOCK, TALK, BODY_ACT, WALK, SPEEDS, AWAY_SPEED, SLEEP_SPEED, STIR_SLOW, PHOTO_RANGE, CTRL, WORK, MAD_SUS, SUS_SNAP, HURT, POLICE, RESIST, …
 //@ Uses:    —
 //@ (header made by tools/map.js; stripped by build.py)
 // ── Tuning: the numbers that set how the game feels. Every one is plain data, read by the systems named beside it.
@@ -59,6 +59,9 @@ const CTRL = {
 // lets you sit down to work, in game minutes; outside them there's nobody in and no work
 const WORK = { sit: 20, fill: 25, drain: 16, low: 30, fresh: 75, from: 8 * 60, to: 17 * 60 };
 const MAD_SUS = 60; // suspicion of you at which someone thinks you're mad: the full meter on the board, the clinic's count
+// an ordinary person's suspicion goes on past 100, up to this: then, the next time they see you, they snap by temper
+// (town/suspicion snapAt: the aggressive swing at you, mockers jeer, the timid run) and it falls back to 100
+const SUS_SNAP = 130;
 const HURT = { punch: 10, thug: 15, lizards: 20, aliens: 25, laser: 30, zombies: 18, thrown: 18, sting: 3 };   // what a blow costs your health
 // the officer (them/moves policeTick): the first time he comes it's only a telling-off; after that he runs you down.
 // He starts at `start` × a townsperson's run (you outsprint him) and gets to `top` (he outsprints you) over `ramp` game

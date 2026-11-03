@@ -45,7 +45,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `whisperCd` | `30` | horror/visions | — |
 | `clinicDay` | `0` | combat/melee | — |
 | `lore` | `{}` | — | — |
-| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, town/suspicion, them/true-form, town/talk, play/photos, game/state |
+| `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, them/true-form, town/talk, play/photos, game/state |
 | `cover` | `{}` | town/quirks | town/talk, game/state |
 | `prints` | `[]` | — | play/photos |
 | `printId` | `0` | — | play/photos |
