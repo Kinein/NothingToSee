@@ -20,7 +20,7 @@ Math helpers, colours, random, mat4 (column-major)
 
 ## data/
 
-### data/tuning  ·  #2  ·  220 lines
+### data/tuning  ·  #2  ·  221 lines
 
 Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's feel here
 
@@ -28,7 +28,7 @@ Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's f
 - **→ uses:** —
 - **← used by:** 56
 
-### data/lines  ·  #3  ·  330 lines
+### data/lines  ·  #3  ·  331 lines
 
 What people say and read: gossip, Lenny, rumours, news, endings. Change the words here
 
@@ -274,7 +274,7 @@ Sitting down, getting up, lying down: the steps and the lowering
 - **→ uses:** core/util, sim/body-motion, sim/characters, world/paths, sim/actions
 - **← used by:** 2 (sim/pose, sim/actions)
 
-### sim/pose  ·  #32  ·  712 lines
+### sim/pose  ·  #32  ·  725 lines
 
 Each frame's pose: targets, gestures, door reach, blending, turning, animate
 
@@ -290,7 +290,7 @@ Following paths and moving characters
 - **→ uses:** data/tuning, sim/core, world/paths, sim/actions
 - **← used by:** 12
 
-### sim/actions  ·  #34  ·  656 lines
+### sim/actions  ·  #34  ·  657 lines
 
 The action queue shared by player and NPCs
 
@@ -358,7 +358,7 @@ Placing people on the map
 - **→ uses:** world/grid, sim/actions, town/npc-update, world/objects, sim/characters
 - **← used by:** 9
 
-### town/npc-update  ·  #43  ·  744 lines
+### town/npc-update  ·  #43  ·  746 lines
 
 Per-frame NPC update
 
@@ -406,7 +406,7 @@ Fleeing to hideouts
 - **→ uses:** sim/core, ui/interface, sim/actions, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, input/walking, town/suspicion, combat/melee, sim/movement, town/cast … +13
 - **← used by:** 26
 
-### town/doors  ·  #62  ·  114 lines
+### town/doors  ·  #62  ·  115 lines
 
 Broken restroom lock, doors left ajar
 
@@ -428,7 +428,7 @@ Echoes: what happened, where, who saw
 
 - **Defines (10):** `ECHO` `ECHO_ORDER` `echo` `placeIn` `whenWord` `flav` `echoLine` `hear` `echoFor` `morningPaper`
 - **→ uses:** sim/core, gfx/renderer, core/util, data/lines, town/suspicion, play/photos
-- **← used by:** 25
+- **← used by:** 26
 
 ### town/company  ·  #66  ·  143 lines
 
@@ -438,12 +438,12 @@ The witnesses THEY go after at night, and standing guard for one; THEIR people t
 - **→ uses:** sim/core, ui/interface, them/proofs, core/util, world/paths, sim/actions, them/awareness, town/cast, world/grid, them/moves, town/suspicion, data/tuning, them/plan, sim/movement … +9
 - **← used by:** 3 (combat/melee, them/night-attacks, play/stashes)
 
-### town/approach  ·  #67  ·  255 lines
+### town/approach  ·  #67  ·  319 lines
 
 People come to you: a word in the street, Hale at your shoulder, THEIR people warning and following you
 
-- **Defines (9):** `approachFree` `approachQuiet` `approachTick` `approachStart` `pName` `approachLines` `approachAct` `approachEnd` `approachStep`
-- **→ uses:** sim/core, core/util, ui/interface, data/tuning, sim/actions, town/talk, sim/movement, world/grid, them/plan, data/lines, town/suspicion, player/work, them/tells, them/servants … +11
+- **Defines (15):** `approachFree` `approachQuiet` `approachTick` `approachStart` `pName` `approachLines` `approachAct` `approachEnd` `approachStep` `HALE_DOOR` `HALE_DOOR_PT` `HALE_DESK_PT` `haleDeskSpot` `haleCall` `haleHerd`
+- **→ uses:** sim/core, core/util, ui/interface, data/tuning, sim/movement, sim/actions, data/lines, world/objects, town/echoes, town/talk, world/paths, player/work, world/grid, them/plan … +12
 - **← used by:** 1 (game/loop)
 
 ### town/traffic-weather  ·  #95  ·  99 lines
@@ -771,7 +771,7 @@ The confrontation: your cards on IT, ✓ or ✗, and what it leaves in the stree
 Photos: reading what is in frame
 
 - **Defines (16):** `OBJ_ICON` `placeName` `shotTarget` `photoAct` `inPhotoCone` `photoCone` `playerPhoto` `addPrint` `takePhoto` `photoItem` `PHOTO_FACE` `photoSeen` `photoWorth` `photoHintTick` `placeCamMark` `toggleCam`
-- **→ uses:** sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, horror/tenth-forms, world/grid, world/vision, core/util, player/needs, gfx/portraits, play/stashes, ui/menus … +13
+- **→ uses:** sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, world/grid, world/vision, core/util, player/needs, gfx/portraits, play/stashes, ui/menus, world/light-map … +13
 - **← used by:** 10
 
 ### play/advice  ·  #84  ·  266 lines

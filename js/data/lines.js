@@ -294,9 +294,11 @@ const APPROACH_LINES = {
     mid: ['You’re a good person. You know that?', 'I love this town. I HATE this town.', 'Have you seen my car? It’s blue. Or red.', 'The lamps are WATCHING us. Shh.', 'You’re my best friend. What’s your name?'],
     bye: ['Fine! FINE! Be like that!', '*hic*', 'Where’d everybody go?'],
   },
+  // Hale herding you back (haleHerd): from outside the office doors, from beside your desk, and once you're sat down
   boss: {
-    mid: ['Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!', 'The Hendricks file isn’t going to write itself!', 'I don’t pay you to WANDER!'],
-    close: ['Desk. NOW.', 'Back to work. NOW!', 'Don’t make me come and find you again.'],
+    door: ['IN! NOW!', 'You see these doors, {p}?! Get THROUGH them!', 'I can SEE you, {p}! INSIDE!', 'Do I have to come and DRAG you?!', 'Tick tock, {p}! TICK! TOCK!', 'I don’t pay you to WANDER!'],
+    desk: ['THIS! This is your DESK!', 'Sit. DOWN.', 'See this chair?! You go IN it!', 'The Hendricks file isn’t going to write itself!', 'Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!'],
+    close: ['And STAY there.', 'Was that so hard?', 'Don’t make me come and find you again.'],
   },
   rude: {
     chat: ['…Okay then.', 'Charming.', 'Rude.', 'Nice talking to you too.'],
@@ -304,7 +306,6 @@ const APPROACH_LINES = {
     warn: ['Walk away. We’ll follow.'],
     lost: ['Thanks a lot!', 'Friendly place.'],
     drunk: ['Hey! I wasn’t FINISHED!', 'Come back! I love you!'],
-    boss: ['Don’t you WALK AWAY FROM ME!', 'I’m TALKING to you!'],
   },
 };
 // Hale, when the work bar runs out (game/endings endFired): where he finds you, what he yells, the word you get in

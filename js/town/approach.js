@@ -1,6 +1,6 @@
 //@ town/approach — People come to you: a word in the street, Hale at your shoulder, THEIR people warning and following you
-//@ Defines: approachFree, approachTick, approachStart, approachLines, approachAct, approachEnd, approachStep
-//@ Uses:    sim/core, core/util, ui/interface, data/tuning, sim/actions, town/talk, sim/movement, world/grid, them/plan, data/lines, …
+//@ Defines: approachFree, approachTick, approachStart, approachLines, approachAct, approachEnd, approachStep, HALE_DOOR, HALE_DOOR_PT, HALE_DESK_PT, haleDeskSpot, haleCall, haleHerd
+//@ Uses:    sim/core, core/util, ui/interface, data/tuning, sim/movement, sim/actions, data/lines, world/objects, town/echoes, town/talk, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── people come to you. Not everything waits for you to start it: now and then somebody comes over on their
 // own. A neighbour with something to tell you, Hale when your chair's been empty too long, one of THEM to ask how you're
@@ -8,8 +8,10 @@
 // asking the way, a drunk who's decided you're his best friend. They call out, walk up and have their say. Stand and hear
 // them out, or walk off: they take that badly. Talk to them yourself (E) and it's an ordinary chat instead.
 // One at a time, never in a fight, a chase, a scene, or with you in handcuffs.
-function approachFree(n) {
-  if (n.isPlayer || !n.onMap || asleep(n) || n.engaged || n.pose !== 'stand' || n.seatTr || n.y) return false;
+// seated: Hale gets up out of his chair for you, nobody else does
+function approachFree(n, seated) {
+  if (n.isPlayer || !n.onMap || asleep(n) || n.engaged) return false;
+  if (!seated && (n.pose !== 'stand' || n.seatTr || n.y)) return false;
   if (n.fleeing || n.trueForm || n.exposed || n.surrendered || n.slain || n.gone || n.under || n.hideUntil) return false;
   if (n.tell || n.secret || n.odd || n.raiding || n.breakIn || n.hunting || n.trance || n.cornered > G.t - 30) return false;
   if (n.def.officer || n.id === 'lenny' || (G.tail && G.tail.id === n.id) || (G.control && G.control.who === n.id))
@@ -46,16 +48,15 @@ function approachTick() {
     if (n && n.onMap && n.queue.some((a) => a.approach && !a.done)) return;
     G.approach = null;
   }
-  // Hale first: in the shift, your chair empty and the bar going, he comes and finds you in the office
+  // Hale first: in the shift, your chair empty and the bar going, he gets up from his desk and herds you back to yours
   const h = NPC.hale;
   if (
     inShift() &&
     G.workBar < WORK.low &&
     !playerAtDesk() &&
-    inOffice() &&
     G.t >= G.haleAt &&
     h &&
-    approachFree(h) &&
+    approachFree(h, true) &&
     (roomAt(h.x, h.z) || {}).bld === 'office'
   ) {
     G.haleAt = G.t + A.boss;
@@ -119,10 +120,8 @@ function approachLines(n, kind) {
   } else if (kind === 'drunk') {
     const a = pick(L.drunk.mid);
     out.push(a, pick(L.drunk.mid.filter((l) => l !== a)));
-  } else if (kind === 'boss') {
-    out.push(pick(L.boss.mid), pick(L.boss.close));
   }
-  return out;
+  return out; // Hale has no set speech: he yells as he goes (haleHerd)
 }
 function approachAct(n, kind) {
   return mkAct({
@@ -132,6 +131,7 @@ function approachAct(n, kind) {
     dur: null,
     anim: 'idle',
     approach: kind,
+    interruptible: kind !== 'boss', // a habit doesn't call Hale off you (town/npc-update)
     until: (c, a) => !!a.done,
     onStart: (c, a) => {
       a.ph = 'come';
@@ -168,6 +168,7 @@ function approachStep(c, a, dt, kind) {
   if (G.t - a.lastT > 1 && a.ph !== 'follow') return approachEnd(c, a, null);
   a.lastT = G.t;
   if (approachQuiet() || !c.onMap) return approachEnd(c, a, null);
+  if (kind === 'boss') return haleHerd(c, a, dt);
   const d = Math.hypot(P.x - c.x, P.z - c.z),
     bd = dt * BODY;
   a.bt += bd;
@@ -176,7 +177,6 @@ function approachStep(c, a, dt, kind) {
       a.called = true;
       ui.say(c, pName(pick(L.call[kind])), 2.4);
       ui.bubble(c, kind === 'probe' || kind === 'warn' ? 'eye' : 'exclaim', 'speech', 2.2);
-      if (kind === 'boss') audio.sting('awkward');
     }
     if (a.bt > A.give || d > A.near + 6) return approachEnd(c, a, kind === 'drunk' ? '…Where’d he go?' : null);
     if (d < A.reach) {
@@ -202,11 +202,10 @@ function approachStep(c, a, dt, kind) {
     c.path = null;
     c.moving = false;
     c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-    c.anim = kind === 'boss' ? 'yell' : 'talk';
+    c.anim = 'talk';
     if (d > A.reach + A.walkOff) {
       // you walked off on them
       if (kind === 'chat') addSus(c, A.rude);
-      if (kind === 'boss') G.workBar = Math.max(1, G.workBar - A.bossCost);
       const bye = L.rude[kind] || L.rude.chat;
       if (kind === 'warn' || kind === 'drunk') {
         ui.say(c, pName(pick(bye)), 2.4);
@@ -229,7 +228,6 @@ function approachStep(c, a, dt, kind) {
     }
     if (typeof l === 'function') l();
     else ui.say(c, pName(l), 3.4);
-    if (kind === 'boss') ui.bubble(c, 'exclaim', 'speech', 2);
     a.next = a.bt + A.gap;
     return;
   }
@@ -256,4 +254,70 @@ function approachStep(c, a, dt, kind) {
   }
   c.run = d > A.runAt + 2 && kind !== 'drunk';
   followPath(c, dt);
+}
+// Hale, with your bar low: he won't talk it over, he herds you. You out of the office, he plants himself outside its
+// front doors and yells across at you, jabbing at the doors once you're close. You in it, he stands by your desk and
+// jabs at that, and yells at you between. Sit down and he's done; he isn't, otherwise, till five or the bar's back up.
+const HALE_DOOR = [15, 13]; // the pavement beside the glass doors, clear of them
+const HALE_DOOR_PT = [14, 1.15, 12.5];
+const HALE_DESK_PT = [OBJ_BY_ID.deskA2.x + 0.5, 0.8, OBJ_BY_ID.deskA2.z + 0.5]; // your desk top
+// beside your chair, either side, or beside the desk
+function haleDeskSpot(c) {
+  const d = OBJ_BY_ID.deskA2,
+    sides = [1, 1, -1, 1, 1, 0, -1, 0];
+  for (let i = 0; i < sides.length; i += 2)
+    if (walkable(d.x + sides[i], d.z + sides[i + 1], c)) return [d.x + sides[i], d.z + sides[i + 1]];
+  return nearestWalkable(d.x, d.z + 1, c, 3);
+}
+function haleCall(c, a) {
+  a.called = true;
+  ui.say(c, pName(pick(APPROACH_LINES.call.boss)), 2.4);
+  ui.bubble(c, 'exclaim', 'speech', 2.2);
+  audio.sting('awkward');
+  a.next = a.bt + 2;
+  a.jab = 0;
+}
+function haleHerd(c, a, dt) {
+  const P = PLAYER,
+    A = APPROACH,
+    L = APPROACH_LINES.boss;
+  if (playerAtDesk()) return approachEnd(c, a, Math.hypot(P.x - c.x, P.z - c.z) < 12 ? pick(L.close) : null);
+  if (!inShift() || G.workBar >= WORK.low + 10) return approachEnd(c, a, null);
+  const desk = inOffice(),
+    want = desk ? 'desk' : 'door';
+  if (a.at !== want) {
+    a.at = want;
+    a.spot = desk ? haleDeskSpot(c) : HALE_DOOR;
+    a.there = false;
+    if (!a.spot || !setPath(c, a.spot[0], a.spot[1])) return approachEnd(c, a, null);
+  }
+  const d = Math.hypot(P.x - c.x, P.z - c.z),
+    hear = d < A.near + 6;
+  a.bt += dt * BODY;
+  // the first thing out of him: your name, across the office or the street, as soon as he's got you in sight
+  if (!a.called && hear && npcSeesPlayer(c, A.near)) haleCall(c, a);
+  if (!a.there) {
+    c.run = Math.hypot(a.spot[0] + 0.5 - c.x, a.spot[1] + 0.5 - c.z) > A.runAt;
+    a.there = followPath(c, dt);
+    c.anim = 'idle';
+    a.point = null;
+    if (!a.there) return;
+    c.run = false;
+  }
+  // there: a line every so often, and between them the finger, at the desk or the doors; the rest of the time, at you
+  if (!a.called && hear) haleCall(c, a);
+  else if (a.bt >= a.next) {
+    a.next = a.bt + A.gap;
+    a.jab = a.bt + A.gap * 0.45;
+    if (hear) {
+      a.said = pick((desk ? L.desk : L.door).filter((l) => l !== a.said)); // never the same one twice running
+      ui.say(c, pName(a.said), 3);
+      ui.bubble(c, 'exclaim', 'speech', 2);
+    }
+  }
+  const pt = desk ? HALE_DESK_PT : HALE_DOOR_PT,
+    jab = a.bt < a.jab && (desk || d < 5);
+  a.point = jab ? pt : null;
+  c.tdir = jab ? Math.atan2(pt[0] - c.x, pt[2] - c.z) : Math.atan2(P.x - c.x, P.z - c.z);
+  c.anim = jab ? 'point' : a.bt < a.jab + 1 && hear ? 'yell' : 'idle';
 }

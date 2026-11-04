@@ -298,6 +298,7 @@ function runAct(c, a, dt) {
           return;
         }
         if (tg.engaged && tg.engaged !== c) return finishAct(c, a, false, 'Busy');
+        if (!c.isPlayer && tg.queue[0] && tg.queue[0].approach) return finishAct(c, a, false, 'Busy'); // on the way to you
         tg.engaged = c;
       }
       a.stage = 'enter';

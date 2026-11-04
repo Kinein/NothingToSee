@@ -66,8 +66,9 @@ function roomWatch(c) {
   } else if (roomAt(PLAYER.x, PLAYER.z) === r && !c.def.stranger && !c.trueForm && !c.exposed) awkward(c, 'walkin');
 }
 const houseIs = (r, id) => r.house === id || (id === 'agnes' && !!r.agnes);
-// home again, through a front door somebody forced: whoever lives here locks it behind them, so it's shut to you again
-// (one that's been found out leaves it as you left it: it has nowhere left to run). You still in there is another matter.
+// home again, through a front door somebody forced, or home all along when it gave (town/npc-update): whoever lives here
+// locks it behind them, so it's shut to you again (one that's been found out leaves it as you left it: it has nowhere
+// left to run). You still in there is another matter.
 function homeAgain(n) {
   const hid = n.id;
   if (!(G.broken[hid] > G.t) || n.exposed || n.trueForm || n.slain) return;

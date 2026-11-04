@@ -57,9 +57,9 @@ function deadWalk(c, T) {
   T.uaR *= 0.82;
   T.hr += sd * 0.02;
 }
-// a walk that's wrong, the kind the photo hint glows for: the dead's sway (THEM, and whoever THEY bit), THEIR mark's
-// lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a print and a note, never a card, and
-// one a day per face.
+// a walk that's wrong, the kind you have to spot yourself (the photo hint never glows for it): the dead's sway (THEM,
+// and whoever THEY bit), THEIR mark's lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a
+// print and a note, never a card, and one a day per face.
 const WALK_NOTE = {
   sway: 'Walks wrong. A sway, one knee stiff.',
   lurch: 'Lurching. Arms hanging out in front.',

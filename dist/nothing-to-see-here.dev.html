@@ -795,7 +795,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.27 · updated Nov 4, 2026</p>
+  <p id="version">v1.28 · updated Nov 5, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1193,10 +1193,11 @@ const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far
 // people coming to you (town/approach): a check every `every` game minutes for somebody within `near` tiles who can see
 // you (fewer after dark). They call out, walk up (running when more than `runAt` off) and talk once within `reach`, a line
 // every `gap` body minutes; `give` body minutes to reach you or they give up. Walk `walkOff` further off mid-sentence and
-// it's rude: `rude` suspicion (Hale takes `bossCost` off the work bar for it). THEIR people, and drunks, follow you after,
-// `follow` game minutes, `back` tiles behind. One of THEM only comes once THEIR awareness is `probeAware`. Hale comes to
-// find you every `boss` game minutes while the work bar is under WORK.low and you're in the office away from your desk. Nobody comes over again within `again` game minutes.
-const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, bossCost: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
+// it's rude: `rude` suspicion. THEIR people, and drunks, follow you after, `follow` game minutes, `back` tiles behind.
+// One of THEM only comes once THEIR awareness is `probeAware`. While the work bar is under WORK.low and you're away from
+// your desk, Hale gets up and herds you back to it (outside the office doors, or at your desk), at most every `boss` game
+// minutes. Nobody comes over again within `again` game minutes.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [
@@ -1625,9 +1626,11 @@ const APPROACH_LINES = {
     mid: ['You’re a good person. You know that?', 'I love this town. I HATE this town.', 'Have you seen my car? It’s blue. Or red.', 'The lamps are WATCHING us. Shh.', 'You’re my best friend. What’s your name?'],
     bye: ['Fine! FINE! Be like that!', '*hic*', 'Where’d everybody go?'],
   },
+  // Hale herding you back (haleHerd): from outside the office doors, from beside your desk, and once you're sat down
   boss: {
-    mid: ['Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!', 'The Hendricks file isn’t going to write itself!', 'I don’t pay you to WANDER!'],
-    close: ['Desk. NOW.', 'Back to work. NOW!', 'Don’t make me come and find you again.'],
+    door: ['IN! NOW!', 'You see these doors, {p}?! Get THROUGH them!', 'I can SEE you, {p}! INSIDE!', 'Do I have to come and DRAG you?!', 'Tick tock, {p}! TICK! TOCK!', 'I don’t pay you to WANDER!'],
+    desk: ['THIS! This is your DESK!', 'Sit. DOWN.', 'See this chair?! You go IN it!', 'The Hendricks file isn’t going to write itself!', 'Do you WORK here or not?!', 'Your chair’s been empty for an HOUR!'],
+    close: ['And STAY there.', 'Was that so hard?', 'Don’t make me come and find you again.'],
   },
   rude: {
     chat: ['…Okay then.', 'Charming.', 'Rude.', 'Nice talking to you too.'],
@@ -1635,7 +1638,6 @@ const APPROACH_LINES = {
     warn: ['Walk away. We’ll follow.'],
     lost: ['Thanks a lot!', 'Friendly place.'],
     drunk: ['Hey! I wasn’t FINISHED!', 'Come back! I love you!'],
-    boss: ['Don’t you WALK AWAY FROM ME!', 'I’m TALKING to you!'],
   },
 };
 // Hale, when the work bar runs out (game/endings endFired): where he finds you, what he yells, the word you get in
@@ -12823,6 +12825,19 @@ function animTargets(c, dt) {
       T.rootY = jab * 0.012;
       break;
     }
+    case 'point': {
+      // jabbing a finger at something (town/approach haleHerd: your desk, the office doors): the arm out at it, poking
+      // the air on every word, leaning in, the other fist on his hip
+      const jab = Math.max(0, Math.sin(t * 7.5)) ** 2,
+        p = cur && cur.point;
+      T.torso = 0.12 + jab * 0.06;
+      T.hp = 0.12 + jab * 0.06;
+      T.uaL = -0.25;
+      T.faL = -1.5;
+      T.aoL = 0.55;
+      if (p) c._reach = { pt: [p[0], p[1] + jab * 0.1, p[2]], w: 1 };
+      break;
+    }
     case 'shame':
       // taking it: head hung, shoulders in, the hands knotted low at the belt, a flinch now and then
       T.hp = 0.5 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;
@@ -13470,6 +13485,7 @@ function runAct(c, a, dt) {
           return;
         }
         if (tg.engaged && tg.engaged !== c) return finishAct(c, a, false, 'Busy');
+        if (!c.isPlayer && tg.queue[0] && tg.queue[0].approach) return finishAct(c, a, false, 'Busy'); // on the way to you
         tg.engaged = c;
       }
       a.stage = 'enter';
@@ -16092,6 +16108,8 @@ function npcUpdate(n, dt) {
   if (n.isThem && !n.exposed) theirThingsOnYou(n, dt);
   if (n.wcCd > 0) n.wcCd -= dt;
   stepChar(n, dt);
+  // home behind a door you forced, never mind how they got there: they lock it. Not THEM: that one's cornered (play/raids)
+  if (!n.isThem && G.broken[n.id] > G.t && atHome(n)) homeAgain(n);
   if (n.tell) tellTick(n, dt * BODY); // a slip plays out in body time, like anything else a body does
   if (n.secret) secretTick(n, dt * BODY);
   if (habitReady(n) && !n.fleeing && !n.hideUntil) {
@@ -21732,8 +21750,9 @@ function roomWatch(c) {
   } else if (roomAt(PLAYER.x, PLAYER.z) === r && !c.def.stranger && !c.trueForm && !c.exposed) awkward(c, 'walkin');
 }
 const houseIs = (r, id) => r.house === id || (id === 'agnes' && !!r.agnes);
-// home again, through a front door somebody forced: whoever lives here locks it behind them, so it's shut to you again
-// (one that's been found out leaves it as you left it: it has nowhere left to run). You still in there is another matter.
+// home again, through a front door somebody forced, or home all along when it gave (town/npc-update): whoever lives here
+// locks it behind them, so it's shut to you again (one that's been found out leaves it as you left it: it has nowhere
+// left to run). You still in there is another matter.
 function homeAgain(n) {
   const hid = n.id;
   if (!(G.broken[hid] > G.t) || n.exposed || n.trueForm || n.slain) return;
@@ -23341,8 +23360,10 @@ function tailAct(n) {
 // asking the way, a drunk who's decided you're his best friend. They call out, walk up and have their say. Stand and hear
 // them out, or walk off: they take that badly. Talk to them yourself (E) and it's an ordinary chat instead.
 // One at a time, never in a fight, a chase, a scene, or with you in handcuffs.
-function approachFree(n) {
-  if (n.isPlayer || !n.onMap || asleep(n) || n.engaged || n.pose !== 'stand' || n.seatTr || n.y) return false;
+// seated: Hale gets up out of his chair for you, nobody else does
+function approachFree(n, seated) {
+  if (n.isPlayer || !n.onMap || asleep(n) || n.engaged) return false;
+  if (!seated && (n.pose !== 'stand' || n.seatTr || n.y)) return false;
   if (n.fleeing || n.trueForm || n.exposed || n.surrendered || n.slain || n.gone || n.under || n.hideUntil) return false;
   if (n.tell || n.secret || n.odd || n.raiding || n.breakIn || n.hunting || n.trance || n.cornered > G.t - 30) return false;
   if (n.def.officer || n.id === 'lenny' || (G.tail && G.tail.id === n.id) || (G.control && G.control.who === n.id))
@@ -23379,16 +23400,15 @@ function approachTick() {
     if (n && n.onMap && n.queue.some((a) => a.approach && !a.done)) return;
     G.approach = null;
   }
-  // Hale first: in the shift, your chair empty and the bar going, he comes and finds you in the office
+  // Hale first: in the shift, your chair empty and the bar going, he gets up from his desk and herds you back to yours
   const h = NPC.hale;
   if (
     inShift() &&
     G.workBar < WORK.low &&
     !playerAtDesk() &&
-    inOffice() &&
     G.t >= G.haleAt &&
     h &&
-    approachFree(h) &&
+    approachFree(h, true) &&
     (roomAt(h.x, h.z) || {}).bld === 'office'
   ) {
     G.haleAt = G.t + A.boss;
@@ -23452,10 +23472,8 @@ function approachLines(n, kind) {
   } else if (kind === 'drunk') {
     const a = pick(L.drunk.mid);
     out.push(a, pick(L.drunk.mid.filter((l) => l !== a)));
-  } else if (kind === 'boss') {
-    out.push(pick(L.boss.mid), pick(L.boss.close));
   }
-  return out;
+  return out; // Hale has no set speech: he yells as he goes (haleHerd)
 }
 function approachAct(n, kind) {
   return mkAct({
@@ -23465,6 +23483,7 @@ function approachAct(n, kind) {
     dur: null,
     anim: 'idle',
     approach: kind,
+    interruptible: kind !== 'boss', // a habit doesn't call Hale off you (town/npc-update)
     until: (c, a) => !!a.done,
     onStart: (c, a) => {
       a.ph = 'come';
@@ -23501,6 +23520,7 @@ function approachStep(c, a, dt, kind) {
   if (G.t - a.lastT > 1 && a.ph !== 'follow') return approachEnd(c, a, null);
   a.lastT = G.t;
   if (approachQuiet() || !c.onMap) return approachEnd(c, a, null);
+  if (kind === 'boss') return haleHerd(c, a, dt);
   const d = Math.hypot(P.x - c.x, P.z - c.z),
     bd = dt * BODY;
   a.bt += bd;
@@ -23509,7 +23529,6 @@ function approachStep(c, a, dt, kind) {
       a.called = true;
       ui.say(c, pName(pick(L.call[kind])), 2.4);
       ui.bubble(c, kind === 'probe' || kind === 'warn' ? 'eye' : 'exclaim', 'speech', 2.2);
-      if (kind === 'boss') audio.sting('awkward');
     }
     if (a.bt > A.give || d > A.near + 6) return approachEnd(c, a, kind === 'drunk' ? '…Where’d he go?' : null);
     if (d < A.reach) {
@@ -23535,11 +23554,10 @@ function approachStep(c, a, dt, kind) {
     c.path = null;
     c.moving = false;
     c.tdir = Math.atan2(P.x - c.x, P.z - c.z);
-    c.anim = kind === 'boss' ? 'yell' : 'talk';
+    c.anim = 'talk';
     if (d > A.reach + A.walkOff) {
       // you walked off on them
       if (kind === 'chat') addSus(c, A.rude);
-      if (kind === 'boss') G.workBar = Math.max(1, G.workBar - A.bossCost);
       const bye = L.rude[kind] || L.rude.chat;
       if (kind === 'warn' || kind === 'drunk') {
         ui.say(c, pName(pick(bye)), 2.4);
@@ -23562,7 +23580,6 @@ function approachStep(c, a, dt, kind) {
     }
     if (typeof l === 'function') l();
     else ui.say(c, pName(l), 3.4);
-    if (kind === 'boss') ui.bubble(c, 'exclaim', 'speech', 2);
     a.next = a.bt + A.gap;
     return;
   }
@@ -23589,6 +23606,72 @@ function approachStep(c, a, dt, kind) {
   }
   c.run = d > A.runAt + 2 && kind !== 'drunk';
   followPath(c, dt);
+}
+// Hale, with your bar low: he won't talk it over, he herds you. You out of the office, he plants himself outside its
+// front doors and yells across at you, jabbing at the doors once you're close. You in it, he stands by your desk and
+// jabs at that, and yells at you between. Sit down and he's done; he isn't, otherwise, till five or the bar's back up.
+const HALE_DOOR = [15, 13]; // the pavement beside the glass doors, clear of them
+const HALE_DOOR_PT = [14, 1.15, 12.5];
+const HALE_DESK_PT = [OBJ_BY_ID.deskA2.x + 0.5, 0.8, OBJ_BY_ID.deskA2.z + 0.5]; // your desk top
+// beside your chair, either side, or beside the desk
+function haleDeskSpot(c) {
+  const d = OBJ_BY_ID.deskA2,
+    sides = [1, 1, -1, 1, 1, 0, -1, 0];
+  for (let i = 0; i < sides.length; i += 2)
+    if (walkable(d.x + sides[i], d.z + sides[i + 1], c)) return [d.x + sides[i], d.z + sides[i + 1]];
+  return nearestWalkable(d.x, d.z + 1, c, 3);
+}
+function haleCall(c, a) {
+  a.called = true;
+  ui.say(c, pName(pick(APPROACH_LINES.call.boss)), 2.4);
+  ui.bubble(c, 'exclaim', 'speech', 2.2);
+  audio.sting('awkward');
+  a.next = a.bt + 2;
+  a.jab = 0;
+}
+function haleHerd(c, a, dt) {
+  const P = PLAYER,
+    A = APPROACH,
+    L = APPROACH_LINES.boss;
+  if (playerAtDesk()) return approachEnd(c, a, Math.hypot(P.x - c.x, P.z - c.z) < 12 ? pick(L.close) : null);
+  if (!inShift() || G.workBar >= WORK.low + 10) return approachEnd(c, a, null);
+  const desk = inOffice(),
+    want = desk ? 'desk' : 'door';
+  if (a.at !== want) {
+    a.at = want;
+    a.spot = desk ? haleDeskSpot(c) : HALE_DOOR;
+    a.there = false;
+    if (!a.spot || !setPath(c, a.spot[0], a.spot[1])) return approachEnd(c, a, null);
+  }
+  const d = Math.hypot(P.x - c.x, P.z - c.z),
+    hear = d < A.near + 6;
+  a.bt += dt * BODY;
+  // the first thing out of him: your name, across the office or the street, as soon as he's got you in sight
+  if (!a.called && hear && npcSeesPlayer(c, A.near)) haleCall(c, a);
+  if (!a.there) {
+    c.run = Math.hypot(a.spot[0] + 0.5 - c.x, a.spot[1] + 0.5 - c.z) > A.runAt;
+    a.there = followPath(c, dt);
+    c.anim = 'idle';
+    a.point = null;
+    if (!a.there) return;
+    c.run = false;
+  }
+  // there: a line every so often, and between them the finger, at the desk or the doors; the rest of the time, at you
+  if (!a.called && hear) haleCall(c, a);
+  else if (a.bt >= a.next) {
+    a.next = a.bt + A.gap;
+    a.jab = a.bt + A.gap * 0.45;
+    if (hear) {
+      a.said = pick((desk ? L.desk : L.door).filter((l) => l !== a.said)); // never the same one twice running
+      ui.say(c, pName(a.said), 3);
+      ui.bubble(c, 'exclaim', 'speech', 2);
+    }
+  }
+  const pt = desk ? HALE_DESK_PT : HALE_DOOR_PT,
+    jab = a.bt < a.jab && (desk || d < 5);
+  a.point = jab ? pt : null;
+  c.tdir = jab ? Math.atan2(pt[0] - c.x, pt[2] - c.z) : Math.atan2(P.x - c.x, P.z - c.z);
+  c.anim = jab ? 'point' : a.bt < a.jab + 1 && hear ? 'yell' : 'idle';
 }
 // ───────────── the horror director: a few events a day from four kinds, more as THEIR plan grows
 // stray signs point the right way more often than not, never always: the town is strange in more than one way
@@ -27192,7 +27275,8 @@ function photoSeen(subj) {
 }
 // ── the photo hint. F shoots the whole wedge in front of you, no aiming. When something worth a photo is in it, the
 // "F photo" hint at the bottom glows and a small camera mark shows over it. It glows for a human's secret as much as for
-// THEM, and for what your own eyes are making up: it means odd, not THEM.
+// THEM, and for what your own eyes are making up: it means odd, not THEM. Not for a walk that's wrong
+// (horror/tenth-forms): that one you have to notice yourself, though the photo takes it all the same.
 const photoWorth = (n) =>
   !n.isPlayer &&
   n.onMap &&
@@ -27203,7 +27287,6 @@ const photoWorth = (n) =>
     (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
     (n.secret && !n.secret.done) ||
     (n.trace && !n.trace.photo) ||
-    (!!oddWalk(n) && !walkShot(n) && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 8) ||
     !!n.vis);
 function photoHintTick(dtReal) {
   UI.hintT = (UI.hintT || 0) - dtReal;
@@ -34992,9 +35075,9 @@ function deadWalk(c, T) {
   T.uaR *= 0.82;
   T.hr += sd * 0.02;
 }
-// a walk that's wrong, the kind the photo hint glows for: the dead's sway (THEM, and whoever THEY bit), THEIR mark's
-// lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a print and a note, never a card, and
-// one a day per face.
+// a walk that's wrong, the kind you have to spot yourself (the photo hint never glows for it): the dead's sway (THEM,
+// and whoever THEY bit), THEIR mark's lurch from day 4, a sleepwalker going out to IT. On film it's odd and no more: a
+// print and a note, never a card, and one a day per face.
 const WALK_NOTE = {
   sway: 'Walks wrong. A sway, one knee stiff.',
   lurch: 'Lurching. Arms hanging out in front.',

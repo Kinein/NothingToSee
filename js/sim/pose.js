@@ -445,6 +445,19 @@ function animTargets(c, dt) {
       T.rootY = jab * 0.012;
       break;
     }
+    case 'point': {
+      // jabbing a finger at something (town/approach haleHerd: your desk, the office doors): the arm out at it, poking
+      // the air on every word, leaning in, the other fist on his hip
+      const jab = Math.max(0, Math.sin(t * 7.5)) ** 2,
+        p = cur && cur.point;
+      T.torso = 0.12 + jab * 0.06;
+      T.hp = 0.12 + jab * 0.06;
+      T.uaL = -0.25;
+      T.faL = -1.5;
+      T.aoL = 0.55;
+      if (p) c._reach = { pt: [p[0], p[1] + jab * 0.1, p[2]], w: 1 };
+      break;
+    }
     case 'shame':
       // taking it: head hung, shoulders in, the hands knotted low at the belt, a flinch now and then
       T.hp = 0.5 + Math.max(0, Math.sin(t * 7.5)) ** 8 * 0.08;

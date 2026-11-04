@@ -1,6 +1,6 @@
 //@ play/photos — Photos: reading what is in frame
 //@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, photoHintTick, placeCamMark, toggleCam
-//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, horror/tenth-forms, world/grid, world/vision, core/util, …
+//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, world/grid, world/vision, core/util, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -349,7 +349,8 @@ function photoSeen(subj) {
 }
 // ── the photo hint. F shoots the whole wedge in front of you, no aiming. When something worth a photo is in it, the
 // "F photo" hint at the bottom glows and a small camera mark shows over it. It glows for a human's secret as much as for
-// THEM, and for what your own eyes are making up: it means odd, not THEM.
+// THEM, and for what your own eyes are making up: it means odd, not THEM. Not for a walk that's wrong
+// (horror/tenth-forms): that one you have to notice yourself, though the photo takes it all the same.
 const photoWorth = (n) =>
   !n.isPlayer &&
   n.onMap &&
@@ -360,7 +361,6 @@ const photoWorth = (n) =>
     (n.odd && !n.odd.photo && G.t <= n.odd.until) ||
     (n.secret && !n.secret.done) ||
     (n.trace && !n.trace.photo) ||
-    (!!oddWalk(n) && !walkShot(n) && Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) < 8) ||
     !!n.vis);
 function photoHintTick(dtReal) {
   UI.hintT = (UI.hintT || 0) - dtReal;

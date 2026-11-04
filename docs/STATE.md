@@ -29,12 +29,12 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `stashes` | `[]` | them/true-form, play/stashes, play/plants, play/confront | play/oddities, ui/menus, game/state |
 | `stashId` | `0` | play/stashes | play/plants, play/oddities |
 | `traps` | `[]` | — | play/stashes, play/traps, ui/menus |
-| `broken` | `{}` | — | world/paths, town/doors, play/raids, ui/menus, game/loop |
+| `broken` | `{}` | — | world/paths, town/npc-update, town/doors, play/raids, ui/menus, game/loop |
 | `intruded` | `''` | town/doors, play/raids | — |
 | `approach` | `null` | town/approach | — |
 | `approachAt` | `0` | town/approach | — |
 | `haleAt` | `0` | town/approach | — |
-| `workBar` | `WORK.fresh` | player/work, them/moves, town/approach | play/advice, ui/hud |
+| `workBar` | `WORK.fresh` | player/work, them/moves | town/approach, play/advice, ui/hud |
 | `workBonusAt` | `-999` | player/work | — |
 | `awayT` | `0` | player/work | play/verbs |
 | `workWarned` | `false` | player/work | — |

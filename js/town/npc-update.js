@@ -61,6 +61,8 @@ function npcUpdate(n, dt) {
   if (n.isThem && !n.exposed) theirThingsOnYou(n, dt);
   if (n.wcCd > 0) n.wcCd -= dt;
   stepChar(n, dt);
+  // home behind a door you forced, never mind how they got there: they lock it. Not THEM: that one's cornered (play/raids)
+  if (!n.isThem && G.broken[n.id] > G.t && atHome(n)) homeAgain(n);
   if (n.tell) tellTick(n, dt * BODY); // a slip plays out in body time, like anything else a body does
   if (n.secret) secretTick(n, dt * BODY);
   if (habitReady(n) && !n.fleeing && !n.hideUntil) {
