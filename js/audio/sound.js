@@ -820,6 +820,10 @@ const audio = (() => {
         tone('square', 1320, 0.003, 0.025, 0.06);
         setTimeout(() => ctx && tone('square', 1760, 0.003, 0.025, 0.09), 70);
       } else if (kind === 'shutter') noise(0.001, 0.3, 0.12, 3000, 1);
+      else if (kind === 'shutterGlass') {
+        noise(0.001, 0.13, 0.06, 2200, 1.4); // the lens against the glass: a hushed click, and the pane's faint tick
+        tone('sine', 2900, 0.002, 0.01, 0.16);
+      }
       else if (kind === 'ring') {
         for (let k = 0; k < 2; k++)
           setTimeout(() => {

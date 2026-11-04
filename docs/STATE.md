@@ -33,6 +33,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `intruded` | `''` | town/doors, play/raids | — |
 | `approach` | `null` | town/approach | — |
 | `approachAt` | `0` | town/approach | — |
+| `strangerAt` | `0` | town/approach | — |
 | `haleAt` | `0` | town/approach | — |
 | `workBar` | `WORK.fresh` | player/work, them/moves | town/approach, play/advice, ui/hud |
 | `workBonusAt` | `-999` | player/work | — |
@@ -195,7 +196,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `rainTo` | `3` | player/work | town/traffic-weather |
 | `rainAmt` | `0.8` | player/work | town/traffic-weather |
 | `rainK` | `0` | town/traffic-weather, game/state, game/endings | gfx/draw-helpers, gfx/frame, town/cell, game/loop |
-| `wet` | `0` | town/traffic-weather, game/state, game/endings | gfx/look |
+| `wet` | `0` | town/traffic-weather, game/state, game/endings | gfx/look, gfx/vf-glass |
 | `dayShown` | `0` | ui/interface, chase/they-come, chase/hunt | player/needs, play/verbs |
 
 ## `G` fields added on the fly

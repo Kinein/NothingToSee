@@ -216,7 +216,7 @@ function addPrint(o) {
 // the frame check: everything visible within a couple of tiles of the aim point is in the picture
 function takePhoto(tg) {
   if (!vfShoot()) ui.flash(); // the flash goes off in the camera's square, if it's up
-  audio.blip('shutter'); // the film never runs out
+  audio.blip(VF_PANE.k > 0.5 ? 'shutterGlass' : 'shutter'); // the film never runs out; against a window, quietly
   const ax = tg.char ? tg.char.x : tg.x,
     az = tg.char ? tg.char.z : tg.z;
   if (G.t < (G.shakenUntil || 0) && G.t >= (G.shakenFrom || 0) && chance(0.35)) {

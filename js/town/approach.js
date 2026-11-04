@@ -1,6 +1,6 @@
 //@ town/approach — People come to you: a word in the street, Hale at your shoulder, THEIR people warning and following you
 //@ Defines: approachFree, approachTick, approachStart, approachLines, approachAct, approachEnd, approachStep, HALE_DOOR, HALE_DOOR_PT, HALE_DESK_PT, haleDeskSpot, haleCall, haleHerd
-//@ Uses:    sim/core, core/util, ui/interface, data/tuning, sim/movement, sim/actions, data/lines, world/objects, town/echoes, town/talk, …
+//@ Uses:    sim/core, core/util, ui/interface, data/tuning, sim/movement, sim/actions, data/lines, world/objects, town/echoes, player/work, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── people come to you. Not everything waits for you to start it: now and then somebody comes over on their
 // own. A neighbour with something to tell you, Hale when your chair's been empty too long, one of THEM to ask how you're
@@ -65,13 +65,15 @@ function approachTick() {
   if (G.t < G.approachAt) return;
   G.approachAt = G.t + rand(A.every[0], A.every[1]);
   if (darkNow() && chance(0.5)) return;
-  const opts = [];
+  const opts = [],
+    strangers = !inOffice() && G.t >= G.strangerAt;
   for (const n of CHARS) {
     if (G.t < (n.cameAt || -1e9) + A.again) continue; // not the same face twice running
     if (!approachFree(n) || Math.hypot(n.x - P.x, n.z - P.z) > A.near || !npcSeesPlayer(n, A.near)) continue;
     if (n.def.stranger) {
-      if (n.kind === 'drunk') opts.push([1.2, [n, 'drunk']]);
-      else if (n.kind === 'walker') opts.push([0.5, [n, 'lost']]);
+      if (!strangers) continue;
+      if (n.kind === 'drunk') opts.push([A.drunk, [n, 'drunk']]);
+      else if (n.kind === 'walker') opts.push([A.lost, [n, 'lost']]);
     } else if (n.isThem) {
       if (G.aware >= A.probeAware && theirDay() < 5) opts.push([1 + G.aware / 100, [n, 'probe']]);
     } else if (servantKind(n) && theirDay() < 5) opts.push([1.2, [n, 'warn']]);
@@ -85,6 +87,7 @@ function approachStart(n, kind) {
   enqueue(n, approachAct(n, kind));
   G.approach = n.id;
   n.cameAt = G.t;
+  if (n.def.stranger) G.strangerAt = G.t + APPROACH.stranger;
 }
 const pName = (s) => s.replace(/\{p\}/g, PLAYER.name || 'you');
 // what they've come to say, in order: strings, or a function that says its own (gossip, a chat line)

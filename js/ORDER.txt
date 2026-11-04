@@ -31,6 +31,7 @@ gfx/draw-helpers.js              # Glow switches, long shadows, floor decals, ma
 gfx/frame.js                     # renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
 gfx/portraits.js                 # Portraits and evidence snapshots rendered offscreen
 gfx/viewfinder.js                # The camera's square: the town through your eyes, the flash, the print
+gfx/vf-glass.js                  # Through the glass: a photo taken through a window, the pane put back in the square
 sim/core.js                      # Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 sim/characters.js                # Character records
 sim/body-motion.js               # The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses

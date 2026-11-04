@@ -29,6 +29,7 @@ function freshG(start) {
     intruded: '',
     approach: null, // who's coming over to you right now (town/approach)
     approachAt: 0, // the next look round for somebody to come over
+    strangerAt: 0, // no stranger comes over to you before this
     haleAt: 0, // Hale comes to find you again no sooner than this
     workBar: WORK.fresh,
     workBonusAt: -999,

@@ -1,6 +1,6 @@
 //@ gfx/viewfinder — The camera's square: the town through your eyes, the flash, the print
 //@ Defines: VF, VF_HOLD, VF_WIDE, VF_TIGHT, vfEl, vfOpen, vfShoot, vfHold, vfPrint, vfClose, vfLabel, VF_SUBJ, vfSubjAt, vfLens, vfInWayAt, VF_PAST, …
-//@ Uses:    gfx/gl, gfx/renderer, sim/core, core/util, world/grid, ui/interface, world/light-map, gfx/world-geometry, gfx/post, horror/layer, …
+//@ Uses:    gfx/gl, gfx/renderer, sim/core, core/util, world/grid, ui/interface, world/light-map, gfx/vf-glass, gfx/world-geometry, gfx/post, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the viewfinder. F lifts the camera and a square comes up on the right: the town through your own eyes,
 // live. With evidence in front of you (play/photos photoAim) the lens swings onto it, zooms in until it fills the frame,
@@ -64,6 +64,7 @@ function vfOpen(act, aim) {
   VF.board = undefined;
   VF.cards.length = VF.prints.length = 0;
   VF.yaw = P.dir;
+  VF_PANE.k = 0;
   VF.fov = VF_WIDE;
   vfLens(1);
   VF.fov = VF_WIDE; // it zooms in once it's up
@@ -272,11 +273,13 @@ function vfRender(still) {
       back: [eye[0] - fx * 60, 1, eye[2] - fz * 60],
       r: clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
     };
-  }
+    vfPane(eye, tg.x, tg.z); // a window on the line: the shot is through the glass (gfx/vf-glass)
+  } else VF_PANE.on = false;
   R.cut = VF.cut;
-  const flash = still
-    ? { x: eye[0] + fx * 0.3, y: eye[1], z: eye[2] + fz * 0.3, r: 8, col: [0.62, 0.6, 0.56], dark: 0 }
-    : null;
+  const fk = VF_PANE.on ? 0.5 : 1, // through glass most of the flash comes back off it
+    flash = still
+      ? { x: eye[0] + fx * 0.3, y: eye[1], z: eye[2] + fz * 0.3, r: 8, col: [0.62 * fk, 0.6 * fk, 0.56 * fk], dark: 0 }
+      : null;
   if (flash) HX.lights.unshift(flash);
   try {
     drawScene(VF.ms, S, S, still ? 'still' : 'live');
@@ -290,8 +293,9 @@ function vfRender(still) {
   gl.blitFramebuffer(0, 0, S, S, 0, 0, S, S, gl.COLOR_BUFFER_BIT, gl.NEAREST);
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-  bloomPasses(VF.scene, VF.blm);
-  composite(VF.scene.tex, VF.blm[0].tex, VF.out, true);
+  const src = vfGlassPass(view, still) || VF.scene;
+  bloomPasses(src, VF.blm);
+  composite(src.tex, VF.blm[0].tex, VF.out, true);
 }
 // VF.out onto the screen, under the square's frame
 function vfBlit() {
