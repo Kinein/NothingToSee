@@ -1,6 +1,6 @@
 //@ gfx/people — Drawing a person: body, face, hair, clothes and the small details
 //@ Defines: WHITE_SHIRT, MARK_GOLD, MARK_GOLD_E, MARK_GOLD_D, MARK_STALK, MARK_BEAD, MARK_FLY, pallor, HEAD_C, HEAD_S, FACE_T, faceZ, dressDetail, drawChar, drawPerson
-//@ Uses:    gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, gfx/body-parts, sim/pose, …
+//@ Uses:    gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, player/needs, gfx/body-parts, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── people
 // Long and thin, a little stooped, the head carried forward. Faces are mostly socket. Nobody in Wexley has slept well in years.
@@ -519,10 +519,12 @@ function drawPerson(c) {
   const legC = dress && L.skirt ? mix3(bot, [0.05, 0.045, 0.045], 0.55) : bot;
   for (const s of [1, -1]) {
     const th = s > 0 ? J.thL : J.thR,
-      sh = s > 0 ? J.shL : J.shR;
-    const Th = M4.joint(P, s * 0.083 * w, -0.03, 0, th, 0, 0);
+      sh = s > 0 ? J.shL : J.shR,
+      lx = (s > 0 ? J.lxL : J.lxR) || 0,
+      kx = (s > 0 ? J.kxL : J.kxR) || 0;
+    const Th = M4.joint(P, s * 0.083 * w, -0.03, 0, th, 0, -s * lx);
     part(Th, 0, -0.21 * h, 0, 0.125, 0.5 * h, 0.135, 'limb2', legC);
-    const Sh = M4.joint(Th, 0, -0.44 * h, 0, sh, 0, 0);
+    const Sh = M4.joint(Th, 0, -0.44 * h, 0, sh, 0, s * kx);
     part(Sh, 0, -0.2 * h, -0.006, 0.095, 0.47 * h, 0.105, 'limb2', legC);
     part(Sh, 0, -0.41 * h + 0.035, 0.05, 0.098, 0.085, 0.26, 'shoe', shoe);
   }

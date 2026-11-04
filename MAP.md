@@ -192,12 +192,12 @@ The look: a cartoon town, and how far it has turned into the horror right now (r
 - **→ uses:** core/util, horror/layer, sim/core, world/light-map, gfx/renderer, taken/taken, game/last-day, them/plan, gfx/world-geometry
 - **← used by:** 3 (gfx/draw-helpers, gfx/frame, game/loop)
 
-### gfx/people  ·  #23  ·  616 lines
+### gfx/people  ·  #23  ·  618 lines
 
 Drawing a person: body, face, hair, clothes and the small details
 
 - **Defines (15):** `WHITE_SHIRT` `MARK_GOLD` `MARK_GOLD_E` `MARK_GOLD_D` `MARK_STALK` `MARK_BEAD` `MARK_FLY` `pallor` `HEAD_C` `HEAD_S` `FACE_T` `faceZ` `dressDetail` `drawChar` `drawPerson`
-- **→ uses:** gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, gfx/body-parts, sim/pose, them/servants, data/tuning
+- **→ uses:** gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, player/needs, gfx/body-parts, sim/pose, them/servants, data/tuning
 - **← used by:** 8
 
 ### gfx/creatures  ·  #24  ·  755 lines
@@ -250,7 +250,7 @@ Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 - **→ uses:** core/util, world/grid, taken/taken, town/cell
 - **← used by:** 97
 
-### sim/characters  ·  #29  ·  87 lines
+### sim/characters  ·  #29  ·  91 lines
 
 Character records
 
@@ -258,12 +258,12 @@ Character records
 - **→ uses:** core/util, sim/core
 - **← used by:** 27
 
-### sim/body-motion  ·  #30  ·  457 lines
+### sim/body-motion  ·  #30  ·  461 lines
 
 The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses
 
 - **Defines (30):** `MOTION` `SETTLE` `settle0` `keyed` `bodySide` `bodySeed` `viaPose` `motionPre` `GAIT` `JOG_W` `GP` `gaitParams` `gaitTargets` `PUNCH` `GRAB` `keyPose` `handsToHead` `photoPose` `LEG_T` `LEG_S` `footY0` `legIK` `SEAT_FOOT` `seatLegs` `seatPose` `liePose` `poseOver` `VAULT_L` `VAULT_R` `vaultPose`
-- **→ uses:** core/util, gfx/reach-rig, gfx/renderer
+- **→ uses:** core/util, gfx/reach-rig, gfx/renderer, player/needs
 - **← used by:** 4 (sim/seat-moves, sim/pose, horror/layer, taken/taken)
 
 ### sim/seat-moves  ·  #31  ·  389 lines
@@ -274,12 +274,12 @@ Sitting down, getting up, lying down: the steps and the lowering
 - **→ uses:** core/util, sim/body-motion, sim/characters, world/paths, sim/actions
 - **← used by:** 2 (sim/pose, sim/actions)
 
-### sim/pose  ·  #32  ·  711 lines
+### sim/pose  ·  #32  ·  712 lines
 
 Each frame's pose: targets, gestures, door reach, blending, turning, animate
 
 - **Defines (12):** `animTargets` `gesture` `applyGestures` `doorReach` `fx_hasProp` `blendJoints` `turnBody` `rootSlide` `drawX` `drawZ` `animate` `updateShown`
-- **→ uses:** core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, sim/characters, sim/seat-moves, player/needs, them/servants, data/tuning, gfx/reach-rig, world/grid, world/objects … +6
+- **→ uses:** core/util, sim/body-motion, sim/core, them/tells, gfx/renderer, input/camera, player/needs, sim/characters, sim/seat-moves, them/servants, data/tuning, gfx/reach-rig, world/grid, world/objects … +6
 - **← used by:** 18
 
 ### sim/movement  ·  #33  ·  82 lines
@@ -300,13 +300,13 @@ The action queue shared by player and NPCs
 
 ## player/
 
-### player/needs  ·  #35  ·  483 lines
+### player/needs  ·  #35  ·  545 lines
 
 The player body: needs, Psychic, accidents, passing out, panic
 
-- **Defines (31):** `lvl` `setNeed` `applyNeedFx` `bump` `addStress` `psychic` `psyDrop` `psyMark` `tooShaken` `shaky` `shakenNote` `stressBand` `mood` `moodWord` `needsTick` `hunted` `psySees` `psyDrain` `accident` `accidentPool` `wallFace` `peePose` `holdingK` `holdStand` `holdWalk` `PEE` `peeRnd` `peeFx` `passOut` `passOutLids` `breakdown`
+- **Defines (34):** `lvl` `setNeed` `applyNeedFx` `bump` `addStress` `psychic` `psyDrop` `psyMark` `tooShaken` `shaky` `shakenNote` `stressBand` `mood` `moodWord` `needsTick` `hunted` `psySees` `psyDrain` `accident` `accidentPool` `wallFace` `peePose` `holdingK` `GRIP` `grip` `legDrop` `holdStand` `holdWalk` `PEE` `peeRnd` `peeFx` `passOut` `passOutLids` `breakdown`
 - **→ uses:** core/util, sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, data/lines, audio/sound, them/tells, town/suspicion, input/walking, play/items, horror/layer … +6
-- **← used by:** 30
+- **← used by:** 32
 
 ### player/work  ·  #36  ·  127 lines
 

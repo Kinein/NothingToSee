@@ -18,6 +18,10 @@ function defaultJ() {
     thR: 0,
     shL: 0,
     shR: 0,
+    lxL: 0, // a leg swung in across the other, at the hip
+    lxR: 0,
+    kxL: 0, // a shin kicked out, at the knee
+    kxR: 0,
     uaL: 0,
     uaR: 0,
     faL: -0.1,

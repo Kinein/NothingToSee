@@ -1,6 +1,6 @@
 //@ sim/body-motion — The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses
 //@ Defines: MOTION, SETTLE, settle0, keyed, viaPose, motionPre, GAIT, JOG_W, GP, gaitParams, gaitTargets, PUNCH, GRAB, keyPose, handsToHead, photoPose, …
-//@ Uses:    core/util, gfx/reach-rig, gfx/renderer
+//@ Uses:    core/util, gfx/reach-rig, gfx/renderer, player/needs
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the body in motion
 // The sim moves people about and says what they're doing; this layer is only how that looks. A walk eases into the
@@ -63,7 +63,11 @@ function motionPre(c, dt) {
   c._wp = wp;
   if (d > 0 && d < 8)
     c.vph =
-      ((c.vph || 0) + Math.min(d * (c.run ? MOTION.runStride : c.jog ? MOTION.jogStride : 1), dt * MOTION.maxStride)) %
+      ((c.vph || 0) +
+        Math.min(
+          d * (c.run ? MOTION.runStride : c.jog ? MOTION.jogStride : 1) * (1 + 0.8 * holdingK(c)), // holding it: quick little steps
+          dt * MOTION.maxStride,
+        )) %
       (TAU * 512);
   else if (c.vph == null) c.vph = wp % TAU;
   const on = c.moving ? 1 : 0;

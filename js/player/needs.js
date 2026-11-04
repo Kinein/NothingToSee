@@ -1,5 +1,5 @@
 //@ player/needs — The player body: needs, Psychic, accidents, passing out, panic
-//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, accidentPool, wallFace, peePose, holdStand, holdWalk, …
+//@ Defines: setNeed, applyNeedFx, bump, psyDrop, shakenNote, stressBand, mood, moodWord, needsTick, psyDrain, accident, accidentPool, wallFace, peePose, GRIP, grip, …
 //@ Uses:    core/util, sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, data/lines, audio/sound, them/tells, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── the player's body
@@ -291,51 +291,113 @@ function peePose(T, c) {
     T.roll = lerp(T.roll, sh, give);
   }
 }
-// holding it, with the last of your will (bladder under BLADDER.hold): standing, the knees pressed together and the
-// weight shifting from foot to foot, a hand down there, looking round for a toilet; walking or jogging, short quick steps
-// with the knees in, bent over it, one hand clamped there. Only your idle and your walk: everything else plays as ever.
+// holding it, with the last of your will (bladder under BLADDER.hold). Standing: the legs crossed tight, bent over it
+// with the bum out, a hand clamped down there, bouncing on the knees and looking round for a toilet; worse, both hands,
+// the legs crossing over the other way and back, and now and then a wave of it that folds you up, shaking. Walking or
+// jogging: knock-kneed, the knees pinned together and the feet flicking out, quick little steps (cadence in
+// sim/body-motion motionPre), bent over with both hands there, the bum waggling. Only your idle and your walk:
+// everything else plays as ever.
 const holdingK = (c) =>
   c.isPlayer && PLAYER.needs && G && !G.sleeping ? sstep(BLADDER.hold, BLADDER.hold * 0.25, PLAYER.needs.bladder) : 0;
+// a hand clamped down there: low, pressed in between the legs; or high, cupped over the other. The arm's angles were
+// solved with armIK's arm (gfx/reach-rig) for torso bends .15, .3 and .45 and are read off here, so it costs nothing
+const GRIP = {
+  lo: [
+    [-0.153, -0.297, -0.13],
+    [0.001, -0.315, -0.484],
+    [0.081, -0.338, -0.697],
+  ],
+  hi: [
+    [0.182, -0.341, -0.842],
+    [0.234, -0.369, -0.988],
+    [0.289, -0.404, -1.128],
+  ],
+};
+function grip(T, s, low, w) {
+  if (w <= 0) return;
+  const g = low ? GRIP.lo : GRIP.hi,
+    u = clamp((T.torso - 0.15) / 0.15, 0, 2),
+    i = u < 1 ? 0 : 1,
+    f = u - i,
+    a = g[i],
+    b = g[i + 1];
+  const ua = lerp(a[0], b[0], f),
+    ao = lerp(a[1], b[1], f),
+    fa = lerp(a[2], b[2], f);
+  if (s > 0) {
+    T.uaL = lerp(T.uaL, ua, w);
+    T.aoL = lerp(T.aoL, ao, w);
+    T.faL = lerp(T.faL, fa, w);
+  } else {
+    T.uaR = lerp(T.uaR, ua, w);
+    T.aoR = lerp(T.aoR, ao, w);
+    T.faR = lerp(T.faR, fa, w);
+  }
+}
+// how far the hips come down for a leg bent at the hip (th), the knee (sh) and swung across (lx)
+const legDrop = (h, th, sh, lx) => 0.44 * h * (2 - Math.cos(lx) * (Math.cos(th) + Math.cos(th + sh)));
 function holdStand(c, T, t) {
   const k = holdingK(c);
   if (k <= 0) return;
-  const sq = Math.sin(t * (3 + 4 * k)),
-    cross = Math.sin(t * 1.9);
-  T.thL = lerp(T.thL, -0.2 - Math.max(0, sq) * 0.22 + cross * 0.08, k);
-  T.thR = lerp(T.thR, -0.2 - Math.max(0, -sq) * 0.22 - cross * 0.08, k);
-  T.shL = lerp(T.shL, 0.32 + Math.max(0, sq) * 0.35, k);
-  T.shR = lerp(T.shR, 0.32 + Math.max(0, -sq) * 0.35, k);
-  T.rootY = lerp(T.rootY, -0.04 + Math.abs(sq) * 0.018, k);
-  T.roll = lerp(T.roll, sq * 0.035, k);
-  T.torso = lerp(T.torso, 0.2 + Math.abs(sq) * 0.03, k);
-  T.uaL = lerp(T.uaL, -0.42, k);
-  T.uaR = lerp(T.uaR, -0.4, k);
-  T.faL = lerp(T.faL, -0.85, k);
-  T.faR = lerp(T.faR, -0.8, k);
-  T.aoL = lerp(T.aoL, -0.1, k);
-  T.aoR = lerp(T.aoR, -0.08, k);
-  T.hp = lerp(T.hp, 0.12, k);
-  T.hy = lerp(T.hy, Math.sin(t * 1.3) * 0.55, k); // where's the toilet
-  T.hr = lerp(T.hr, Math.sin(t * 9) * 0.05, k);
+  const h = c.look.h,
+    k2 = sstep(0.35, 0.9, k), // the worse it gets: both hands, the dance
+    bob = 0.5 + 0.5 * Math.sin(t * 9), // bouncing on the knees (fixed beats: a rate riding k would skid the phase)
+    wave = sstep(0.55, 0.95, Math.sin(t * 0.55 + 1.3)) * k2, // a wave of it: squeezed up, folded over, shaking
+    sw = sstep(-0.35, 0.35, Math.sin(t * 0.8)), // which leg's crossed in front (1 the left); swapping, they uncross
+    un = 1 - Math.abs(2 * sw - 1),
+    lx = (0.1 + 0.06 * wave) * (1 - 0.85 * un),
+    knee = 0.1 + 0.1 * bob * k2 + 0.3 * wave + 0.25 * un;
+  const thL = lerp(0.05, -0.14, sw) - 0.15 * wave,
+    thR = lerp(-0.14, 0.05, sw) - 0.15 * wave,
+    shL = knee + lerp(0, 0.1, sw),
+    shR = knee + lerp(0.1, 0, sw),
+    lxL = lx * (1 + sw),
+    lxR = lx * (2 - sw);
+  T.thL = lerp(T.thL, thL, k);
+  T.thR = lerp(T.thR, thR, k);
+  T.shL = lerp(T.shL, shL, k);
+  T.shR = lerp(T.shR, shR, k);
+  T.lxL = lerp(T.lxL, lxL, k);
+  T.lxR = lerp(T.lxR, lxR, k);
+  T.rootY = lerp(T.rootY, -Math.min(legDrop(h, thL, shL, lxL), legDrop(h, thR, shR, lxR)), k); // the straighter leg stands
+  T.roll = lerp(T.roll, Math.sin(t * 4.5) * 0.03 * k2 + Math.sin(t * 31) * 0.012 * wave, k); // hips going
+  T.twist = lerp(T.twist, Math.sin(t * 4.5) * 0.08 * k2, k);
+  T.torso = lerp(T.torso, 0.2 + 0.12 * k2 + 0.16 * wave + 0.03 * bob * k2, k);
+  grip(T, -1, true, k);
+  grip(T, 1, false, k2);
+  if (k2 < 1) {
+    T.uaL = lerp(T.uaL, -0.2, k * (1 - k2)); // not yet: the other hand balled up at the side
+    T.faL = lerp(T.faL, -0.7, k * (1 - k2));
+  }
+  T.hp = lerp(T.hp, 0.1 + 0.4 * wave, k);
+  T.hy = lerp(T.hy, Math.sin(t * 1.3) * 0.6 * (1 - wave), k); // where's the toilet
+  T.hr = lerp(T.hr, Math.sin(t * 9) * 0.05 - 0.15 * wave, k);
 }
 function holdWalk(c, T, p, rw) {
   const k = holdingK(c);
   if (k <= 0) return;
-  const s = Math.sin(p);
-  T.thL = lerp(T.thL, T.thL * 0.5 - 0.12, k); // short steps, the knees kept in
-  T.thR = lerp(T.thR, T.thR * 0.5 - 0.12, k);
-  T.shL = lerp(T.shL, T.shL * 0.75 + 0.18, k);
-  T.shR = lerp(T.shR, T.shR * 0.75 + 0.18, k);
-  T.torso = lerp(T.torso, 0.3 + rw * 0.08, k);
-  T.twist *= 1 - 0.7 * k;
-  T.roll = lerp(T.roll, s * (0.06 + rw * 0.04), k); // a waddle, side to side
-  T.uaL = lerp(T.uaL, -0.45, k); // one hand clamped down there
-  T.faL = lerp(T.faL, -0.9, k);
-  T.aoL = lerp(T.aoL, -0.12, k);
-  T.uaR = lerp(T.uaR, -0.3 + s * 0.35 * (0.4 + rw), k); // the other flapping for balance
-  T.faR = lerp(T.faR, -0.9 - rw * 0.4, k);
-  T.aoR = lerp(T.aoR, 0.2 + rw * 0.15, k);
-  T.hp = lerp(T.hp, 0.18 + Math.sin(p * 2) * 0.03, k);
+  const k2 = sstep(0.35, 0.9, k),
+    s = Math.sin(p),
+    swL = Math.max(0, -Math.cos(p + 0.3)), // a leg coming through (the same beat as gaitTargets' knee)
+    swR = Math.max(0, Math.cos(p + 0.3));
+  T.thL = lerp(T.thL, T.thL * 0.5 - 0.08, k); // short steps
+  T.thR = lerp(T.thR, T.thR * 0.5 - 0.08, k);
+  T.shL = lerp(T.shL, T.shL * 0.6 + 0.2, k);
+  T.shR = lerp(T.shR, T.shR * 0.6 + 0.2, k);
+  T.lxL = lerp(T.lxL, 0.11 + 0.03 * rw, k); // the knees pinned together
+  T.lxR = lerp(T.lxR, 0.11 + 0.03 * rw, k);
+  T.kxL = lerp(T.kxL, 0.1 + (0.25 + 0.15 * rw) * swL, k); // and the feet flicking out round them
+  T.kxR = lerp(T.kxR, 0.1 + (0.25 + 0.15 * rw) * swR, k);
+  T.rootY = lerp(T.rootY, T.rootY - 0.04 - 0.02 * rw, k);
+  T.torso = lerp(T.torso, 0.3 + 0.1 * rw + 0.04 * k2, k); // bent over it
+  T.twist *= 1 - 0.8 * k;
+  T.roll = lerp(T.roll, s * (0.06 + rw * 0.05), k); // the bum waggling side to side
+  grip(T, -1, true, k);
+  T.uaL = lerp(T.uaL, -0.3 + s * 0.35 * (0.4 + rw), k * (1 - k2)); // the other flapping for balance, till it's needed too
+  T.faL = lerp(T.faL, -0.9 - rw * 0.4, k * (1 - k2));
+  T.aoL = lerp(T.aoL, 0.2 + rw * 0.15, k * (1 - k2));
+  grip(T, 1, false, k2);
+  T.hp = lerp(T.hp, 0.12 + Math.sin(p * 2) * 0.03, k);
   T.hy = lerp(T.hy, Math.sin(c.animT * 1.6) * 0.3, k);
 }
 // the spray, drawn: droplets in an arc from where you stand, splashing where they land. Looks only: its own little
