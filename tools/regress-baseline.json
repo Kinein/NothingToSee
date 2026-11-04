@@ -8,9 +8,9 @@
    "martin",
    "hale"
   ],
-  "people": "ecba9b3a672b",
-  "state": "018a57dfa72b",
-  "light": 9726.693335
+  "people": "7c029d85f825",
+  "state": "8f7d3d777b29",
+  "light": 9715.996249
  },
  "2": {
   "when": "10:50 day 5",
@@ -21,9 +21,9 @@
    "vic",
    "earl"
   ],
-  "people": "79ef4a909df2",
-  "state": "23876509a3b2",
-  "light": 122127.508464
+  "people": "78b0e7418b9e",
+  "state": "8a58d7f12880",
+  "light": 122168.761789
  },
  "3": {
   "when": "10:50 day 5",
@@ -34,8 +34,8 @@
    "denise",
    "ray"
   ],
-  "people": "8dd7b8ce67c1",
-  "state": "233d8fd08d2c",
+  "people": "dc5519878ec6",
+  "state": "dbdb70c1654e",
   "light": 9749.977838
  }
 }
