@@ -24,6 +24,7 @@ python3 build.py                  # → dist/nothing-to-see-here.html (the game)
 python3 build.py --dev            # → dist/nothing-to-see-here.dev.html (with window.__dev tools)
 python3 tools/check.py            # after EVERY change: headers, MAP.md, SYMBOLS.tsv, docs/STATE.md, builds, syntax
 python3 tools/check.py --full     # + headless boot test + seeded determinism check (needs Python playwright)
+python3 tools/object_sheets.py office   # → renders/office/: every object in the 4 keys-camera views, one PNG each
 npx prettier@3 --write js tools   # formatting (config in .prettierrc.json; js/data/ is hand-aligned and ignored)
 ```
 
@@ -82,6 +83,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | True forms, fights | `js/them/true-form.js`, `js/combat/*.js` (`foeMelee`, `foeRanged`, `hurt`, `fireBolt`); your swing: `js/town/fleeing.js` (`attackKey`, `swingAct`) |
 | Hitting people: hit count, onlookers, police calls, knockouts | `js/combat/brawl.js` (`struck`, `onlook`, `callPolice`, `knockCold`); numbers in `BRAWL` |
 | Blood: the spray from every blow, splats on floors and runs down walls, kept all game (`G.blood`), THEIR colours, the hit-stop | `js/combat/blood.js` (`bleed`, `bleedAt`, `bloodPool`, `bloodDraw`); numbers in `BLOOD`; the splat/drip shapes in `DFS` (gfx/shaders-fx.js) |
+| What a shaken head hears: sharper ears, sounds that aren't there, catching one of THEM slip to clear your name (`catchThem`); numbers in `EARS` | `js/horror/ears.js`, `visionPing` in horror/visions.js, `heardIt` in them/plan.js |
 | Horror events and scenes | `js/horror/director.js` (daily plan), `layer.js` (machinery), `midday.js`, `night.js` |
 | Encounters (rites) | `js/horror/encounters.js`, `encounter-outcomes.js`, `encounter-draw.js` |
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |

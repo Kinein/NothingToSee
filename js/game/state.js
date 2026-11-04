@@ -39,6 +39,9 @@ function freshG(start) {
     sleepFrom: 0,
     visionOff: 0,
     whisperCd: 30,
+    earCd: 20, // real seconds to the next sound that isn't there (horror/ears)
+    fakeEar: null, // the sound that isn't there, until you check or it fades: {x, z, until}
+    catchDay: 0, // the day you last caught one of THEM slipping and cleared your name (horror/ears catchThem)
     clinicDay: 0,
     lore: {},
     traits: {},

@@ -251,6 +251,12 @@ dark at night stays, as a slow drift.
 
 A vision never shows up on film (as today).
 
+**Hearing things (v1.26).** The lower Psychic gets under 60, the better you hear: THEIR slips and noises carry up to
+1.8× as far and none go by unnoticed. But now and then a sound comes from somewhere there's nobody. Real and fake
+look and sound the same. Walk up to a fake and it costs you 8 Psychic (and sometimes a shadow). See one of THEM slip with
+your own eyes and your head has to hold (a save: under 40 you may doubt it, the lower the likelier): if it holds, nobody
+thinks you're mad any more (their suspicion is wiped, everyone else's falls), once a day. Numbers in `EARS`.
+
 ## Needs
 
 Hunger and energy stay as they are. The bladder stays, for the funny moments and as one more thing to get wrong.

@@ -80,6 +80,7 @@ play/biography.js                # Biography: six facts a suspect, found by chat
 play/traps.js                    # Traps
 play/raids.js                    # Raids: kicking in a door
 horror/visions.js                # Visions
+horror/ears.js                   # What a shaken head hears: real slips and sounds that aren't there; catching one clears your name
 play/verbs.js                    # What you can do: snooping, eating, Lenny, chat
 play/confront.js                 # Giving up, the FBI, the talk options
 play/confrontation.js            # The confrontation: your cards on IT, ✓ or ✗, and what it leaves in the street
@@ -127,3 +128,4 @@ game/loop.js                     # Per-frame simulation, main loop, boot
 
 # Developer-only (python3 build.py --dev): never in the real page
 dev dev/devtools.js              # window.__dev: state access, skip time, per-system timing
+dev dev/object-sheets.js         # __dev.objectSheets: every object of a building in the four camera views, one PNG each

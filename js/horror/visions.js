@@ -1,6 +1,6 @@
 //@ horror/visions — Visions
 //@ Defines: VISION_FACTIONS, hallucinate, visionDoor, visionPing, visionFlicker, visionSpot, visionFigure, visionShade, visionRunner, visionWatcher, visionStep
-//@ Uses:    sim/core, core/util, world/grid, data/tuning, audio/sound, world/vision, horror/layer, world/paths, town/cast, player/needs, …
+//@ Uses:    sim/core, core/util, data/tuning, world/grid, audio/sound, world/vision, horror/layer, world/paths, town/cast, player/needs, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── visions
 // Under Psychic 60 the mind starts lying, now and then: a shadow in a dark corner, someone running off at the edge of
@@ -54,6 +54,7 @@ function visionPing() {
     const d = Math.hypot(x - P.x, z - P.z);
     if (d < 5 || visAt(x + 0.5, z + 0.5) > 0.4) continue;
     notifyPing(x + 0.5, z + 0.5);
+    G.fakeEar = { x: x + 0.5, z: z + 0.5, until: G.t + EARS.wait }; // go and look: horror/ears earCheck
     return true;
   }
   return false;

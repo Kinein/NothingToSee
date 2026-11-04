@@ -172,6 +172,7 @@ function tellTick(n, dt) {
     if (seen && !tl.seen) {
       tl.seen = true;
       psyMark('sign');
+      if (n.isThem) catchThem(n); // a slip seen with your own eyes
     }
     if (seen && !tl.caught && npcSeesPlayer(n, 8)) {
       tl.caught = true;
@@ -186,7 +187,13 @@ function tellTick(n, dt) {
   // what you see is only what you see: nothing is filed, nothing slows down. A photo is the only record.
   const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
   if (seen) tl.w += dt;
-  if (seen && tl.w > 0.8 && n.isThem) psyMark('sign'); // a slight sign, seen with your own eyes
+  if (seen && tl.w > 0.8 && n.isThem) {
+    psyMark('sign'); // a slight sign, seen with your own eyes
+    if (!tl.rolled && !tl.ritual && !tl.watch) {
+      tl.rolled = true;
+      catchThem(n);
+    }
+  }
   if (tl.watch) {
     if (seen && !tl.scared && tl.w > 1) {
       tl.scared = true;

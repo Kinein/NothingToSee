@@ -65,7 +65,6 @@ function shiftOver() {
 // your desk only takes you in office hours, on a working day: at night you can't even sit down at it
 function deskShut() {
   if (!isWorkday()) return 'No work today';
-  if (G.sickDay) return 'Day off';
   const m = tod();
   if (m < WORK.from) return 'Too early · the shift is at 9:00';
   if (m >= WORK.to) return 'Shift’s over · back at 9:00';
@@ -118,7 +117,6 @@ function newDay() {
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
-  if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
   G.momFacts = 0;
   G.mailToday = false;

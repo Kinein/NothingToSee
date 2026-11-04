@@ -795,7 +795,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.25 · updated Nov 3, 2026</p>
+  <p id="version">v1.26 · updated Nov 4, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1212,6 +1212,14 @@ const NEEDS = [
 // What it does: under `visions` rare visions · under `shaky` more of them, red at the edges and your hands shake (no
 // photos) · under `mute` no gossip and no confronting (you can still fight) · at 0 a panic attack, out of it at `after`.
 const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9, things: 3.5, visions: 60, shaky: 40, mute: 20, after: 40 };
+// What a shaken head hears (horror/ears). Under `PSY.visions` the ear sharpens as Psychic falls, from nothing at 60 to
+// full at 0: THEIR slips and noises carry up to `reach` × as far, the first few no longer go by unnoticed (them/plan
+// heardIt), and a sound out of sight comes every `gap` real seconds from somewhere there's nobody: it looks and sounds
+// like the real ones. Walk up to a fake (within `near`, within `wait` game minutes) and it costs you `fake` Psychic, and
+// `shade` of the time a shadow too. See one of THEM slip with your own eyes and your head must hold, `save` (at 0 .. at
+// `PSY.shaky`) the chance it does; if it does, nobody thinks you're mad any more (suspicion of the ordinary people who
+// did is wiped, everyone else's falls by `ease`), once a day.
+const EARS = { reach: 1.8, gap: [14, 30], near: 2.4, wait: 40, fake: 8, shade: 0.35, save: [0.35, 1], ease: 25 };
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
@@ -14357,7 +14365,6 @@ function shiftOver() {
 // your desk only takes you in office hours, on a working day: at night you can't even sit down at it
 function deskShut() {
   if (!isWorkday()) return 'No work today';
-  if (G.sickDay) return 'Day off';
   const m = tod();
   if (m < WORK.from) return 'Too early · the shift is at 9:00';
   if (m >= WORK.to) return 'Shift’s over · back at 9:00';
@@ -14410,7 +14417,6 @@ function newDay() {
   G.sickDay = !!G.sickNext && isWorkday(d);
   G.sickNext = false;
   G.workWarned = false;
-  if (G.sickDay) setTimeout(() => ui.note('sick', 'Hale: take the day off', ''), 1200);
   G.momToday = false;
   G.momFacts = 0;
   G.mailToday = false;
@@ -15675,21 +15681,23 @@ function mayShed(n, why) {
   return true;
 }
 // a slip is always heard from close by, through a wall: one of THEM changing for a moment, or anyone at their secret
+// (a shaken head hears further: horror/ears earReach)
 const slipHeard = (x, z) =>
-  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r);
+  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r * earReach());
 function heardIt(kind, x, z) {
   const T = TIP[kind],
     P = PLAYER;
   if (!T || !G.started || !P.onMap || G.sleeping || G.away) return false;
-  const d = Math.hypot(P.x - x, P.z - z);
-  if (d > T.r) return false;
+  const reach = T.r * earReach(),
+    d = Math.hypot(P.x - x, P.z - z);
+  if (d > reach) return false;
   const left = G.tipLeft || (G.tipLeft = {});
   if (left[kind] == null) left[kind] = irand(T.first[0], T.first[1]);
   if (left[kind] > 0) {
     left[kind]--;
-    return false;
+    if (psychic() >= PSY.shaky) return false; // a clear head lets the first few go by; a shaken one hears them all
   }
-  if (!chance(T.p * (1.15 - d / T.r))) return false;
+  if (!chance(T.p * (1 + earGain()) * (1.15 - d / reach))) return false;
   left[kind] = irand(T.gap[0], T.gap[1]);
   return true;
 }
@@ -16866,6 +16874,7 @@ function tellTick(n, dt) {
     if (seen && !tl.seen) {
       tl.seen = true;
       psyMark('sign');
+      if (n.isThem) catchThem(n); // a slip seen with your own eyes
     }
     if (seen && !tl.caught && npcSeesPlayer(n, 8)) {
       tl.caught = true;
@@ -16880,7 +16889,13 @@ function tellTick(n, dt) {
   // what you see is only what you see: nothing is filed, nothing slows down. A photo is the only record.
   const seen = visAt(n.x, n.z) > 0.55 && n.shown > 0.5;
   if (seen) tl.w += dt;
-  if (seen && tl.w > 0.8 && n.isThem) psyMark('sign'); // a slight sign, seen with your own eyes
+  if (seen && tl.w > 0.8 && n.isThem) {
+    psyMark('sign'); // a slight sign, seen with your own eyes
+    if (!tl.rolled && !tl.ritual && !tl.watch) {
+      tl.rolled = true;
+      catchThem(n);
+    }
+  }
   if (tl.watch) {
     if (seen && !tl.scared && tl.w > 1) {
       tl.scared = true;
@@ -25761,6 +25776,7 @@ function visionPing() {
     const d = Math.hypot(x - P.x, z - P.z);
     if (d < 5 || visAt(x + 0.5, z + 0.5) > 0.4) continue;
     notifyPing(x + 0.5, z + 0.5);
+    G.fakeEar = { x: x + 0.5, z: z + 0.5, until: G.t + EARS.wait }; // go and look: horror/ears earCheck
     return true;
   }
   return false;
@@ -25880,6 +25896,60 @@ function visionStep(dtReal) {
     if (Math.abs(angDiff(P.dir, toIt)) < 0.45 || Math.hypot(s.x - P.x, s.z - P.z) < 5) SHADE.t = 0; // looked: nobody
   }
   if (SHADE.t <= 0) SHADE.on = false;
+}
+// ───────────── ears: what a shaken head hears, and the catch that clears your name
+// Under Psychic 60 the ear sharpens as Psychic falls (earGain 0 → 1): THEIR slips and noises carry further and none go
+// by unnoticed (them/plan slipHeard, heardIt), and now and then a sound comes from somewhere there's nobody (visionPing).
+// The two sound the same. Go and look: a real one is one of THEM slipping, a fake costs you Psychic. Catching a real one
+// with your own eyes is the way out of being the mad one (catchThem). Numbers in `EARS`.
+const earGain = () => clamp((PSY.visions - psychic()) / PSY.visions, 0, 1);
+const earReach = () => 1 + earGain() * (EARS.reach - 1);
+function earsTick(dtReal) {
+  if (G.speed === 0 || G.sleeping || G.away || SHADE.on || G.t < G.visionOff || !PLAYER.onMap) return;
+  if (G.fakeEar) return earCheck(G.fakeEar);
+  const gain = earGain();
+  if (gain <= 0) return;
+  G.earCd -= dtReal;
+  if (G.earCd > 0) return;
+  G.earCd = rand(EARS.gap[0], EARS.gap[1]) * (1.2 - gain * 0.7);
+  visionPing();
+}
+// walked up to the spot of a sound that wasn't there
+function earCheck(E) {
+  if (G.t > E.until) {
+    G.fakeEar = null;
+    return;
+  }
+  if (Math.hypot(PLAYER.x - E.x, PLAYER.z - E.z) > EARS.near || visAt(E.x, E.z) < 0.4) return;
+  G.fakeEar = null;
+  setNeed('stress', Math.min(95, PLAYER.needs.stress + EARS.fake));
+  ui.bubble(PLAYER, 'nerve', 'thought', 2);
+  ui.note('ear', 'Nothing there', 'warn');
+  audio.sting('whisper');
+  if (chance(EARS.shade)) visionShade();
+}
+// one of THEM slipping, seen with your own eyes. A head this shaken has to trust what it saw (the save: the lower
+// Psychic, the likelier you doubt it). If it holds: the ordinary people who thought you were mad don't any more, and
+// the rest ease off too. Once a day.
+function catchThem(n) {
+  if (!G.started || G.catchDay === dayNo()) return;
+  const psy = psychic();
+  if (psy < PSY.shaky && !chance(EARS.save[0] + ((EARS.save[1] - EARS.save[0]) * psy) / PSY.shaky)) {
+    ui.bubble(PLAYER, 'nerve', 'thought', 2.5);
+    ui.note('eye', 'Was that real?', 'warn');
+    return;
+  }
+  G.catchDay = dayNo();
+  let mad = 0;
+  for (const c of CHARS) {
+    if (c.isPlayer || c.isThem || c.def.stranger) continue;
+    if (c.sus >= MAD_SUS) {
+      c.sus = 0;
+      mad++;
+    } else c.sus = Math.max(0, c.sus - EARS.ease);
+  }
+  ui.note('eye', mad ? 'You’re not mad. You saw it.' : 'You saw it. You’re not mad.', 'good');
+  audio.sting('onto');
 }
 // ───────────────────────── what you can do ─────────────────────────
 const DESK_OWNER = {
@@ -29283,7 +29353,7 @@ function updateHud(dtReal) {
   const wtip = !isWorkday()
     ? 'No work today'
     : G.sickDay
-      ? 'Day off'
+      ? 'Nothing moves it today'
       : m < 540
         ? 'Shift at 9:00'
         : m >= 1020
@@ -43002,6 +43072,9 @@ function freshG(start) {
     sleepFrom: 0,
     visionOff: 0,
     whisperCd: 30,
+    earCd: 20, // real seconds to the next sound that isn't there (horror/ears)
+    fakeEar: null, // the sound that isn't there, until you check or it fades: {x, z, until}
+    catchDay: 0, // the day you last caught one of THEM slipping and cleared your name (horror/ears catchThem)
     clinicDay: 0,
     lore: {},
     traits: {},
@@ -44942,6 +45015,7 @@ function simStep(dtReal, spdOver) {
   personal.r = G.inv.flashOn ? 2.4 : 3.2;
   personal.int = G.inv.flashOn ? 0.3 : 0.24;
   hallucinate(dtReal);
+  earsTick(dtReal);
   audio.ringTick(dtReal, !!G.phoneRing && pr && pr.home);
   audio.update({
     hum: pr && (pr.bld === 'office' ? officeLit() : pr.bld === 'shop' ? shopOpen() : false),

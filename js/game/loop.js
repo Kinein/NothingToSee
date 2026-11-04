@@ -227,6 +227,7 @@ function simStep(dtReal, spdOver) {
   personal.r = G.inv.flashOn ? 2.4 : 3.2;
   personal.int = G.inv.flashOn ? 0.3 : 0.24;
   hallucinate(dtReal);
+  earsTick(dtReal);
   audio.ringTick(dtReal, !!G.phoneRing && pr && pr.home);
   audio.update({
     hum: pr && (pr.bld === 'office' ? officeLit() : pr.bld === 'shop' ? shopOpen() : false),

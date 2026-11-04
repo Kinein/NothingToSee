@@ -1,6 +1,6 @@
 //@ them/plan — THEIR five-day plan: phases, stages, how it moves on each midnight
 //@ Defines: WEEK, PHASES, STAGE_OF_PHASE, mayShed, heardIt, STAGES, STAGE_HOOKS, holdings, EMBLEM_AT, emblemMesh, marks, opDone, advanceWeek, finale, nextGatherT, gatherNow, …
-//@ Uses:    sim/core, core/util, ui/interface, gfx/renderer, game/state, them/awareness, audio/sound, sim/actions, town/cast, world/grid, …
+//@ Uses:    sim/core, core/util, ui/interface, gfx/renderer, game/state, them/awareness, audio/sound, sim/actions, data/tuning, horror/ears, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── THEIR plan: five days, Monday to Friday. Every midnight it moves on a day, and nothing you do slows it down.
 // The only way to stop it is to catch every one of THEM before Friday night runs out.
@@ -36,21 +36,23 @@ function mayShed(n, why) {
   return true;
 }
 // a slip is always heard from close by, through a wall: one of THEM changing for a moment, or anyone at their secret
+// (a shaken head hears further: horror/ears earReach)
 const slipHeard = (x, z) =>
-  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r);
+  !!(G.started && PLAYER.onMap && !G.sleeping && !G.away && Math.hypot(PLAYER.x - x, PLAYER.z - z) <= TIP.slip.r * earReach());
 function heardIt(kind, x, z) {
   const T = TIP[kind],
     P = PLAYER;
   if (!T || !G.started || !P.onMap || G.sleeping || G.away) return false;
-  const d = Math.hypot(P.x - x, P.z - z);
-  if (d > T.r) return false;
+  const reach = T.r * earReach(),
+    d = Math.hypot(P.x - x, P.z - z);
+  if (d > reach) return false;
   const left = G.tipLeft || (G.tipLeft = {});
   if (left[kind] == null) left[kind] = irand(T.first[0], T.first[1]);
   if (left[kind] > 0) {
     left[kind]--;
-    return false;
+    if (psychic() >= PSY.shaky) return false; // a clear head lets the first few go by; a shaken one hears them all
   }
-  if (!chance(T.p * (1.15 - d / T.r))) return false;
+  if (!chance(T.p * (1 + earGain()) * (1.15 - d / reach))) return false;
   left[kind] = irand(T.gap[0], T.gap[1]);
   return true;
 }

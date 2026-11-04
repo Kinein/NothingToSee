@@ -20,7 +20,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | Field | Starts as | Written in | Read in |
 | --- | --- | --- | --- |
 | `t` | `start` | game/endings, game/loop | world/paths, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, town/npc-update, … |
-| `speed` | `1` | town/arrest, town/on-the-run, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/confrontation, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/layer, chase/they-come, chase/flee, game/loop |
+| `speed` | `1` | town/arrest, town/on-the-run, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/confrontation, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/ears, horror/layer, chase/they-come, chase/flee, game/loop |
 | `inv` | `{
       trap: 0,
       flashlight: false,
@@ -41,8 +41,11 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sickDay` | `false` | player/work, combat/hits, taken/taken, taken/back-up | sim/core, ui/hud |
 | `smelly` | `false` | player/needs, play/stashes, play/verbs | them/tells, town/approach, ui/hud |
 | `sleepFrom` | `0` | play/verbs | — |
-| `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions |
+| `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions, horror/ears |
 | `whisperCd` | `30` | horror/visions | — |
+| `earCd` | `20` | horror/ears | — |
+| `fakeEar` | `null` | horror/visions, horror/ears | — |
+| `catchDay` | `0` | horror/ears | — |
 | `clinicDay` | `0` | combat/melee | — |
 | `lore` | `{}` | — | — |
 | `traits` | `{}` | town/quirks | town/daily-plans, them/awareness, them/true-form, town/talk, play/photos, game/state |

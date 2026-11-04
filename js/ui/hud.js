@@ -332,7 +332,7 @@ function updateHud(dtReal) {
   const wtip = !isWorkday()
     ? 'No work today'
     : G.sickDay
-      ? 'Day off'
+      ? 'Nothing moves it today'
       : m < 540
         ? 'Shift at 9:00'
         : m >= 1020

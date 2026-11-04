@@ -101,6 +101,14 @@ const NEEDS = [
 // What it does: under `visions` rare visions · under `shaky` more of them, red at the edges and your hands shake (no
 // photos) · under `mute` no gossip and no confronting (you can still fight) · at 0 a panic attack, out of it at `after`.
 const PSY = { sign: 70, form: 50, fight: 30, fast: 30, slow: 6, dark: 2, near: 9, things: 3.5, visions: 60, shaky: 40, mute: 20, after: 40 };
+// What a shaken head hears (horror/ears). Under `PSY.visions` the ear sharpens as Psychic falls, from nothing at 60 to
+// full at 0: THEIR slips and noises carry up to `reach` × as far, the first few no longer go by unnoticed (them/plan
+// heardIt), and a sound out of sight comes every `gap` real seconds from somewhere there's nobody: it looks and sounds
+// like the real ones. Walk up to a fake (within `near`, within `wait` game minutes) and it costs you `fake` Psychic, and
+// `shade` of the time a shadow too. See one of THEM slip with your own eyes and your head must hold, `save` (at 0 .. at
+// `PSY.shaky`) the chance it does; if it does, nobody thinks you're mad any more (suspicion of the ordinary people who
+// did is wiped, everyone else's falls by `ease`), once a day.
+const EARS = { reach: 1.8, gap: [14, 30], near: 2.4, wait: 40, fake: 8, shade: 0.35, save: [0.35, 1], ease: 25 };
 // the bladder: −10 an hour awake, `asleep` an hour asleep, `coffee` a cup (about three trips a day). An accident in
 // public and you smell until you shower: people notice you `smell` × further off. A pee in a hedge or the alley takes
 // `pee` game minutes; anyone who sees it finds you `peeSus` weirder, and while you're at it you're noticed `peeSeen` × as far.
