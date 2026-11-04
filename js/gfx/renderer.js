@@ -21,6 +21,7 @@ const R = {
   flash: 0,
   pulse: 0,
   hitStop: 0, // real seconds left of a blow's freeze (combat/blood)
+  cut: null, // the walls cut for the camera's square instead of for the view (gfx/viewfinder)
   lampP: new Float32Array(48),
   lampC: new Float32Array(48),
   lampN: 0,

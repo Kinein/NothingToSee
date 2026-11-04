@@ -1,6 +1,6 @@
 //@ play/photos — Photos: reading what is in frame
-//@ Defines: OBJ_ICON, placeName, shotTarget, photoAct, inPhotoCone, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, photoHintTick, placeCamMark, toggleCam
-//@ Uses:    sim/core, ui/interface, town/suspicion, data/tuning, them/tells, sim/actions, world/grid, world/vision, core/util, player/needs, …
+//@ Defines: OBJ_ICON, placeName, shotTarget, PHOTO_SHUTTER, PHOTO_DUR, photoAct, inPhotoCone, photoInterest, photoAim, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, …
+//@ Uses:    sim/core, ui/interface, data/tuning, town/suspicion, gfx/viewfinder, them/tells, sim/actions, core/util, world/grid, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
 const OBJ_ICON = {
@@ -72,13 +72,17 @@ function shotTarget(p) {
   if (p.tile) return { x: p.gx, z: p.gz, label: 'Nothing much', icon: null };
   return null;
 }
+// the shutter goes this far into the photo: first the camera comes up and the square shows what you're looking at
+// (gfx/viewfinder), then the flash
+const PHOTO_SHUTTER = 0.8,
+  PHOTO_DUR = 1.9;
 function photoAct(tg) {
   const pos = () => (tg.char ? [tg.char.x, tg.char.z] : [tg.x, tg.z]);
   return mkAct({
     kind: 'wait',
     label: 'Photo',
     icon: 'camera',
-    dur: 1.5,
+    dur: PHOTO_DUR,
     anim: 'photo',
     check: () => {
       const [x, z] = pos();
@@ -86,15 +90,21 @@ function photoAct(tg) {
       if (tg.char ? !(tg.char.onMap && tg.char.shown > 0.5) : visAt(x, z) < 0.35) return 'No clear shot';
       return null;
     },
-    onStart: (c) => {
+    onStart: (c, a) => {
       const [x, z] = pos();
       c.tdir = Math.atan2(x - c.x, z - c.z);
-      takePhoto(tg);
+      vfOpen(a, tg);
+    },
+    onTick: (c, a) => {
+      if (!a.shot && a.t >= PHOTO_SHUTTER) {
+        a.shot = true;
+        takePhoto(tg);
+      }
     },
   });
 }
 // F: the photo, straight away. The camera takes in a wide wedge in front of you, as far as you can see clearly; no aiming.
-function inPhotoCone(x, z) {
+function inPhotoCone(x, z, half = CTRL.photoHalf) {
   const P = PLAYER,
     dx = x - P.x,
     dz = z - P.z,
@@ -102,9 +112,46 @@ function inPhotoCone(x, z) {
   if (d > CTRL.photoRange || visAt(x, z) <= 0.35) return false;
   if (d < 0.6) return true;
   return (
-    Math.abs(angDiff(P.tdir, Math.atan2(dx, dz))) <= (CTRL.photoHalf * Math.PI) / 180 &&
+    Math.abs(angDiff(P.tdir, Math.atan2(dx, dz))) <= (half * Math.PI) / 180 &&
     losClear(Math.floor(P.x), Math.floor(P.z), Math.floor(x), Math.floor(z))
   );
+}
+// what F points you at: the likeliest evidence in a wider arc than the frame (a person worth a photo, as the hint reads
+// it, or something THEY left on the floor), the strongest first, then the nearest the middle. Nothing worth it: null,
+// and you shoot the way you face.
+function photoInterest(n) {
+  const tl = n.tell;
+  if (tl && !tl.photo && !tl.unmask && tl.type !== 'glare') return tl.ritual || tl.type === 'true' ? 6 : 5;
+  if (n.odd && !n.odd.photo && G.t <= n.odd.until) return 4;
+  if ((n.trace && !n.trace.photo) || n.vis) return 3.5;
+  if (n.secret && !n.secret.done) return 3;
+  return 2; // nothing else gets past photoWorth: a walk that's wrong you aim at yourself
+}
+function photoAim() {
+  const P = PLAYER,
+    at = (x, z) => Math.abs(angDiff(P.tdir, Math.atan2(x - P.x, z - P.z))) + Math.hypot(x - P.x, z - P.z) * 0.06;
+  let best = null,
+    bs = -1e9;
+  const take = (tg, x, z, w) => {
+    const s = w - at(x, z) * 1.2;
+    if (s > bs) {
+      bs = s;
+      best = tg;
+    }
+  };
+  for (const n of CHARS) if (photoWorth(n) && inPhotoCone(n.x, n.z, CTRL.photoAim)) take(n, n.x, n.z, photoInterest(n));
+  if (SHADE.on && SHADE.c && inPhotoCone(SHADE.c.x, SHADE.c.z, CTRL.photoAim)) take(SHADE.c, SHADE.c.x, SHADE.c.z, 3.5);
+  for (const it of G.items)
+    if (
+      it.by &&
+      !it.photo &&
+      it.kind !== 'puddle' &&
+      it.kind !== 'wallpee' &&
+      it.kind !== 'opened' &&
+      it.kind !== 'trap'
+    )
+      if (inPhotoCone(it.x, it.z, CTRL.photoAim)) take({ item: it, x: it.x, z: it.z }, it.x, it.z, 3.5);
+  return best;
 }
 function photoCone() {
   const P = PLAYER;
@@ -136,23 +183,29 @@ function playerPhoto() {
       kind: 'wait',
       label: 'Photo',
       icon: 'camera',
-      dur: 1.5,
+      dur: PHOTO_DUR,
       anim: 'photo',
       photo: true,
       interruptible: false,
-      onStart: () => closeMenu(),
+      onStart: (c, a) => {
+        closeMenu();
+        const tg = photoAim(); // turn to it: the frame the game reads follows you
+        if (tg) c.tdir = Math.atan2(tg.x - c.x, tg.z - c.z);
+        vfOpen(a, tg);
+      },
       onTick: (c, a) => {
-        if (!a.shot && a.t >= 0.3) {
+        if (!a.shot && a.t >= PHOTO_SHUTTER) {
           a.shot = true;
           takePhoto(photoCone());
         }
       },
     }),
-  ); // up to the eye, then the shutter
+  ); // up to the eye, a look through it, then the shutter
 }
 function addPrint(o) {
   const pr = Object.assign({ id: ++G.printId, at: G.t, pin: null }, o);
   G.prints.push(pr);
+  vfPrint(pr); // a photo's print gets the picture the camera took
   while (G.prints.length > 30) {
     const i = G.prints.findIndex((p) => !p.pin);
     if (i < 0) break;
@@ -162,19 +215,22 @@ function addPrint(o) {
 }
 // the frame check: everything visible within a couple of tiles of the aim point is in the picture
 function takePhoto(tg) {
-  ui.flash();
+  if (!vfShoot()) ui.flash(); // the flash goes off in the camera's square, if it's up
   audio.blip('shutter'); // the film never runs out
   const ax = tg.char ? tg.char.x : tg.x,
     az = tg.char ? tg.char.z : tg.z;
   if (G.t < (G.shakenUntil || 0) && G.t >= (G.shakenFrom || 0) && chance(0.35)) {
     // shaken hands
+    VF.blur = true;
     const pr = addPrint({ kind: 'blur', what: 'Blurred', where: placeName(ax, az) });
     ui.card({ title: 'Blurred', img: printImage(pr), stamp: 'BLURRED' });
     return photoSeen(tg.char);
   }
   const inFrame = tg.inFrame || ((x, z) => Math.hypot(x - ax, z - az) < 2.4 && visAt(x, z) > 0.35);
   const chars = CHARS.filter((n) => !n.isPlayer && n.onMap && (n === tg.char || (n.shown > 0.5 && inFrame(n.x, n.z))));
-  const items = G.items.filter((it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)));
+  const items = G.items.filter(
+    (it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)),
+  );
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
   // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.

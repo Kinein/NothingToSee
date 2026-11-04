@@ -8,6 +8,7 @@
 //   __dev.skip(minutes)                      run the simulation forward without rendering
 //   __dev.perf()                             per-system milliseconds per frame, and the slowest frames
 //   __dev.perfReset()                        start counting again
+//   __dev.run('code')                        evaluate code inside the game's own scope (any top-level name)
 // Timing works by wrapping top-level functions: function declarations are plain bindings in the shared scope,
 // so replacing one here replaces it for every caller.
 const DEV = { acc: {}, calls: {}, frames: 0, cur: null, slow: [], t0: performance.now() };
@@ -81,6 +82,9 @@ window.__dev = {
   CHARS,
   get UI() {
     return UI;
+  },
+  run(src) {
+    return eval(src);
   },
   /** run the simulation forward `min` game minutes, in steps, without drawing */
   /** run the simulation forward `min` game minutes without drawing; returns the slowest steps with what they spent it on */

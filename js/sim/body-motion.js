@@ -361,8 +361,8 @@ function handsToHead(c, T, w) {
 // the camera out of the pocket and up to the eye in both hands, elbows tucked in; the shutter gives a small kick
 function photoPose(c, T, pr) {
   const p = pr == null ? 0.5 : pr,
-    up = sstep(0.02, 0.2, p) * (1 - sstep(0.72, 0.97, p)),
-    kick = sstep(0.2, 0.24, p) * (1 - sstep(0.26, 0.36, p));
+    up = sstep(0.02, 0.16, p) * (1 - sstep(0.76, 0.97, p)), // up to the eye, a look through it (play/photos)
+    kick = sstep(0.4, 0.43, p) * (1 - sstep(0.45, 0.55, p)); // the shutter, at PHOTO_SHUTTER / PHOTO_DUR
   c.fx.prop = 'camera';
   T.uaR = lerp(-0.45, -1.26, up);
   T.aoR = lerp(0.08, -0.44, up);

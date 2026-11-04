@@ -90,7 +90,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Hidden things, the fridge, taking and the place rule (`takeThing`, `placeOwner`) | `js/play/stashes.js` (`STASH_KINDS`, `PLANTS`) |
 | THEIR plant at a victim's place and in your home, THEY take things back, signs for a gut feeling | `js/play/plants.js` (`morningThings`) |
 | Traps, raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
-| Photos: the wedge, the photo hint (`photoHintTick`), the flash rule (`photoSeen`) | `js/play/photos.js` (`playerPhoto`, `takePhoto`) |
+| Photos: the wedge, the photo hint (`photoHintTick`), the flash rule (`photoSeen`), what F turns you onto (`photoAim`, `CTRL.photoAim`) | `js/play/photos.js` (`playerPhoto`, `takePhoto`); the camera's square (live view through your eyes, zoom, the walls and furniture left out of the shot, the flash, the print): `js/gfx/viewfinder.js` (`vfOpen`, `vfLens`, `vfRender`, `vfInWay`) |
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
 | "Come with me", witnesses THEY visit at night | `js/town/company.js` |

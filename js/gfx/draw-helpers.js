@@ -1,6 +1,6 @@
 //@ gfx/draw-helpers — Glow switches, long shadows, floor decals, main-shader setup, lamp gathering and tints
 //@ Defines: emitFor, lumBi, longShadow, DECAL_ID, DECAL_M, DECAL_J, DECAL_S, drawDecal, drawDecalR, useMain, gatherLamps, moodColor, glowCol, glowK, lampTint, FRUSTUM, …
-//@ Uses:    gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, sim/pose, gfx/post, gfx/look, horror/layer, …
+//@ Uses:    gfx/renderer, gfx/gl, sim/core, core/util, world/light-map, world/grid, gfx/world-geometry, sim/pose, gfx/post, gfx/look, …
 //@ (header made by tools/map.js; stripped by build.py)
 // which glowing parts are switched on right now
 function emitFor(m) {
@@ -123,9 +123,10 @@ function useMain(mode) {
   gl.uniform2f(U.uMap, W, H);
   gl.uniform1f(U.uTime, R.time);
   const pl = G && G.started && PLAYER && PLAYER.onMap ? [PLAYER.x, 1.0, PLAYER.z] : [cam.tx, 1.0, cam.tz];
-  gl.uniform3fv(U.uFocus, cam.follow ? pl : [cam.tx, 1.0, cam.tz]);
-  gl.uniform3fv(U.uFocus2, pl);
-  gl.uniform1f(U.uCutR, 7.5 * Math.max(0.8, cam.zoom / 8.5));
+  const C = R.cut; // the camera's square: only what's between the lens and its subject (gfx/viewfinder)
+  gl.uniform3fv(U.uFocus, C ? C.at : cam.follow ? pl : [cam.tx, 1.0, cam.tz]);
+  gl.uniform3fv(U.uFocus2, C ? C.back : pl);
+  gl.uniform1f(U.uCutR, C ? C.r : 7.5 * Math.max(0.8, cam.zoom / 8.5));
   gl.uniform1f(U.uWallsDown, cam.wallsDown);
   gl.uniform3fv(U.uFog, LOOK.fog);
   gl.uniform4fv(U.uLook, LOOK.vec);
