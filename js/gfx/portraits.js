@@ -304,8 +304,9 @@ function flatPrint(pr) {
 // drawn ahead of time, one per idle moment, right after a game starts. Later requests hit the cache.
 const WARM = [];
 let warmBusy = false;
-function warmLater(fn) {
-  WARM.push(fn);
+function warmLater(fn, first) {
+  if (first) WARM.unshift(fn);
+  else WARM.push(fn);
   if (!warmBusy) warmNext();
 }
 function warmNext() {

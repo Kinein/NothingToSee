@@ -128,6 +128,16 @@ const M4 = {
     m[15] = 1;
     return m;
   },
+  persp(fovy, aspect, n, f) {
+    const m = new Float32Array(16),
+      k = 1 / Math.tan(fovy / 2);
+    m[0] = k / aspect;
+    m[5] = k;
+    m[10] = (f + n) / (n - f);
+    m[11] = -1;
+    m[14] = (2 * f * n) / (n - f);
+    return m;
+  },
   lookAt(e, t, up) {
     let zx = e[0] - t[0],
       zy = e[1] - t[1],

@@ -196,6 +196,32 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .pc-meta b{font:16px var(--f-type)}
 .pcard.out{opacity:0;transform:rotate(var(--tilt,0deg)) translateX(30px);transition:all .6s}
 @keyframes cin{from{transform:rotate(var(--tilt,0deg)) translateX(60px) scale(.9)}to{transform:rotate(var(--tilt,0deg))}}
+/* the camera's square (gfx/viewfinder): live, WebGL draws the town into the hole the border leaves (so no background
+   here); then the flash, then the print */
+#vf{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));top:calc(124px + env(safe-area-inset-top,0px));width:min(320px,40vw);border:9px solid #141313;border-radius:5px;box-shadow:0 16px 40px rgba(0,0,0,.65),inset 0 0 0 1px rgba(255,255,255,.05);pointer-events:none;z-index:4;animation:vfin .22s cubic-bezier(.2,1.2,.4,1);transition:border-color .7s,border-bottom-width .5s cubic-bezier(.2,1.3,.4,1),transform .6s cubic-bezier(.2,1.3,.4,1),border-radius .5s}
+#vf[hidden]{display:none}
+#vf .vf-win{position:relative;aspect-ratio:1;overflow:hidden;background:transparent}
+#vf .vf-win::before{content:"";position:absolute;inset:10px;z-index:2;pointer-events:none;
+  background:linear-gradient(#f2ead6,#f2ead6) left top/18px 2px,linear-gradient(#f2ead6,#f2ead6) left top/2px 18px,
+  linear-gradient(#f2ead6,#f2ead6) right top/18px 2px,linear-gradient(#f2ead6,#f2ead6) right top/2px 18px,
+  linear-gradient(#f2ead6,#f2ead6) left bottom/18px 2px,linear-gradient(#f2ead6,#f2ead6) left bottom/2px 18px,
+  linear-gradient(#f2ead6,#f2ead6) right bottom/18px 2px,linear-gradient(#f2ead6,#f2ead6) right bottom/2px 18px;background-repeat:no-repeat;opacity:.75;transition:opacity .2s}
+#vf .vf-win::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;z-index:2;border:1.5px solid rgba(242,234,214,.6);border-radius:50%;transition:opacity .2s}
+#vf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+#vf .vf-fl{position:absolute;inset:0;z-index:3;background:#fffdf6;opacity:0;pointer-events:none}
+#vf .stamp{position:absolute;left:12px;bottom:14px;z-index:4;padding:3px 9px 0;border:2px solid var(--stamp);color:var(--stamp);font:19px/1.4 var(--f-type);letter-spacing:.12em;transform:rotate(-8deg);background:rgba(231,224,204,.14);opacity:0}
+#vf .vf-cap{position:absolute;left:3px;right:3px;bottom:-34px;font:17px/1.2 var(--f-type);color:#3a342c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .5s .3s}
+#vf.shot .vf-fl{opacity:1}
+#vf.shot .vf-win::before,#vf.shot .vf-win::after,#vf.print .vf-win::before,#vf.print .vf-win::after{opacity:0}
+#vf.print{pointer-events:auto;cursor:pointer;border-color:var(--polaroid);border-width:10px 10px 46px;border-radius:3px;transform:rotate(var(--tilt,0deg))}
+#vf.print .vf-win{background:#0b0b0b}
+#vf.print .vf-fl{opacity:0;transition:opacity .9s ease-out}
+#vf.print .vf-cap{opacity:1}
+#vf.print.stamped .stamp{opacity:1;animation:vfst .32s .45s cubic-bezier(.3,1.6,.5,1) backwards}
+#vf.nothing .stamp{color:#6b6760;border-color:#6b6760}
+#vf.out{opacity:0;transform:rotate(var(--tilt,0deg)) translateX(40px) scale(.9);transition:opacity .55s,transform .55s}
+@keyframes vfin{from{transform:translateX(50px)}to{transform:none}}
+@keyframes vfst{from{transform:rotate(-8deg) scale(1.9);opacity:0}to{transform:rotate(-8deg);opacity:1}}
 #reveal{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
 #reveal .rv-ic{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--stamp);background:rgba(30,8,6,.6);box-shadow:0 0 60px rgba(200,64,47,.5)}
 #reveal .rv-ic .ic{width:64px;height:64px;color:#f08a74;stroke-width:1.4}
@@ -767,6 +793,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
     <button id="boardBtn" data-tip="Evidence · Tab" aria-label="Open the evidence board"><img alt=""><span class="slots"><i></i><i></i><i></i></span></button>
   </div>
   <div id="cards"></div>
+  <div id="vf" hidden><div class="vf-win"><img alt="" hidden><i class="vf-fl"></i><span class="stamp"></span></div><b class="vf-cap"></b></div>
   <div id="reveal" hidden></div>
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
@@ -795,7 +822,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.27 · updated Nov 4, 2026</p>
+  <p id="version">v1.28 · updated Nov 5, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -989,6 +1016,16 @@ const M4 = {
     m[15] = 1;
     return m;
   },
+  persp(fovy, aspect, n, f) {
+    const m = new Float32Array(16),
+      k = 1 / Math.tan(fovy / 2);
+    m[0] = k / aspect;
+    m[5] = k;
+    m[10] = (f + n) / (n - f);
+    m[11] = -1;
+    m[14] = (2 * f * n) / (n - f);
+    return m;
+  },
   lookAt(e, t, up) {
     let zx = e[0] - t[0],
       zy = e[1] - t[1],
@@ -1155,6 +1192,7 @@ const CTRL = {
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
+  photoAim: 75,      // F turns you and the lens onto the likeliest evidence within this half-angle (a 150° arc)
   flashNear: 3,      // the flash rule: this close, from any side, they notice the photo; further off, only facing you
   boltSpeed: 3.5,    // enemy projectiles: tiles per game minute (7 tiles a second at normal speed)
   boltHit: 0.42,     // how close a bolt must pass to you to land
@@ -8487,6 +8525,7 @@ const R = {
   flash: 0,
   pulse: 0,
   hitStop: 0, // real seconds left of a blow's freeze (combat/blood)
+  cut: null, // the walls cut for the camera's square instead of for the view (gfx/viewfinder)
   lampP: new Float32Array(48),
   lampC: new Float32Array(48),
   lampN: 0,
@@ -10428,9 +10467,10 @@ function useMain(mode) {
   gl.uniform2f(U.uMap, W, H);
   gl.uniform1f(U.uTime, R.time);
   const pl = G && G.started && PLAYER && PLAYER.onMap ? [PLAYER.x, 1.0, PLAYER.z] : [cam.tx, 1.0, cam.tz];
-  gl.uniform3fv(U.uFocus, cam.follow ? pl : [cam.tx, 1.0, cam.tz]);
-  gl.uniform3fv(U.uFocus2, pl);
-  gl.uniform1f(U.uCutR, 7.5 * Math.max(0.8, cam.zoom / 8.5));
+  const C = R.cut; // the camera's square: only what's between the lens and its subject (gfx/viewfinder)
+  gl.uniform3fv(U.uFocus, C ? C.at : cam.follow ? pl : [cam.tx, 1.0, cam.tz]);
+  gl.uniform3fv(U.uFocus2, C ? C.back : pl);
+  gl.uniform1f(U.uCutR, C ? C.r : 7.5 * Math.max(0.8, cam.zoom / 8.5));
   gl.uniform1f(U.uWallsDown, cam.wallsDown);
   gl.uniform3fv(U.uFog, LOOK.fog);
   gl.uniform4fv(U.uLook, LOOK.vec);
@@ -10604,10 +10644,27 @@ function renderFrame() {
     gl.bindTexture(gl.TEXTURE_2D, R.tVis);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TW, TH, gl.RGBA, gl.UNSIGNED_BYTE, texVis);
   }
-  gl.bindFramebuffer(gl.FRAMEBUFFER, R.msFb);
+  drawScene(R.msFb, w, h, null);
+  // resolve, outlines, bloom, composite
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.msFb);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, R.scene.fb);
+  gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  drawMask();
+  bloomPasses(R.scene, R.blm);
+  composite(R.scene.tex, R.blm[0].tex, null, false);
+  vfFrame(); // the camera's square, when it's up (gfx/viewfinder)
+  gl.bindVertexArray(null);
+}
+// the world, from wherever cam stands. pov: the player's own eyes (gfx/viewfinder) — no you in it, none of the marks
+// the game draws for you on the floor, and in the photo itself ('still') none of what your head makes up
+function drawScene(fb, w, h, pov) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
   gl.viewport(0, 0, w, h);
-  const fog = LOOK.fog;
-  gl.clearColor(fog[0] * 0.8, fog[1] * 0.8, fog[2] * 0.8, 1);
+  const fog = pov ? vfSky() : LOOK.fog,
+    fk = pov ? 1 : 0.8;
+  gl.clearColor(fog[0] * fk, fog[1] * fk, fog[2] * fk, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
@@ -10623,11 +10680,11 @@ function renderFrame() {
   drawMesh(R.marks);
   for (const m of R.doorMeshes) {
     m.model = doorMatrix(m.door);
-    if (meshInView(m)) drawMesh(m);
+    if (meshInView(m) && !(pov && vfInWay(m))) drawMesh(m); // an open door swung into the camera's shot
   }
   for (const m of R.objMeshes) {
     if (m.lair && m.lair.key !== CAP.lit) continue;
-    if (!meshInView(m)) continue;
+    if (!meshInView(m) || (pov && vfInWay(m))) continue;
     m.emitMul = emitFor(m);
     if (m.light) m.tint = lampTint(m.light);
     drawMesh(m);
@@ -10645,17 +10702,25 @@ function renderFrame() {
     if (m.litGrp) m.emitMul = 1;
     drawMesh(m);
   }
-  for (const m of R.itemMeshes.values()) if (meshInView(m)) drawMesh(m);
+  for (const m of R.itemMeshes.values()) if (meshInView(m) && !(pov && vfInWay(m))) drawMesh(m);
   const night = carNight();
   for (const c of CARS) {
     const m = c.mesh;
     m.model = c.model;
     m.emitMul = night ? 1 : 0.1;
     m.center = [c.x, 1, c.z];
-    drawMesh(m);
+    if (!(pov && vfInWayAt(c.x, c.z, 1, true))) drawMesh(m);
   }
-  for (const c of CHARS) if (c.onMap && c.shown > 0.02 && !c.capHide && charInView(c)) drawChar(c);
-  if (SHADE.on) drawChar(SHADE.c);
+  for (const c of CHARS)
+    if (
+      c.onMap &&
+      c.shown > 0.02 &&
+      !c.capHide &&
+      !(pov && (c === PLAYER || vfInWayAt(c.x, c.z, 0.2))) &&
+      charInView(c)
+    )
+      drawChar(c);
+  if (SHADE.on && pov !== 'still') drawChar(SHADE.c);
   try {
     combatDraw();
   } catch (e) {
@@ -10700,7 +10765,7 @@ function renderFrame() {
   gl.uniform1f(D.U.uSeed, 0);
   gl.uniform1f(D.U.uWetD, LOOK.wet);
   for (const c of CHARS)
-    if (c.onMap && c.shown > 0.02 && !c.capHide) {
+    if (c.onMap && c.shown > 0.02 && !c.capHide && !(pov && c === PLAYER)) {
       drawDecal(drawX(c), drawZ(c), 0.44, [0, 0, 0, 0.55 * c.shown], 0, (c.y || 0) + 0.012);
       longShadow(c);
     }
@@ -10733,7 +10798,7 @@ function renderFrame() {
     console.error(e);
   }
   const P = PLAYER;
-  if (P && P.onMap && G.started && !G.over) {
+  if (!pov && P && P.onMap && G.started && !G.over) {
     if (P.path && P.moving) {
       let px = P.x,
         pz = P.z,
@@ -10764,7 +10829,7 @@ function renderFrame() {
       (P.y || 0) + 0.02,
     );
   }
-  if (UI.walkMark)
+  if (UI.walkMark && !pov)
     drawDecal(
       UI.walkMark.x,
       UI.walkMark.z,
@@ -10772,10 +10837,12 @@ function renderFrame() {
       [0.98, 0.88, 0.62, 0.65 * (1 - UI.walkMark.t)],
       1,
     );
-  if (R.hoverChar && R.hoverChar !== P) drawDecal(R.hoverChar.x, R.hoverChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
-  if (R.focusChar && R.focusChar !== R.hoverChar && R.focusChar.onMap)
-    drawDecal(R.focusChar.x, R.focusChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
-  else if (UI.focus && UI.focus.item) drawDecal(UI.focus.item.x, UI.focus.item.z, 0.5, [1, 0.84, 0.52, 0.7], 1, 0.02);
+  if (!pov) {
+    if (R.hoverChar && R.hoverChar !== P) drawDecal(R.hoverChar.x, R.hoverChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
+    if (R.focusChar && R.focusChar !== R.hoverChar && R.focusChar.onMap)
+      drawDecal(R.focusChar.x, R.focusChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
+    else if (UI.focus && UI.focus.item) drawDecal(UI.focus.item.x, UI.focus.item.z, 0.5, [1, 0.84, 0.52, 0.7], 1, 0.02);
+  }
 
   // additive atmosphere: light shafts, dust, rain, halos
   gl.blendFunc(gl.ONE, gl.ONE);
@@ -10878,17 +10945,6 @@ function renderFrame() {
   gl.enable(gl.DEPTH_TEST);
   gl.depthMask(true);
   gl.disable(gl.BLEND);
-
-  // resolve, outlines, bloom, composite
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.msFb);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, R.scene.fb);
-  gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-  drawMask();
-  bloomPasses();
-  composite();
-  gl.bindVertexArray(null);
 }
 function drawMask() {
   const t = R.mask;
@@ -10943,13 +10999,12 @@ function bindTex(unit, t, loc) {
   gl.bindTexture(gl.TEXTURE_2D, t);
   gl.uniform1i(loc, unit);
 }
-function bloomPasses() {
+function bloomPasses(src, B) {
   gl.disable(gl.DEPTH_TEST);
   gl.disable(gl.BLEND);
-  const B = R.blm;
   pass(R.bright, B[0], (u) => {
-    bindTex(0, R.scene.tex, u.uSrc);
-    gl.uniform2f(u.uTexel, 1 / R.scene.w, 1 / R.scene.h);
+    bindTex(0, src.tex, u.uSrc);
+    gl.uniform2f(u.uTexel, 1 / src.w, 1 / src.h);
     gl.uniform1f(u.uTh, R.hdr ? 0.8 : 0.66);
     gl.uniform1f(u.uKnee, 0.3);
   });
@@ -10967,46 +11022,49 @@ function bloomPasses() {
     });
   gl.disable(gl.BLEND);
 }
-function composite() {
+// pov: the same grade for the camera's square, the town's mood and all, but none of what happens on your screen
+// (the red edges, the lids, the stage light, the outlines): those are yours, not the film's
+function composite(scene, bloom, target, pov) {
   const stress = G && G.started && PLAYER ? PLAYER.needs.stress : 20;
-  const bad = clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
+  const bad = pov ? 0 : clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
   const sleep = G && G.sleeping ? 1 : 0;
-  R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
-  pass(R.comp, null, (u) => {
-    bindTex(0, R.scene.tex, u.uScene);
-    bindTex(1, R.blm[0].tex, u.uBloom);
+  if (!pov) R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
+  const sc = pov ? 0 : 1;
+  pass(R.comp, target, (u) => {
+    bindTex(0, scene, u.uScene);
+    bindTex(1, bloom, u.uBloom);
     bindTex(2, R.mask.tex, u.uMask);
-    gl.uniform2f(u.uRes, R.canvas.width, R.canvas.height);
+    gl.uniform2f(u.uRes, target ? target.w : R.canvas.width, target ? target.h : R.canvas.height);
     gl.uniform1f(u.uTime, R.time);
     gl.uniform1f(u.uBloomK, (R.hdr ? 0.3 : 0.38) + 0.1 * LOOK.toon); // the cartoon glows a little
     gl.uniform1f(u.uBad, bad);
-    gl.uniform1f(u.uFlash, R.flash);
-    gl.uniform1f(u.uPulse, R.pulse);
-    gl.uniform1f(u.uSleep, R.sleepK * 0.75);
+    gl.uniform1f(u.uFlash, R.flash * sc);
+    gl.uniform1f(u.uPulse, R.pulse * sc);
+    gl.uniform1f(u.uSleep, R.sleepK * 0.75 * sc);
     gl.uniform1f(u.uSat, lerp(0.8, 1.16, LOOK.toon));
     gl.uniform4fv(u.uLook, LOOK.vec);
     gl.uniform1f(u.uStK, STY.k);
-    gl.uniform1f(u.uSBeat, STY.beat);
+    gl.uniform1f(u.uSBeat, STY.beat * sc);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));
     if (u.uStage) {
-      gl.uniform1f(u.uStage, R.stageK || 0);
+      gl.uniform1f(u.uStage, (R.stageK || 0) * sc);
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
-    if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid)); // a scene's lids, or yours, passed out or for good
+    if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze * sc);
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid) * sc); // a scene's lids, or yours, passed out or for good
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
-    if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
+    if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK * sc);
     gl.uniform1f(u.uNight, HX.night);
     gl.uniform1f(u.uDread, HX.dread);
-    gl.uniform1f(u.uDanger, HX.danger);
+    gl.uniform1f(u.uDanger, HX.danger * sc);
     gl.uniform1f(u.uSel, Math.max(HX.sel, LOOK.sel)); // drain all but the red: a scene's, or the turned town's
-    gl.uniform1f(u.uLetter, HX.letter);
-    gl.uniform1f(u.uJolt, HX.jolt);
+    gl.uniform1f(u.uLetter, HX.letter * sc);
+    gl.uniform1f(u.uJolt, HX.jolt * sc);
     gl.uniform1f(u.uBlood, HX.blood);
-    gl.uniform1f(u.uBeat, HX.beat);
+    gl.uniform1f(u.uBeat, HX.beat * sc);
     gl.uniform1i(
       u.uHasMask,
-      R.goalObj || R.goalChar || R.hoverMesh || R.hoverChar || R.focusMesh || R.focusChar ? 1 : 0,
+      !pov && (R.goalObj || R.goalChar || R.hoverMesh || R.hoverChar || R.focusMesh || R.focusChar) ? 1 : 0,
     );
   });
 }
@@ -11312,8 +11370,9 @@ function flatPrint(pr) {
 // drawn ahead of time, one per idle moment, right after a game starts. Later requests hit the cache.
 const WARM = [];
 let warmBusy = false;
-function warmLater(fn) {
-  WARM.push(fn);
+function warmLater(fn, first) {
+  if (first) WARM.unshift(fn);
+  else WARM.push(fn);
   if (!warmBusy) warmNext();
 }
 function warmNext() {
@@ -11351,6 +11410,420 @@ function cardSoon(o, snap) {
   };
   if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 250 });
   else setTimeout(go, 30);
+}
+// ───────────── the viewfinder. F lifts the camera and a square comes up on the right: the town through your own eyes,
+// live. With evidence in front of you (play/photos photoAim) the lens swings onto it, zooms in until it fills the frame,
+// and whatever stands between you and it (a wall, a window, a wardrobe, somebody in the way) is left out of the
+// picture; with none, it's simply the way you face. The shutter fires in the square (the town only gets a
+// glint of it), the frame it froze develops there as the print, with whatever the shot filed stamped on it, and after a
+// few seconds it goes; the evidence cards the shot made come in after it. Render only: what a photo files is still
+// takePhoto's business (play/photos), and nothing here touches the simulation.
+const VF = {
+  S: 512, // the square's pixels
+  fov: 1.2, // the lens, top to bottom, eased toward the zoom
+  mode: null, // 'live' | 'shot' (white, the still on its way) | 'print' | null
+  act: null, // the action holding the camera up
+  aim: null, // the subject: a person (or what they really are), or { item | obj, x, z }, or a place { x, z }
+  yaw: 0,
+  cut: null, // while the square draws: { at, back, r } for the wall cut (useMain), and the line it hides things on
+  eye: [0, 0, 0],
+  pitch: 0,
+  t0: 0, // R.time the mode began
+  still: 0, // frames left before the still is drawn, under the flash's white (a vision lets go of its body meanwhile)
+  at: 0, // G.t of the shot, for the date on the print
+  blur: false,
+  stamp: '',
+  cap: '',
+  board: undefined, // whose board a click on the print opens
+  catchUntil: 0, // cards made until then belong to this shot
+  cards: [],
+  prints: [],
+  el: null,
+};
+const VF_HOLD = 4.4, // real seconds the print stays up
+  VF_WIDE = 1.2, // the lens with nothing to zoom on
+  VF_TIGHT = 0.36; // as far as it zooms
+function vfEl() {
+  if (VF.el) return VF.el;
+  const el = $('#vf');
+  if (!el) return null;
+  VF.el = el;
+  VF.win = el.querySelector('.vf-win');
+  VF.img = el.querySelector('img');
+  el.onclick = () => {
+    if (VF.mode !== 'print') return;
+    const id = VF.board;
+    vfClose(true);
+    openBoard(id || null);
+  };
+  return el;
+}
+// F (or a click photo) lifts the camera: the square comes up, live
+function vfOpen(act, aim) {
+  const el = R.ready && vfEl();
+  if (!el) return;
+  if (VF.mode) vfClose(true);
+  const P = PLAYER;
+  VF.mode = 'live';
+  VF.act = act;
+  VF.aim = aim ? (aim.look ? aim : aim.char || (aim.x != null ? aim : null)) : null;
+  VF.t0 = R.time;
+  VF.blur = false;
+  VF.stamp = VF.cap = '';
+  VF.board = undefined;
+  VF.cards.length = VF.prints.length = 0;
+  VF.yaw = P.dir;
+  VF.fov = VF_WIDE;
+  vfLens(1);
+  VF.fov = VF_WIDE; // it zooms in once it's up
+  VF.img.hidden = true;
+  VF.img.removeAttribute('src');
+  el.className = 'live';
+  el.style.setProperty('--tilt', filmRange(-3, 3).toFixed(1) + 'deg');
+  el.querySelector('.stamp').textContent = '';
+  el.querySelector('.vf-cap').textContent = '';
+  el.hidden = false;
+}
+// the shutter: white in the square, a glint in the town. False when the square isn't up (then the old full flash).
+function vfShoot() {
+  if (VF.mode !== 'live') return false;
+  VF.mode = 'shot';
+  VF.t0 = R.time;
+  VF.still = 3;
+  VF.at = G.t;
+  VF.catchUntil = R.time + 0.9;
+  VF.el.classList.replace('live', 'shot');
+  vfUnclip();
+  R.flash = Math.max(R.flash, 0.12);
+  return true;
+}
+// a card the shot made waits for the print to go; its stamp goes on the print
+function vfHold(o) {
+  if (!VF.mode || VF.mode === 'live' || R.time > VF.catchUntil) return false;
+  VF.cards.push(o);
+  if (!VF.stamp && o.stamp) VF.stamp = o.stamp;
+  if (!VF.cap) VF.cap = o.title || (o.char ? o.char.short : '');
+  if (VF.board === undefined) VF.board = o.char ? o.char.id : null;
+  if (VF.mode === 'print') vfLabel();
+  return true;
+}
+// a print the shot filed: it gets this picture in the book (until the page reloads; then its recipe again)
+function vfPrint(pr) {
+  if (!VF.mode || VF.mode === 'live' || R.time > VF.catchUntil) return;
+  VF.prints.push(pr);
+  if (!VF.cap) VF.cap = pr.what === pr.where ? pr.what : pr.what + ' · ' + pr.where;
+}
+function vfClose(flush) {
+  const cards = VF.cards.slice();
+  VF.mode = null;
+  VF.act = null;
+  VF.cards.length = VF.prints.length = 0;
+  if (VF.el) VF.el.hidden = true;
+  vfUnclip();
+  if (flush) for (const o of cards) ui.card(o);
+}
+function vfLabel() {
+  VF.el.querySelector('.stamp').textContent = VF.stamp;
+  VF.el.querySelector('.vf-cap').textContent = VF.cap || placeName(PLAYER.x, PLAYER.z);
+  VF.el.classList.toggle('stamped', !!VF.stamp);
+  VF.el.classList.toggle('nothing', VF.stamp === 'NOTHING' || VF.stamp === 'BLURRED');
+}
+// where the lens points, and how tight: the subject's middle, a person filling about two thirds of the frame (a
+// thing on the floor with some floor round it); no subject, the way you face, wide
+const VF_SUBJ = { x: 0, y: 0, z: 0, h: 0 };
+function vfSubjAt(tg) {
+  const S = VF_SUBJ;
+  S.x = tg.x;
+  S.z = tg.z;
+  if (tg.look) {
+    const big = tg.trueForm || (tg.tell && tg.tell.type === 'true');
+    S.h = (big ? 2.5 : 1.85) * tg.look.h;
+    S.y = (tg.y || 0) + S.h * 0.5;
+  } else if (tg.item) {
+    S.h = 1;
+    S.y = 0.25;
+  } else {
+    S.h = tg.obj ? 2.4 : 8; // a piece of furniture; a bare spot on the floor isn't worth a zoom
+    S.y = 0.7;
+  }
+  return S;
+}
+function vfLens(k) {
+  const P = PLAYER,
+    tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? VF.aim : null,
+    eyeY = (P.y || 0) + 1.52 * (P.look.h || 1);
+  let yaw = P.dir,
+    pitch = -0.13,
+    fov = VF_WIDE;
+  if (tg) {
+    const S = vfSubjAt(tg),
+      d = Math.hypot(S.x - P.x, S.z - P.z);
+    if (d > 0.3) {
+      yaw = Math.atan2(S.x - P.x, S.z - P.z);
+      pitch = clamp(Math.atan2(S.y - eyeY, d), -0.7, 0.3);
+      fov = clamp(2 * Math.atan((S.h * 0.75) / Math.hypot(d, S.y - eyeY)), VF_TIGHT, VF_WIDE);
+    }
+  }
+  VF.yaw += angDiff(VF.yaw, yaw) * k;
+  VF.pitch += (pitch - VF.pitch) * k;
+  VF.fov += (fov - VF.fov) * k;
+}
+// the line from the lens to the subject: a thing standing on it, nearer than the subject, would block the shot. wide:
+// anywhere in the frame at its depth, not just on the line (furniture; a person only goes if they're right in front)
+function vfInWayAt(x, z, r, wide) {
+  const C = VF.cut;
+  if (!C) return false;
+  const ex = VF.eye[0],
+    ez = VF.eye[2],
+    tx = C.tx - ex,
+    tz = C.tz - ez,
+    d = Math.hypot(tx, tz) || 1,
+    t = ((x - ex) * tx + (z - ez) * tz) / d;
+  if (t < 0.15 || t > d - (wide ? 0.15 : 0.45)) return false;
+  return Math.abs((x - ex) * tz - (z - ez) * tx) / d < r + (wide ? 0.2 + t * Math.tan(VF.fov / 2) * 0.9 : 0.35);
+}
+// no subject, but a window in front of you: the shot is through it, at what's on the other side
+const VF_PAST = { x: 0, z: 0 };
+function vfWindow(eye, fx, fz) {
+  for (let s = 0.3; s < 4; s += 0.2) {
+    const x = Math.floor(eye[0] + fx * s),
+      z = Math.floor(eye[2] + fz * s);
+    if (!inb(x, z)) return null;
+    const c = tiles[I(x, z)];
+    if (c === 'W') {
+      VF_PAST.x = eye[0] + fx * (s + 2.5);
+      VF_PAST.z = eye[2] + fz * (s + 2.5);
+      return VF_PAST;
+    }
+    if (WALLISH.has(c)) return null; // a blank wall: that's the picture
+  }
+  return null;
+}
+// a mesh in the way, by its bounding sphere (gfx/draw-helpers meshInView); nothing big enough to be half the street
+function vfInWay(m) {
+  const b = m.bound;
+  if (!VF.cut || !b) return false;
+  const M = m.model,
+    s = Math.max(Math.hypot(M[0], M[1], M[2]), Math.hypot(M[8], M[9], M[10])),
+    r = b[3] * s;
+  if (r > 2.5) return false;
+  return vfInWayAt(
+    M[0] * b[0] + M[4] * b[1] + M[8] * b[2] + M[12],
+    M[2] * b[0] + M[6] * b[1] + M[10] * b[2] + M[14],
+    r,
+    true,
+  );
+}
+function vfTargets() {
+  if (VF.out) return;
+  const S = VF.S,
+    fb = gl.createFramebuffer(),
+    cr = gl.createRenderbuffer(),
+    dr = gl.createRenderbuffer(),
+    samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES) || 0);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, cr);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, R.hdr ? gl.RGBA16F : gl.RGBA8, S, S);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, dr);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.DEPTH_COMPONENT24, S, S);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, cr);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dr);
+  VF.ms = fb;
+  VF.scene = makeTarget(S, S, R.hdr);
+  VF.blm = [];
+  for (let k = 1; k <= 4; k++) VF.blm.push(makeTarget(S >> k, S >> k, R.hdr));
+  VF.out = makeTarget(S, S, false);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+// above the walls: the sky outdoors, a dark ceiling indoors (the town has no ceilings to draw)
+const VF_ROOF = [0.025, 0.022, 0.024];
+function vfSky() {
+  if (roomAt(PLAYER.x, PLAYER.z)) return VF_ROOF;
+  const f = LOOK.fog;
+  return [f[0] * 0.9 + SKY[0] * 0.25, f[1] * 0.9 + SKY[1] * 0.25, f[2] * 0.9 + SKY[2] * 0.3];
+}
+// the town through your eyes into VF.out; the still has the flash in it, and only what is really there
+function vfRender(still) {
+  vfTargets();
+  const P = PLAYER,
+    S = VF.S;
+  let yaw = VF.yaw,
+    pitch = VF.pitch;
+  if (!still) {
+    yaw += Math.sin(R.time * 1.7) * 0.006; // held in two hands, not on a tripod
+    pitch += Math.sin(R.time * 2.3) * 0.005;
+  }
+  const fx = Math.sin(yaw),
+    fz = Math.cos(yaw),
+    cp = Math.cos(pitch),
+    eye = [P.x + fx * 0.14, (P.y || 0) + 1.52 * (P.look.h || 1), P.z + fz * 0.14];
+  const view = M4.lookAt(eye, [eye[0] + fx * cp, eye[1] + Math.sin(pitch), eye[2] + fz * cp], [0, 1, 0]);
+  const keep = [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown];
+  cam.VP = M4.mul(M4.persp(VF.fov, 1, 0.08, 70), view);
+  cam.view = view;
+  cam.right = [view[0], view[4], view[8]];
+  cam.up = [view[1], view[5], view[9]];
+  cam.fwd = [-view[2], -view[6], -view[10]];
+  cam.eye = eye;
+  cam.wallsDown = 0;
+  VF.eye = eye;
+  // a subject: the walls between you and it come down (the shader's own cut, aimed at a point just past it; nothing
+  // else is cut), and vfInWay leaves out what stands on the line
+  const tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? vfSubjAt(VF.aim) : vfWindow(eye, fx, fz);
+  if (tg) {
+    const dx = tg.x - eye[0],
+      dz = tg.z - eye[2],
+      d = Math.hypot(dx, dz) || 1;
+    VF.cut = {
+      tx: tg.x,
+      tz: tg.z,
+      at: [tg.x + (dx / d) * 0.3, 1, tg.z + (dz / d) * 0.3],
+      back: [eye[0] - fx * 60, 1, eye[2] - fz * 60],
+      r: clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
+    };
+  }
+  R.cut = VF.cut;
+  const flash = still
+    ? { x: eye[0] + fx * 0.3, y: eye[1], z: eye[2] + fz * 0.3, r: 8, col: [0.62, 0.6, 0.56], dark: 0 }
+    : null;
+  if (flash) HX.lights.unshift(flash);
+  try {
+    drawScene(VF.ms, S, S, still ? 'still' : 'live');
+  } finally {
+    [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown] = keep;
+    VF.cut = R.cut = null;
+    if (flash) HX.lights.splice(HX.lights.indexOf(flash), 1);
+  }
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, VF.ms);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, VF.scene.fb);
+  gl.blitFramebuffer(0, 0, S, S, 0, 0, S, S, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  bloomPasses(VF.scene, VF.blm);
+  composite(VF.scene.tex, VF.blm[0].tex, VF.out, true);
+}
+// VF.out onto the screen, under the square's frame
+function vfBlit() {
+  const w = VF.win.getBoundingClientRect(),
+    c = R.canvas.getBoundingClientRect(),
+    kx = R.canvas.width / c.width,
+    ky = R.canvas.height / c.height,
+    H = R.canvas.height,
+    S = VF.S;
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, VF.out.fb);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  gl.blitFramebuffer(
+    0,
+    0,
+    S,
+    S,
+    Math.round((w.left - c.left) * kx),
+    Math.round(H - (w.bottom - c.top) * ky),
+    Math.round((w.right - c.left) * kx),
+    Math.round(H - (w.top - c.top) * ky),
+    gl.COLOR_BUFFER_BIT,
+    gl.LINEAR,
+  );
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  // the bubbles and words over people's heads live above the canvas: keep them out of the hole the square looks through
+  const fx = $('#fx');
+  if (fx)
+    fx.style.clipPath =
+      'polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,' +
+      w.left +
+      'px ' +
+      w.top +
+      'px,' +
+      w.right +
+      'px ' +
+      w.top +
+      'px,' +
+      w.right +
+      'px ' +
+      w.bottom +
+      'px,' +
+      w.left +
+      'px ' +
+      w.bottom +
+      'px,' +
+      w.left +
+      'px ' +
+      w.top +
+      'px)';
+}
+function vfUnclip() {
+  const fx = $('#fx');
+  if (fx) fx.style.clipPath = '';
+}
+// every frame, at the end of renderFrame
+function vfFrame() {
+  if (!VF.mode) return;
+  const P = PLAYER,
+    gone = !G.started || G.over || UI.caseOpen || UI.scene || CAP.on || !P.onMap;
+  if (VF.mode === 'live') {
+    if (gone || P.queue[0] !== VF.act) return vfClose(false); // put down before the shutter
+    vfLens(0.12);
+    vfRender(false);
+    vfBlit();
+    return;
+  }
+  if (VF.mode === 'shot') {
+    if (VF.still === 3) for (const n of CHARS) if (n.vis && !n.tell) n.vis = null; // the camera never lies: the flash finds nothing there
+    if (VF.still > 0 && --VF.still === 0) {
+      vfRender(true);
+      warmLater(vfDevelop, true);
+    }
+    if (gone) vfClose(true);
+    return;
+  }
+  if (gone || R.time - VF.t0 > VF_HOLD + 0.6) return vfClose(true);
+  if (R.time - VF.t0 > VF_HOLD && !VF.el.classList.contains('out')) VF.el.classList.add('out');
+}
+// the still, read back once, becomes the print: the date in the corner, smeared if your hands shook
+function vfDevelop() {
+  if (VF.mode !== 'shot' || VF.still) return;
+  const S = VF.S,
+    px = new Uint8Array(S * S * 4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, VF.out.fb);
+  gl.readPixels(0, 0, S, S, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  let cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  let ctx = cv.getContext('2d');
+  const id = ctx.createImageData(S, S);
+  for (let y = 0; y < S; y++) id.data.set(px.subarray((S - 1 - y) * S * 4, (S - y) * S * 4), y * S * 4);
+  ctx.putImageData(id, 0, 0);
+  if (VF.blur) {
+    const sm = document.createElement('canvas');
+    sm.width = sm.height = S;
+    const sx = sm.getContext('2d');
+    sx.drawImage(cv, 0, 0);
+    for (let k = 1; k <= 6; k++) {
+      sx.globalAlpha = 0.32;
+      sx.drawImage(cv, k * 4.5, k * 1.6);
+    }
+    cv = sm;
+    ctx = sx;
+    ctx.globalAlpha = 1;
+  }
+  ctx.font = '600 21px ui-monospace, Menlo, monospace';
+  ctx.fillStyle = '#ff8a2a';
+  ctx.fillText('D' + dayNo(VF.at) + ' ' + fmtTime(VF.at), S - 146, S - 18);
+  let url = '';
+  try {
+    url = cv.toDataURL('image/jpeg', 0.88);
+  } catch (e) {
+    url = '';
+  }
+  if (url) for (const pr of VF.prints) R.snaps['print:' + pr.id] = url;
+  VF.mode = 'print';
+  VF.t0 = R.time;
+  if (url) {
+    VF.img.src = url;
+    VF.img.hidden = false;
+  }
+  vfLabel();
+  VF.el.classList.replace('shot', 'print');
 }
 // ───────────────────────── simulation core ─────────────────────────
 const PLAN_MAX = 8;
@@ -11889,8 +12362,8 @@ function handsToHead(c, T, w) {
 // the camera out of the pocket and up to the eye in both hands, elbows tucked in; the shutter gives a small kick
 function photoPose(c, T, pr) {
   const p = pr == null ? 0.5 : pr,
-    up = sstep(0.02, 0.2, p) * (1 - sstep(0.72, 0.97, p)),
-    kick = sstep(0.2, 0.24, p) * (1 - sstep(0.26, 0.36, p));
+    up = sstep(0.02, 0.16, p) * (1 - sstep(0.76, 0.97, p)), // up to the eye, a look through it (play/photos)
+    kick = sstep(0.4, 0.43, p) * (1 - sstep(0.45, 0.55, p)); // the shutter, at PHOTO_SHUTTER / PHOTO_DUR
   c.fx.prop = 'camera';
   T.uaR = lerp(-0.45, -1.26, up);
   T.aoR = lerp(0.08, -0.44, up);
@@ -21253,6 +21726,8 @@ function bloodCutAt(x, y, z, fx, fy, fz, rad) {
   return sstep(-0.15, 0.55, az - fz2) * (1 - sstep(rad * 0.6, rad, d));
 }
 function bloodWallTop(x, z) {
+  const C = R.cut; // the camera's square (gfx/viewfinder)
+  if (C) return lerp(2.8, 0.42, sstep(0.3, 0.75, bloodCutAt(x, 1, z, C.at[0], 1, C.at[2], C.r)));
   const P = PLAYER,
     on = G.started && P && P.onMap,
     px = on ? P.x : cam.tx,
@@ -26915,13 +27390,17 @@ function shotTarget(p) {
   if (p.tile) return { x: p.gx, z: p.gz, label: 'Nothing much', icon: null };
   return null;
 }
+// the shutter goes this far into the photo: first the camera comes up and the square shows what you're looking at
+// (gfx/viewfinder), then the flash
+const PHOTO_SHUTTER = 0.8,
+  PHOTO_DUR = 1.9;
 function photoAct(tg) {
   const pos = () => (tg.char ? [tg.char.x, tg.char.z] : [tg.x, tg.z]);
   return mkAct({
     kind: 'wait',
     label: 'Photo',
     icon: 'camera',
-    dur: 1.5,
+    dur: PHOTO_DUR,
     anim: 'photo',
     check: () => {
       const [x, z] = pos();
@@ -26929,15 +27408,21 @@ function photoAct(tg) {
       if (tg.char ? !(tg.char.onMap && tg.char.shown > 0.5) : visAt(x, z) < 0.35) return 'No clear shot';
       return null;
     },
-    onStart: (c) => {
+    onStart: (c, a) => {
       const [x, z] = pos();
       c.tdir = Math.atan2(x - c.x, z - c.z);
-      takePhoto(tg);
+      vfOpen(a, tg);
+    },
+    onTick: (c, a) => {
+      if (!a.shot && a.t >= PHOTO_SHUTTER) {
+        a.shot = true;
+        takePhoto(tg);
+      }
     },
   });
 }
 // F: the photo, straight away. The camera takes in a wide wedge in front of you, as far as you can see clearly; no aiming.
-function inPhotoCone(x, z) {
+function inPhotoCone(x, z, half = CTRL.photoHalf) {
   const P = PLAYER,
     dx = x - P.x,
     dz = z - P.z,
@@ -26945,9 +27430,46 @@ function inPhotoCone(x, z) {
   if (d > CTRL.photoRange || visAt(x, z) <= 0.35) return false;
   if (d < 0.6) return true;
   return (
-    Math.abs(angDiff(P.tdir, Math.atan2(dx, dz))) <= (CTRL.photoHalf * Math.PI) / 180 &&
+    Math.abs(angDiff(P.tdir, Math.atan2(dx, dz))) <= (half * Math.PI) / 180 &&
     losClear(Math.floor(P.x), Math.floor(P.z), Math.floor(x), Math.floor(z))
   );
+}
+// what F points you at: the likeliest evidence in a wider arc than the frame (a person worth a photo, as the hint reads
+// it, or something THEY left on the floor), the strongest first, then the nearest the middle. Nothing worth it: null,
+// and you shoot the way you face.
+function photoInterest(n) {
+  const tl = n.tell;
+  if (tl && !tl.photo && !tl.unmask && tl.type !== 'glare') return tl.ritual || tl.type === 'true' ? 6 : 5;
+  if (n.odd && !n.odd.photo && G.t <= n.odd.until) return 4;
+  if ((n.trace && !n.trace.photo) || n.vis) return 3.5;
+  if (n.secret && !n.secret.done) return 3;
+  return 2; // a walk that's wrong
+}
+function photoAim() {
+  const P = PLAYER,
+    at = (x, z) => Math.abs(angDiff(P.tdir, Math.atan2(x - P.x, z - P.z))) + Math.hypot(x - P.x, z - P.z) * 0.06;
+  let best = null,
+    bs = -1e9;
+  const take = (tg, x, z, w) => {
+    const s = w - at(x, z) * 1.2;
+    if (s > bs) {
+      bs = s;
+      best = tg;
+    }
+  };
+  for (const n of CHARS) if (photoWorth(n) && inPhotoCone(n.x, n.z, CTRL.photoAim)) take(n, n.x, n.z, photoInterest(n));
+  if (SHADE.on && SHADE.c && inPhotoCone(SHADE.c.x, SHADE.c.z, CTRL.photoAim)) take(SHADE.c, SHADE.c.x, SHADE.c.z, 3.5);
+  for (const it of G.items)
+    if (
+      it.by &&
+      !it.photo &&
+      it.kind !== 'puddle' &&
+      it.kind !== 'wallpee' &&
+      it.kind !== 'opened' &&
+      it.kind !== 'trap'
+    )
+      if (inPhotoCone(it.x, it.z, CTRL.photoAim)) take({ item: it, x: it.x, z: it.z }, it.x, it.z, 3.5);
+  return best;
 }
 function photoCone() {
   const P = PLAYER;
@@ -26979,23 +27501,29 @@ function playerPhoto() {
       kind: 'wait',
       label: 'Photo',
       icon: 'camera',
-      dur: 1.5,
+      dur: PHOTO_DUR,
       anim: 'photo',
       photo: true,
       interruptible: false,
-      onStart: () => closeMenu(),
+      onStart: (c, a) => {
+        closeMenu();
+        const tg = photoAim(); // turn to it: the frame the game reads follows you
+        if (tg) c.tdir = Math.atan2(tg.x - c.x, tg.z - c.z);
+        vfOpen(a, tg);
+      },
       onTick: (c, a) => {
-        if (!a.shot && a.t >= 0.3) {
+        if (!a.shot && a.t >= PHOTO_SHUTTER) {
           a.shot = true;
           takePhoto(photoCone());
         }
       },
     }),
-  ); // up to the eye, then the shutter
+  ); // up to the eye, a look through it, then the shutter
 }
 function addPrint(o) {
   const pr = Object.assign({ id: ++G.printId, at: G.t, pin: null }, o);
   G.prints.push(pr);
+  vfPrint(pr); // a photo's print gets the picture the camera took
   while (G.prints.length > 30) {
     const i = G.prints.findIndex((p) => !p.pin);
     if (i < 0) break;
@@ -27005,19 +27533,22 @@ function addPrint(o) {
 }
 // the frame check: everything visible within a couple of tiles of the aim point is in the picture
 function takePhoto(tg) {
-  ui.flash();
+  if (!vfShoot()) ui.flash(); // the flash goes off in the camera's square, if it's up
   audio.blip('shutter'); // the film never runs out
   const ax = tg.char ? tg.char.x : tg.x,
     az = tg.char ? tg.char.z : tg.z;
   if (G.t < (G.shakenUntil || 0) && G.t >= (G.shakenFrom || 0) && chance(0.35)) {
     // shaken hands
+    VF.blur = true;
     const pr = addPrint({ kind: 'blur', what: 'Blurred', where: placeName(ax, az) });
     ui.card({ title: 'Blurred', img: printImage(pr), stamp: 'BLURRED' });
     return photoSeen(tg.char);
   }
   const inFrame = tg.inFrame || ((x, z) => Math.hypot(x - ax, z - az) < 2.4 && visAt(x, z) > 0.35);
   const chars = CHARS.filter((n) => !n.isPlayer && n.onMap && (n === tg.char || (n.shown > 0.5 && inFrame(n.x, n.z))));
-  const items = G.items.filter((it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)));
+  const items = G.items.filter(
+    (it) => it.kind !== 'puddle' && it.kind !== 'wallpee' && (it === tg.item || inFrame(it.x, it.z)),
+  );
   let filed = false;
   const got = new Set(); // who already has a proof out of this frame
   // THEM in a tell: the body slipping is a Body card, THEIR business a Habit card. After the change, no face: no card.
@@ -28622,7 +29153,7 @@ const ui = {
   },
   card(o) {
     const box = $('#cards');
-    if (!box || !(o.char || o.title)) return;
+    if (!box || !(o.char || o.title) || vfHold(o)) return; // a photo's card waits for its print to go
     const el = document.createElement('div');
     el.className =
       'pcard' +
@@ -45336,6 +45867,7 @@ window.addEventListener('DOMContentLoaded', () => {
 //   __dev.skip(minutes)                      run the simulation forward without rendering
 //   __dev.perf()                             per-system milliseconds per frame, and the slowest frames
 //   __dev.perfReset()                        start counting again
+//   __dev.run('code')                        evaluate code inside the game's own scope (any top-level name)
 // Timing works by wrapping top-level functions: function declarations are plain bindings in the shared scope,
 // so replacing one here replaces it for every caller.
 const DEV = { acc: {}, calls: {}, frames: 0, cur: null, slow: [], t0: performance.now() };
@@ -45409,6 +45941,9 @@ window.__dev = {
   CHARS,
   get UI() {
     return UI;
+  },
+  run(src) {
+    return eval(src);
   },
   /** run the simulation forward `min` game minutes, in steps, without drawing */
   /** run the simulation forward `min` game minutes without drawing; returns the slowest steps with what they spent it on */

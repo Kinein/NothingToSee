@@ -1,6 +1,6 @@
 //@ gfx/frame — renderFrame: the world pass, decals, additive atmosphere, mask, bloom, composite
-//@ Defines: renderFrame, drawMask, pass, bindTex, bloomPasses, composite
-//@ Uses:    gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, taken/taken, core/util, …
+//@ Defines: renderFrame, drawScene, drawMask, pass, bindTex, bloomPasses, composite
+//@ Uses:    gfx/gl, gfx/renderer, gfx/draw-helpers, sim/core, horror/layer, world/vision, world/grid, ui/interface, gfx/viewfinder, taken/taken, …
 //@ (header made by tools/map.js; stripped by build.py)
 function renderFrame() {
   resizeCanvas();
@@ -23,10 +23,27 @@ function renderFrame() {
     gl.bindTexture(gl.TEXTURE_2D, R.tVis);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TW, TH, gl.RGBA, gl.UNSIGNED_BYTE, texVis);
   }
-  gl.bindFramebuffer(gl.FRAMEBUFFER, R.msFb);
+  drawScene(R.msFb, w, h, null);
+  // resolve, outlines, bloom, composite
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.msFb);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, R.scene.fb);
+  gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  drawMask();
+  bloomPasses(R.scene, R.blm);
+  composite(R.scene.tex, R.blm[0].tex, null, false);
+  vfFrame(); // the camera's square, when it's up (gfx/viewfinder)
+  gl.bindVertexArray(null);
+}
+// the world, from wherever cam stands. pov: the player's own eyes (gfx/viewfinder) — no you in it, none of the marks
+// the game draws for you on the floor, and in the photo itself ('still') none of what your head makes up
+function drawScene(fb, w, h, pov) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
   gl.viewport(0, 0, w, h);
-  const fog = LOOK.fog;
-  gl.clearColor(fog[0] * 0.8, fog[1] * 0.8, fog[2] * 0.8, 1);
+  const fog = pov ? vfSky() : LOOK.fog,
+    fk = pov ? 1 : 0.8;
+  gl.clearColor(fog[0] * fk, fog[1] * fk, fog[2] * fk, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.disable(gl.CULL_FACE);
@@ -42,11 +59,11 @@ function renderFrame() {
   drawMesh(R.marks);
   for (const m of R.doorMeshes) {
     m.model = doorMatrix(m.door);
-    if (meshInView(m)) drawMesh(m);
+    if (meshInView(m) && !(pov && vfInWay(m))) drawMesh(m); // an open door swung into the camera's shot
   }
   for (const m of R.objMeshes) {
     if (m.lair && m.lair.key !== CAP.lit) continue;
-    if (!meshInView(m)) continue;
+    if (!meshInView(m) || (pov && vfInWay(m))) continue;
     m.emitMul = emitFor(m);
     if (m.light) m.tint = lampTint(m.light);
     drawMesh(m);
@@ -64,17 +81,25 @@ function renderFrame() {
     if (m.litGrp) m.emitMul = 1;
     drawMesh(m);
   }
-  for (const m of R.itemMeshes.values()) if (meshInView(m)) drawMesh(m);
+  for (const m of R.itemMeshes.values()) if (meshInView(m) && !(pov && vfInWay(m))) drawMesh(m);
   const night = carNight();
   for (const c of CARS) {
     const m = c.mesh;
     m.model = c.model;
     m.emitMul = night ? 1 : 0.1;
     m.center = [c.x, 1, c.z];
-    drawMesh(m);
+    if (!(pov && vfInWayAt(c.x, c.z, 1, true))) drawMesh(m);
   }
-  for (const c of CHARS) if (c.onMap && c.shown > 0.02 && !c.capHide && charInView(c)) drawChar(c);
-  if (SHADE.on) drawChar(SHADE.c);
+  for (const c of CHARS)
+    if (
+      c.onMap &&
+      c.shown > 0.02 &&
+      !c.capHide &&
+      !(pov && (c === PLAYER || vfInWayAt(c.x, c.z, 0.2))) &&
+      charInView(c)
+    )
+      drawChar(c);
+  if (SHADE.on && pov !== 'still') drawChar(SHADE.c);
   try {
     combatDraw();
   } catch (e) {
@@ -119,7 +144,7 @@ function renderFrame() {
   gl.uniform1f(D.U.uSeed, 0);
   gl.uniform1f(D.U.uWetD, LOOK.wet);
   for (const c of CHARS)
-    if (c.onMap && c.shown > 0.02 && !c.capHide) {
+    if (c.onMap && c.shown > 0.02 && !c.capHide && !(pov && c === PLAYER)) {
       drawDecal(drawX(c), drawZ(c), 0.44, [0, 0, 0, 0.55 * c.shown], 0, (c.y || 0) + 0.012);
       longShadow(c);
     }
@@ -152,7 +177,7 @@ function renderFrame() {
     console.error(e);
   }
   const P = PLAYER;
-  if (P && P.onMap && G.started && !G.over) {
+  if (!pov && P && P.onMap && G.started && !G.over) {
     if (P.path && P.moving) {
       let px = P.x,
         pz = P.z,
@@ -183,7 +208,7 @@ function renderFrame() {
       (P.y || 0) + 0.02,
     );
   }
-  if (UI.walkMark)
+  if (UI.walkMark && !pov)
     drawDecal(
       UI.walkMark.x,
       UI.walkMark.z,
@@ -191,10 +216,12 @@ function renderFrame() {
       [0.98, 0.88, 0.62, 0.65 * (1 - UI.walkMark.t)],
       1,
     );
-  if (R.hoverChar && R.hoverChar !== P) drawDecal(R.hoverChar.x, R.hoverChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
-  if (R.focusChar && R.focusChar !== R.hoverChar && R.focusChar.onMap)
-    drawDecal(R.focusChar.x, R.focusChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
-  else if (UI.focus && UI.focus.item) drawDecal(UI.focus.item.x, UI.focus.item.z, 0.5, [1, 0.84, 0.52, 0.7], 1, 0.02);
+  if (!pov) {
+    if (R.hoverChar && R.hoverChar !== P) drawDecal(R.hoverChar.x, R.hoverChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
+    if (R.focusChar && R.focusChar !== R.hoverChar && R.focusChar.onMap)
+      drawDecal(R.focusChar.x, R.focusChar.z, 0.52, [1, 0.84, 0.52, 0.75], 1, 0.02);
+    else if (UI.focus && UI.focus.item) drawDecal(UI.focus.item.x, UI.focus.item.z, 0.5, [1, 0.84, 0.52, 0.7], 1, 0.02);
+  }
 
   // additive atmosphere: light shafts, dust, rain, halos
   gl.blendFunc(gl.ONE, gl.ONE);
@@ -297,17 +324,6 @@ function renderFrame() {
   gl.enable(gl.DEPTH_TEST);
   gl.depthMask(true);
   gl.disable(gl.BLEND);
-
-  // resolve, outlines, bloom, composite
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, R.msFb);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, R.scene.fb);
-  gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
-  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-  drawMask();
-  bloomPasses();
-  composite();
-  gl.bindVertexArray(null);
 }
 function drawMask() {
   const t = R.mask;
@@ -362,13 +378,12 @@ function bindTex(unit, t, loc) {
   gl.bindTexture(gl.TEXTURE_2D, t);
   gl.uniform1i(loc, unit);
 }
-function bloomPasses() {
+function bloomPasses(src, B) {
   gl.disable(gl.DEPTH_TEST);
   gl.disable(gl.BLEND);
-  const B = R.blm;
   pass(R.bright, B[0], (u) => {
-    bindTex(0, R.scene.tex, u.uSrc);
-    gl.uniform2f(u.uTexel, 1 / R.scene.w, 1 / R.scene.h);
+    bindTex(0, src.tex, u.uSrc);
+    gl.uniform2f(u.uTexel, 1 / src.w, 1 / src.h);
     gl.uniform1f(u.uTh, R.hdr ? 0.8 : 0.66);
     gl.uniform1f(u.uKnee, 0.3);
   });
@@ -386,46 +401,49 @@ function bloomPasses() {
     });
   gl.disable(gl.BLEND);
 }
-function composite() {
+// pov: the same grade for the camera's square, the town's mood and all, but none of what happens on your screen
+// (the red edges, the lids, the stage light, the outlines): those are yours, not the film's
+function composite(scene, bloom, target, pov) {
   const stress = G && G.started && PLAYER ? PLAYER.needs.stress : 20;
-  const bad = clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
+  const bad = pov ? 0 : clamp((stress - (100 - PSY.shaky)) / PSY.shaky, 0, 1); // under 40 the world turns red at the edges
   const sleep = G && G.sleeping ? 1 : 0;
-  R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
-  pass(R.comp, null, (u) => {
-    bindTex(0, R.scene.tex, u.uScene);
-    bindTex(1, R.blm[0].tex, u.uBloom);
+  if (!pov) R.sleepK = (R.sleepK || 0) + (sleep - (R.sleepK || 0)) * 0.08;
+  const sc = pov ? 0 : 1;
+  pass(R.comp, target, (u) => {
+    bindTex(0, scene, u.uScene);
+    bindTex(1, bloom, u.uBloom);
     bindTex(2, R.mask.tex, u.uMask);
-    gl.uniform2f(u.uRes, R.canvas.width, R.canvas.height);
+    gl.uniform2f(u.uRes, target ? target.w : R.canvas.width, target ? target.h : R.canvas.height);
     gl.uniform1f(u.uTime, R.time);
     gl.uniform1f(u.uBloomK, (R.hdr ? 0.3 : 0.38) + 0.1 * LOOK.toon); // the cartoon glows a little
     gl.uniform1f(u.uBad, bad);
-    gl.uniform1f(u.uFlash, R.flash);
-    gl.uniform1f(u.uPulse, R.pulse);
-    gl.uniform1f(u.uSleep, R.sleepK * 0.75);
+    gl.uniform1f(u.uFlash, R.flash * sc);
+    gl.uniform1f(u.uPulse, R.pulse * sc);
+    gl.uniform1f(u.uSleep, R.sleepK * 0.75 * sc);
     gl.uniform1f(u.uSat, lerp(0.8, 1.16, LOOK.toon));
     gl.uniform4fv(u.uLook, LOOK.vec);
     gl.uniform1f(u.uStK, STY.k);
-    gl.uniform1f(u.uSBeat, STY.beat);
+    gl.uniform1f(u.uSBeat, STY.beat * sc);
     if (u.uFade) gl.uniform1f(u.uFade, Math.max(CAP.fx.fade, CELL.fade, END.fade));
     if (u.uStage) {
-      gl.uniform1f(u.uStage, R.stageK || 0);
+      gl.uniform1f(u.uStage, (R.stageK || 0) * sc);
       gl.uniform2f(u.uSpot, R.stageAt ? R.stageAt[0] : 0.5, R.stageAt ? R.stageAt[1] : 0.5);
     }
-    if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze);
-    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid)); // a scene's lids, or yours, passed out or for good
+    if (u.uDaze) gl.uniform1f(u.uDaze, CAP.fx.daze * sc);
+    if (u.uLid) gl.uniform1f(u.uLid, Math.max(CAP.fx.lid, R.outLid || 0, END.lid) * sc); // a scene's lids, or yours, passed out or for good
     if (u.uWash) gl.uniform3fv(u.uWash, CAP.wash);
-    if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK);
+    if (u.uWashK) gl.uniform1f(u.uWashK, CAP.fx.washK * sc);
     gl.uniform1f(u.uNight, HX.night);
     gl.uniform1f(u.uDread, HX.dread);
-    gl.uniform1f(u.uDanger, HX.danger);
+    gl.uniform1f(u.uDanger, HX.danger * sc);
     gl.uniform1f(u.uSel, Math.max(HX.sel, LOOK.sel)); // drain all but the red: a scene's, or the turned town's
-    gl.uniform1f(u.uLetter, HX.letter);
-    gl.uniform1f(u.uJolt, HX.jolt);
+    gl.uniform1f(u.uLetter, HX.letter * sc);
+    gl.uniform1f(u.uJolt, HX.jolt * sc);
     gl.uniform1f(u.uBlood, HX.blood);
-    gl.uniform1f(u.uBeat, HX.beat);
+    gl.uniform1f(u.uBeat, HX.beat * sc);
     gl.uniform1i(
       u.uHasMask,
-      R.goalObj || R.goalChar || R.hoverMesh || R.hoverChar || R.focusMesh || R.focusChar ? 1 : 0,
+      !pov && (R.goalObj || R.goalChar || R.hoverMesh || R.hoverChar || R.focusMesh || R.focusChar) ? 1 : 0,
     );
   });
 }

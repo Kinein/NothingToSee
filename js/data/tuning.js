@@ -44,6 +44,7 @@ const CTRL = {
   shakeHold: 120,    // a shake stays fresh this long; after that, shake it again before you open it
   photoHalf: 60,     // the camera takes in a 120° wedge in front of you…
   photoRange: 8,     // …out to this far, and only what you can actually see
+  photoAim: 75,      // F turns you and the lens onto the likeliest evidence within this half-angle (a 150° arc)
   flashNear: 3,      // the flash rule: this close, from any side, they notice the photo; further off, only facing you
   boltSpeed: 3.5,    // enemy projectiles: tiles per game minute (7 tiles a second at normal speed)
   boltHit: 0.42,     // how close a bolt must pass to you to land

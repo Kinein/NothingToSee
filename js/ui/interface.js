@@ -186,7 +186,7 @@ const ui = {
   },
   card(o) {
     const box = $('#cards');
-    if (!box || !(o.char || o.title)) return;
+    if (!box || !(o.char || o.title) || vfHold(o)) return; // a photo's card waits for its print to go
     const el = document.createElement('div');
     el.className =
       'pcard' +

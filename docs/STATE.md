@@ -19,7 +19,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 
 | Field | Starts as | Written in | Read in |
 | --- | --- | --- | --- |
-| `t` | `start` | game/endings, game/loop | world/paths, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, town/npc-update, … |
+| `t` | `start` | game/endings, game/loop | world/paths, gfx/viewfinder, sim/core, sim/movement, sim/actions, player/work, town/quirks, them/plan, … |
 | `speed` | `1` | town/arrest, town/on-the-run, them/true-form, combat/hits, combat/melee, combat/throws, play/verbs, play/confrontation, ui/case-board, horror/half-forms-real, horror/encounter-outcomes, taken/taken, chase/hunt, chase/hunt-step, chase/fbi, game/state, game/last-day | horror/visions, horror/ears, horror/layer, chase/they-come, chase/flee, game/loop |
 | `inv` | `{
       trap: 0,
@@ -132,8 +132,8 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sleeping` | `false` | player/needs, town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/routines, town/quirks, them/plan, town/npc-update, town/cell, town/on-the-run, … |
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
-| `over` | `null` | game/state | gfx/frame, player/needs, player/work, them/plan, them/moves, them/wipe, town/arrest, town/cell, … |
-| `started` | `false` | game/state | gfx/look, gfx/draw-helpers, gfx/frame, player/needs, town/routines, town/quirks, them/plan, town/npc-update, … |
+| `over` | `null` | game/state | gfx/frame, gfx/viewfinder, player/needs, player/work, them/plan, them/moves, them/wipe, town/arrest, … |
+| `started` | `false` | game/state | gfx/look, gfx/draw-helpers, gfx/frame, gfx/viewfinder, player/needs, town/routines, town/quirks, them/plan, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |
 | `habits` | `{}` | town/routines, game/state | town/daily-plans, town/quirks, them/wipe, town/talk, play/oddities |

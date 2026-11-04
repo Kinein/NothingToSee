@@ -1,6 +1,6 @@
 //@ combat/blood — Blood: sprayed by blows, onto floors and walls, kept all game; THEIR colours
 //@ Defines: BLOOD_KINDS, BLOOD_COL, BLOOD_FACE, bloodOf, bleed, bleedAt, bloodPool, bloodStain, bloodDrop, bloodTick, BLOOD_FX, BLOOD_PEND, BL_M, BL_COL, bloodFx, bloodCol, …
-//@ Uses:    core/util, gfx/renderer, sim/core, gfx/gl, data/tuning, world/grid, gfx/post, horror/layer, world/vision, input/walking, …
+//@ Uses:    core/util, gfx/renderer, sim/core, gfx/gl, data/tuning, world/grid, gfx/world-geometry, gfx/post, horror/layer, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── blood. Only violence spills it, and what's spilled stays for the rest of the game (G.blood). A blow throws
 // drops away from whoever struck it: they fly, land on the floor as splats, and hit walls and run down them. THEIR blood
@@ -157,6 +157,8 @@ function bloodCutAt(x, y, z, fx, fy, fz, rad) {
   return sstep(-0.15, 0.55, az - fz2) * (1 - sstep(rad * 0.6, rad, d));
 }
 function bloodWallTop(x, z) {
+  const C = R.cut; // the camera's square (gfx/viewfinder)
+  if (C) return lerp(2.8, 0.42, sstep(0.3, 0.75, bloodCutAt(x, 1, z, C.at[0], 1, C.at[2], C.r)));
   const P = PLAYER,
     on = G.started && P && P.onMap,
     px = on ? P.x : cam.tx,
