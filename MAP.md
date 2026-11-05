@@ -248,12 +248,12 @@ Through the glass: a photo taken through a window, the pane put back in the squa
 - **→ uses:** gfx/gl, gfx/viewfinder, world/grid, world/light-map, core/util, sim/core, gfx/post, gfx/look, gfx/renderer, gfx/frame
 - **← used by:** 2 (gfx/viewfinder, play/photos)
 
-### gfx/vf-sky  ·  #30  ·  241 lines
+### gfx/vf-sky  ·  #30  ·  403 lines
 
 Over your head in a photo: ceilings, the sky, the city past the edge of town
 
-- **Defines (6):** `VF_SKY_FS` `vfRoof` `VF_SUN` `VF_MOON` `vfOrb` `vfBackdrop`
-- **→ uses:** gfx/gl, world/grid, gfx/viewfinder, gfx/renderer, world/light-map, sim/core, gfx/frame, gfx/look, gfx/post, gfx/world-geometry, core/util
+- **Defines (7):** `VF_SKY_FS` `VF_UPPER` `vfRoof` `VF_SUN` `VF_MOON` `vfOrb` `vfBackdrop`
+- **→ uses:** gfx/gl, world/grid, gfx/viewfinder, gfx/renderer, world/light-map, sim/core, gfx/frame, gfx/look, gfx/world-geometry, core/util, gfx/post
 - **← used by:** 1 (gfx/frame)
 
 ### gfx/reach-rig  ·  #104  ·  275 lines
