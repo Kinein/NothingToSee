@@ -86,8 +86,9 @@ const RESIST = { cuffed: 0.86, run: 1.38, stumble: 2, first: 2.2, near: 2.6, far
 // it's rude: `rude` suspicion. THEIR people, and drunks, follow you after, `follow` game minutes, `back` tiles behind.
 // One of THEM only comes once THEIR awareness is `probeAware`. While the work bar is under WORK.low and you're away from
 // your desk, Hale gets up and herds you back to it (outside the office doors, or at your desk), at most every `boss` game
-// minutes. Nobody comes over again within `again` game minutes.
-const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300 };
+// minutes. Nobody comes over again within `again` game minutes. Strangers (a drunk, somebody lost) are rarer: weights
+// `drunk` and `lost`, no two within `stranger` game minutes, and never while you're in the office.
+const APPROACH = { every: [45, 95], near: 14, runAt: 7, reach: 1.6, gap: 4.4, give: 30, walkOff: 2.2, rude: 4, follow: [10, 20], back: 3.2, probeAware: 15, boss: 40, again: 300, drunk: 0.5, lost: 0.2, stranger: 480 };
 
 // ── Needs and the Psychic bar (player/needs)
 const NEEDS = [

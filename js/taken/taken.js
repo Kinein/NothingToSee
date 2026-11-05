@@ -654,6 +654,7 @@ function capAudio() {
     rain: 0,
     car: 0,
     dread: CAP.lit ? 0.25 : HX.dread,
+    space: 'lair',
   });
 }
 

@@ -229,15 +229,7 @@ function simStep(dtReal, spdOver) {
   hallucinate(dtReal);
   earsTick(dtReal);
   audio.ringTick(dtReal, !!G.phoneRing && pr && pr.home);
-  audio.update({
-    hum: pr && (pr.bld === 'office' ? officeLit() : pr.bld === 'shop' ? shopOpen() : false),
-    outside: !pr,
-    night: hourF() > 20 || hourF() < 6,
-    stress: PLAYER.needs.stress,
-    rain: G.rainK,
-    car: carLoud,
-    dread: HX.dread,
-  });
+  soundTick(dtReal, pr, carLoud); // audio/foley: the air for here and now, steps, doors, hands
   if (cam.follow) {
     const k = Math.min(1, dtReal * (3 + (G.sleeping ? 0 : G.speed) * 2.5));
     cam.tx += (PLAYER.x - cam.tx) * k;

@@ -101,7 +101,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Mouse, camera | `js/input/camera.js`, camera state in `js/gfx/renderer.js` |
 | Menus, HUD, pie menu, the evidence book, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
 | HUD markup and all CSS | `shell/page.html`, `shell/styles.css` |
-| Sound | `js/audio/sound.js` (all synthesised with Web Audio) |
+| Sound | `js/audio/sound.js` (all synthesised with Web Audio: the beds, the two reverb rooms, the muffle, every one-shot in `hx`, `voice`, `loop`); what plays when, from the game's state (the air for here and now, footsteps by surface, doors, hands at work `FOLEY_USE`/`FOLEY_ANIM`, voices for `ui.say`): `js/audio/foley.js` (`soundTick`, `foleyTick`, `voiceFor`). Sound only listens and has its own randomness (`audio.rnd`): never `Math.random` |
 | Being taken to the lair and escaping | `js/taken/` (`taken.js` capture → `coming.js` → `down-there.js` → `way-out*.js` → `back-up.js`) |
 | THEY come for you, hunts, the FBI | `js/chase/` (`they-come.js`, `hunt*.js`, `flee.js`, `fbi.js`) |
 | Friday finale | `js/game/last-day.js` (`looseBegin`) |
