@@ -74,6 +74,14 @@ arena) and the fights-by-situation rules are in
 - **Signs for a gut feeling, the small half.** A bought person gets gold art at home but no new PC; someone taken in
   the night comes in after lunch but doesn't walk dazed.
 
+### 6. Sound: what v1.30 left out
+audio/foley.js voices the town (steps, doors, hands, voices, the air for each place and hour). Not yet heard:
+- footsteps and doors inside THEIR lairs while you're down there: the capture scenes (taken/) drive their own
+  audio and never call `soundTick`. `stepSurf` already knows `metal` (the craft) and `mud` (drains, nest).
+- a TV that's simply on in a room (only the one you watch plays), the radio, Lenny's trolley.
+- the levels were set by measuring them headless (all within a few dB of the old sounds); listen on real
+  speakers and on headphones, and nudge the numbers in `audio.update` and the `hx` cases.
+
 ### Not now
 Real ES modules (`import`/`export`) would mean untangling ~1,400 shared top-level names and the circular calls
 between town/, them/ and horror/. Don't start it unless asked.

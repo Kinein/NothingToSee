@@ -269,6 +269,7 @@ const ui = {
     if (b) el.querySelector('.si').innerHTML = b.el.innerHTML; // whatever face they were pulling goes in with the words
     $('#fx').appendChild(el);
     UI.says.push({ el, c, t: 0, life: secs || 3 });
+    voiceFor(c, text); // audio/foley: heard as well as read
   },
   bubble(c, icon, kind, secs) {
     if (!c || !c.onMap) return;

@@ -99,6 +99,7 @@ input/camera.js                  # Input and camera control
 input/walking.js                 # WASD walking relative to the camera
 input/targeting.js               # What E acts on; keyboard handling
 audio/sound.js                   # Sound, all synthesised (Web Audio)
+audio/foley.js                   # What you hear of the town: the air by place and hour, steps, doors, hands at work, voices
 town/traffic-weather.js          # Traffic and weather
 horror/layer.js                  # The horror layer: shared machinery
 horror/midday.js                 # Midday scenes

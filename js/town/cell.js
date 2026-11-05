@@ -115,6 +115,7 @@ function cellFrame(dt) {
     rain: (G.rainK || 0) * 0.3,
     car: 0,
     dread: 0,
+    space: 'cell',
   });
 }
 function cellEnter() {

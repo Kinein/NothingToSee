@@ -16,7 +16,7 @@ Math helpers, colours, random, mat4 (column-major)
 
 - **Defines (18):** `TAU` `clamp` `lerp` `sstep` `rand` `irand` `pick` `chance` `shuffle` `hash2` `hex` `mix3` `mul3` `add3` `angDiff` `fmtTime` `fmtDur` `M4`
 - **→ uses:** gfx/renderer
-- **← used by:** 111
+- **← used by:** 112
 
 ## data/
 
@@ -26,7 +26,7 @@ Tuning numbers: speeds, controls, needs, work, damage, odds. Change the game's f
 
 - **Defines (37):** `CLOCK` `TALK` `BODY_ACT` `WALK` `SPEEDS` `AWAY_SPEED` `SLEEP_SPEED` `STIR_SLOW` `PHOTO_RANGE` `CTRL` `WORK` `MAD_SUS` `SUS_SNAP` `HURT` `POLICE` `RESIST` `APPROACH` `NEEDS` `PSY` `EARS` `BLADDER` `OUT` `BED` `TIP` `ATTACK_ODDS` `HORROR_MIX` `AWARE_STEPS` `FOE_HP` `MELEE` `BRAWL` `MARK` `RANGED` `EVIDENCE` `BLOOD` `WIPE` `BIO_FIND` `AJAR`
 - **→ uses:** —
-- **← used by:** 56
+- **← used by:** 57
 
 ### data/lines  ·  #3  ·  331 lines
 
@@ -44,7 +44,7 @@ Town tile grid, houses, THEIR lairs under the town, buildings and rooms
 
 - **Defines (39):** `W` `TOWN_H` `H` `tiles` `I` `inb` `tget` `tset` `fill` `box` `hl` `vl` `WALLISH` `OUTDOOR` `VOIDISH` `isWallish` `isOutdoor` `HOUSE_DEFS` `HOUSE_OF` `HOUSE_DOOR` `LAIR_Z0` `LAIR_MAPS` `LAIR_OF` `LAIRS` `STATION_Z0` `STATION_MAP` `SZ` `STATION` `lairAt` `LZ` `BUILDINGS` `buildingAt` `ROOM_DEFS` `HOUSE_WALLS` `HOUSE_MATS` `roomOf` `ROOMS` `roomAt` `roomByKey`
 - **→ uses:** —
-- **← used by:** 80
+- **← used by:** 82
 
 ### world/objects  ·  #5  ·  399 lines
 
@@ -52,7 +52,7 @@ Object placement on the grid, doors, edges, ritual and watch spots
 
 - **Defines (17):** `DIRS` `FACE_ANG` `OT` `PLACE` `OBJ` `objAt` `blockAt` `sightAt` `OBJ_BY_ID` `objCovers` `DOORS` `doorAt` `SHOP_DOOR` `isShopDoor` `EDGES` `RITUAL` `WATCH_SPOT`
 - **→ uses:** world/grid, gfx/world-geometry
-- **← used by:** 51
+- **← used by:** 52
 
 ### world/light-map  ·  #18  ·  405 lines
 
@@ -60,7 +60,7 @@ Line of sight helpers and the per-cell light map
 
 - **Defines (34):** `doorClosed` `blocksSight` `blocksLight` `fov` `losClear` `lightR` `lightG` `lightB` `LIGHTS` `DYN` `addLight` `LAIR_LAMPS` `STATION_TUBES` `WINDOWS` `SKY` `personal` `lightOn` `rLR` `rLG` `rLB` `STY` `ST_RED` `ST_AMBER` `ST_TEAL` `ST_ORDER` `lightHue` `styleLight` `REACH` `DOOR_SHUT` `OUTDOOR_CELLS` `reachOf` `addReach` `computeLight` `cellLum`
 - **→ uses:** world/grid, core/util, world/objects, sim/core, gfx/world-geometry
-- **← used by:** 37
+- **← used by:** 38
 
 ### world/vision  ·  #19  ·  113 lines
 
@@ -68,7 +68,7 @@ What the player can see: field of view and explored cells
 
 - **Defines (18):** `visTarget` `visCur` `explored` `SIGHT_R` `darkSight` `computeVision` `smoothVision` `TW` `TH` `texLight` `texVis` `MAPS` `solidForExpand` `EXP_SOLID` `EXP_OUT` `expandMaps` `visAt` `lumAt`
 - **→ uses:** world/grid, world/light-map, world/objects
-- **← used by:** 42
+- **← used by:** 43
 
 ### world/paths  ·  #20  ·  178 lines
 
@@ -248,13 +248,13 @@ Through the glass: a photo taken through a window, the pane put back in the squa
 - **→ uses:** gfx/gl, gfx/viewfinder, world/grid, world/light-map, core/util, sim/core, gfx/post, gfx/look, gfx/renderer, gfx/frame
 - **← used by:** 2 (gfx/viewfinder, play/photos)
 
-### gfx/reach-rig  ·  #102  ·  275 lines
+### gfx/reach-rig  ·  #103  ·  275 lines
 
 Bones, arm solver, eyes that follow
 
 - **Defines (19):** `RIG` `BODY_PTS` `rigKind` `rigFrames` `bodyPt` `toLocal` `armFK` `det3` `solve3` `solveArm` `rigAim` `armIK` `handPt` `lookAt` `wob` `bell` `v3add` `v3lerp` `poseMix`
 - **→ uses:** core/util, world/grid, sim/pose, gfx/renderer, town/cast, sim/core
-- **← used by:** 4 (sim/body-motion, sim/pose, them/tells, horror/encounter-draw)
+- **← used by:** 5 (sim/body-motion, sim/pose, them/tells, audio/sound, horror/encounter-draw)
 
 ## sim/
 
@@ -264,7 +264,7 @@ Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 
 - **Defines (25):** `PLAN_MAX` `DOW` `DOW_LONG` `G` `CHARS` `PLAYER` `NPC` `SHADE` `dayNo` `tod` `hourF` `dow` `isWorkday` `inShift` `CAL0` `calDate` `MONTHS` `shopOpen` `officeLit` `inRoomSet` `NO_TINT` `NEON_OFF` `lightGroupOn` `SKY_KEYS` `skyAt`
 - **→ uses:** core/util, world/grid, taken/taken, town/cell
-- **← used by:** 99
+- **← used by:** 100
 
 ### sim/characters  ·  #31  ·  91 lines
 
@@ -322,7 +322,7 @@ The player body: needs, Psychic, accidents, passing out, panic
 
 - **Defines (34):** `lvl` `setNeed` `applyNeedFx` `bump` `addStress` `psychic` `psyDrop` `psyMark` `tooShaken` `shaky` `shakenNote` `stressBand` `mood` `moodWord` `needsTick` `hunted` `psySees` `psyDrain` `accident` `accidentPool` `wallFace` `peePose` `holdingK` `GRIP` `grip` `legDrop` `holdStand` `holdWalk` `PEE` `peeRnd` `peeFx` `passOut` `passOutLids` `breakdown`
 - **→ uses:** core/util, sim/core, data/tuning, ui/interface, world/grid, sim/actions, gfx/renderer, data/lines, audio/sound, them/tells, town/suspicion, input/walking, play/items, horror/layer … +6
-- **← used by:** 32
+- **← used by:** 33
 
 ### player/work  ·  #38  ·  127 lines
 
@@ -390,7 +390,7 @@ Being arrested, shown on the map
 - **→ uses:** sim/core, sim/actions, core/util, town/traffic-weather, audio/sound, horror/layer, gfx/gl, world/paths, gfx/renderer, world/grid, town/on-the-run, them/moves, ui/interface, town/npc-update … +18
 - **← used by:** 23
 
-### town/cell  ·  #53  ·  515 lines
+### town/cell  ·  #53  ·  516 lines
 
 Held in a cell
 
@@ -462,7 +462,7 @@ People come to you: a word in the street, Hale at your shoulder, THEIR people wa
 - **→ uses:** sim/core, core/util, ui/interface, data/tuning, sim/movement, sim/actions, data/lines, world/objects, town/echoes, player/work, town/talk, world/paths, world/grid, them/plan … +12
 - **← used by:** 1 (game/loop)
 
-### town/traffic-weather  ·  #97  ·  99 lines
+### town/traffic-weather  ·  #98  ·  99 lines
 
 Traffic and weather
 
@@ -628,15 +628,15 @@ What a shaken head hears: real slips and sounds that aren't there; catching one 
 - **→ uses:** sim/core, data/tuning, ui/interface, core/util, player/needs, horror/visions, audio/sound, world/vision
 - **← used by:** 3 (them/plan, them/tells, game/loop)
 
-### horror/layer  ·  #98  ·  660 lines
+### horror/layer  ·  #99  ·  660 lines
 
 The horror layer: shared machinery
 
 - **Defines (34):** `HX` `HX_FACS` `hxFac` `hxReset` `hxLamp` `hxLook` `HX_SHADOW` `hxActor` `hxKill` `snapOrBlend` `hxAnimate` `hxWalk` `hxFace` `hxSeen` `hxDist` `hxPan` `hxSound` `hxDecal` `hxLight` `hxDark` `hxGlint` `hxOpen` `hxLineOpen` `hxStage` `drawCraft` `hxMainUniforms` `hxDrawWorld` `hxDrawDecals` `hxDrawAdditive` `hxTick` `hxBadHour` `hxUpdate` `hxEndScene` `hxCinema`
 - **→ uses:** core/util, sim/core, gfx/renderer, gfx/gl, world/grid, world/vision, gfx/post, audio/sound, gfx/world-geometry, gfx/draw-helpers, horror/night, sim/pose, them/plan, ui/interface … +11
-- **← used by:** 37
+- **← used by:** 38
 
-### horror/midday  ·  #99  ·  496 lines
+### horror/midday  ·  #100  ·  496 lines
 
 Midday scenes
 
@@ -644,7 +644,7 @@ Midday scenes
 - **→ uses:** horror/layer, core/util, sim/core, gfx/renderer, town/cast, world/grid, them/plan, combat/blood
 - **← used by:** 1 (horror/layer)
 
-### horror/night  ·  #100  ·  676 lines
+### horror/night  ·  #101  ·  676 lines
 
 Night scenes
 
@@ -652,7 +652,7 @@ Night scenes
 - **→ uses:** horror/layer, core/util, sim/core, gfx/renderer, world/grid, them/plan, world/vision, audio/sound, world/objects, world/light-map
 - **← used by:** 2 (horror/visions, horror/layer)
 
-### horror/half-forms  ·  #101  ·  453 lines
+### horror/half-forms  ·  #102  ·  453 lines
 
 Half-changed for a second
 
@@ -660,7 +660,7 @@ Half-changed for a second
 - **→ uses:** gfx/renderer, ui/menus, core/util, world/grid, gfx/people, town/cast, gfx/body-parts
 - **← used by:** 3 (gfx/people, them/tells, horror/half-forms-real)
 
-### horror/half-forms-real  ·  #103  ·  78 lines
+### horror/half-forms-real  ·  #104  ·  78 lines
 
 Half-changed for real, late in the week
 
@@ -668,7 +668,7 @@ Half-changed for real, late in the week
 - **→ uses:** sim/core, core/util, gfx/renderer, world/vision, horror/half-forms, data/tuning, them/awareness, town/suspicion, them/plan, them/tells, horror/layer, horror/visions, audio/sound
 - **← used by:** 2 (them/office-night, horror/visions)
 
-### horror/tenth-forms  ·  #104  ·  173 lines
+### horror/tenth-forms  ·  #105  ·  173 lines
 
 Tenth forms: barely visible traits
 
@@ -676,7 +676,7 @@ Tenth forms: barely visible traits
 - **→ uses:** sim/core, core/util, play/photos, play/oddities, town/cell, them/plan, them/proofs, them/servants, ui/interface, town/cast, town/suspicion
 - **← used by:** 5 (gfx/people, sim/pose, them/office-night, play/photos, game/loop)
 
-### horror/encounters  ·  #105  ·  610 lines
+### horror/encounters  ·  #106  ·  610 lines
 
 Who's who; encounters: choosing when, where, who, and getting everyone in place
 
@@ -684,7 +684,7 @@ Who's who; encounters: choosing when, where, who, and getting everyone in place
 - **→ uses:** sim/core, core/util, world/grid, gfx/renderer, horror/encounter-outcomes, world/paths, town/npc-update, them/plan, sim/actions, them/awareness, town/cast, world/vision, town/daily-plans, horror/encounter-draw … +3
 - **← used by:** 4 (them/office-night, horror/encounter-outcomes, horror/encounter-draw, game/loop)
 
-### horror/encounter-outcomes  ·  #106  ·  545 lines
+### horror/encounter-outcomes  ·  #107  ·  545 lines
 
 An encounter under way: the rite, being noticed, pulling victims out, how it ends
 
@@ -692,7 +692,7 @@ An encounter under way: the rite, being noticed, pulling victims out, how it end
 - **→ uses:** sim/core, sim/actions, core/util, horror/encounters, town/fleeing, town/npc-update, ui/interface, horror/layer, gfx/renderer, horror/encounter-draw, them/true-form, world/vision, them/plan, town/spawning … +15
 - **← used by:** 5 (them/true-form, ui/menus, play/advice, horror/encounters, game/loop)
 
-### horror/encounter-draw  ·  #107  ·  786 lines
+### horror/encounter-draw  ·  #108  ·  786 lines
 
 How an encounter looks: lights, poses, the bodies doing it
 
@@ -808,13 +808,13 @@ Interaction menus for objects, people, items
 - **→ uses:** sim/core, play/verbs, sim/actions, ui/interface, play/stashes, core/util, world/objects, gfx/portraits, player/needs, data/tuning, town/cast, world/grid, data/lines, audio/sound … +19
 - **← used by:** 9
 
-### ui/interface  ·  #87  ·  636 lines
+### ui/interface  ·  #87  ·  637 lines
 
 Notes, bubbles, tooltips, overlays
 
 - **Defines (23):** `ICON_PATHS` `NEED_ART` `ICON_NEED` `BOLT_PATH` `needArt` `artIcon` `svgIcon` `$` `esc` `UI` `RING_C` `ringSvg` `setRing` `ui` `LAYOUT` `layoutPush` `layoutOverlays` `headY` `updateFx` `updateActRing` `playerActShown` `actProgress` `updateGoal`
-- **→ uses:** sim/core, gfx/renderer, world/grid, core/util, them/plan, gfx/frame, play/advice, audio/sound, ui/hud-images, ui/hud, gfx/viewfinder, them/proofs, gfx/portraits, ui/case-board … +5
-- **← used by:** 71
+- **→ uses:** sim/core, gfx/renderer, world/grid, core/util, them/plan, gfx/frame, play/advice, audio/sound, ui/hud-images, ui/hud, gfx/viewfinder, them/proofs, gfx/portraits, ui/case-board … +6
+- **← used by:** 72
 
 ### ui/hud-images  ·  #88  ·  22 lines
 
@@ -884,17 +884,25 @@ What E acts on; keyboard handling
 
 ## audio/
 
-### audio/sound  ·  #96  ·  844 lines
+### audio/sound  ·  #96  ·  1559 lines
 
 Sound, all synthesised (Web Audio)
 
 - **Defines (1):** `audio`
-- **→ uses:** core/util
-- **← used by:** 57
+- **→ uses:** core/util, gfx/reach-rig, world/grid
+- **← used by:** 58
+
+### audio/foley  ·  #97  ·  308 lines
+
+What you hear of the town: the air by place and hour, steps, doors, hands at work, voices
+
+- **Defines (13):** `SND` `FOLEY` `FOLEY_USE` `FOLEY_ANIM` `foleyGap` `knockGap` `soundTick` `foleyPsy` `stepSurf` `foleyTick` `foleyLoops` `loopWant` `voiceFor`
+- **→ uses:** sim/core, audio/sound, horror/layer, world/objects, core/util, ui/interface, player/needs, world/light-map, data/tuning, world/vision, world/grid
+- **← used by:** 2 (ui/interface, game/loop)
 
 ## taken/
 
-### taken/taken  ·  #108  ·  762 lines
+### taken/taken  ·  #109  ·  763 lines
 
 Being taken: the capture
 
@@ -902,7 +910,7 @@ Being taken: the capture
 - **→ uses:** sim/core, gfx/renderer, core/util, world/grid, ui/interface, horror/layer, audio/sound, game/loop, world/vision, world/objects, taken/coming, taken/way-out-play, sim/characters, sim/pose … +21
 - **← used by:** 31
 
-### taken/coming  ·  #109  ·  1115 lines
+### taken/coming  ·  #110  ·  1115 lines
 
 What you see coming
 
@@ -910,7 +918,7 @@ What you see coming
 - **→ uses:** taken/taken, audio/sound, horror/layer, gfx/renderer, core/util, input/camera, sim/core, town/cast, world/objects, them/plan, world/light-map, world/grid, combat/hits, data/tuning
 - **← used by:** 10
 
-### taken/down-there  ·  #110  ·  644 lines
+### taken/down-there  ·  #111  ·  644 lines
 
 Down there, half awake
 
@@ -918,7 +926,7 @@ Down there, half awake
 - **→ uses:** taken/taken, core/util, horror/layer, audio/sound, gfx/renderer, world/grid, sim/core, world/objects, taken/coming, world/light-map, town/cast
 - **← used by:** 6 (town/talk, taken/taken, taken/way-out, taken/way-out-play, taken/lair-life, chase/they-come)
 
-### taken/way-out  ·  #111  ·  344 lines
+### taken/way-out  ·  #112  ·  344 lines
 
 The way out of the lair: the setup for each lair
 
@@ -926,7 +934,7 @@ The way out of the lair: the setup for each lair
 - **→ uses:** taken/taken, world/grid, core/util, them/awareness, world/objects, taken/down-there, taken/coming, world/paths, gfx/renderer, taken/way-out-play, horror/layer, sim/core, world/vision, game/loop … +2
 - **← used by:** 1 (taken/taken)
 
-### taken/way-out-play  ·  #112  ·  549 lines
+### taken/way-out-play  ·  #113  ·  549 lines
 
 Escaping the lair: watchers, sleepers, being caught, getting out
 
@@ -934,7 +942,7 @@ Escaping the lair: watchers, sleepers, being caught, getting out
 - **→ uses:** taken/taken, gfx/renderer, horror/layer, audio/sound, world/grid, core/util, sim/core, world/light-map, ui/interface, world/paths, world/vision, data/tuning, sim/pose, them/moves … +7
 - **← used by:** 3 (taken/taken, taken/way-out, chase/they-come)
 
-### taken/back-up  ·  #113  ·  170 lines
+### taken/back-up  ·  #114  ·  170 lines
 
 Back up top
 
@@ -942,7 +950,7 @@ Back up top
 - **→ uses:** taken/taken, sim/core, taken/coming, core/util, horror/layer, input/walking, audio/sound, sim/pose, world/objects, world/paths, world/vision, them/plan, gfx/renderer, player/needs … +3
 - **← used by:** 2 (taken/taken, taken/way-out-play)
 
-### taken/lair-life  ·  #114  ·  441 lines
+### taken/lair-life  ·  #115  ·  441 lines
 
 THEIR places, alive while you are there
 
@@ -952,7 +960,7 @@ THEIR places, alive while you are there
 
 ## chase/
 
-### chase/they-come  ·  #115  ·  179 lines
+### chase/they-come  ·  #116  ·  179 lines
 
 When THEY come for you
 
@@ -960,7 +968,7 @@ When THEY come for you
 - **→ uses:** sim/core, taken/taken, core/util, them/plan, horror/layer, gfx/renderer, ui/interface, audio/sound, chase/hunt, taken/coming, them/proofs, them/awareness, world/vision, taken/down-there … +1
 - **← used by:** 6 (them/moves, play/verbs, input/targeting, chase/hunt, game/state, game/loop)
 
-### chase/hunt  ·  #116  ·  384 lines
+### chase/hunt  ·  #117  ·  384 lines
 
 When THEY come for you: the hunters, their tuning, how each kind of hunt starts
 
@@ -968,7 +976,7 @@ When THEY come for you: the hunters, their tuning, how each kind of hunt starts
 - **→ uses:** sim/core, audio/sound, horror/layer, core/util, taken/coming, ui/interface, taken/taken, world/paths, chase/they-come, sim/characters, town/arrest, chase/hunt-end, them/awareness, ui/pie-menu … +5
 - **← used by:** 16
 
-### chase/hunt-step  ·  #117  ·  622 lines
+### chase/hunt-step  ·  #118  ·  622 lines
 
 The hunt each frame: seeing, chasing, grabs, being beaten
 
@@ -976,7 +984,7 @@ The hunt each frame: seeing, chasing, grabs, being beaten
 - **→ uses:** chase/hunt, sim/core, horror/layer, audio/sound, chase/hunt-end, taken/taken, sim/actions, core/util, gfx/renderer, world/paths, taken/coming, world/grid, ui/interface, world/light-map … +14
 - **← used by:** 8
 
-### chase/hunt-end  ·  #118  ·  366 lines
+### chase/hunt-end  ·  #119  ·  366 lines
 
 How a hunt ends, and how it looks and sounds
 
@@ -984,7 +992,7 @@ How a hunt ends, and how it looks and sounds
 - **→ uses:** chase/hunt, sim/core, horror/layer, core/util, taken/taken, gfx/renderer, taken/coming, world/grid, audio/sound, ui/interface, gfx/draw-helpers, world/paths, town/cast, world/vision … +8
 - **← used by:** 7
 
-### chase/flee  ·  #119  ·  86 lines
+### chase/flee  ·  #120  ·  86 lines
 
 One of THEM running from you
 
@@ -992,7 +1000,7 @@ One of THEM running from you
 - **→ uses:** gfx/world-geometry, sim/core, core/util, world/vision, gfx/renderer, horror/layer, combat/blood, taken/taken, ui/interface, audio/sound
 - **← used by:** 2 (play/advice, chase/hunt-step)
 
-### chase/fbi  ·  #120  ·  395 lines
+### chase/fbi  ·  #121  ·  395 lines
 
 The grey cars: the FBI takes one that gave up
 
@@ -1002,7 +1010,7 @@ The grey cars: the FBI takes one that gave up
 
 ## game/
 
-### game/state  ·  #121  ·  564 lines
+### game/state  ·  #122  ·  564 lines
 
 Game state, new game, saving, endings
 
@@ -1010,7 +1018,7 @@ Game state, new game, saving, endings
 - **→ uses:** sim/core, ui/interface, gfx/renderer, core/util, town/cast, world/vision, world/objects, world/grid, town/quirks, game/last-day, play/stashes, town/arrest, town/routines, data/tuning … +24
 - **← used by:** 14
 
-### game/endings  ·  #122  ·  643 lines
+### game/endings  ·  #123  ·  643 lines
 
 The last picture: where you fell, the cell for good, what THEY made of Wexley
 
@@ -1018,7 +1026,7 @@ The last picture: where you fell, the cell for good, what THEY made of Wexley
 - **→ uses:** gfx/renderer, core/util, sim/core, horror/layer, town/cell, ui/interface, audio/sound, sim/pose, town/cast, them/plan, data/lines, world/vision, combat/bolts, chase/fbi … +11
 - **← used by:** 4 (gfx/frame, input/targeting, game/state, game/loop)
 
-### game/last-day  ·  #123  ·  549 lines
+### game/last-day  ·  #124  ·  549 lines
 
 Friday: hell let loose
 
@@ -1026,17 +1034,17 @@ Friday: hell let loose
 - **→ uses:** sim/core, world/grid, ui/interface, horror/layer, core/util, sim/actions, gfx/renderer, audio/sound, chase/hunt, them/awareness, town/suspicion, taken/taken, town/cast, combat/melee … +15
 - **← used by:** 11
 
-### game/loop  ·  #124  ·  467 lines
+### game/loop  ·  #125  ·  459 lines
 
 Per-frame simulation, main loop, boot
 
 - **Defines (15):** `lightT` `lastPlayerCell` `carLoud` `hurrying` `fightOn` `stirNear` `clockSpeed` `simStep` `worldStep` `styleStep` `lastT` `frame` `showTitle` `startPlaying` `boot`
-- **→ uses:** sim/core, ui/interface, gfx/renderer, world/light-map, sim/actions, taken/taken, world/grid, data/tuning, game/state, horror/layer, core/util, world/vision, town/cell, chase/hunt … +45
+- **→ uses:** sim/core, ui/interface, gfx/renderer, world/light-map, sim/actions, taken/taken, world/grid, data/tuning, game/state, horror/layer, core/util, world/vision, town/cell, chase/hunt … +46
 - **← used by:** 9
 
 ## dev/
 
-### dev/devtools  ·  #125  ·  153 lines
+### dev/devtools  ·  #126  ·  153 lines
 
 window.__dev: state access, skip time, per-system timing
 
@@ -1044,7 +1052,7 @@ window.__dev: state access, skip time, per-system timing
 - **→ uses:** sim/core, game/loop, core/util, data/tuning, gfx/frame, ui/interface
 - **← used by:** 0
 
-### dev/object-sheets  ·  #126  ·  353 lines
+### dev/object-sheets  ·  #127  ·  353 lines
 
 __dev.objectSheets: every object of a building in the four camera views, one PNG each
 
