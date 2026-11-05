@@ -240,7 +240,7 @@ The camera's square: the town through your eyes, the flash, the print
 - **→ uses:** gfx/gl, gfx/renderer, sim/core, core/util, world/grid, ui/interface, world/light-map, gfx/vf-glass, gfx/world-geometry, gfx/post, horror/layer, gfx/frame, gfx/portraits, ui/case-board … +3
 - **← used by:** 4 (gfx/frame, gfx/vf-glass, play/photos, ui/interface)
 
-### gfx/vf-glass  ·  #29  ·  233 lines
+### gfx/vf-glass  ·  #29  ·  250 lines
 
 Through the glass: a photo taken through a window, the pane put back in the square
 

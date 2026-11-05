@@ -11882,7 +11882,7 @@ void main(){
   vec3 g = mix(col, soft9(vUv, 1.4), 0.25)*vec3(0.9, 0.955, 0.965);
   // your side of it, ghosting in the glass: a smudgy veil, stronger toward the top where the sky is
   float veil = uRefl*(0.3 + fres*1.6)*(0.65 + 0.35*vn(vec2(a, y)*2.3))*(0.75 + 0.35*(lp.y/hb.y));
-  g += nearC*veil*0.5;
+  g += nearC*veil*mix(0.28, 0.5, toon);   // the noir keeps its blacks
   // mist where the cold glass meets the frame: in from the corners, along the sill, a cold night or a wet one most
   float pxw = (t*uTan)*(2.0*uTexel.x);   // how wide a pixel of the square is, there on the glass
   float n1 = vn(vec2(a, y)*13.0), n2 = vn(vec2(a, y)*37.0 + 3.7);
@@ -11908,19 +11908,27 @@ void main(){
   // a hairline of light along the edge of the glass, where the bevel catches it
   float rim = exp(-pow((sd + uSoft*0.9)/(uSoft*0.45 + pxw), 2.0));
   g += (nearC*0.4 + 0.03)*rim*0.35;
-  // once it has turned, or when it rains: water running down the glass, bending what's behind it
-  float rk = max(uWet*0.85, smoothstep(0.35, 0.85, hor));
+  // once it has turned, or when it rains: water on the glass, bending what's behind it. Drops sitting all over it, and
+  // a few running down, a thin wet trail behind each
+  float rk = max(uWet*0.85, smoothstep(0.35, 0.85, hor))*gm;
   if(rk > 0.01){
-    float cw = 0.026, ci = floor(a/cw), r1 = h21(vec2(ci, 5.0));
-    float x0 = (ci + 0.3 + 0.4*h21(vec2(ci, 9.0)))*cw + sin(y*17.0 + r1*30.0)*0.003;
-    float head = 2.15 - fract(uTime*(0.04 + 0.07*r1) + r1*7.0)*1.45;
-    float lw = 0.0013 + pxw*0.5, dx = abs(a - x0);
-    float line = step(0.7, r1)*(1.0 - smoothstep(lw, lw + pxw*1.5, dx))*smoothstep(head - 0.004, head + 0.03, y)*smoothstep(2.16, 1.95 - r1*0.5, y);
-    float bead = step(0.7, r1)*(1.0 - smoothstep(0.0035 + pxw, 0.007 + pxw*2.0, length(vec2(dx, (y - head)*0.6))));
-    vec3 bent = texture(uSrc, vUv + vec2((a - x0)/max(lw, 1e-4)*0.004, -0.003)).rgb;
-    float wl = max(line, bead)*rk*gm;
-    g = mix(g, bent*0.8 + nearC*0.3 + 0.025, wl*0.8);
-    g += (nearC*0.6 + 0.05)*bead*rk*gm*0.6;
+    vec2 rq = vec2(a, y)/0.024, ri = floor(rq), rf = fract(rq) - (0.25 + 0.5*vec2(h21(ri + 1.7), h21(ri + 5.9)));
+    float rr = 0.1 + 0.18*h21(ri + 8.3);
+    float sp = step(0.74, h21(ri + 2.2))*(1.0 - smoothstep(rr*0.7, rr, length(rf)))*smoothstep(1.5, 4.0, 0.024/pxw);
+    g = mix(g, texture(uSrc, vUv - rf*0.014).rgb*0.85 + nearC*0.1, sp*rk*0.85);   // a drop turns what's behind it over
+    g += (nearC*0.5 + 0.04)*sp*rk*smoothstep(0.0, 0.5, (rf.y - rf.x)/rr)*0.45;     // and catches the light on one side
+    float cw = 0.032, ci = floor(a/cw), r1 = h21(vec2(ci, 5.0)), r2 = h21(vec2(ci, 9.0));
+    float x0 = (ci + 0.3 + 0.4*r2)*cw + sin(y*23.0 + r1*30.0)*0.0025;
+    float head = 2.15 - fract(uTime*(0.03 + 0.05*r1) + r1*7.0)*1.4, len = 0.06 + 0.26*r2, up = y - head;
+    float on = step(0.6, r1), dx = abs(a - x0);
+    float lw = (0.0008 + pxw*0.35)*(1.0 - clamp(up/len, 0.0, 1.0)*0.7);
+    float trail = on*(1.0 - smoothstep(lw, lw + pxw*1.5, dx))*step(0.0, up)*(1.0 - smoothstep(0.0, len, up));
+    float br = 0.0035 + 0.002*r2;
+    vec2 bv = vec2(a - x0, (y - head)*0.75);
+    float bead = on*(1.0 - smoothstep(br, br + pxw*1.5, length(bv)));
+    vec3 bent = texture(uSrc, vUv + vec2(sign(a - x0)*0.003*trail, 0.0) - bv/br*0.01*bead).rgb;
+    g = mix(g, bent*0.85 + nearC*0.14, max(trail*0.6, bead)*rk*0.8);
+    g += (nearC*0.6 + 0.05)*bead*rk*smoothstep(0.1, 0.7, (bv.y - bv.x)/br)*0.5;
   }
   // the flash, coming back off the glass: small and soft, the lens was close
   if(uHot.z > 0.001){
@@ -12035,9 +12043,18 @@ function vfGlassPass(view, still) {
       nz = Pn.ax ? 0 : Pn.sn,
       nf = nx * fx + nz * fz;
     if (nf > 0.2) {
-      hx = 0.5 + (0.5 * (nx * rx + nz * rz)) / (nf * tn);
-      hy = 0.5 + (0.5 * (nx * ux + nz * uz)) / (nf * tn);
-      hk = 0.55;
+      hx = (0.5 * (nx * rx + nz * rz)) / (nf * tn);
+      hy = (0.5 * (nx * ux + nz * uz)) / (nf * tn);
+      // careful: the lens tilted a hair, so the bounce slides off the subject toward a corner instead of onto a face
+      const hr = Math.hypot(hx, hy);
+      if (hr < 0.3) {
+        const s = hr > 1e-3 ? 0.3 / hr : 0;
+        hx = s ? hx * s : -0.21;
+        hy = s ? hy * s : 0.21;
+      }
+      hx += 0.5;
+      hy += 0.5;
+      hk = 0.5;
     }
   }
   gl.disable(gl.DEPTH_TEST);

@@ -12043,9 +12043,18 @@ function vfGlassPass(view, still) {
       nz = Pn.ax ? 0 : Pn.sn,
       nf = nx * fx + nz * fz;
     if (nf > 0.2) {
-      hx = 0.5 + (0.5 * (nx * rx + nz * rz)) / (nf * tn);
-      hy = 0.5 + (0.5 * (nx * ux + nz * uz)) / (nf * tn);
-      hk = 0.55;
+      hx = (0.5 * (nx * rx + nz * rz)) / (nf * tn);
+      hy = (0.5 * (nx * ux + nz * uz)) / (nf * tn);
+      // careful: the lens tilted a hair, so the bounce slides off the subject toward a corner instead of onto a face
+      const hr = Math.hypot(hx, hy);
+      if (hr < 0.3) {
+        const s = hr > 1e-3 ? 0.3 / hr : 0;
+        hx = s ? hx * s : -0.21;
+        hy = s ? hy * s : 0.21;
+      }
+      hx += 0.5;
+      hy += 0.5;
+      hk = 0.5;
     }
   }
   gl.disable(gl.DEPTH_TEST);

@@ -497,11 +497,11 @@ vfUnclip	js/gfx/viewfinder.js	349	function
 vfFrame	js/gfx/viewfinder.js	354	function
 vfDevelop	js/gfx/viewfinder.js	378	function
 VF_GLASS_FS	js/gfx/vf-glass.js	13	const
-VF_PANE	js/gfx/vf-glass.js	111	const
-vfLightAt	js/gfx/vf-glass.js	124	function
-VF_FAR	js/gfx/vf-glass.js	135	const
-vfPane	js/gfx/vf-glass.js	137	function
-vfGlassPass	js/gfx/vf-glass.js	181	function
+VF_PANE	js/gfx/vf-glass.js	119	const
+vfLightAt	js/gfx/vf-glass.js	132	function
+VF_FAR	js/gfx/vf-glass.js	143	const
+vfPane	js/gfx/vf-glass.js	145	function
+vfGlassPass	js/gfx/vf-glass.js	189	function
 PLAN_MAX	js/sim/core.js	6	const
 DOW	js/sim/core.js	7	const
 DOW_LONG	js/sim/core.js	8	const
