@@ -22,7 +22,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 button:focus-visible,input:focus-visible{outline:2px solid var(--sodium);outline-offset:2px}
 .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 #view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#view.c-walk{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cellipse cx='14' cy='16' rx='9' ry='5' fill='none' stroke='%23000' stroke-opacity='.55' stroke-width='3.5'/%3E%3Cellipse cx='14' cy='16' rx='9' ry='5' fill='none' stroke='%23f2dcae' stroke-width='1.6'/%3E%3Cpath d='M14 4v8' stroke='%23000' stroke-opacity='.55' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M14 4v8' stroke='%23f2dcae' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 14 16,crosshair}
 #view.c-act{cursor:pointer}
 #view.c-cam{cursor:crosshair}
 body.breaking #bars,body.breaking #clock{animation:glitch 2.4s infinite steps(1)}
@@ -294,8 +293,6 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .po.dis kbd{background:#8f8a80}
 .po .pwhy{font-style:normal;font-size:12.5px;color:#ec8a74;background:rgba(10,11,14,.8);padding:0 6px;border-radius:6px;white-space:nowrap}
 @media (pointer:coarse){.po kbd,.prompt kbd{display:none}}
-.route-dot{position:absolute;left:-11px;top:-6px;width:22px;height:12px;border:2px solid rgba(232,211,106,.85);border-radius:50%;pointer-events:none;animation:routePulse 1.1s ease-in-out infinite}
-@keyframes routePulse{50%{opacity:.35}}
 .prompt{position:absolute;left:0;top:0;display:flex;align-items:center;gap:7px;padding:3px 11px 3px 3px;border-radius:999px;background:rgba(10,11,14,.9);border:1px solid var(--line2);font:600 14.5px/1 var(--f-ui);color:var(--ink);white-space:nowrap;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.45)}
 .prompt kbd{min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:#e6dfcc;color:#16171a;font:700 12.5px/22px var(--f-ui);text-align:center}
 .prompt span{padding:4px 0}
@@ -327,17 +324,7 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 .btn.primary:hover{background:#efb366}
 .btn:not(.primary):hover{border-color:var(--ink)}
 .btn small{font-weight:400;font-size:12.5px;color:var(--dim)}
-.ctlrow{display:flex;align-items:center;gap:0;margin-top:14px;font-size:14px;color:var(--dim)}
-.ctlrow span{margin-right:10px}
-.ctlrow .seg{padding:6px 12px;border:1px solid var(--line2);font:600 13.5px var(--f-ui);color:var(--dim)}
-.ctlrow .seg:first-of-type{border-radius:8px 0 0 8px}
-.ctlrow .seg:last-of-type{border-radius:0 8px 8px 0;border-left:0}
-.ctlrow .seg[aria-pressed="true"]{background:rgba(230,223,204,.14);color:var(--ink);border-color:var(--ink)}
-.ctlrow .seg:not([aria-pressed="true"]):hover{color:var(--ink)}
-.sheet header .ctlrow{margin:0 auto 0 0}
 .hintrow i{font-style:normal}
-html[data-controls="keys"] [data-mode="mouse"],html[data-controls="mouse"] [data-mode="keys"]{display:none!important}
-@media (pointer:coarse){.ctlrow{display:none}}
 .hintrow{display:flex;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:14.5px;color:var(--dim)}
 .hintrow span{display:flex;align-items:center;gap:7px}
 .hintrow .ic{color:#cfc7b2}
@@ -769,7 +756,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 
 
 
-<canvas id="view" class="c-walk" aria-label="The town of Wexley, seen from above"></canvas>
+<canvas id="view" aria-label="The town of Wexley, seen from above"></canvas>
 <div id="fx"></div>
 <div id="endcap" hidden><b></b><span></span></div>
 <div id="tip" hidden></div>
@@ -798,7 +785,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
   <div id="zz" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleeping</div>
-  <div id="hints"><span data-mode="keys"><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span data-mode="keys"><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span data-mode="mouse"><kbd>Click</kbd>walk · act <kbd>Shift</kbd>run</span><span data-mode="mouse"><kbd>Click</kbd>IT to hit · Attack on anyone</span><span id="hint-photo"><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
+  <div id="hints"><span><kbd>WASD</kbd>walk <kbd>Shift</kbd>run</span><span><kbd>E</kbd>act <kbd>Space</kbd>hit</span><span id="hint-photo"><kbd>F</kbd>photo</span><span class="hg"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>Glowing · do next</span></div>
   <div id="tools"></div>
 </div>
 <div id="pie" hidden></div>
@@ -814,15 +801,14 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <button class="btn primary" id="begin"><svg class="ic" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>Play</button>
       <button class="btn" id="continue" hidden>Continue<small id="continue-sub"></small></button>
     </div>
-    <div class="ctlrow" role="group" aria-label="Controls"><span>Controls</span><button class="seg" data-ctl="keys" aria-pressed="true">WASD + keys</button><button class="seg" data-ctl="mouse" aria-pressed="false">Mouse</button></div>
     <div class="hintrow">
-      <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/></svg><i data-mode="keys">WASD walk · E act · F photo</i><i data-mode="mouse">Click walk · click IT to hit · F photo</i></span>
+      <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/></svg><i>WASD walk · E act · F photo</i></span>
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg>Four frames, then a crowd</span>
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a8 8 0 0 0-8 8c0 3 1.5 5 3.5 6v4h9v-4c2-1 3.5-3 3.5-6a8 8 0 0 0-8-8zM9 11.5h.01M15 11.5h.01M10.5 21v-2.5M13.5 21v-2.5"/></svg>Three aren't human</span>
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.29 · updated Nov 5, 2026</p>
+  <p id="version">v1.31 · updated Nov 5, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -839,14 +825,14 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
 
 <div id="help" class="overlay modal" hidden>
   <div class="sheet" role="dialog" aria-label="Controls">
-    <header><h2>Controls</h2><div class="ctlrow" role="group" aria-label="Controls"><span>Controls</span><button class="seg" data-ctl="keys" aria-pressed="true">WASD + keys</button><button class="seg" data-ctl="mouse" aria-pressed="false">Mouse</button></div><button class="x" id="help-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <header><h2>Controls</h2><button class="x" id="help-close" aria-label="Close"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="helpgrid">
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/></svg><kbd>W A S D</kbd><span>Walk · W into the scene</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M13 4l-2 7h5l-6 9 2-7H7z"/></svg><kbd>Shift</kbd><span>Run · over benches, fences, chairs</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5V6a1.5 1.5 0 0 1 3 0v8.5a6.5 6.5 0 0 1-6.5 6.5h-.5a5.8 5.8 0 0 1-4.7-2.4l-2.6-3.8a1.5 1.5 0 0 1 2.4-1.8L8 15"/></svg><kbd>E</kbd><span>Act on what you face</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg><kbd>W A S D</kbd><span>Pick in a menu</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></svg><kbd>F</kbd><span>Photo of the whole wedge in front of you, no aiming · something odd in it (THEIRS or a human’s secret) and the F hint glows, a camera mark over it · within 3 steps they notice the photo from any side; further off, only if they face you</span></div>
-      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span data-mode="mouse">Walk there · click someone or something to go up to it and act · click IT out of its skin to hit it · anyone’s menu has Attack (Space)</span><span data-mode="keys">Act on someone or something within reach · walking and hitting are the keys’ (Controls: Mouse to click instead)</span></div>
+      <div><svg class="ic" viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0v6a5 5 0 0 1-10 0zM12 4v5M7 9h10"/></svg><kbd>Click</kbd><span>Act on someone or something within reach · walking and hitting are the keys’</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3M2 12h20M12 2v20"/></svg><kbd>Drag · C</kbd><span>Look around · back to you</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21"/></svg><kbd>Wheel · pinch</kbd><span>Zoom</span></div>
       <div><svg class="ic" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg><kbd>Q · R</kbd><span>Rotate</span></div>
@@ -1180,6 +1166,7 @@ const CTRL = {
   reachObj: 1.6,     // E reaches a thing when its nearest edge is this close
   reachChar: 2.0,    // …a person, centre to centre
   reachItem: 1.5,    // …something on the floor
+  trapAhead: 0.9,    // V: the trap goes down this far in front of you, on the tile there
   close: 0.9,        // this close, facing doesn't matter
   facing: 70,        // half-angle you must roughly face to pick something new (a 140° wedge)
   holdDist: 0.6,     // once picked, a target stays picked out to reach + this…
@@ -1198,7 +1185,6 @@ const CTRL = {
   boltHit: 0.42,     // how close a bolt must pass to you to land
   boltRange: 14,
   knockout: 1440,    // beaten: you sleep for a day
-  mouseYaw: 30,      // mouse controls: the camera turned this many degrees off square to the town, a slant toward isometric
 };
 
 // ── Work and damage (sim/core, player/work, combat/hits)
@@ -14470,7 +14456,6 @@ function accident() {
   const free = P.onMap && !G.sleeping && !G.away && P.pose === 'stand' && !P.seatTr && !P.vault;
   if (!free || (P.queue[0] && P.queue[0].interruptible === false)) return accidentPool();
   hardReset(P);
-  routeStop();
   enqueue(
     P,
     mkAct({
@@ -20261,17 +20246,6 @@ function playerMelee(n) {
   cancelAll(P);
   enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
 }
-// the mouse's blow (a click on IT, Attack on someone's menu): in reach, the swing; further off, you go up to them first
-function attackChar(n) {
-  const P = PLAYER;
-  if (cuffedNow()) return ui.float(P, 'Cuffed', 'bad');
-  if (n.trueForm && n.tell.t < TF_CHANGE) return ui.note('lock', 'Attack · Changing', '');
-  if (Math.hypot(n.x - P.x, n.z - P.z) <= swingReach() && !wallBetween(P.x, P.z, n.x, n.z)) {
-    routeStop();
-    return playerMelee(n);
-  }
-  routeTo(n.x, n.z, { char: n, hit: true });
-}
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {
   const P = PLAYER;
@@ -26042,60 +26016,91 @@ function markFact(n, i) {
 const BIO_SRC = { chat: 'they told you', home: 'in their things', paper: 'the paper', mom: 'Mom' };
 // ───────────── traps: steel jaws from Pell's. Whatever steps in stays put, for a while.
 // Bait it with something THEY lost and its owner comes looking. Unbaited, it takes whoever walks by.
+// the floor tile a step ahead of you: where V puts a trap down
+function trapSpot(P) {
+  return [Math.floor(P.x + Math.sin(P.tdir) * CTRL.trapAhead), Math.floor(P.z + Math.cos(P.tdir) * CTRL.trapAhead)];
+}
+// anyone who sees you at it gets a look at you, and the trap it's about is a seen one
+function trapWatched(a) {
+  for (const n of CHARS)
+    if (
+      !n.isPlayer &&
+      n.onMap &&
+      !asleep(n) &&
+      !n.def.stranger &&
+      npcSeesPlayer(n, 8) &&
+      !(a.seen || (a.seen = {}))[n.id]
+    ) {
+      a.seen[n.id] = 1;
+      addSus(n, 8);
+      ui.bubble(n, 'question', 'speech', 2);
+    }
+}
+const watched = (a) => !!(a.seen && Object.keys(a.seen).length);
+// V: down on one knee and the jaws go on the floor in front of you, unbaited. E on it baits it or takes it back up
+function trapKey() {
+  const P = PLAYER;
+  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on || cuffedNow())
+    return;
+  if (UI.menuOpen) return closeMenu();
+  dismissHints();
+  if (G.inv.trap <= 0) return ui.float(P, 'No trap', '');
+  enqueue(P, setTrapAct());
+}
 function setTrapAct() {
+  const [x, z] = trapSpot(PLAYER);
   return mkAct({
     kind: 'wait',
     label: 'Set trap',
     icon: 'trap',
-    dur: 4,
-    anim: 'dig',
+    dur: 3,
+    anim: 'pickup',
+    reach: [x + 0.5, 0.05, z + 0.5],
     check: () => {
-      const x = Math.floor(PLAYER.x),
-        z = Math.floor(PLAYER.z);
       if (G.inv.trap <= 0) return 'No trap';
-      if (G.traps.some((t) => t.x === x && t.z === z)) return 'Already one here';
+      if (G.traps.some((t) => t.x === x && t.z === z)) return 'Already one there';
       if (doorAt[I(x, z)] >= 0) return 'Not in a doorway';
-      if (!walkable(x, z)) return 'Not here';
+      if (!walkable(x, z) || wallBetween(PLAYER.x, PLAYER.z, x + 0.5, z + 0.5)) return 'Not there';
       return null;
     },
-    onTick: (c, a) => {
-      for (const n of CHARS)
-        if (
-          !n.isPlayer &&
-          n.onMap &&
-          !asleep(n) &&
-          !n.def.stranger &&
-          npcSeesPlayer(n, 8) &&
-          !(a.seen || (a.seen = {}))[n.id]
-        ) {
-          a.seen[n.id] = 1;
-          addSus(n, 8);
-          ui.bubble(n, 'question', 'speech', 2);
-        }
-    },
+    onStart: (c) => (c.tdir = Math.atan2(x + 0.5 - c.x, z + 0.5 - c.z)),
+    onTick: (c, a) => trapWatched(a),
     onEnd: (c, a, ok) => {
       if (!ok) return;
       G.inv.trap--;
-      const x = Math.floor(c.x),
-        z = Math.floor(c.z),
-        bait = takeBait();
       const tr = {
         id: (G.trapId = (G.trapId || 0) + 1),
         x,
         z,
-        bait: bait ? bait.true : null,
-        baitWhat: bait ? bait.what : null,
-        baitProof: bait,
-        seen: !!(a.seen && Object.keys(a.seen).length),
+        bait: null,
+        baitWhat: null,
+        baitProof: null,
+        seen: watched(a),
         at: G.t,
       };
       G.traps.push(tr);
-      addItem({ kind: 'trap', trap: tr.id, x: x + 0.5, z: z + 0.5, rot: rand(0, TAU), bait: !!bait });
-      ui.note('trap', bait ? 'Trap set · baited with ' + bait.what.toLowerCase() : 'Trap set', '');
+      addItem({ kind: 'trap', trap: tr.id, x: x + 0.5, z: z + 0.5, rot: rand(0, TAU), bait: false });
+      ui.note('trap', 'Trap set', '');
       audio.blip('click');
     },
   });
 }
+// E on an open trap: something THEY lost goes in the jaws, and its owner comes looking (baitPull)
+function baitTrap(it, a) {
+  const tr = G.traps.find((t) => t.id === it.trap);
+  if (!tr || tr.bait) return;
+  const bait = takeBait();
+  if (!bait) return ui.note('trap', 'Nothing to bait it with', 'bad');
+  tr.bait = bait.true;
+  tr.baitWhat = bait.what;
+  tr.baitProof = bait;
+  if (watched(a)) tr.seen = true;
+  it.bait = true;
+  if (R.ready) R.itemMeshes.set(it.id, buildItemMesh(it));
+  ui.note('trap', 'Trap baited · ' + bait.what.toLowerCase(), '');
+  audio.blip('click');
+}
+const hasBait = () => G.proofs.some((p) => p.src === 'item');
 function liftTrap(it) {
   const tr = !it.shut && G.traps.find((t) => t.id === it.trap);
   if (it.shut && CHARS.some((c) => c.trapped && Math.hypot(c.x - it.x, c.z - it.z) < 0.6))
@@ -28540,6 +28545,7 @@ function menuForItem(it) {
         check: () => (inReach({ item: it }) ? null : 'Too far'),
         onStart: (c) => (c.tdir = Math.atan2(it.x - c.x, it.z - c.z)),
         onTick: (c, a, dt) => {
+          if (it.kind === 'trap') trapWatched(a);
           if (floor) {
             const dx = it.x - c.x,
               dz = it.z - c.z,
@@ -28561,7 +28567,7 @@ function menuForItem(it) {
         },
         onEnd: (c, a, ok) => {
           c.moving = false;
-          if (ok && G.items.includes(it)) fn();
+          if (ok && G.items.includes(it)) fn(a);
         },
       }),
     );
@@ -28611,7 +28617,18 @@ function menuForItem(it) {
         go('Put it back', () => closeUp(OBJ[it.obj]), 3, 'box'),
       ),
     );
-  else if (it.kind === 'trap')
+  else if (it.kind === 'trap') {
+    // open and empty: bait it with something THEY lost, or take it back up (the bait comes back with it)
+    const tr = !it.shut && G.traps.find((t) => t.id === it.trap);
+    if (tr && !tr.bait)
+      ops.push(
+        opt(
+          'Bait it',
+          'trap',
+          hasBait() ? go('Bait it', (a) => baitTrap(it, a), 2, 'trap') : null,
+          hasBait() ? null : 'Nothing of THEIRS on you',
+        ),
+      );
     ops.push(
       opt(
         'Pick it up',
@@ -28619,7 +28636,7 @@ function menuForItem(it) {
         go('Pick it up', () => liftTrap(it), 2),
       ),
     );
-  else if (it.kind === 'mark' && it.place === 'you')
+  } else if (it.kind === 'mark' && it.place === 'you')
     ops.push(
       opt(
         'Destroy',
@@ -28666,7 +28683,7 @@ function bagItem(it) {
 const ITEMS_INV = [
   {
     k: 'trap',
-    label: 'Trap · set it where you stand',
+    label: 'Trap · V puts it down in front of you',
     icon: 'trap',
     has: () => G.inv.trap > 0,
     count: () => G.inv.trap,
@@ -29800,7 +29817,7 @@ function buildHud() {
   $('#eye img').src = HUD_IMG.eye0;
   $('#boardBtn img').src = HUD_IMG.book;
   $('#tools').innerHTML = [
-    ['walls', 'walls', 'Walls · V'],
+    ['walls', 'walls', 'Walls'],
     ['follow', 'target', 'Find me · C'],
     ['rot', 'rot', 'Rotate · Q R'],
     ['will', 'brain', 'Free will'],
@@ -30122,10 +30139,9 @@ function updateHud(dtReal) {
 }
 // ───────────── pie menu
 // the directional menu: up to four actions on W A S D (or the mouse). Two sit left and right; a third goes on top; a fourth below.
-// Slots fill in that order, so an action keeps its key as a menu grows: A, D, W, S. With mouse controls a person's menu
-// has one more, down on the right: Attack, on Space (m.hit, set in presentMenu).
+// Slots fill in that order, so an action keeps its key as a menu grows: A, D, W, S.
 const MENU_KEYS = ['a', 'd', 'w', 's'];
-const MENU_XY = { a: [-150, 0], d: [150, 0], w: [0, -116], s: [0, 116], hit: [120, 96] };
+const MENU_XY = { a: [-150, 0], d: [150, 0], w: [0, -116], s: [0, 116] };
 function openMenu(m, x, y, anchor) {
   if (!m || !m.ops || !m.ops.length) return;
   fitMenu(m);
@@ -30150,7 +30166,7 @@ function openMenu(m, x, y, anchor) {
       (o.dis ? svgIcon(o.icon || 'dots') : artIcon(o.icon)) +
       (o.dis ? '<s>' + svgIcon('lock') + '</s>' : '') +
       '<kbd>' +
-      (key === 'hit' ? 'Space' : key.toUpperCase()) +
+      key.toUpperCase() +
       '</kbd></span><b></b>' +
       (o.dis ? '<i class="pwhy"></i>' : '');
     b.querySelector('b').textContent = o.label;
@@ -30168,7 +30184,6 @@ function openMenu(m, x, y, anchor) {
     UI.menuOps[key] = o;
   };
   m.ops.forEach((o, k) => slot(o, MENU_KEYS[k]));
-  if (m.hit) slot(m.hit, 'hit');
   pie.hidden = false;
   UI.menuOpen = true;
   UI.menuAnchor = anchor || null;
@@ -30205,14 +30220,10 @@ function runOpt(o, pointer) {
     UI.viaPointer = false;
   }
 }
-// one option: do it. Two to four (locked ones count): show the menu. Mouse controls: anyone you can hit has Attack too,
-// unless the menu already has a blow on it, so even a one-option person opens a menu
+// one option: do it. Two to four (locked ones count): show the menu
 function presentMenu(m, x, y, anchor, pointer) {
   if (!m || !m.ops || !m.ops.length || ARREST.on) return false;
-  const n = anchor && anchor.char;
-  if (n && mouseMode() && swingable(n) && !m.ops.some((o) => o.icon === 'fist' || o.label === 'Catch'))
-    m.hit = opt('Attack', 'fist', () => attackChar(n));
-  if (m.ops.length === 1 && !m.hit) {
+  if (m.ops.length === 1) {
     runOpt(m.ops[0], pointer);
     return true;
   }
@@ -30742,32 +30753,6 @@ const interactive = (o) =>
       o.id !== 'agnesChair' &&
       o.id !== 'homeLock'));
 const held = (k) => !!keys[k] && !swallowed.has(k);
-// two ways to play, kept apart from the save. 'keys': WASD walks, E acts, Space hits, the camera square to the town.
-// 'mouse': click to walk, click IT to hit, Attack on anyone's menu, the camera turned CTRL.mouseYaw off square.
-// A touch screen has no keys: always the mouse.
-const CONTROLS_KEY = 'nothing-to-see-controls';
-let controls = 'keys';
-try {
-  if (localStorage.getItem(CONTROLS_KEY) === 'mouse') controls = 'mouse';
-} catch (e) {}
-const mouseMode = () => controls === 'mouse' || isTouch();
-const squareYaw = () => (mouseMode() ? CTRL.mouseYaw * DEG : 0); // where the camera rests, before any Q / R quarter turns
-function setControls(m) {
-  const was = squareYaw();
-  controls = m === 'mouse' ? 'mouse' : 'keys';
-  try {
-    localStorage.setItem(CONTROLS_KEY, controls);
-  } catch (e) {}
-  if (G && G.started && !G.over && !CAP.on && !UI.cf) cam.yawT += squareYaw() - was; // keeps any quarter turns you made
-  if (!mouseMode()) routeStop();
-  showControls();
-}
-// the page follows the mode: hints, the Controls sheet, the switch on the title and in the sheet
-function showControls() {
-  document.documentElement.dataset.controls = mouseMode() ? 'mouse' : 'keys';
-  document.querySelectorAll('[data-ctl]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.ctl === controls));
-}
-
 function panBy(dxPx, dyPx) {
   const r = R.canvas.getBoundingClientRect();
   const wx = (dxPx / r.width) * 2 * cam.halfW,
@@ -30832,8 +30817,7 @@ function dismissHints() {
     if (h) h.classList.add('out');
   }
 }
-// a click, with mouse controls: on someone or something, you walk up to it if it's off (input/walking routeTo) and it
-// opens as E would; on IT out of its skin, the blow; anywhere else, you walk there. With keys: only what's in reach opens
+// a click on someone or something in reach opens it, as E would. Walking and hitting are the keys'
 function handleClick(px, py) {
   if (UI.menuOpen) {
     closeMenu();
@@ -30843,34 +30827,19 @@ function handleClick(px, py) {
   dismissHints();
   const p = pickAt(px, py);
   if (!p) return;
-  if (p.char && p.char.isPlayer) {
-    routeStop();
-    return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
-  }
-  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj)),
-    walk = mouseMode();
-  if (!some) {
-    if (!walk) return;
-    const g = rayGround(screenRay(px, py));
-    return routeTo(g[0], g[1], null);
-  }
-  if (walk && p.char && p.char.trueForm) return attackChar(p.char);
-  if (!inReach(p)) {
-    if (!walk) return;
-    const at = p.char ? [p.char.x, p.char.z] : p.item ? [p.item.x, p.item.z] : [p.obj.cx, p.obj.cz];
-    return routeTo(at[0], at[1], p);
-  }
-  routeStop();
+  if (p.char && p.char.isPlayer) return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
+  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj));
+  if (!some || !inReach(p)) return;
   clickOn(p, px, py, true);
 }
-// what clicking something in reach does (also where a walk to it ends)
+// what clicking something in reach does
 function clickOn(p, px, py, pointer) {
   if (cuffedNow()) return ui.float(PLAYER, 'Cuffed', 'bad'); // running in cuffs: hands behind your back
   if (p.char) {
     const n = p.char;
     if (n.trueForm) {
-      if (pointer && !mouseMode())
-        ui.note('fist', 'Space · hit', ''); // with keys, the blow is the key
+      if (pointer)
+        ui.note('fist', 'Space · hit', ''); // the blow is the key
       else if (n.tell.t >= TF_CHANGE) playerMelee(n);
       else ui.note('lock', 'Attack · Changing', '');
       return;
@@ -30897,7 +30866,7 @@ function handleHover(px, py) {
   }
   const p = pickAt(px, py);
   let text = null,
-    cur = mouseMode() ? 'c-walk' : '';
+    cur = '';
   if (p && p.char) {
     R.hoverChar = p.char;
     text = p.char.isPlayer ? p.char.name : hidesName(p.char) ? null : p.char.short;
@@ -31415,9 +31384,7 @@ function vaultTick(c, dt) {
 function driveTick(dt) {
   const P = PLAYER;
   if (P.vault && vaultTick(P, dt)) return;
-  const key = moveInput();
-  if (key) routeStop(); // the keys take over from the mouse
-  const v = key || routeStep();
+  const v = moveInput();
   if (!v || !P.onMap || G.away) {
     if (!P.queue.length) {
       P.run = false;
@@ -31438,14 +31405,13 @@ function driveTick(dt) {
       (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
-    sp = key ? speed * dt : Math.min(speed * dt, ROUTE.left); // a route stops on its turns, not past them
-  if (key && run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+    sp = speed * dt;
+  if (run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
-  const go = key ? steerAssist(P, v) : v,
+  const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
-  if (!key && ROUTE.on) ROUTE.stall = moved < sp * 0.3 ? ROUTE.stall + sp : 0;
   // stuck inside a wall or a piece of furniture (a scene put you down there) and pushing to get out: freed after a moment
   P.stuckT = moved < 1e-5 && !standOK(P.x, P.z) ? (P.stuckT || 0) + dt : 0;
   if (P.stuckT > CTRL.unstick) {
@@ -31463,163 +31429,6 @@ function driveTick(dt) {
     G.idleT = 0;
     cam.follow = true;
   }
-}
-// ───────────── walking by mouse. Click the floor and you go there; click someone or something further off and you walk up
-// to it, and it opens just as if you'd pressed E beside it. Only the mouse finds its way round things (A*, world/paths):
-// the keys stay your own feet, and touching one drops the route.
-const ROUTE = {
-  on: false,
-  pts: null,
-  pi: 0,
-  goal: null,
-  end: null,
-  tx: 0,
-  tz: 0,
-  left: 0,
-  stall: 0,
-  retry: 0,
-  rpAt: 0,
-};
-function routeStop() {
-  ROUTE.on = false;
-  ROUTE.pts = null;
-  ROUTE.goal = null;
-  ROUTE.end = null;
-}
-const routeAt = (g) => (g.char ? [g.char.x, g.char.z] : g.item ? [g.item.x, g.item.z] : [g.obj.cx, g.obj.cz]);
-const routeGone = (g) =>
-  g.char ? !g.char.onMap || g.char.shown < 0.5 : g.item ? !G.items.includes(g.item) : !!g.obj.wrecked;
-// the point of a thing you'd reach for: its nearest edge, just inside, so a wall it stands against doesn't count
-function routeEdge(g, x, z) {
-  if (!g.obj) return routeAt(g);
-  const o = g.obj;
-  return [clamp(x, o.x + 0.05, o.x + o.w - 0.05), clamp(z, o.z + 0.05, o.z + o.h - 0.05)];
-}
-// where to stand: for a thing, any open tile it can be reached from (nearest first); otherwise the tile under the point
-function routeTiles(x, z, g) {
-  const P = PLAYER;
-  if (!g || !g.obj) {
-    const t = nearestWalkable(x, z, P, 2);
-    return t ? [t] : [];
-  }
-  const o = g.obj,
-    out = [];
-  for (let tz = Math.floor(o.z) - 2; tz <= Math.ceil(o.z + o.h) + 1; tz++)
-    for (let tx = Math.floor(o.x) - 2; tx <= Math.ceil(o.x + o.w) + 1; tx++) {
-      if (!walkable(tx, tz, P) || objEdgeDist(o, tx + 0.5, tz + 0.5) > CTRL.reachObj) continue;
-      const e = routeEdge(g, tx + 0.5, tz + 0.5);
-      if (!wallBetween(tx + 0.5, tz + 0.5, e[0], e[1])) out.push([tx, tz]);
-    }
-  return out.sort(
-    (a, b) => Math.hypot(a[0] + 0.5 - P.x, a[1] + 0.5 - P.z) - Math.hypot(b[0] + 0.5 - P.x, b[1] + 0.5 - P.z),
-  );
-}
-function routePlan(x, z, g, raw) {
-  const P = PLAYER;
-  for (const t of routeTiles(x, z, g).slice(0, 6)) {
-    const path = findPath(P.x, P.z, t[0], t[1], P);
-    if (!path) continue;
-    const pts = (raw ? path : smoothPath(P, path)).map((q) => [q[0] + 0.5, q[1] + 0.5]);
-    if (!g && standOK(x, z) && Math.floor(x) === t[0] && Math.floor(z) === t[1]) {
-      if (pts.length) pts[pts.length - 1] = [x, z];
-      else pts.push([x, z]);
-    }
-    if (!pts.length) pts.push([t[0] + 0.5, t[1] + 0.5]);
-    Object.assign(ROUTE, { on: true, pts, pi: 0, goal: g, end: pts[pts.length - 1], tx: x, tz: z, stall: 0 });
-    return true;
-  }
-  return false;
-}
-function routeTo(x, z, g) {
-  const P = PLAYER;
-  if (!P.onMap || G.away || ARREST.on) return false;
-  const cur = P.queue[0];
-  if (cur && !cur.swing && (cur.interruptible === false || cur.photo)) return false; // passing out, a breakdown: not now
-  ROUTE.retry = 0;
-  ROUTE.rpAt = performance.now();
-  if (!routePlan(x, z, g)) {
-    routeStop();
-    ui.float(P, 'No way there', '');
-    return false;
-  }
-  return true;
-}
-// you've got there: turn to it and it opens, as E would
-function routeArrive(g) {
-  const P = PLAYER,
-    [x, z] = routeAt(g);
-  P.tdir = Math.atan2(x - P.x, z - P.z);
-  if (g.hit) return playerMelee(g.char); // gone up to hit them: the swing
-  const xy = anchorXY(g) || [window.innerWidth / 2, window.innerHeight / 2];
-  clickOn(g, xy[0], xy[1], true);
-}
-// the way to go this step, or null: [ux, uz], with ROUTE.left how far to the next turn
-function routeStep() {
-  if (!ROUTE.on) return null;
-  const P = PLAYER,
-    g = ROUTE.goal;
-  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.scene || UI.cf || ARREST.on || !P.onMap || G.away)
-    return (routeStop(), null);
-  if (g) {
-    if (routeGone(g)) return (routeStop(), null);
-    // someone, or something on the floor: stop once it's within plain reach (within a swing, if you're going to hit them).
-    // A thing: walk all the way to where you'd stand
-    const [x, z] = routeAt(g),
-      reach = g.hit ? swingReach() * 0.85 : g.char ? CTRL.reachChar : CTRL.reachItem;
-    if (!g.obj && Math.hypot(x - P.x, z - P.z) <= reach && !wallBetween(P.x, P.z, x, z)) {
-      routeStop();
-      routeArrive(g);
-      return null;
-    }
-    // someone walking about: aim again now and then where they are now
-    const now = performance.now();
-    if (g.char && now - ROUTE.rpAt > 500) {
-      ROUTE.rpAt = now;
-      if (Math.hypot(g.char.x - ROUTE.tx, g.char.z - ROUTE.tz) > 1.2 && !routePlan(g.char.x, g.char.z, g))
-        return (routeStop(), null);
-    }
-  }
-  let pt = ROUTE.pts[ROUTE.pi];
-  while (pt && Math.hypot(pt[0] - P.x, pt[1] - P.z) < 0.08) pt = ROUTE.pts[++ROUTE.pi];
-  if (!pt) {
-    // at the end of the way, and they've moved on since: after them again, a few times
-    if (g && g.char && !inReach(g) && ROUTE.retry++ < 3 && routePlan(g.char.x, g.char.z, g)) return routeStep();
-    routeStop();
-    if (g) {
-      const e = routeEdge(g, P.x, P.z);
-      if (inReach(g) && !wallBetween(P.x, P.z, e[0], e[1])) routeArrive(g);
-      else ui.float(P, 'Can’t reach', '');
-    }
-    return null;
-  }
-  // caught on a corner (driveTick counts the steps that went nowhere): try the plain tile route, then give up
-  if (ROUTE.stall > 0.6) {
-    if (ROUTE.retry++ >= 2 || !routePlan(ROUTE.tx, ROUTE.tz, g, true)) {
-      routeStop();
-      ui.float(P, 'Can’t get through', '');
-      return null;
-    }
-    return routeStep();
-  }
-  const dx = pt[0] - P.x,
-    dz = pt[1] - P.z,
-    d = Math.hypot(dx, dz);
-  ROUTE.left = d;
-  return [dx / d, dz / d];
-}
-// a ring on the floor where you're headed
-function routeMarker() {
-  let el = UI.routeEl;
-  if (!el) {
-    el = UI.routeEl = document.createElement('div');
-    el.className = 'route-dot';
-    $('#fx').appendChild(el);
-  }
-  const e = ROUTE.on && !ROUTE.goal ? ROUTE.end : null;
-  el.hidden = !e;
-  if (!e) return;
-  const [x, y] = project(e[0], 0.02, e[1]);
-  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }
 // ───────────── what E would act on: the nearest thing you're roughly facing. Forgiving, and sticky once picked.
 const DEG = Math.PI / 180;
@@ -31706,7 +31515,6 @@ function pickFocus() {
   return null;
 }
 function updateFocus(dtReal) {
-  routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
   const live =
     G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping && !cuffedNow();
@@ -31954,7 +31762,10 @@ function initInput() {
     if (k === 'q') cam.yawT += Math.PI / 2;
     if (k === 'r') cam.yawT -= Math.PI / 2;
     if (k === 'c') cam.follow = true;
-    if (k === 'v') toggleWalls();
+    if (k === 'v') {
+      if (!e.repeat) trapKey(); // a trap down in front of you
+      return;
+    }
     if (k === 'l' && G.inv.flashlight) G.inv.flashOn = !G.inv.flashOn;
     if (k === '+' || k === '=') cam.zoomT = clamp(cam.zoomT / 1.2, 2.7, 18);
     if (k === '-' || k === '_') cam.zoomT = clamp(cam.zoomT * 1.2, 2.7, 18);
@@ -44008,7 +43819,7 @@ function newGame(name, preview) {
   cam.tz = preview ? 16 : PLAYER.z;
   cam.follow = !preview;
   cam.zoomT = cam.zoom = preview ? 9.5 : CAM_ZOOM;
-  if (!preview) cam.yaw = cam.yawT = squareYaw(); // keys: square to the town, W up the screen along the walls; mouse: slanted
+  if (!preview) cam.yaw = cam.yawT = 0; // square to the town, W up the screen along the walls
   warmPortraits();
 }
 // put everyone where their day says they should be (start of game, after loading)
@@ -44236,7 +44047,7 @@ function loadGame(data) {
   cam.tz = PLAYER.z;
   cam.follow = true;
   cam.zoomT = cam.zoom = CAM_ZOOM;
-  cam.yaw = cam.yawT = squareYaw();
+  cam.yaw = cam.yawT = 0;
   warmPortraits();
   if (G.wanted && G.away && G.away.kind === 'held') setTimeout(() => gameOver('jailed'), 400); // taken in while wanted
   return true;
@@ -45881,14 +45692,6 @@ function boot() {
   if (isTouch()) document.querySelectorAll('.tapword').forEach((e) => (e.textContent = 'Tap'));
   buildHud();
   initInput();
-  showControls();
-  document.querySelectorAll('[data-ctl]').forEach(
-    (b) =>
-      (b.onclick = () => {
-        setControls(b.dataset.ctl);
-        b.blur(); // or Space would press it again
-      }),
-  );
   newGame('Sam', true);
   showTitle();
   $('#begin').onclick = () => {

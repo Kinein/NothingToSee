@@ -32,6 +32,7 @@ const CTRL = {
   reachObj: 1.6,     // E reaches a thing when its nearest edge is this close
   reachChar: 2.0,    // …a person, centre to centre
   reachItem: 1.5,    // …something on the floor
+  trapAhead: 0.9,    // V: the trap goes down this far in front of you, on the tile there
   close: 0.9,        // this close, facing doesn't matter
   facing: 70,        // half-angle you must roughly face to pick something new (a 140° wedge)
   holdDist: 0.6,     // once picked, a target stays picked out to reach + this…
@@ -50,7 +51,6 @@ const CTRL = {
   boltHit: 0.42,     // how close a bolt must pass to you to land
   boltRange: 14,
   knockout: 1440,    // beaten: you sleep for a day
-  mouseYaw: 30,      // mouse controls: the camera turned this many degrees off square to the town, a slant toward isometric
 };
 
 // ── Work and damage (sim/core, player/work, combat/hits)

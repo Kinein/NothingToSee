@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
 //@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, freeSpot, settle, …
-//@ Uses:    world/grid, sim/core, gfx/world-geometry, data/tuning, ui/interface, input/camera, world/objects, gfx/renderer, sim/actions, core/util, …
+//@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, core/util, sim/actions, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -493,9 +493,7 @@ function vaultTick(c, dt) {
 function driveTick(dt) {
   const P = PLAYER;
   if (P.vault && vaultTick(P, dt)) return;
-  const key = moveInput();
-  if (key) routeStop(); // the keys take over from the mouse
-  const v = key || routeStep();
+  const v = moveInput();
   if (!v || !P.onMap || G.away) {
     if (!P.queue.length) {
       P.run = false;
@@ -516,14 +514,13 @@ function driveTick(dt) {
       (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
-    sp = key ? speed * dt : Math.min(speed * dt, ROUTE.left); // a route stops on its turns, not past them
-  if (key && run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
+    sp = speed * dt;
+  if (run && !swinging && !cuffedNow() && P.pose === 'stand' && vaultStart(P, v[0], v[1], speed)) {
     vaultTick(P, dt);
     return;
   }
-  const go = key ? steerAssist(P, v) : v,
+  const go = steerAssist(P, v),
     moved = tryMove(P, go[0] * sp, go[1] * sp);
-  if (!key && ROUTE.on) ROUTE.stall = moved < sp * 0.3 ? ROUTE.stall + sp : 0;
   // stuck inside a wall or a piece of furniture (a scene put you down there) and pushing to get out: freed after a moment
   P.stuckT = moved < 1e-5 && !standOK(P.x, P.z) ? (P.stuckT || 0) + dt : 0;
   if (P.stuckT > CTRL.unstick) {
@@ -541,161 +538,4 @@ function driveTick(dt) {
     G.idleT = 0;
     cam.follow = true;
   }
-}
-// ───────────── walking by mouse. Click the floor and you go there; click someone or something further off and you walk up
-// to it, and it opens just as if you'd pressed E beside it. Only the mouse finds its way round things (A*, world/paths):
-// the keys stay your own feet, and touching one drops the route.
-const ROUTE = {
-  on: false,
-  pts: null,
-  pi: 0,
-  goal: null,
-  end: null,
-  tx: 0,
-  tz: 0,
-  left: 0,
-  stall: 0,
-  retry: 0,
-  rpAt: 0,
-};
-function routeStop() {
-  ROUTE.on = false;
-  ROUTE.pts = null;
-  ROUTE.goal = null;
-  ROUTE.end = null;
-}
-const routeAt = (g) => (g.char ? [g.char.x, g.char.z] : g.item ? [g.item.x, g.item.z] : [g.obj.cx, g.obj.cz]);
-const routeGone = (g) =>
-  g.char ? !g.char.onMap || g.char.shown < 0.5 : g.item ? !G.items.includes(g.item) : !!g.obj.wrecked;
-// the point of a thing you'd reach for: its nearest edge, just inside, so a wall it stands against doesn't count
-function routeEdge(g, x, z) {
-  if (!g.obj) return routeAt(g);
-  const o = g.obj;
-  return [clamp(x, o.x + 0.05, o.x + o.w - 0.05), clamp(z, o.z + 0.05, o.z + o.h - 0.05)];
-}
-// where to stand: for a thing, any open tile it can be reached from (nearest first); otherwise the tile under the point
-function routeTiles(x, z, g) {
-  const P = PLAYER;
-  if (!g || !g.obj) {
-    const t = nearestWalkable(x, z, P, 2);
-    return t ? [t] : [];
-  }
-  const o = g.obj,
-    out = [];
-  for (let tz = Math.floor(o.z) - 2; tz <= Math.ceil(o.z + o.h) + 1; tz++)
-    for (let tx = Math.floor(o.x) - 2; tx <= Math.ceil(o.x + o.w) + 1; tx++) {
-      if (!walkable(tx, tz, P) || objEdgeDist(o, tx + 0.5, tz + 0.5) > CTRL.reachObj) continue;
-      const e = routeEdge(g, tx + 0.5, tz + 0.5);
-      if (!wallBetween(tx + 0.5, tz + 0.5, e[0], e[1])) out.push([tx, tz]);
-    }
-  return out.sort(
-    (a, b) => Math.hypot(a[0] + 0.5 - P.x, a[1] + 0.5 - P.z) - Math.hypot(b[0] + 0.5 - P.x, b[1] + 0.5 - P.z),
-  );
-}
-function routePlan(x, z, g, raw) {
-  const P = PLAYER;
-  for (const t of routeTiles(x, z, g).slice(0, 6)) {
-    const path = findPath(P.x, P.z, t[0], t[1], P);
-    if (!path) continue;
-    const pts = (raw ? path : smoothPath(P, path)).map((q) => [q[0] + 0.5, q[1] + 0.5]);
-    if (!g && standOK(x, z) && Math.floor(x) === t[0] && Math.floor(z) === t[1]) {
-      if (pts.length) pts[pts.length - 1] = [x, z];
-      else pts.push([x, z]);
-    }
-    if (!pts.length) pts.push([t[0] + 0.5, t[1] + 0.5]);
-    Object.assign(ROUTE, { on: true, pts, pi: 0, goal: g, end: pts[pts.length - 1], tx: x, tz: z, stall: 0 });
-    return true;
-  }
-  return false;
-}
-function routeTo(x, z, g) {
-  const P = PLAYER;
-  if (!P.onMap || G.away || ARREST.on) return false;
-  const cur = P.queue[0];
-  if (cur && !cur.swing && (cur.interruptible === false || cur.photo)) return false; // passing out, a breakdown: not now
-  ROUTE.retry = 0;
-  ROUTE.rpAt = performance.now();
-  if (!routePlan(x, z, g)) {
-    routeStop();
-    ui.float(P, 'No way there', '');
-    return false;
-  }
-  return true;
-}
-// you've got there: turn to it and it opens, as E would
-function routeArrive(g) {
-  const P = PLAYER,
-    [x, z] = routeAt(g);
-  P.tdir = Math.atan2(x - P.x, z - P.z);
-  if (g.hit) return playerMelee(g.char); // gone up to hit them: the swing
-  const xy = anchorXY(g) || [window.innerWidth / 2, window.innerHeight / 2];
-  clickOn(g, xy[0], xy[1], true);
-}
-// the way to go this step, or null: [ux, uz], with ROUTE.left how far to the next turn
-function routeStep() {
-  if (!ROUTE.on) return null;
-  const P = PLAYER,
-    g = ROUTE.goal;
-  if (!G || !G.started || G.over || UI.menuOpen || UI.caseOpen || UI.scene || UI.cf || ARREST.on || !P.onMap || G.away)
-    return (routeStop(), null);
-  if (g) {
-    if (routeGone(g)) return (routeStop(), null);
-    // someone, or something on the floor: stop once it's within plain reach (within a swing, if you're going to hit them).
-    // A thing: walk all the way to where you'd stand
-    const [x, z] = routeAt(g),
-      reach = g.hit ? swingReach() * 0.85 : g.char ? CTRL.reachChar : CTRL.reachItem;
-    if (!g.obj && Math.hypot(x - P.x, z - P.z) <= reach && !wallBetween(P.x, P.z, x, z)) {
-      routeStop();
-      routeArrive(g);
-      return null;
-    }
-    // someone walking about: aim again now and then where they are now
-    const now = performance.now();
-    if (g.char && now - ROUTE.rpAt > 500) {
-      ROUTE.rpAt = now;
-      if (Math.hypot(g.char.x - ROUTE.tx, g.char.z - ROUTE.tz) > 1.2 && !routePlan(g.char.x, g.char.z, g))
-        return (routeStop(), null);
-    }
-  }
-  let pt = ROUTE.pts[ROUTE.pi];
-  while (pt && Math.hypot(pt[0] - P.x, pt[1] - P.z) < 0.08) pt = ROUTE.pts[++ROUTE.pi];
-  if (!pt) {
-    // at the end of the way, and they've moved on since: after them again, a few times
-    if (g && g.char && !inReach(g) && ROUTE.retry++ < 3 && routePlan(g.char.x, g.char.z, g)) return routeStep();
-    routeStop();
-    if (g) {
-      const e = routeEdge(g, P.x, P.z);
-      if (inReach(g) && !wallBetween(P.x, P.z, e[0], e[1])) routeArrive(g);
-      else ui.float(P, 'Can’t reach', '');
-    }
-    return null;
-  }
-  // caught on a corner (driveTick counts the steps that went nowhere): try the plain tile route, then give up
-  if (ROUTE.stall > 0.6) {
-    if (ROUTE.retry++ >= 2 || !routePlan(ROUTE.tx, ROUTE.tz, g, true)) {
-      routeStop();
-      ui.float(P, 'Can’t get through', '');
-      return null;
-    }
-    return routeStep();
-  }
-  const dx = pt[0] - P.x,
-    dz = pt[1] - P.z,
-    d = Math.hypot(dx, dz);
-  ROUTE.left = d;
-  return [dx / d, dz / d];
-}
-// a ring on the floor where you're headed
-function routeMarker() {
-  let el = UI.routeEl;
-  if (!el) {
-    el = UI.routeEl = document.createElement('div');
-    el.className = 'route-dot';
-    $('#fx').appendChild(el);
-  }
-  const e = ROUTE.on && !ROUTE.goal ? ROUTE.end : null;
-  el.hidden = !e;
-  if (!e) return;
-  const [x, y] = project(e[0], 0.02, e[1]);
-  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }

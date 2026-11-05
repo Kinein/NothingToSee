@@ -1,6 +1,6 @@
 //@ ui/menus — Interaction menus for objects, people, items
 //@ Defines: opt, NO_SHAKE, menuForObject, fitMenu, objMenu, deskMenu, objStatus, menuForChar, ITEM_NAMES, itemName, menuForItem, bagItem, ITEMS_INV
-//@ Uses:    sim/core, play/verbs, sim/actions, ui/interface, play/stashes, core/util, world/objects, gfx/portraits, player/needs, data/tuning, …
+//@ Uses:    sim/core, play/verbs, sim/actions, ui/interface, play/stashes, core/util, world/objects, gfx/portraits, player/needs, play/traps, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── menus
 function opt(label, icon, fn, dis) {
@@ -680,6 +680,7 @@ function menuForItem(it) {
         check: () => (inReach({ item: it }) ? null : 'Too far'),
         onStart: (c) => (c.tdir = Math.atan2(it.x - c.x, it.z - c.z)),
         onTick: (c, a, dt) => {
+          if (it.kind === 'trap') trapWatched(a);
           if (floor) {
             const dx = it.x - c.x,
               dz = it.z - c.z,
@@ -701,7 +702,7 @@ function menuForItem(it) {
         },
         onEnd: (c, a, ok) => {
           c.moving = false;
-          if (ok && G.items.includes(it)) fn();
+          if (ok && G.items.includes(it)) fn(a);
         },
       }),
     );
@@ -751,7 +752,18 @@ function menuForItem(it) {
         go('Put it back', () => closeUp(OBJ[it.obj]), 3, 'box'),
       ),
     );
-  else if (it.kind === 'trap')
+  else if (it.kind === 'trap') {
+    // open and empty: bait it with something THEY lost, or take it back up (the bait comes back with it)
+    const tr = !it.shut && G.traps.find((t) => t.id === it.trap);
+    if (tr && !tr.bait)
+      ops.push(
+        opt(
+          'Bait it',
+          'trap',
+          hasBait() ? go('Bait it', (a) => baitTrap(it, a), 2, 'trap') : null,
+          hasBait() ? null : 'Nothing of THEIRS on you',
+        ),
+      );
     ops.push(
       opt(
         'Pick it up',
@@ -759,7 +771,7 @@ function menuForItem(it) {
         go('Pick it up', () => liftTrap(it), 2),
       ),
     );
-  else if (it.kind === 'mark' && it.place === 'you')
+  } else if (it.kind === 'mark' && it.place === 'you')
     ops.push(
       opt(
         'Destroy',
@@ -806,7 +818,7 @@ function bagItem(it) {
 const ITEMS_INV = [
   {
     k: 'trap',
-    label: 'Trap · set it where you stand',
+    label: 'Trap · V puts it down in front of you',
     icon: 'trap',
     has: () => G.inv.trap > 0,
     count: () => G.inv.trap,

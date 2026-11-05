@@ -87,7 +87,6 @@ function pickFocus() {
   return null;
 }
 function updateFocus(dtReal) {
-  routeMarker();
   UI.focusT = (UI.focusT || 0) - dtReal;
   const live =
     G && G.started && !G.over && !UI.caseOpen && !UI.cf && PLAYER.onMap && !G.away && !G.sleeping && !cuffedNow();
@@ -335,7 +334,10 @@ function initInput() {
     if (k === 'q') cam.yawT += Math.PI / 2;
     if (k === 'r') cam.yawT -= Math.PI / 2;
     if (k === 'c') cam.follow = true;
-    if (k === 'v') toggleWalls();
+    if (k === 'v') {
+      if (!e.repeat) trapKey(); // a trap down in front of you
+      return;
+    }
     if (k === 'l' && G.inv.flashlight) G.inv.flashOn = !G.inv.flashOn;
     if (k === '+' || k === '=') cam.zoomT = clamp(cam.zoomT / 1.2, 2.7, 18);
     if (k === '-' || k === '_') cam.zoomT = clamp(cam.zoomT * 1.2, 2.7, 18);

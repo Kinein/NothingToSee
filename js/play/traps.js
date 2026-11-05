@@ -1,63 +1,94 @@
 //@ play/traps — Traps
-//@ Defines: setTrapAct, liftTrap, trapItem, springTrap, trapTick, baitPull, caution
-//@ Uses:    sim/core, ui/interface, sim/actions, play/items, core/util, town/suspicion, audio/sound, town/echoes, them/tells, them/proofs, …
+//@ Defines: trapSpot, trapWatched, trapKey, setTrapAct, baitTrap, liftTrap, trapItem, springTrap, trapTick, baitPull, caution
+//@ Uses:    sim/core, ui/interface, sim/actions, play/items, core/util, audio/sound, town/suspicion, town/echoes, data/tuning, them/tells, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── traps: steel jaws from Pell's. Whatever steps in stays put, for a while.
 // Bait it with something THEY lost and its owner comes looking. Unbaited, it takes whoever walks by.
+// the floor tile a step ahead of you: where V puts a trap down
+function trapSpot(P) {
+  return [Math.floor(P.x + Math.sin(P.tdir) * CTRL.trapAhead), Math.floor(P.z + Math.cos(P.tdir) * CTRL.trapAhead)];
+}
+// anyone who sees you at it gets a look at you, and the trap it's about is a seen one
+function trapWatched(a) {
+  for (const n of CHARS)
+    if (
+      !n.isPlayer &&
+      n.onMap &&
+      !asleep(n) &&
+      !n.def.stranger &&
+      npcSeesPlayer(n, 8) &&
+      !(a.seen || (a.seen = {}))[n.id]
+    ) {
+      a.seen[n.id] = 1;
+      addSus(n, 8);
+      ui.bubble(n, 'question', 'speech', 2);
+    }
+}
+const watched = (a) => !!(a.seen && Object.keys(a.seen).length);
+// V: down on one knee and the jaws go on the floor in front of you, unbaited. E on it baits it or takes it back up
+function trapKey() {
+  const P = PLAYER;
+  if (!G || !G.started || G.over || UI.caseOpen || UI.scene || UI.cf || !P.onMap || G.away || ARREST.on || cuffedNow())
+    return;
+  if (UI.menuOpen) return closeMenu();
+  dismissHints();
+  if (G.inv.trap <= 0) return ui.float(P, 'No trap', '');
+  enqueue(P, setTrapAct());
+}
 function setTrapAct() {
+  const [x, z] = trapSpot(PLAYER);
   return mkAct({
     kind: 'wait',
     label: 'Set trap',
     icon: 'trap',
-    dur: 4,
-    anim: 'dig',
+    dur: 3,
+    anim: 'pickup',
+    reach: [x + 0.5, 0.05, z + 0.5],
     check: () => {
-      const x = Math.floor(PLAYER.x),
-        z = Math.floor(PLAYER.z);
       if (G.inv.trap <= 0) return 'No trap';
-      if (G.traps.some((t) => t.x === x && t.z === z)) return 'Already one here';
+      if (G.traps.some((t) => t.x === x && t.z === z)) return 'Already one there';
       if (doorAt[I(x, z)] >= 0) return 'Not in a doorway';
-      if (!walkable(x, z)) return 'Not here';
+      if (!walkable(x, z) || wallBetween(PLAYER.x, PLAYER.z, x + 0.5, z + 0.5)) return 'Not there';
       return null;
     },
-    onTick: (c, a) => {
-      for (const n of CHARS)
-        if (
-          !n.isPlayer &&
-          n.onMap &&
-          !asleep(n) &&
-          !n.def.stranger &&
-          npcSeesPlayer(n, 8) &&
-          !(a.seen || (a.seen = {}))[n.id]
-        ) {
-          a.seen[n.id] = 1;
-          addSus(n, 8);
-          ui.bubble(n, 'question', 'speech', 2);
-        }
-    },
+    onStart: (c) => (c.tdir = Math.atan2(x + 0.5 - c.x, z + 0.5 - c.z)),
+    onTick: (c, a) => trapWatched(a),
     onEnd: (c, a, ok) => {
       if (!ok) return;
       G.inv.trap--;
-      const x = Math.floor(c.x),
-        z = Math.floor(c.z),
-        bait = takeBait();
       const tr = {
         id: (G.trapId = (G.trapId || 0) + 1),
         x,
         z,
-        bait: bait ? bait.true : null,
-        baitWhat: bait ? bait.what : null,
-        baitProof: bait,
-        seen: !!(a.seen && Object.keys(a.seen).length),
+        bait: null,
+        baitWhat: null,
+        baitProof: null,
+        seen: watched(a),
         at: G.t,
       };
       G.traps.push(tr);
-      addItem({ kind: 'trap', trap: tr.id, x: x + 0.5, z: z + 0.5, rot: rand(0, TAU), bait: !!bait });
-      ui.note('trap', bait ? 'Trap set · baited with ' + bait.what.toLowerCase() : 'Trap set', '');
+      addItem({ kind: 'trap', trap: tr.id, x: x + 0.5, z: z + 0.5, rot: rand(0, TAU), bait: false });
+      ui.note('trap', 'Trap set', '');
       audio.blip('click');
     },
   });
 }
+// E on an open trap: something THEY lost goes in the jaws, and its owner comes looking (baitPull)
+function baitTrap(it, a) {
+  const tr = G.traps.find((t) => t.id === it.trap);
+  if (!tr || tr.bait) return;
+  const bait = takeBait();
+  if (!bait) return ui.note('trap', 'Nothing to bait it with', 'bad');
+  tr.bait = bait.true;
+  tr.baitWhat = bait.what;
+  tr.baitProof = bait;
+  if (watched(a)) tr.seen = true;
+  it.bait = true;
+  if (R.ready) R.itemMeshes.set(it.id, buildItemMesh(it));
+  ui.note('trap', 'Trap baited · ' + bait.what.toLowerCase(), '');
+  audio.blip('click');
+}
+const hasBait = () => G.proofs.some((p) => p.src === 'item');
 function liftTrap(it) {
   const tr = !it.shut && G.traps.find((t) => t.id === it.trap);
   if (it.shut && CHARS.some((c) => c.trapped && Math.hypot(c.x - it.x, c.z - it.z) < 0.6))

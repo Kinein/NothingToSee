@@ -406,14 +406,6 @@ function boot() {
   if (isTouch()) document.querySelectorAll('.tapword').forEach((e) => (e.textContent = 'Tap'));
   buildHud();
   initInput();
-  showControls();
-  document.querySelectorAll('[data-ctl]').forEach(
-    (b) =>
-      (b.onclick = () => {
-        setControls(b.dataset.ctl);
-        b.blur(); // or Space would press it again
-      }),
-  );
   newGame('Sam', true);
   showTitle();
   $('#begin').onclick = () => {

@@ -89,7 +89,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Player verbs: eat, sleep, snoop, Lenny | `js/play/verbs.js` |
 | Hidden things, the fridge, taking and the place rule (`takeThing`, `placeOwner`) | `js/play/stashes.js` (`STASH_KINDS`, `PLANTS`) |
 | THEIR plant at a victim's place and in your home, THEY take things back, signs for a gut feeling | `js/play/plants.js` (`morningThings`) |
-| Traps, raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
+| Traps (V puts one down in front of you: `trapKey`, `setTrapAct`; E on it baits it or picks it up: `baitTrap`, `liftTrap`), raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
 | Photos: the wedge, the photo hint (`photoHintTick`), the flash rule (`photoSeen`), what F turns you onto (`photoAim`, `CTRL.photoAim`) | `js/play/photos.js` (`playerPhoto`, `takePhoto`); the camera's square (live view through your eyes, zoom, the walls and furniture left out of the shot, the flash, the print): `js/gfx/viewfinder.js` (`vfOpen`, `vfLens`, `vfRender`, `vfInWay`) |
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
@@ -99,7 +99,6 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | What E does, keyboard handling | `js/input/targeting.js` (`interact`, `initInput`), then `js/ui/menus.js` |
 | WASD walking, collisions | `js/input/walking.js` |
 | Mouse, camera | `js/input/camera.js`, camera state in `js/gfx/renderer.js` |
-| The two control modes, WASD + keys or mouse (`controls`, `mouseMode`, `setControls`; the mouse's slanted camera `squareYaw`, `CTRL.mouseYaw`; click-to-hit `attackChar` in town/fleeing; the menu's Attack slot `m.hit` in ui/pie-menu) | `js/input/camera.js` |
 | Menus, HUD, pie menu, the evidence book, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
 | HUD markup and all CSS | `shell/page.html`, `shell/styles.css` |
 | Sound | `js/audio/sound.js` (all synthesised with Web Audio) |

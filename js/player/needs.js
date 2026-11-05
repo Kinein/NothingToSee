@@ -153,7 +153,6 @@ function accident() {
   const free = P.onMap && !G.sleeping && !G.away && P.pose === 'stand' && !P.seatTr && !P.vault;
   if (!free || (P.queue[0] && P.queue[0].interruptible === false)) return accidentPool();
   hardReset(P);
-  routeStop();
   enqueue(
     P,
     mkAct({

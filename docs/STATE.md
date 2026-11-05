@@ -158,7 +158,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `stageNews` | `null` | them/plan, town/echoes | — |
 | `gatherDay` | `irand(3, 4)` | player/work, them/plan | town/daily-plans, town/talk, horror/director, them/office-night |
 | `gatherTip` | `0` | town/talk, them/office-night | them/plan |
-| `proofs` | `[]` | — | town/npc-update, them/proofs, them/wipe, play/stashes, play/plants, play/biography, ui/menus, ui/case-board |
+| `proofs` | `[]` | — | town/npc-update, them/proofs, them/wipe, play/stashes, play/plants, play/biography, play/traps, ui/menus, … |
 | `proofId` | `0` | — | them/proofs, play/stashes |
 | `mark` | `{}` | — | ui/menus, ui/case-board |
 | `plants` | `{}` | play/plants | — |

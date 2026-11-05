@@ -1,6 +1,6 @@
 //@ town/fleeing — Fleeing to hideouts
-//@ Defines: HIDEOUTS, hideoutFor, flee, hideAway, giveUp, chaseAct, swingAct, swingTarget, playerMelee, attackChar, attackKey
-//@ Uses:    sim/core, ui/interface, sim/actions, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, input/walking, …
+//@ Defines: HIDEOUTS, hideoutFor, flee, hideAway, giveUp, chaseAct, swingAct, swingTarget, playerMelee, attackKey
+//@ Uses:    sim/core, sim/actions, ui/interface, world/grid, data/tuning, core/util, town/spawning, world/paths, town/npc-update, town/suspicion, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── fleeing: their flat, a den, the stockroom, the alley or the park at night. Lose them and they hide 1–3 hours.
 const HIDEOUTS = { stock: [41, 9], agnes: [21, 22], alley: [27, 5], park: [41, 30] };
@@ -248,17 +248,6 @@ function playerMelee(n) {
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
   enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
-}
-// the mouse's blow (a click on IT, Attack on someone's menu): in reach, the swing; further off, you go up to them first
-function attackChar(n) {
-  const P = PLAYER;
-  if (cuffedNow()) return ui.float(P, 'Cuffed', 'bad');
-  if (n.trueForm && n.tell.t < TF_CHANGE) return ui.note('lock', 'Attack · Changing', '');
-  if (Math.hypot(n.x - P.x, n.z - P.z) <= swingReach() && !wallBetween(P.x, P.z, n.x, n.z)) {
-    routeStop();
-    return playerMelee(n);
-  }
-  routeTo(n.x, n.z, { char: n, hit: true });
 }
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {

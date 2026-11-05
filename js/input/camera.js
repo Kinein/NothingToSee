@@ -1,6 +1,6 @@
 //@ input/camera — Input and camera control
-//@ Defines: MENU_TYPES, BARE_SEATS, CONTROLS_KEY, setControls, showControls, panBy, pickAt, dismissHints, handleClick, clickOn, handleHover
-//@ Uses:    gfx/renderer, sim/core, ui/interface, ui/menus, input/walking, ui/pie-menu, taken/taken, core/util, world/vision, world/grid, …
+//@ Defines: MENU_TYPES, BARE_SEATS, panBy, pickAt, dismissHints, handleClick, clickOn, handleHover
+//@ Uses:    gfx/renderer, ui/interface, sim/core, ui/menus, ui/pie-menu, taken/taken, core/util, world/vision, world/grid, play/stashes, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── input & camera control ─────────────────────────
 const keys = {};
@@ -21,32 +21,6 @@ const interactive = (o) =>
       o.id !== 'agnesChair' &&
       o.id !== 'homeLock'));
 const held = (k) => !!keys[k] && !swallowed.has(k);
-// two ways to play, kept apart from the save. 'keys': WASD walks, E acts, Space hits, the camera square to the town.
-// 'mouse': click to walk, click IT to hit, Attack on anyone's menu, the camera turned CTRL.mouseYaw off square.
-// A touch screen has no keys: always the mouse.
-const CONTROLS_KEY = 'nothing-to-see-controls';
-let controls = 'keys';
-try {
-  if (localStorage.getItem(CONTROLS_KEY) === 'mouse') controls = 'mouse';
-} catch (e) {}
-const mouseMode = () => controls === 'mouse' || isTouch();
-const squareYaw = () => (mouseMode() ? CTRL.mouseYaw * DEG : 0); // where the camera rests, before any Q / R quarter turns
-function setControls(m) {
-  const was = squareYaw();
-  controls = m === 'mouse' ? 'mouse' : 'keys';
-  try {
-    localStorage.setItem(CONTROLS_KEY, controls);
-  } catch (e) {}
-  if (G && G.started && !G.over && !CAP.on && !UI.cf) cam.yawT += squareYaw() - was; // keeps any quarter turns you made
-  if (!mouseMode()) routeStop();
-  showControls();
-}
-// the page follows the mode: hints, the Controls sheet, the switch on the title and in the sheet
-function showControls() {
-  document.documentElement.dataset.controls = mouseMode() ? 'mouse' : 'keys';
-  document.querySelectorAll('[data-ctl]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.ctl === controls));
-}
-
 function panBy(dxPx, dyPx) {
   const r = R.canvas.getBoundingClientRect();
   const wx = (dxPx / r.width) * 2 * cam.halfW,
@@ -111,8 +85,7 @@ function dismissHints() {
     if (h) h.classList.add('out');
   }
 }
-// a click, with mouse controls: on someone or something, you walk up to it if it's off (input/walking routeTo) and it
-// opens as E would; on IT out of its skin, the blow; anywhere else, you walk there. With keys: only what's in reach opens
+// a click on someone or something in reach opens it, as E would. Walking and hitting are the keys'
 function handleClick(px, py) {
   if (UI.menuOpen) {
     closeMenu();
@@ -122,34 +95,19 @@ function handleClick(px, py) {
   dismissHints();
   const p = pickAt(px, py);
   if (!p) return;
-  if (p.char && p.char.isPlayer) {
-    routeStop();
-    return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
-  }
-  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj)),
-    walk = mouseMode();
-  if (!some) {
-    if (!walk) return;
-    const g = rayGround(screenRay(px, py));
-    return routeTo(g[0], g[1], null);
-  }
-  if (walk && p.char && p.char.trueForm) return attackChar(p.char);
-  if (!inReach(p)) {
-    if (!walk) return;
-    const at = p.char ? [p.char.x, p.char.z] : p.item ? [p.item.x, p.item.z] : [p.obj.cx, p.obj.cz];
-    return routeTo(at[0], at[1], p);
-  }
-  routeStop();
+  if (p.char && p.char.isPlayer) return presentMenu(menuForChar(p.char), px, py, { char: p.char }, true);
+  const some = p.char || (p.item && menuForItem(p.item)) || (p.obj && interactive(p.obj) && menuForObject(p.obj));
+  if (!some || !inReach(p)) return;
   clickOn(p, px, py, true);
 }
-// what clicking something in reach does (also where a walk to it ends)
+// what clicking something in reach does
 function clickOn(p, px, py, pointer) {
   if (cuffedNow()) return ui.float(PLAYER, 'Cuffed', 'bad'); // running in cuffs: hands behind your back
   if (p.char) {
     const n = p.char;
     if (n.trueForm) {
-      if (pointer && !mouseMode())
-        ui.note('fist', 'Space · hit', ''); // with keys, the blow is the key
+      if (pointer)
+        ui.note('fist', 'Space · hit', ''); // the blow is the key
       else if (n.tell.t >= TF_CHANGE) playerMelee(n);
       else ui.note('lock', 'Attack · Changing', '');
       return;
@@ -176,7 +134,7 @@ function handleHover(px, py) {
   }
   const p = pickAt(px, py);
   let text = null,
-    cur = mouseMode() ? 'c-walk' : '';
+    cur = '';
   if (p && p.char) {
     R.hoverChar = p.char;
     text = p.char.isPlayer ? p.char.name : hidesName(p.char) ? null : p.char.short;

@@ -92,7 +92,7 @@ function buildHud() {
   $('#eye img').src = HUD_IMG.eye0;
   $('#boardBtn img').src = HUD_IMG.book;
   $('#tools').innerHTML = [
-    ['walls', 'walls', 'Walls · V'],
+    ['walls', 'walls', 'Walls'],
     ['follow', 'target', 'Find me · C'],
     ['rot', 'rot', 'Rotate · Q R'],
     ['will', 'brain', 'Free will'],
