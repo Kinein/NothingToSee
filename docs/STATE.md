@@ -195,7 +195,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `rainFrom` | `19.5` | player/work | town/traffic-weather |
 | `rainTo` | `3` | player/work | town/traffic-weather |
 | `rainAmt` | `0.8` | player/work | town/traffic-weather |
-| `rainK` | `0` | town/traffic-weather, game/state, game/endings | gfx/draw-helpers, gfx/frame, town/cell, audio/foley |
+| `rainK` | `0` | town/traffic-weather, game/state, game/endings | gfx/draw-helpers, gfx/frame, gfx/vf-sky, town/cell, audio/foley |
 | `wet` | `0` | town/traffic-weather, game/state, game/endings | gfx/look, gfx/vf-glass |
 | `dayShown` | `0` | ui/interface, chase/they-come, chase/hunt | player/needs, play/verbs |
 

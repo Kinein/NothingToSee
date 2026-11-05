@@ -125,6 +125,7 @@ function drawScene(fb, w, h, pov) {
   } catch (e) {
     console.error(e);
   }
+  if (pov) vfBackdrop(); // the square's ceilings, sky and city, wherever nothing solid was drawn (gfx/vf-sky)
 
   // floor decals
   const D = R.decal;

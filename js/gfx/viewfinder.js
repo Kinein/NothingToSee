@@ -17,6 +17,7 @@ const VF = {
   aim: null, // the subject: a person (or what they really are), or { item | obj, x, z }, or a place { x, z }
   yaw: 0,
   cut: null, // while the square draws: { at, back, r } for the wall cut (useMain), and the line it hides things on
+  flash: null, // while the still draws: its flash, for the ceiling (gfx/vf-sky)
   eye: [0, 0, 0],
   pitch: 0,
   t0: 0, // R.time the mode began
@@ -227,7 +228,7 @@ function vfTargets() {
   VF.out = makeTarget(S, S, false);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
-// above the walls: the sky outdoors, a dark ceiling indoors (the town has no ceilings to draw)
+// the clear colour under the backdrop (gfx/vf-sky), which draws the real sky and ceilings over it
 const VF_ROOF = [0.025, 0.022, 0.024];
 function vfSky() {
   if (roomAt(PLAYER.x, PLAYER.z)) return VF_ROOF;
@@ -281,11 +282,12 @@ function vfRender(still) {
       ? { x: eye[0] + fx * 0.3, y: eye[1], z: eye[2] + fz * 0.3, r: 8, col: [0.62 * fk, 0.6 * fk, 0.56 * fk], dark: 0 }
       : null;
   if (flash) HX.lights.unshift(flash);
+  VF.flash = flash; // on the ceiling too (gfx/vf-sky)
   try {
     drawScene(VF.ms, S, S, still ? 'still' : 'live');
   } finally {
     [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown] = keep;
-    VF.cut = R.cut = null;
+    VF.cut = R.cut = VF.flash = null;
     if (flash) HX.lights.splice(HX.lights.indexOf(flash), 1);
   }
   gl.bindFramebuffer(gl.READ_FRAMEBUFFER, VF.ms);
