@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dist",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "exec python3 -m http.server ${PORT:-8768} --directory dist"
+      ],
+      "port": 8768
+    },
+    {
+      "name": "object-sheets",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "tools/object_sheets.py",
+        "office",
+        "--no-open",
+        "--port",
+        "8770"
+      ],
+      "port": 8770
+    }
+  ]
+}

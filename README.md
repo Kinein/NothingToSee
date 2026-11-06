@@ -11,7 +11,8 @@ python3 tools/check.py --full    # …plus a headless boot test and the determin
 npx prettier@3 --write js tools  # code formatting (.prettierrc.json); js/data/ is hand-aligned and ignored
 ```
 
-`CLAUDE.md` is the short guide for AI assistants: the rules above plus where to go to change what.
+`CLAUDE.md` is the short guide for AI assistants: the rules above plus where to go to change what. Its
+setup lives in `.claude/`: path-scoped rules, hooks that guard the generated files and `main`, and skills.
 
 ## Layout
 
@@ -28,7 +29,7 @@ SYMBOLS.tsv            every top-level name → module and line: grep -w name SY
 docs/STATE.md          every field of the game state G: start value, who writes it, who reads it    (generated)
 docs/PERFORMANCE.md    what makes frames slow, what was done about it, how to measure
 docs/DESIGN.md         the agreed redesign of talking, evidence, Psychic and the confrontation (built, v1.11–v1.17)
-tools/                 check.py, map.js, state.js, split.js, move.js, smoke.py, regress.py, profile.py, playtest.py, allocs.py
+tools/                 check.py, map.js, state.js, split.js, move.js, smoke.py, regress.py, profile.py, playtest.py, allocs.py, review-checks.js
 FOLLOWUP.md            what's left to do, and the rules for doing it
 CLAUDE.md              short guide for AI assistants: rules and where to change what
 ```
@@ -91,6 +92,7 @@ For anything else: `grep -w theName SYMBOLS.tsv`, then MAP.md for that module's 
 | `tools/profile.py`, `tools/playtest.py` | Where the time goes: simulation cost per game hour, slow frames during a fast-forwarded week |
 | `tools/allocs.py` | Memory allocated per frame, by function (garbage means collector pauses) |
 | `tools/smoke.py` | Headless boot: starts a game and fails on any JavaScript error |
+| `tools/review-checks.js [--base REF \| --all]` | The scripted half of a review, on the changed lines: Math.random outside the simulation, allocation in per-frame code, read-backs outside `warmLater`, new `G` fields not in `freshG`, a module missing from ORDER.txt, the version bump |
 | dev build: `__dev` in the browser console | `__dev.perf()`, `__dev.skip(minutes)`, `__dev.speed(45)`, `__dev.keepAlive()`, `__dev.run('…')` |
 
 The headless tools need `pip install playwright && playwright install chromium`. Headless WebGL is software

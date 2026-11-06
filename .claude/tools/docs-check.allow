@@ -1,0 +1,2 @@
+# Names the docs mention that are not files in the repo (generated, ignored, or deliberately gone).
+.claude/hooks.log

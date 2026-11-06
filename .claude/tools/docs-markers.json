@@ -1,0 +1,38 @@
+{
+  "CLAUDE": {
+    "doc": "CLAUDE.md",
+    "code": ["js", "tools", "shell", "build.py"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  },
+  "README": {
+    "doc": "README.md",
+    "code": ["js/ORDER.txt", "js", "tools", "shell", "build.py"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  },
+  "DESIGN": {
+    "doc": "docs/DESIGN.md",
+    "code": ["js/town", "js/them", "js/play", "js/player/needs.js", "js/combat/melee.js", "js/horror/visions.js", "js/ui/confront-view.js", "js/ui/case-board.js", "js/data"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  },
+  "PERFORMANCE": {
+    "doc": "docs/PERFORMANCE.md",
+    "code": ["js/gfx", "js/game/loop.js", "js/sim", "js/world", "js/core/util.js", "tools/allocs.py", "tools/profile.py", "tools/playtest.py"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  },
+  "FOLLOWUP": {
+    "doc": "FOLLOWUP.md",
+    "code": ["js", "tools"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  },
+  "ASSETS": {
+    "doc": "3D_ASSETS.md",
+    "code": ["js/gfx", "js/world/objects.js", "js/town/cast.js", "js/horror"],
+    "date": "2026-11-07",
+    "hash": "ee377876d76051bf16c55d325e3f8f02197cef0f"
+  }
+}

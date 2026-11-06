@@ -2,3 +2,7 @@
 node_modules/
 __pycache__/
 renders/
+.claude/hooks.log
+.claude/settings.local.json
+.claude/worktrees/
+.claude/.cc-writes/

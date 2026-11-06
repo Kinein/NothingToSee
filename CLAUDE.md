@@ -45,7 +45,8 @@ Changes that leave `dist/` untouched (docs, tools, CLAUDE.md) don't bump it.
 ## Generated files: never edit by hand
 
 `dist/`, `MAP.md`, `SYMBOLS.tsv`, `docs/STATE.md` and the `//@` header lines at the top of each module are
-written by the tools (`check.py` runs them all). Commit them together with the source change.
+written by the tools (`check.py` runs them all). Commit them together with the source change. The `guard-files`
+and `bash-gate` hooks refuse a hand edit of any of them.
 
 ## Where to change things
 
@@ -60,7 +61,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Lights, line of sight, what the player can see | `js/world/light-map.js`, `js/world/vision.js` |
 | Pathfinding, who may walk where | `js/world/paths.js` (`findPath`, `walkable`) |
 | Shaders, bloom, what's drawn each frame | `js/gfx/shaders*.js`, `js/gfx/post.js`, `js/gfx/frame.js` (`renderFrame`) |
-| The art style: a cozy cartoon town (fill light, clean walls, toon-shaded people with an ink edge, warm picture-book grade) that turns into the old harsh noir when something bad happens, worst at night: colour drained but the red, blood that isn't there, wet streets, red doorways and windows (`LOOK.h`; what turns it: `lookTarget`; the doorways: `lookDoors`). Render only, the game's light map never sees it | `js/gfx/look.js`; the shader side: `uLook`/`uFill`, grime `GR`, the blood `gore` in gfx/shaders.js, the grade in gfx/post.js |
+| The art style: cozy cartoon town that turns harsh noir when something bad happens (`LOOK.h`, `lookTarget`, `lookDoors`). Render only | `js/gfx/look.js`; the shader side in gfx/shaders.js, the grade in gfx/post.js. Rule: [look.md](.claude/rules/look.md) |
 | How people and creatures are drawn | `js/gfx/people.js` (`drawPerson`), `js/gfx/creatures.js`, `js/gfx/body-parts.js` |
 | Animation, poses, gaits, sitting | `js/sim/pose.js`, `js/sim/body-motion.js`, `js/sim/seat-moves.js` |
 | The action queue every character runs | `js/sim/actions.js` (`mkAct`, `enqueue`, `runAct`) |
@@ -90,7 +91,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Hidden things, the fridge, taking and the place rule (`takeThing`, `placeOwner`) | `js/play/stashes.js` (`STASH_KINDS`, `PLANTS`) |
 | THEIR plant at a victim's place and in your home, THEY take things back, signs for a gut feeling | `js/play/plants.js` (`morningThings`) |
 | Traps (V puts one down in front of you: `trapKey`, `setTrapAct`; E on it baits it or picks it up: `baitTrap`, `liftTrap`), raids, items on the floor | `js/play/traps.js`, `raids.js`, `items.js` |
-| Photos: the wedge, the photo hint (`photoHintTick`), the flash rule (`photoSeen`), what F turns you onto (`photoAim`, `CTRL.photoAim`) | `js/play/photos.js` (`playerPhoto`, `takePhoto`); the camera's square (live view through your eyes, zoom, the walls and furniture left out of the shot, the flash, the print): `js/gfx/viewfinder.js` (`vfOpen`, `vfLens`, `vfRender`, `vfInWay`); the ceilings, sky and city skyline only the photo sees: `js/gfx/vf-sky.js` (`vfBackdrop`); the staged shot (what a shot is worth: `photoStakes`; something odd gets a whip-pan and slow push-in, evidence sends the camera round to where it shows best, walls permitting, and the subject poses for it; the world slows meanwhile): `js/gfx/vf-stage.js` (`VF_SHOT`, `VF_POSE`, `vfPlan`, `vfSpotOk`, `vfSlow`) |
+| Photos: the wedge, the photo hint, the flash rule, what F turns you onto; the camera's square, the photo's sky, the staged shot | `js/play/photos.js` (`playerPhoto`, `takePhoto`), `js/gfx/viewfinder.js` (`vfOpen`, `vfRender`), `js/gfx/vf-sky.js` (`vfBackdrop`), `js/gfx/vf-stage.js` (`vfPlan`). Rule: [photos.md](.claude/rules/photos.md) |
 | The confrontation (every card turns ✓ or ✗; 0–1 shrug, 2 ugly, 3+ gives up) | `js/play/confrontation.js` (`openConfront`, `cardHolds`, `cfOutcome`), `js/ui/confront-view.js`; the stage light: `uStage` in gfx/post.js |
 | Giving up, the FBI, talk verbs (`SOC`) | `js/play/confront.js` (`surrender`, `fbiTake`) |
 | "Come with me", witnesses THEY visit at night | `js/town/company.js` |
@@ -101,7 +102,7 @@ written by the tools (`check.py` runs them all). Commit them together with the s
 | Mouse, camera | `js/input/camera.js`, camera state in `js/gfx/renderer.js` |
 | Menus, HUD, pie menu, the evidence book, notes | `js/ui/menus.js`, `hud.js`, `pie-menu.js`, `case-board.js`, `interface.js` |
 | HUD markup and all CSS | `shell/page.html`, `shell/styles.css` |
-| Sound | `js/audio/sound.js` (all synthesised with Web Audio: the beds, the two reverb rooms, the muffle, every one-shot in `hx`, `voice`, `loop`); what plays when, from the game's state (the air for here and now, footsteps by surface, doors, hands at work `FOLEY_USE`/`FOLEY_ANIM`, voices for `ui.say`): `js/audio/foley.js` (`soundTick`, `foleyTick`, `voiceFor`). Sound only listens and has its own randomness (`audio.rnd`): never `Math.random` |
+| Sound | `js/audio/sound.js` (synthesised: `hx`, `voice`, `loop`); what plays when: `js/audio/foley.js` (`soundTick`, `foleyTick`, `voiceFor`). Sound only listens; never `Math.random`. Rule: [sound.md](.claude/rules/sound.md) |
 | Being taken to the lair and escaping | `js/taken/` (`taken.js` capture → `coming.js` → `down-there.js` → `way-out*.js` → `back-up.js`) |
 | THEY come for you, hunts, the FBI | `js/chase/` (`they-come.js`, `hunt*.js`, `flee.js`, `fbi.js`) |
 | Friday finale | `js/game/last-day.js` (`looseBegin`) |
@@ -130,4 +131,46 @@ A new field on `G` belongs in `freshG` (game/state.js) with its "unset" value.
   determinism check breaks.
 - `README.md` has the long version of the layout; `FOLLOWUP.md` lists open tasks.
 - `docs/DESIGN.md` is the agreed redesign of talking, evidence, Psychic and the confrontation, built in v1.11–v1.17.
-  Read it before changing any of those; FOLLOWUP.md lists the parts of it that aren't built yet.
+  Read it before changing any of those (the `design` rule below says how); FOLLOWUP.md lists what isn't built yet.
+- Ask before deciding what is the designer's: a feel number, a line people say, anything `docs/DESIGN.md` settled,
+  whether a change in behaviour is meant (and so a new determinism baseline). Propose, don't settle it silently.
+- Every name or path you cite you have seen in a file in this session; otherwise say it's unverified. Say which
+  check a change reached: `check.py`, `check.py --full`, or played in the browser.
+
+## Rules
+
+`.claude/rules/<name>.md` load when you read or edit a file under their `paths:`. Each is short and names the
+document to read first. **Read the rule that loads before you change anything in its area.**
+
+| Rule | Covers | Loads for |
+| --- | --- | --- |
+| [design.md](.claude/rules/design.md) | talking, evidence, Psychic, the confrontation: what `docs/DESIGN.md` settled | `docs/DESIGN.md`, town/talk, echoes, suspicion, them/proofs, tells, play/biography, oddities, confrontation, confront, stashes, plants, player/needs, ui/confront-view, case-board |
+| [frame-code.md](.claude/rules/frame-code.md) | no allocation per frame, read-backs via `warmLater`, measuring | `js/gfx/**`, `js/sim/**`, game/loop, world/light-map, world/vision, combat/blood, audio/foley |
+| [look.md](.claude/rules/look.md) | the art style, cartoon to noir, render only | gfx/look, shaders, shaders-fx, post, frame |
+| [photos.md](.claude/rules/photos.md) | photos, the viewfinder, the photo's sky, the staged shot | play/photos, gfx/viewfinder, vf-sky, vf-stage |
+| [sound.md](.claude/rules/sound.md) | sound only listens, `audio.rnd` | `js/audio/**` |
+| [state.md](.claude/rules/state.md) | `G`, `freshG`, saving | game/state, sim/core, sim/characters |
+| [data.md](.claude/rules/data.md) | the tuning numbers and the lines are the designer's; hand-aligned tables | `js/data/**` |
+| [tools.md](.claude/rules/tools.md) | the gate, the determinism baseline, formatting | `tools/**`, `build.py` |
+| [docs.md](.claude/rules/docs.md) | generated vs written docs, `docs-check`, `/docs-sync` | README, FOLLOWUP, 3D_ASSETS, CLAUDE, `docs/DESIGN.md`, `docs/PERFORMANCE.md`, `.claude/rules/**`, `.claude/skills/**` |
+
+## Hooks
+
+Wired in `.claude/settings.json`, described in [.claude/hooks/README.md](.claude/hooks/README.md). They refuse a hand
+edit of the generated files and the `//@` headers, protect `main` and uncommitted work from destructive git, ask
+before a new determinism baseline, and ask before editing the guardrails themselves. A denied call is the rule
+speaking: change the approach, don't work around the hook. A plain push is allowed; a force-push or a delete of
+`main` is not. After changing a hook, run `node .claude/tools/hooks-selftest.js`.
+
+## Skills
+
+- `/grill-me <topic>`: interview the user about a plan until no branch of it is open.
+- `nts-review`: review a change against this file and `docs/DESIGN.md`: `node tools/review-checks.js`, then the
+  checklist. Not a bug hunt; `/code-review` is.
+- `/docs-sync <doc>`: reconcile one document with the code since its marker; `docs-check` is its mechanical half.
+- `temp-instrumentation`: temporary timing or ordering logs for a hitch or a race, removed afterwards.
+
+## Docs check
+
+After editing a `.md` (other than the generated ones), run `node .claude/tools/docs-check.js` and fix the dead
+references it reports for the files you touched.
