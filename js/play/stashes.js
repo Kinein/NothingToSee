@@ -1,6 +1,6 @@
 //@ play/stashes — Stashes and rummaging: THEIR things, lookalikes, the fridge, taking and the place rule
 //@ Defines: SHAKE_TYPES, STASH_KINDS, FRIDGE_THEM, FRIDGE_PLAIN, PLANTS, junkIn, ownerOf, stashPool, placeOwner, placeLabel, makeStashes, frontOf, tamperSeen, RUMMAGE_FIND, RUMMAGE_TRASH, RUMMAGE_DIG, …
-//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, play/verbs, world/grid, town/suspicion, data/lines, play/photos, …
+//@ Uses:    sim/core, core/util, town/cast, ui/interface, world/objects, gfx/peek, play/verbs, world/grid, town/suspicion, data/lines, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── stashes: what THEY keep inside ordinary things
 // Shake a thing and you hear whether something's loose in it, never what. Open it up and you see. You take it: found
@@ -279,6 +279,7 @@ function rummageAct(o) {
         addSus(v, 4);
         ui.say(v, 'Staff only.', 2.5);
       }
+      peekOpen(o, 'rummage', peekHid(o, trash)); // the close-up of your hands in it (gfx/peek)
     },
     onTick: (c, a) => {
       tamperSeen(o, a, 1);
@@ -309,16 +310,22 @@ function rummageAct(o) {
         ]),
         'onto',
       );
+      peekShow('feel');
     },
     onEnd: (c, a, ok) => {
+      if (!ok && !a.hit) peekStop();
       if (!ok || a.hit) return;
       if (o.type === 'fridge') return fridgeLook(o);
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (trash) return o.id === 'breakBin' ? binDig() : digResult(o);
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
-      if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
+      if (homeFact(o)) {
+        peekShow('take', o.idx % 2 ? 'photo' : 'doc', o.idx % 2 ? 'A photo' : 'A letter');
+        return searchedHome(o); // a document, a photo: a fact for their page
+      }
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
+      peekShow('nothing');
       searchedHome(o);
     },
   });
@@ -332,6 +339,7 @@ function fridgeLook(o) {
     S = st && stashDef(st);
   const what = S ? S.desc : n && n.isThem && G.faction === 'aliens' ? 'empty, and spotless' : pick(FRIDGE_PLAIN);
   ui.note('fridge', (n ? n.short + '’s fridge: ' : 'The fridge: ') + what, S ? 'onto' : '');
+  peekShow('reveal', S ? st.k : what === 'empty, and spotless' ? 'bare' : what, S ? S.what : what, st && thingLook(st));
   if (n) noteOnce(n, 'Their fridge: ' + what + '.', { by: 'you' });
   if (st && !S.empty) openUp(o, true);
 }
@@ -344,6 +352,7 @@ function pryAct(o) {
     anim: 'dig',
     long: true,
     check: () => (o.data.openUntil > G.t ? 'Already open' : null),
+    onStart: () => peekOpen(o, 'pry', peekHid(o, RUMMAGE_TRASH.has(o.type))),
     onTick: (c, a, dt) => {
       a.st = (a.st || 0) + dt;
       if (a.st >= 0.5) {
@@ -353,8 +362,16 @@ function pryAct(o) {
     },
     onEnd: (c, a, ok) => {
       if (ok) openUp(o);
+      else peekStop();
     },
   });
+}
+// what the close-up (gfx/peek) lays under the rest while your hands look: what's really in there, if anything
+function peekHid(o, trash) {
+  const st = stashIn(o);
+  if (st && (!st.out || o.type === 'fridge')) return { k: st.k, look: thingLook(st) };
+  const j = !trash && o.type !== 'fridge' && junkIn(o);
+  return j ? { k: j } : null;
 }
 function openUp(o, quiet) {
   const f = frontOf(o),
@@ -394,12 +411,13 @@ function openUp(o, quiet) {
       at: G.t,
     });
     if (!quiet) ui.note('box', (RUMMAGE_TRASH.has(o.type) ? 'In the rubbish: ' : 'Inside: ') + S.desc + '.', 'onto');
+    peekShow('reveal', st.k, S.what, thingLook(st));
     if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
     const j = junkIn(o);
     searchedHome(o);
-    homeFact(o);
+    const fact = homeFact(o);
     ui.note(
       'box',
       j
@@ -409,6 +427,8 @@ function openUp(o, quiet) {
           : 'Nothing inside. Wires and dust.',
       '',
     );
+    if (fact) peekShow('take', o.idx % 2 ? 'photo' : 'doc', o.idx % 2 ? 'A photo' : 'A letter');
+    else peekShow(j ? 'reveal' : 'nothing', j, j || 'Nothing inside');
   }
 }
 // put it all back the way it was: nobody needs to know you looked

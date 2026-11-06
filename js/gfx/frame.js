@@ -34,6 +34,7 @@ function renderFrame() {
   bloomPasses(R.scene, R.blm);
   composite(R.scene.tex, R.blm[0].tex, null, false);
   vfFrame(); // the camera's square, when it's up (gfx/viewfinder)
+  peekFrame(); // the rummage close-up, when your hands are in something (gfx/peek)
   gl.bindVertexArray(null);
 }
 // the world, from wherever cam stands. pov: the player's own eyes (gfx/viewfinder) — no you in it, none of the marks

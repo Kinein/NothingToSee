@@ -111,7 +111,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `events` | `[]` | — | town/talk, town/echoes, play/confront |
 | `heard` | `[]` | — | town/echoes, ui/case-board |
 | `headline` | `null` | town/echoes | ui/menus |
-| `faction` | `pick(['aliens', 'lizards', 'zombies'])` | — | gfx/props, gfx/people, gfx/creatures, gfx/portraits, gfx/vf-stage, sim/pose, town/routines, town/quirks, … |
+| `faction` | `pick(['aliens', 'lizards', 'zombies'])` | — | gfx/props, gfx/people, gfx/creatures, gfx/portraits, gfx/vf-stage, gfx/peek, sim/pose, town/routines, … |
 | `them` | `[]` | game/state | town/cast, town/npc-update, game/endings |
 | `exposed` | `[]` | — | them/true-form, horror/visions, play/confront |
 | `factionKnown` | `false` | them/tells | them/plan, them/true-form, play/stashes, horror/visions, play/confront, play/photos, ui/menus, ui/hud, … |
@@ -133,8 +133,8 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `sleeping` | `false` | player/needs, town/arrest, combat/hits, play/verbs, taken/taken, taken/back-up, chase/hunt, game/last-day | gfx/frame, player/work, town/routines, town/quirks, them/plan, town/npc-update, town/cell, town/on-the-run, … |
 | `phoneRing` | `null` | town/talk, them/office-night, ui/menus, game/loop | — |
 | `watcher` | `null` | town/talk, them/office-night, game/loop | — |
-| `over` | `null` | game/state | gfx/frame, gfx/viewfinder, player/needs, player/work, them/plan, them/moves, them/wipe, town/arrest, … |
-| `started` | `false` | game/state | gfx/look, gfx/draw-helpers, gfx/frame, gfx/viewfinder, player/needs, town/routines, town/quirks, them/plan, … |
+| `over` | `null` | game/state | gfx/frame, gfx/viewfinder, gfx/peek, player/needs, player/work, them/plan, them/moves, them/wipe, … |
+| `started` | `false` | game/state | gfx/look, gfx/draw-helpers, gfx/frame, gfx/viewfinder, gfx/peek, player/needs, town/routines, town/quirks, … |
 | `slackCaught` | `false` | play/verbs | — |
 | `haleSaw` | `false` | town/npc-update, play/verbs | — |
 | `habits` | `{}` | town/routines, game/state | town/daily-plans, town/quirks, them/wipe, town/talk, play/oddities |

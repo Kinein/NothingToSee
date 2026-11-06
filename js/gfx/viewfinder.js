@@ -56,6 +56,7 @@ function vfOpen(act, aim, stake) {
   const el = R.ready && vfEl();
   if (!el) return;
   if (VF.mode) vfClose(true);
+  if (PK.on) peekClose(); // the camera comes up: your hands are out of whatever they were in
   const P = PLAYER;
   VF.mode = 'live';
   VF.act = act;
@@ -318,13 +319,16 @@ function vfRender(still) {
 }
 // VF.out onto the screen, under the square's frame
 function vfBlit() {
-  const w = VF.win.getBoundingClientRect(),
+  squareBlit(VF.win, VF.out, VF.S);
+}
+// a square picture onto the screen where its frame's window is (the photo's, the rummage close-up's in gfx/peek)
+function squareBlit(win, out, S) {
+  const w = win.getBoundingClientRect(),
     c = R.canvas.getBoundingClientRect(),
     kx = R.canvas.width / c.width,
     ky = R.canvas.height / c.height,
-    H = R.canvas.height,
-    S = VF.S;
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, VF.out.fb);
+    H = R.canvas.height;
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, out.fb);
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   gl.blitFramebuffer(
     0,

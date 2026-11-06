@@ -239,6 +239,18 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #vf.nothing .stamp{color:#6b6760;border-color:#6b6760}
 #vf.out{opacity:0;transform:rotate(var(--tilt,0deg)) translateX(40px) scale(.9);transition:opacity .55s,transform .55s}
 @keyframes vfin{from{transform:translateX(50px)}to{transform:none}}
+/* the rummage close-up (gfx/peek): a square of somewhere else, very near, where your hands are */
+#peek{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));top:calc(124px + env(safe-area-inset-top,0px));width:min(360px,42vw);border:8px solid #0f0e0d;border-radius:6px;box-shadow:0 18px 44px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.05);pointer-events:none;z-index:4;animation:pkin .28s cubic-bezier(.2,1.15,.4,1);transition:opacity .45s,transform .45s,border-color .6s}
+#peek[hidden]{display:none}
+#peek .pk-win{position:relative;aspect-ratio:1;overflow:hidden;background:transparent}
+#peek .pk-win::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 40px rgba(0,0,0,.55);pointer-events:none}
+#peek .pk-cap{position:absolute;left:10px;bottom:10px;max-width:calc(100% - 20px);padding:3px 9px 2px;background:rgba(14,12,10,.74);color:#e9dfca;font:15px/1.3 var(--f-type);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:3px}
+#peek.found .pk-cap{color:#fff1cc;animation:pkcap .4s cubic-bezier(.3,1.5,.5,1)}
+#peek.theirs{border-color:#2a110c}
+#peek.theirs .pk-cap{color:#ffd2a6}
+#peek.out{opacity:0;transform:translateX(40px) scale(.94)}
+@keyframes pkin{from{opacity:0;transform:translateX(50px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes pkcap{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
 @keyframes vfst{from{transform:rotate(-8deg) scale(1.9);opacity:0}to{transform:rotate(-8deg);opacity:1}}
 #reveal{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
 #reveal .rv-ic{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--stamp);background:rgba(30,8,6,.6);box-shadow:0 0 60px rgba(200,64,47,.5)}
@@ -800,6 +812,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
   </div>
   <div id="cards"></div>
   <div id="vf" hidden><div class="vf-win"><img alt="" hidden><i class="vf-af"></i><i class="vf-dip"></i><i class="vf-fl"></i><span class="stamp"></span></div><b class="vf-cap"></b></div>
+  <div id="peek" hidden><div class="pk-win"></div><b class="pk-cap"></b></div>
   <div id="reveal" hidden></div>
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
@@ -827,7 +840,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.35 · updated Nov 6, 2026</p>
+  <p id="version">v1.36 · updated Nov 7, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -10678,6 +10691,7 @@ function renderFrame() {
   bloomPasses(R.scene, R.blm);
   composite(R.scene.tex, R.blm[0].tex, null, false);
   vfFrame(); // the camera's square, when it's up (gfx/viewfinder)
+  peekFrame(); // the rummage close-up, when your hands are in something (gfx/peek)
   gl.bindVertexArray(null);
 }
 // the world, from wherever cam stands. pov: the player's own eyes (gfx/viewfinder) — no you in it, none of the marks
@@ -11489,6 +11503,7 @@ function vfOpen(act, aim, stake) {
   const el = R.ready && vfEl();
   if (!el) return;
   if (VF.mode) vfClose(true);
+  if (PK.on) peekClose(); // the camera comes up: your hands are out of whatever they were in
   const P = PLAYER;
   VF.mode = 'live';
   VF.act = act;
@@ -11751,13 +11766,16 @@ function vfRender(still) {
 }
 // VF.out onto the screen, under the square's frame
 function vfBlit() {
-  const w = VF.win.getBoundingClientRect(),
+  squareBlit(VF.win, VF.out, VF.S);
+}
+// a square picture onto the screen where its frame's window is (the photo's, the rummage close-up's in gfx/peek)
+function squareBlit(win, out, S) {
+  const w = win.getBoundingClientRect(),
     c = R.canvas.getBoundingClientRect(),
     kx = R.canvas.width / c.width,
     ky = R.canvas.height / c.height,
-    H = R.canvas.height,
-    S = VF.S;
-  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, VF.out.fb);
+    H = R.canvas.height;
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, out.fb);
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
   gl.blitFramebuffer(
     0,
@@ -13105,6 +13123,4053 @@ function vfPoseFx(c, T, dt) {
     S.gaped = false;
   }
   if (c.fx.half) c.fx.half.k = Math.max(c.fx.half.k, w); // held out, no stutter, while the lens is on it
+}
+// ───────────── the rummage close-up's shapes (gfx/peek). It is all a few centimetres from the lens, so nothing in it
+// is a plain box: edges are rounded, round things are turned on a lathe, wires and fingers are tubes, paper is a sheet
+// that crumples. Every vertex carries [emit, material, u, v] where the world's meshes keep their ext, and
+// gfx/peek-shader paints each surface from its material and its u, v (the print on a page, the label round a tin, the
+// pages of a book). Sizes are real: metres, a hand is 18 cm long. Every helper winds its triangles the way its normals
+// face, so the shader can tell the back of a sheet of paper from its front.
+const PKM = {
+  plain: 0,
+  card: 1,
+  wood: 2,
+  paper: 3,
+  news: 4,
+  note: 5,
+  receipt: 6,
+  chart: 7,
+  obit: 8,
+  photo: 9,
+  knit: 10,
+  cloth: 11,
+  steel: 12,
+  brass: 13,
+  glass: 14,
+  skin: 15,
+  nail: 16,
+  plastic: 17,
+  bag: 18,
+  flesh: 19,
+  scales: 20,
+  label: 21,
+  book: 22,
+  bone: 23,
+  fuzz: 24,
+  rubber: 25,
+  pcb: 26,
+  ice: 27,
+  bread: 28,
+  felt: 29,
+  money: 30,
+  dice: 31,
+  dial: 32,
+  led: 33,
+  token: 34,
+  fish: 35,
+  tape: 36,
+  enamel: 37,
+  foil: 38,
+  leather: 39,
+};
+// shaping noise: a hash of the lattice point, never the simulation's random
+function pkHash(x, y, z, s) {
+  let h =
+    Math.imul(x | 0, 374761393) ^
+    Math.imul(y | 0, 668265263) ^
+    Math.imul(z | 0, 1274126177) ^
+    Math.imul(s | 0, 982451653);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function pkNoise(x, y, z, s) {
+  const ix = Math.floor(x),
+    iy = Math.floor(y),
+    iz = Math.floor(z),
+    fx = x - ix,
+    fy = y - iy,
+    fz = z - iz,
+    ux = fx * fx * (3 - 2 * fx),
+    uy = fy * fy * (3 - 2 * fy),
+    uz = fz * fz * (3 - 2 * fz);
+  let v = 0;
+  for (let k = 0; k < 8; k++) {
+    const dx = k & 1,
+      dy = (k >> 1) & 1,
+      dz = k >> 2;
+    v += pkHash(ix + dx, iy + dy, iz + dz, s) * (dx ? ux : 1 - ux) * (dy ? uy : 1 - uy) * (dz ? uz : 1 - uz);
+  }
+  return v;
+}
+const pkFbm = (x, y, z, s) =>
+  pkNoise(x, y, z, s) * 0.55 +
+  pkNoise(x * 2.1, y * 2.1, z * 2.1, s + 1) * 0.3 +
+  pkNoise(x * 4.3, y * 4.3, z * 4.3, s + 2) * 0.15;
+// a seeded stream for laying things out (where the pens lie, which way a tooth faces)
+function pkRng(seed) {
+  let s = (seed | 0) * 2654435761 + 1;
+  return () => {
+    s = Math.imul(s ^ (s >>> 15), 2246822519);
+    s = Math.imul(s ^ (s >>> 13), 3266489917);
+    return ((s ^= s >>> 16) >>> 0) / 4294967296;
+  };
+}
+const PG_A = [0, 0, 0],
+  PG_B = [0, 0, 0],
+  PG_C = [0, 0, 0],
+  PG_D = [0, 0, 0],
+  PG_E = [0, 0, 0];
+// a surface from fn(u, v, out) over u, v in 0..1, normals from the surface itself. col: a colour or fn(u, v, P).
+// o: emit · flat (faceted: crumpled paper) · uv(u, v) → [u, v] for the paint · out: a point inside it (a closed
+// thing's normals point away from it; without one the surface is a sheet and either side may face the lens)
+function pkGrid(g, nu, nv, fn, col, mat, o) {
+  o = o || {};
+  const em = o.emit || 0,
+    e = 1e-3,
+    P = [],
+    N = [],
+    T = [];
+  for (let j = 0; j <= nv; j++)
+    for (let i = 0; i <= nu; i++) {
+      const u = i / nu,
+        v = j / nv,
+        vv = clamp(v, 4e-3, 1 - 4e-3);
+      fn(u, v, PG_A);
+      fn(u + e, vv, PG_B);
+      fn(u - e, vv, PG_C);
+      fn(u, vv + e, PG_D);
+      fn(u, vv - e, PG_E);
+      const ax = PG_B[0] - PG_C[0],
+        ay = PG_B[1] - PG_C[1],
+        az = PG_B[2] - PG_C[2],
+        bx = PG_D[0] - PG_E[0],
+        by = PG_D[1] - PG_E[1],
+        bz = PG_D[2] - PG_E[2];
+      let nx = ay * bz - az * by,
+        ny = az * bx - ax * bz,
+        nz = ax * by - ay * bx;
+      const l = Math.hypot(nx, ny, nz);
+      if (l < 1e-12) {
+        nx = 0;
+        ny = 1;
+        nz = 0;
+      } else {
+        nx /= l;
+        ny /= l;
+        nz /= l;
+      }
+      P.push(PG_A[0], PG_A[1], PG_A[2]);
+      N.push(nx, ny, nz);
+      const t = o.uv ? o.uv(u, v) : null;
+      T.push(t ? t[0] : u, t ? t[1] : v);
+    }
+  let flip = false;
+  if (o.out) {
+    let s = 0;
+    for (let k = 0; k < P.length; k += 3)
+      s += N[k] * (P[k] - o.out[0]) + N[k + 1] * (P[k + 1] - o.out[1]) + N[k + 2] * (P[k + 2] - o.out[2]);
+    flip = s < 0;
+  }
+  const W = nu + 1,
+    cOf = (k) =>
+      typeof col === 'function' ? col(T[k * 2], T[k * 2 + 1], [P[k * 3], P[k * 3 + 1], P[k * 3 + 2]]) : col,
+    put = (k, nx, ny, nz) =>
+      g.vert(P[k * 3], P[k * 3 + 1], P[k * 3 + 2], nx, ny, nz, cOf(k), [em, mat, T[k * 2], T[k * 2 + 1]]);
+  const tris = [];
+  for (let j = 0; j < nv; j++)
+    for (let i = 0; i < nu; i++) {
+      const a = j * W + i,
+        b = a + 1,
+        c = a + W + 1,
+        d = a + W;
+      if (flip) tris.push(a, c, b, a, d, c);
+      else tris.push(a, b, c, a, c, d);
+    }
+  if (o.flat) {
+    for (let k = 0; k < tris.length; k += 3) {
+      const A = tris[k],
+        B = tris[k + 1],
+        Cc = tris[k + 2],
+        ux = P[B * 3] - P[A * 3],
+        uy = P[B * 3 + 1] - P[A * 3 + 1],
+        uz = P[B * 3 + 2] - P[A * 3 + 2],
+        vx = P[Cc * 3] - P[A * 3],
+        vy = P[Cc * 3 + 1] - P[A * 3 + 1],
+        vz = P[Cc * 3 + 2] - P[A * 3 + 2];
+      let nx = uy * vz - uz * vy,
+        ny = uz * vx - ux * vz,
+        nz = ux * vy - uy * vx;
+      const l = Math.hypot(nx, ny, nz) || 1;
+      nx /= l;
+      ny /= l;
+      nz /= l;
+      const k0 = g.vc;
+      put(A, nx, ny, nz);
+      put(B, nx, ny, nz);
+      put(Cc, nx, ny, nz);
+      g.i.push(k0, k0 + 1, k0 + 2);
+    }
+    return;
+  }
+  const k0 = g.vc,
+    sg = flip ? -1 : 1;
+  for (let k = 0; k < P.length / 3; k++) put(k, N[k * 3] * sg, N[k * 3 + 1] * sg, N[k * 3 + 2] * sg);
+  for (const t of tris) g.i.push(k0 + t);
+}
+// a box with rounded edges, centred on cx, cy, cz. Each face is its own grid and paints with u = face + 0..1
+// (0 +x, 1 −x, 2 +y, 3 −y, 4 +z, 5 −z), v = 0..1 across it: a book knows its spine from its pages.
+const PK_FACES = [
+  [1, 0, 0, 0, 1, 0, 0, 0, 1],
+  [-1, 0, 0, 0, 0, 1, 0, 1, 0],
+  [0, 1, 0, 0, 0, 1, 1, 0, 0],
+  [0, -1, 0, 1, 0, 0, 0, 0, 1],
+  [0, 0, 1, 1, 0, 0, 0, 1, 0],
+  [0, 0, -1, 0, 1, 0, 1, 0, 0],
+];
+function pkSteps(h, r, inner) {
+  const b = Math.min(1, r / h),
+    out = [-1, -1 + b / 3, -1 + (2 * b) / 3, -1 + b];
+  for (let k = 1; k < inner; k++) out.push(-1 + b + ((2 - 2 * b) * k) / inner);
+  out.push(1 - b, 1 - (2 * b) / 3, 1 - b / 3, 1);
+  return out.filter((x, i) => i === 0 || x - out[i - 1] > 1e-6);
+}
+function pkRBox(g, cx, cy, cz, sx, sy, sz, r, col, mat, o) {
+  o = o || {};
+  const h = [sx / 2, sy / 2, sz / 2],
+    rr = Math.min(r, h[0] * 0.999, h[1] * 0.999, h[2] * 0.999),
+    em = o.emit || 0,
+    inner = o.inner || 3;
+  for (let f = 0; f < 6; f++) {
+    if (o.skip && o.skip.includes(f)) continue;
+    const F = PK_FACES[f],
+      ai = F[3] ? 0 : F[4] ? 1 : 2,
+      bi = F[6] ? 0 : F[7] ? 1 : 2,
+      ss = pkSteps(h[ai], rr, inner),
+      ts = pkSteps(h[bi], rr, inner),
+      k0 = g.vc,
+      W = ss.length;
+    for (let j = 0; j < ts.length; j++)
+      for (let i = 0; i < ss.length; i++) {
+        const s = ss[i],
+          t = ts[j],
+          p = [0, 0, 0];
+        for (let a = 0; a < 3; a++) p[a] = F[a] * h[a] + F[3 + a] * s * h[a] + F[6 + a] * t * h[a];
+        const n = [0, 0, 0],
+          q = [0, 0, 0];
+        for (let a = 0; a < 3; a++) {
+          const lim = h[a] - rr;
+          q[a] = clamp(p[a], -lim, lim);
+          n[a] = p[a] - q[a];
+        }
+        const l = Math.hypot(n[0], n[1], n[2]) || 1;
+        for (let a = 0; a < 3; a++) n[a] = l > 1e-9 ? n[a] / l : F[a];
+        const c = typeof col === 'function' ? col(f, s, t) : col;
+        g.vert(cx + q[0] + n[0] * rr, cy + q[1] + n[1] * rr, cz + q[2] + n[2] * rr, n[0], n[1], n[2], c, [
+          em,
+          mat,
+          f + (s * 0.5 + 0.5) * 0.998,
+          t * 0.5 + 0.5,
+        ]);
+      }
+    for (let j = 0; j < ts.length - 1; j++)
+      for (let i = 0; i < W - 1; i++) {
+        const a = k0 + j * W + i;
+        g.i.push(a, a + 1, a + W + 1, a, a + W + 1, a + W);
+      }
+  }
+}
+// turned on a lathe round the y axis: prof = [r0, y0, r1, y1, …] from the bottom middle out, up and back in. A point
+// given twice is a hard edge (a tin's rim). u goes round, v along the outline.
+function pkLathe(g, x, y, z, prof, seg, col, mat, o) {
+  o = o || {};
+  const n = prof.length / 2,
+    em = o.emit || 0,
+    L = [0];
+  for (let i = 1; i < n; i++)
+    L.push(L[i - 1] + Math.hypot(prof[i * 2] - prof[i * 2 - 2], prof[i * 2 + 1] - prof[i * 2 - 1]));
+  const len = L[n - 1] || 1,
+    k0 = g.vc,
+    W = seg + 1;
+  for (let i = 0; i < n; i++) {
+    const a = Math.max(0, i - 1),
+      b = Math.min(n - 1, i + 1);
+    let a2 = a,
+      b2 = b;
+    if (i > 0 && prof[i * 2] === prof[i * 2 - 2] && prof[i * 2 + 1] === prof[i * 2 - 1]) a2 = i; // second of a pair: forward only
+    if (i < n - 1 && prof[i * 2] === prof[i * 2 + 2] && prof[i * 2 + 1] === prof[i * 2 + 3]) b2 = i; // first of a pair: back only
+    let tr = prof[b2 * 2] - prof[a2 * 2],
+      ty = prof[b2 * 2 + 1] - prof[a2 * 2 + 1];
+    const tl = Math.hypot(tr, ty) || 1;
+    tr /= tl;
+    ty /= tl;
+    const nr = ty,
+      ny = -tr,
+      r = prof[i * 2],
+      py = prof[i * 2 + 1];
+    for (let s = 0; s <= seg; s++) {
+      const an = (s / seg) * TAU,
+        sn = Math.sin(an),
+        cs = Math.cos(an),
+        c = typeof col === 'function' ? col(s / seg, L[i] / len) : col;
+      g.vert(x + r * sn, y + py, z + r * cs, nr * sn, ny, nr * cs, c, [em, mat, s / seg, L[i] / len]);
+    }
+  }
+  for (let i = 0; i < n - 1; i++)
+    for (let s = 0; s < seg; s++) {
+      const a = k0 + i * W + s;
+      g.i.push(a, a + 1, a + W + 1, a, a + W + 1, a + W);
+    }
+}
+// a tube along pts = [x, y, z, …] (smoothed through them), radius rad or rad(t) for t 0..1 along it. o: caps (round
+// ends) · closed (a loop: a rubber band) · flat (squashed to an oval: a strap, a hairgrip)
+function pkTube(g, pts, rad, seg, col, mat, o) {
+  o = o || {};
+  const raw = [];
+  for (let k = 0; k < pts.length; k += 3) raw.push([pts[k], pts[k + 1], pts[k + 2]]);
+  const closed = !!o.closed,
+    m = raw.length,
+    C = [];
+  const at = (i) => raw[closed ? ((i % m) + m) % m : clamp(i, 0, m - 1)];
+  const sub = o.sub || 4;
+  for (let i = 0; i < (closed ? m : m - 1); i++) {
+    const p0 = at(i - 1),
+      p1 = at(i),
+      p2 = at(i + 1),
+      p3 = at(i + 2);
+    for (let k = 0; k < sub; k++) {
+      const t = k / sub,
+        t2 = t * t,
+        t3 = t2 * t,
+        q = [0, 0, 0];
+      for (let a = 0; a < 3; a++)
+        q[a] =
+          0.5 *
+          (2 * p1[a] +
+            (-p0[a] + p2[a]) * t +
+            (2 * p0[a] - 5 * p1[a] + 4 * p2[a] - p3[a]) * t2 +
+            (-p0[a] + 3 * p1[a] - 3 * p2[a] + p3[a]) * t3);
+      C.push(q);
+    }
+  }
+  if (!closed) C.push(raw[m - 1].slice());
+  else C.push(C[0].slice());
+  const R = (t) => (typeof rad === 'function' ? rad(t) : rad);
+  // rings: centre, radius, along-ness t
+  let rings = C.map((p, i) => ({ p, r: R(i / (C.length - 1)), t: i / (C.length - 1) }));
+  const tan = (i) => {
+    const a = rings[Math.max(0, i - 1)].p,
+      b = rings[Math.min(rings.length - 1, i + 1)].p,
+      v = [b[0] - a[0], b[1] - a[1], b[2] - a[2]],
+      l = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0] / l, v[1] / l, v[2] / l];
+  };
+  if (o.caps && !closed) {
+    const T0 = tan(0),
+      T1 = tan(rings.length - 1),
+      r0 = rings[0],
+      r1 = rings[rings.length - 1],
+      pre = [],
+      post = [];
+    for (let k = 4; k >= 1; k--) {
+      const th = (k / 4) * (Math.PI / 2);
+      pre.push({
+        p: [
+          r0.p[0] - T0[0] * r0.r * Math.sin(th),
+          r0.p[1] - T0[1] * r0.r * Math.sin(th),
+          r0.p[2] - T0[2] * r0.r * Math.sin(th),
+        ],
+        r: r0.r * Math.cos(th) + 1e-5,
+        t: 0,
+      });
+      post.unshift({
+        p: [
+          r1.p[0] + T1[0] * r1.r * Math.sin(th),
+          r1.p[1] + T1[1] * r1.r * Math.sin(th),
+          r1.p[2] + T1[2] * r1.r * Math.sin(th),
+        ],
+        r: r1.r * Math.cos(th) + 1e-5,
+        t: 1,
+      });
+    }
+    rings = pre.concat(rings, post);
+  }
+  // frames by parallel transport, so the tube doesn't twist
+  const n = rings.length;
+  let T = tan(0),
+    N1 = Math.abs(T[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+    crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+    nrm = (a) => {
+      const l = Math.hypot(a[0], a[1], a[2]) || 1;
+      return [a[0] / l, a[1] / l, a[2] / l];
+    };
+  N1 = nrm([N1[0] - T[0] * dot(N1, T), N1[1] - T[1] * dot(N1, T), N1[2] - T[2] * dot(N1, T)]);
+  const em = o.emit || 0,
+    k0 = g.vc,
+    W = seg + 1,
+    fl = o.flat || 1;
+  let len = 0;
+  for (let i = 0; i < n; i++) {
+    const Ti = tan(i);
+    N1 = nrm([N1[0] - Ti[0] * dot(N1, Ti), N1[1] - Ti[1] * dot(N1, Ti), N1[2] - Ti[2] * dot(N1, Ti)]);
+    const N2 = crs(Ti, N1),
+      rg = rings[i],
+      ra = rings[Math.max(0, i - 1)],
+      rb = rings[Math.min(n - 1, i + 1)],
+      ds = Math.hypot(rb.p[0] - ra.p[0], rb.p[1] - ra.p[1], rb.p[2] - ra.p[2]) || 1e-6,
+      dr = (rb.r - ra.r) / ds;
+    if (i > 0) len += Math.hypot(rg.p[0] - rings[i - 1].p[0], rg.p[1] - rings[i - 1].p[1], rg.p[2] - rings[i - 1].p[2]);
+    for (let s = 0; s <= seg; s++) {
+      const an = (s / seg) * TAU,
+        ca = Math.cos(an),
+        sa = Math.sin(an) * fl,
+        d = [N1[0] * ca + N2[0] * sa, N1[1] * ca + N2[1] * sa, N1[2] * ca + N2[2] * sa],
+        nn = nrm([
+          N1[0] * ca + (N2[0] * Math.sin(an)) / fl - Ti[0] * dr,
+          N1[1] * ca + (N2[1] * Math.sin(an)) / fl - Ti[1] * dr,
+          N1[2] * ca + (N2[2] * Math.sin(an)) / fl - Ti[2] * dr,
+        ]),
+        c = typeof col === 'function' ? col(s / seg, rg.t) : col;
+      g.vert(rg.p[0] + d[0] * rg.r, rg.p[1] + d[1] * rg.r, rg.p[2] + d[2] * rg.r, nn[0], nn[1], nn[2], c, [
+        em,
+        mat,
+        s / seg,
+        o.vLen ? len / o.vLen : rg.t,
+      ]);
+    }
+  }
+  for (let i = 0; i < n - 1; i++)
+    for (let s = 0; s < seg; s++) {
+      const a = k0 + i * W + s;
+      g.i.push(a, a + 1, a + W + 1, a, a + W + 1, a + W);
+    }
+}
+// a lump: an ellipsoid pushed in and out by noise. o.ridge: sharp folds (a ball of paper), o.flat: faceted
+function pkBlob(g, cx, cy, cz, rx, ry, rz, amp, freq, seed, col, mat, o) {
+  o = o || {};
+  const nu = o.nu || 22,
+    nv = o.nv || 14;
+  pkGrid(
+    g,
+    nu,
+    nv,
+    (u, v, P) => {
+      const th = v * Math.PI,
+        ph = u * TAU,
+        dx = Math.sin(th) * Math.sin(ph),
+        dy = -Math.cos(th),
+        dz = Math.sin(th) * Math.cos(ph);
+      let k = pkFbm(dx * freq + 11, dy * freq + 5, dz * freq + 3, seed);
+      if (o.ridge) k = 1 - Math.abs(k * 2 - 1);
+      const s = 1 + amp * (k - 0.5) * 2;
+      P[0] = cx + dx * rx * s;
+      P[1] = cy + dy * ry * s * (o.squash && dy < 0 ? o.squash : 1);
+      P[2] = cz + dz * rz * s;
+    },
+    col,
+    mat,
+    { emit: o.emit, flat: o.flat, out: [cx, cy, cz] },
+  );
+}
+// a sheet in x z (w by d, centred), lifted by disp(u, v) → y. o.flat for paper that's been screwed up
+function pkSheet(g, w, d, nu, nv, disp, col, mat, o) {
+  o = o || {};
+  pkGrid(
+    g,
+    nu,
+    nv,
+    (u, v, P) => {
+      P[0] = (u - 0.5) * w;
+      P[1] = disp ? disp(u, v) : 0;
+      P[2] = (v - 0.5) * d;
+      if (o.bend) o.bend(u, v, P);
+    },
+    col,
+    mat,
+    o,
+  );
+}
+// the mesh for the close-up: a vertex array, a model matrix of its own, and whether it's glass (drawn last, blended)
+function pkMesh(g, glass) {
+  const m = uploadGeo(g);
+  m.M = new Float32Array(M4.ident());
+  m.glass = !!glass;
+  m.show = true;
+  return m;
+}
+// ───────────── the rummage close-up's light (gfx/peek). Not the town's shader: there is no light map in there, no fog
+// of war, no cartoon fill. One lamp from above with a real shadow, a soft fill from the room, a rim from behind, and
+// every surface painted by what it's made of (gfx/peek-geo PKM): the fibres in cardboard, the grain of a drawer, the
+// print on a newspaper, a fingertip's skin. The town's grade still goes over it (gfx/frame composite), so when the
+// town turns, so does what's in your hands.
+const PK_VS = `#version 300 es
+precision highp float;
+layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNor; layout(location=2) in vec3 aCol; layout(location=3) in vec4 aExt;
+uniform mat4 uVP, uModel, uLVP;
+out vec3 vW; out vec3 vN; out vec3 vC; out vec4 vE; out vec3 vO; out vec4 vL; out float vD;
+void main(){
+  vec4 w = uModel*vec4(aPos, 1.0);
+  vW = w.xyz; vN = mat3(uModel)*aNor; vC = aCol; vE = aExt; vO = aPos; vL = uLVP*w;
+  gl_Position = uVP*w; vD = gl_Position.w;
+}`;
+const PK_FS = `#version 300 es
+precision highp float;
+precision highp sampler2DShadow;
+in vec3 vW; in vec3 vN; in vec3 vC; in vec4 vE; in vec3 vO; in vec4 vL; in float vD;
+uniform vec3 uEye; uniform float uTime; uniform float uFar;
+uniform vec3 uKeyP; uniform vec3 uKeyD; uniform vec3 uKeyC; uniform vec2 uKeyCone;
+uniform vec3 uSky; uniform vec3 uGnd; uniform vec3 uRimP; uniform vec3 uRimC;
+uniform sampler2DShadow uShadow; uniform vec2 uShTexel;
+uniform vec3 uBoxA; uniform vec3 uBoxB; uniform float uBoxK;
+uniform vec4 uOcc[6]; uniform int uOccN;
+uniform vec3 uTint; uniform float uEmitK; uniform float uGlass;
+out vec4 frag;
+const float PI = 3.14159265;
+float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx)*0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y)*p3.z); }
+float h13(vec3 p){ p = fract(p*0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y)*p.z); }
+float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f);
+  return mix(mix(mix(h13(i), h13(i + vec3(1,0,0)), f.x), mix(h13(i + vec3(0,1,0)), h13(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h13(i + vec3(0,0,1)), h13(i + vec3(1,0,1)), f.x), mix(h13(i + vec3(0,1,1)), h13(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float fbm(vec3 p){ return vn(p)*0.5 + vn(p*2.03 + 7.1)*0.3 + vn(p*4.1 + 3.3)*0.2; }
+// a few lines of print: rows of words, ragged at the end of a paragraph
+float print(vec2 q, float rows, float words, float sd){
+  float r = floor(q.y*rows), fy = fract(q.y*rows);
+  float line = smoothstep(0.22, 0.3, fy)*smoothstep(0.74, 0.66, fy);
+  float w = floor(q.x*words), fw = fract(q.x*words);
+  float word = step(0.1, fw)*step(fw, 0.35 + 0.6*h12(vec2(w, r + sd)));
+  float endl = step(q.x, h12(vec2(r, sd*3.1)) < 0.2 ? 0.3 + 0.5*h12(vec2(r, sd)) : 1.0);
+  float ch = smoothstep(0.15, 0.35, fract(q.x*words*5.0 + h12(vec2(w, r))));
+  return line*word*endl*(0.55 + 0.45*ch);
+}
+float inR(vec2 q, vec2 a, vec2 b){ return step(a.x, q.x)*step(q.x, b.x)*step(a.y, q.y)*step(q.y, b.y); }
+float ell(vec2 q, vec2 c, vec2 r){ vec2 d = (q - c)/r; return 1.0 - smoothstep(0.85, 1.0, dot(d, d)); }
+// halftone: a tone as the dots of a newspaper photo
+float dots(vec2 q, float tone, float k){ vec2 g = fract(q*k) - 0.5; return 1.0 - smoothstep(0.0, 0.08, length(g) - sqrt(max(1.0 - tone, 0.0))*0.5); }
+vec3 bumped(vec3 n, float hh){
+  vec3 dpx = dFdx(vW), dpy = dFdy(vW);
+  float dhx = dFdx(hh), dhy = dFdy(hh);
+  vec3 r1 = cross(dpy, n), r2 = cross(n, dpx);
+  float det = dot(dpx, r1)*(gl_FrontFacing ? 1.0 : -1.0);
+  vec3 gr = sign(det)*(dhx*r1 + dhy*r2);
+  return normalize(abs(det)*n - gr);
+}
+const vec2 PD[8] = vec2[8](vec2(-0.613,0.617), vec2(0.170,-0.040), vec2(-0.299,0.791), vec2(0.645,0.493),
+  vec2(-0.651,-0.718), vec2(0.421,0.027), vec2(-0.817,-0.271), vec2(0.977,-0.108));
+float shade(float ndl){
+  vec3 p = vL.xyz/vL.w*0.5 + 0.5;
+  if(p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0) return 1.0;
+  float bias = 0.0006 + 0.0022*(1.0 - clamp(ndl, 0.0, 1.0)), s = 0.0;
+  for(int i = 0; i < 8; i++) s += texture(uShadow, vec3(p.xy + PD[i]*uShTexel*2.2, p.z - bias));
+  return s/8.0;
+}
+// the insides of the thing you have your hand in: dark in the corners and darker the further down
+float boxAO(vec3 p, vec3 n){
+  if(uBoxK <= 0.0) return 1.0;
+  vec3 a = p - uBoxA, b = uBoxB - p;
+  if(min(min(a.x, a.z), min(b.x, b.z)) < -0.01 || a.y < -0.01 || b.y < -0.06) return 1.0;
+  float k = 1.0;
+  k *= 1.0 - 0.45*exp(-max(a.x, 0.0)/0.03)*(1.0 - max(n.x, 0.0)*0.6);
+  k *= 1.0 - 0.45*exp(-max(b.x, 0.0)/0.03)*(1.0 - max(-n.x, 0.0)*0.6);
+  k *= 1.0 - 0.45*exp(-max(a.z, 0.0)/0.03)*(1.0 - max(n.z, 0.0)*0.6);
+  k *= 1.0 - 0.45*exp(-max(b.z, 0.0)/0.03)*(1.0 - max(-n.z, 0.0)*0.6);
+  k *= 1.0 - 0.4*exp(-max(a.y, 0.0)/0.02)*(1.0 - max(n.y, 0.0)*0.4);
+  float depth = clamp(a.y/max(uBoxB.y - uBoxA.y, 0.01), 0.0, 1.0);
+  return mix(1.0, k*mix(0.45, 1.0, depth), uBoxK);
+}
+// the things lying in there, and your hand: a soft dark under each
+float occAO(vec3 p, vec3 n){
+  float k = 1.0;
+  for(int i = 0; i < 6; i++){
+    if(i >= uOccN) break;
+    vec3 d = uOcc[i].xyz - p; float l = length(d), r = uOcc[i].w;
+    if(l < r*0.9) continue;
+    k *= 1.0 - clamp(r*r/(l*l)*max(dot(n, d/l), 0.0)*0.9, 0.0, 0.8);
+  }
+  return k;
+}
+void main(){
+  vec3 n = normalize(vN); if(!gl_FrontFacing) n = -n;
+  vec3 V = normalize(uEye - vW);
+  vec3 base = pow(max(vC, vec3(0.0)), vec3(2.2))*uTint, c = base, em = vec3(0.0);
+  float r = 0.6, met = 0.0, f0 = 0.04, wrap = 0.0, sheen = 0.0, alpha = 1.0, h = 0.0, bk = 0.0, sss = 0.0;
+  int m = int(vE.y + 0.5);
+  float face = floor(vE.z); vec2 q = vec2(fract(vE.z), vE.w);
+  vec3 o = vO;
+  vec3 an = abs(n);
+  vec2 tp = an.y > max(an.x, an.z) ? o.xz : (an.x > an.z ? o.zy : o.xy);   // a flat projection for cloth and grain
+  if(m == 0){ c *= 0.96 + 0.08*vn(o*160.0); r = 0.55; h = vn(o*500.0); bk = 0.00008; }
+  else if(m == 1){ float f = fbm(o*75.0); c *= 0.8 + 0.36*f; c *= 0.94 + 0.08*vn(vec3(tp*vec2(420.0, 50.0), 1.0));
+    r = 0.92; f0 = 0.03; wrap = 0.15; h = f; bk = 0.0005; }
+  else if(m == 2){ float g = fbm(vec3(o.x*3.0, o.y*55.0, o.z*55.0)); float ring = fract(g*7.0 + o.x*1.5);
+    c *= 0.72 + 0.38*smoothstep(0.0, 0.7, ring); c *= 0.9 + 0.12*vn(o*vec3(30.0, 300.0, 300.0)); r = 0.42; h = ring; bk = 0.00025; }
+  else if(m == 3){ c *= 0.95 + 0.07*vn(o*520.0); r = 0.85; wrap = 0.35; h = vn(o*300.0); bk = 0.00012; }
+  else if(m == 4){ c *= 0.92 + 0.1*fbm(o*30.0);
+    float cu = fract(q.x*3.0), ci = floor(q.x*3.0), inCol = step(0.05, cu)*step(cu, 0.95);
+    float ink = print(vec2((cu - 0.05)/0.9, q.y), 64.0, 5.0, ci)*inCol*step(q.y, 0.8);
+    ink = max(ink, step(0.84, q.y)*step(q.y, 0.95)*step(0.05, q.x)*step(q.x, 0.95)*print(vec2(q.x, (q.y - 0.84)/0.11), 1.0, 3.0, 7.0)*1.4);
+    float pic = (ci == 1.0 ? 1.0 : 0.0)*inR(vec2(cu, q.y), vec2(0.08, 0.46), vec2(0.92, 0.74));
+    ink = mix(ink, dots(q*vec2(1.0, 1.4), 0.35 + 0.4*fbm(vec3(q*6.0, 2.0)), 90.0), pic);
+    c = mix(c, vec3(0.06, 0.055, 0.05), clamp(ink, 0.0, 1.0)*0.85); r = 0.9; wrap = 0.35; }
+  else if(m == 5){ c *= 0.95 + 0.05*vn(o*400.0);
+    float rule = smoothstep(0.03, 0.0, abs(fract(q.y*13.0) - 0.15))*0.35;
+    float row = floor(q.y*13.0), fy = fract(q.y*13.0);
+    float wave = abs(fy - 0.5 - 0.12*sin(q.x*150.0 + row*2.7) - 0.06*sin(q.x*47.0 + row));
+    float pen = smoothstep(0.07, 0.03, wave)*step(0.08, q.x)*step(q.x, 0.62 + 0.3*h12(vec2(row, 3.0)))*step(0.18, h12(vec2(floor(q.x*7.0), row)))*step(q.y, 0.9)*step(0.1, q.y);
+    c = mix(c, vec3(0.62, 0.72, 0.9), rule); c = mix(c, vec3(0.07, 0.1, 0.32), pen); r = 0.85; wrap = 0.35; }
+  else if(m == 6){ float ink = print(vec2((q.x - 0.1)/0.8, q.y), 36.0, 4.0, 2.0)*inR(q, vec2(0.1, 0.1), vec2(0.9, 0.82));
+    ink = max(ink, inR(q, vec2(0.3, 0.86), vec2(0.7, 0.92)));
+    ink = max(ink, step(0.5, fract(q.x*26.0))*inR(q, vec2(0.1, 0.36), vec2(0.9, 0.37)));
+    c = mix(c, vec3(0.28, 0.28, 0.3), ink*0.75); r = 0.7; wrap = 0.35; }
+  else if(m == 7){ vec2 cell = floor(q*vec2(34.0, 44.0)); vec2 f = fract(q*vec2(34.0, 44.0)) - 0.5 - (vec2(h12(cell), h12(cell + 4.1)) - 0.5)*0.6;
+    float st = step(0.82, h12(cell + 9.0))*(1.0 - smoothstep(0.02, 0.09 + 0.08*h12(cell + 2.0), length(f)));
+    float grid = smoothstep(0.004, 0.0, abs(fract(length(q - 0.5)*8.0) - 0.5) - 0.497) + smoothstep(0.003, 0.0, abs(fract(q.x*6.0) - 0.5) - 0.497)*0.6;
+    float ring = smoothstep(0.009, 0.0, abs(length((q - vec2(0.64, 0.4))*vec2(1.0, 1.3)) - 0.075));
+    c = mix(c, vec3(0.75, 0.78, 0.82), st*0.9 + grid*0.12);
+    em += vec3(0.2, 1.0, 0.55)*ring*(0.7 + 0.3*sin(uTime*2.2))*uEmitK + vec3(0.6, 0.7, 0.9)*st*0.15; r = 0.8; }
+  else if(m == 8){ c *= 0.9 + 0.12*fbm(o*40.0); c *= 1.0 - 0.3*smoothstep(0.55, 0.8, fbm(o*55.0 + 3.0));
+    float ink = print(vec2((q.x - 0.47)/0.47, q.y), 30.0, 4.0, 3.0)*inR(q, vec2(0.47, 0.42), vec2(0.94, 0.8));
+    ink = max(ink, print(vec2((q.x - 0.06)/0.88, q.y), 30.0, 6.0, 5.0)*inR(q, vec2(0.06, 0.06), vec2(0.94, 0.38)));
+    ink = max(ink, inR(q, vec2(0.08, 0.86), vec2(0.92, 0.94))*print(vec2(q.x, (q.y - 0.86)/0.08), 1.0, 2.5, 1.0)*1.3);
+    float pf = inR(q, vec2(0.07, 0.42), vec2(0.42, 0.8));
+    float tone = 0.45 + 0.1*q.y;
+    tone = mix(tone, 0.12, ell(q, vec2(0.245, 0.48), vec2(0.15, 0.09)));
+    tone = mix(tone, 0.72, ell(q, vec2(0.245, 0.63), vec2(0.07, 0.1)));
+    tone = mix(tone, 0.2, ell(q, vec2(0.245, 0.71), vec2(0.075, 0.035)));
+    tone -= 0.4*(ell(q, vec2(0.22, 0.64), vec2(0.012, 0.008)) + ell(q, vec2(0.27, 0.64), vec2(0.012, 0.008)));
+    ink = mix(ink, dots(q*vec2(1.0, 1.25), tone, 120.0), pf);
+    c = mix(c, vec3(0.09, 0.07, 0.05), clamp(ink, 0.0, 1.0)*0.8); r = 0.9; wrap = 0.3; }
+  else if(m == 9){ float bd = inR(q, vec2(0.06, 0.06), vec2(0.94, 0.94));
+    vec3 im = mix(vec3(0.42, 0.4, 0.28), vec3(0.62, 0.66, 0.72), smoothstep(0.35, 0.6, q.y));
+    im = mix(im, vec3(0.32, 0.16, 0.13), ell(q, vec2(0.5, 0.3), vec2(0.17, 0.22)));
+    im = mix(im, vec3(0.78, 0.6, 0.5), ell(q, vec2(0.5, 0.58), vec2(0.075, 0.09)));
+    im = mix(im, vec3(0.2, 0.14, 0.1), ell(q, vec2(0.5, 0.64), vec2(0.08, 0.045)));
+    im = mix(im*0.9 + 0.05, vec3(dot(im, vec3(0.33))), 0.25)*vec3(1.05, 0.97, 0.82);
+    c = mix(vec3(0.9, 0.88, 0.82), pow(im, vec3(2.2)), bd); r = 0.18; f0 = 0.05; }
+  else if(m == 10){ vec2 p = tp*vec2(230.0, 170.0); float kx = fract(p.x), ky = fract(p.y + abs(kx - 0.5)*0.9);
+    float st = smoothstep(0.0, 0.35, ky)*smoothstep(1.0, 0.55, ky)*(1.0 - 0.6*smoothstep(0.3, 0.5, abs(kx - 0.5)));
+    c *= 0.62 + 0.48*st; c *= 0.92 + 0.12*vn(o*90.0); r = 1.0; sheen = 0.55; wrap = 0.2; h = st; bk = 0.0007; }
+  else if(m == 11){ vec2 p = tp*520.0; float w = 0.5 + 0.5*sin(p.x)*sin(p.y);
+    c *= 0.9 + 0.12*w; c *= 0.95 + 0.08*vn(o*60.0); r = 0.95; sheen = 0.35; wrap = 0.15; h = w; bk = 0.00015; }
+  else if(m == 12){ met = 1.0; r = 0.28 + 0.18*vn(o*vec3(700.0, 25.0, 25.0)); c *= 0.9 + 0.12*vn(o*vec3(900.0, 30.0, 30.0)); }
+  else if(m == 13){ met = 1.0; r = 0.3; c *= 0.78 + 0.25*fbm(o*90.0); h = fbm(o*200.0); bk = 0.00006; }
+  else if(m == 14){ r = 0.05; f0 = 0.05; }
+  else if(m == 15){ c *= 0.92 + 0.12*vn(o*260.0); c = mix(c, c*vec3(1.08, 0.86, 0.84), vn(o*90.0)*0.4);
+    r = 0.5; f0 = 0.028; wrap = 0.4; sss = 0.6; h = vn(o*1500.0)*0.7 + vn(o*vec3(80.0, 900.0, 80.0))*0.3; bk = 0.00007; }
+  else if(m == 16){ c = mix(c, vec3(0.92, 0.82, 0.78), 0.4); r = 0.22; f0 = 0.04; wrap = 0.3; }
+  else if(m == 17){ r = 0.32; f0 = 0.045; c *= 0.97 + 0.05*vn(o*300.0); }
+  else if(m == 18){ float f = fbm(o*vec3(26.0, 70.0, 26.0)); float rg = 1.0 - abs(f*2.0 - 1.0);
+    r = 0.24; f0 = 0.05; h = rg*rg; bk = 0.004; c *= 0.85 + 0.2*rg; }
+  else if(m == 19){ float f = fbm(o*85.0); float fat = smoothstep(0.6, 0.68, f);
+    c = mix(c*(0.8 + 0.3*fbm(o*30.0)), vec3(0.85, 0.78, 0.66), fat); r = 0.2 + fat*0.25; f0 = 0.03; wrap = 0.45; sss = 0.6; h = f; bk = 0.0006; }
+  else if(m == 20){ vec2 p = tp*vec2(150.0, 170.0); p.x += floor(p.y)*0.5; vec2 f = fract(p) - 0.5;
+    float e = smoothstep(0.32, 0.48, max(abs(f.x)*1.2, abs(f.y) + abs(f.x)*0.4));
+    c *= 0.72 + 0.4*(1.0 - e); c *= 0.9 + 0.15*vn(o*40.0); r = 0.55; wrap = 0.7; sheen = 0.25; h = 1.0 - e; bk = 0.00035; }
+  else if(m == 21){ float band = inR(q, vec2(0.04, 0.32), vec2(0.42, 0.74));
+    float ink = print(vec2((q.x - 0.06)/0.34, (q.y - 0.35)/0.36), 7.0, 3.0, 4.0)*band;
+    float emb = ell(q, vec2(0.7, 0.54), vec2(0.13, 0.2));
+    float gold = smoothstep(0.012, 0.0, abs(q.y - 0.14)) + smoothstep(0.012, 0.0, abs(q.y - 0.88));
+    c = mix(c, vec3(0.92, 0.88, 0.78), band); c = mix(c, vec3(0.12, 0.08, 0.06), ink*0.8);
+    c = mix(c, vec3(0.75, 0.12, 0.08), emb*0.9); c = mix(c, vec3(0.8, 0.62, 0.25), clamp(gold, 0.0, 1.0));
+    r = 0.38; f0 = 0.04; }
+  else if(m == 22){
+    if(face == 2.0 || face == 3.0 || face == 5.0){ float l = face == 3.0 ? q.x : q.y;
+      c = vec3(0.86, 0.82, 0.7)*(0.88 + 0.12*sin(l*900.0)*0.5 + 0.06*vn(o*300.0)); r = 0.9; wrap = 0.2; }
+    else { vec2 p = tp*420.0; c *= 0.85 + 0.12*sin(p.x)*sin(p.y) + 0.1*vn(o*50.0); r = 0.7; sheen = 0.2;
+      if(face == 4.0){ float b = smoothstep(0.01, 0.0, abs(q.y - 0.12) - 0.012) + smoothstep(0.01, 0.0, abs(q.y - 0.88) - 0.012);
+        float t = inR(q, vec2(0.3, 0.42), vec2(0.7, 0.7))*print(vec2((q.x - 0.3)/0.4, (q.y - 0.42)/0.28), 4.0, 1.5, 6.0);
+        c = mix(c, vec3(0.75, 0.58, 0.25), clamp(b + t, 0.0, 1.0)); met = clamp(b + t, 0.0, 1.0)*0.8; } } }
+  else if(m == 23){ c *= 0.9 + 0.14*vn(o*700.0); c = mix(c, c*vec3(0.8, 0.72, 0.55), smoothstep(0.5, 0.8, fbm(o*120.0))*0.6);
+    r = 0.34; wrap = 0.35; sss = 0.3; h = vn(o*900.0); bk = 0.00005; }
+  else if(m == 24){ c *= 0.75 + 0.4*fbm(o*500.0); r = 1.0; sheen = 0.9; wrap = 0.4; h = fbm(o*700.0); bk = 0.0008; }
+  else if(m == 25){ c *= 0.95 + 0.06*vn(o*200.0); r = 0.42; f0 = 0.035; wrap = 0.35; sss = 0.4;
+    float feat = ell(q, vec2(0.34, 0.6), vec2(0.07, 0.04)) + ell(q, vec2(0.66, 0.6), vec2(0.07, 0.04)) + ell(q, vec2(0.5, 0.28), vec2(0.13, 0.03));
+    c = mix(c, vec3(0.03), clamp(feat, 0.0, 1.0)); c = mix(c, c*vec3(0.85, 0.55, 0.5), ell(q, vec2(0.5, 0.42), vec2(0.06, 0.08))*0.5); }
+  else if(m == 26){ vec2 p = tp*150.0; vec2 ce = floor(p), f = fract(p) - 0.5;
+    float tx = step(abs(f.y), 0.07)*step(0.45, h12(ce)), ty = step(abs(f.x), 0.07)*step(0.62, h12(ce + 3.0));
+    float pad = 1.0 - smoothstep(0.16, 0.22, length(f)); pad *= step(0.7, h12(ce + 7.0));
+    float tr = clamp(tx + ty, 0.0, 1.0);
+    c = mix(c*(0.9 + 0.1*vn(o*300.0)), c*1.6, tr*0.6); c = mix(c, vec3(0.78, 0.76, 0.7), pad);
+    met = pad*0.9; r = mix(0.4, 0.25, pad); h = max(tr*0.4, pad); bk = 0.00012; }
+  else if(m == 27){ r = 0.08; f0 = 0.05; h = fbm(o*120.0); bk = 0.0004; }
+  else if(m == 28){ float f = fbm(o*180.0); c *= 0.75 + 0.4*f; float pore = smoothstep(0.7, 0.78, vn(o*420.0));
+    c *= 1.0 - pore*0.4; r = 0.85; wrap = 0.2; h = f - pore; bk = 0.0006; }
+  else if(m == 29){ c *= 0.88 + 0.16*vn(o*700.0); r = 1.0; sheen = 0.4; h = vn(o*900.0); bk = 0.0001; }
+  else if(m == 30){ float fr = 1.0 - inR(q, vec2(0.05, 0.08), vec2(0.95, 0.92)) + (1.0 - inR(q, vec2(0.07, 0.12), vec2(0.93, 0.88)))*0.5;
+    float gu = smoothstep(0.35, 0.0, abs(sin(q.x*150.0 + sin(q.y*25.0)*3.0)))*0.35;
+    float por = ell(q, vec2(0.32, 0.5), vec2(0.13, 0.3));
+    float num = ell(q, vec2(0.86, 0.75), vec2(0.06, 0.12)) + ell(q, vec2(0.14, 0.25), vec2(0.05, 0.1));
+    c = mix(c, c*0.55, clamp(fr*0.5 + gu + num*0.6, 0.0, 1.0)); c = mix(c, c*0.5 + 0.04, por*(0.5 + 0.5*vn(vec3(q*40.0, 1.0))));
+    r = 0.8; wrap = 0.25; }
+  else if(m == 31){ int fv = face < 0.5 ? 1 : face < 1.5 ? 6 : face < 2.5 ? 2 : face < 3.5 ? 5 : face < 4.5 ? 3 : 4;
+    float pip = 0.0;
+    vec2 P[7] = vec2[7](vec2(0.5), vec2(0.26, 0.26), vec2(0.74, 0.74), vec2(0.26, 0.74), vec2(0.74, 0.26), vec2(0.26, 0.5), vec2(0.74, 0.5));
+    for(int i = 0; i < 7; i++){
+      bool on = (i == 0 && (fv == 1 || fv == 3 || fv == 5)) || ((i == 1 || i == 2) && fv >= 2) || ((i == 3 || i == 4) && fv >= 4) || (i >= 5 && fv == 6);
+      if(on) pip = max(pip, 1.0 - smoothstep(0.075, 0.095, length(q - P[i])));
+    }
+    c = mix(c, vec3(0.04, 0.03, 0.03), pip); r = 0.22; f0 = 0.045; h = -pip; bk = 0.0004; wrap = 0.2; }
+  else if(m == 32){ float rho = q.y;
+    float tick = step(0.78, rho)*step(rho, 0.92)*step(abs(fract(q.x*12.0 + 0.5) - 0.5), 0.035);
+    float hh = smoothstep(0.035, 0.0, abs(fract(q.x - 0.83 + 0.5) - 0.5)*rho*6.0)*step(rho, 0.5);
+    float mh = smoothstep(0.03, 0.0, abs(fract(q.x - 0.17 + 0.5) - 0.5)*rho*6.0)*step(rho, 0.78);
+    c = mix(c, vec3(0.05), clamp(tick + hh + mh, 0.0, 1.0)); r = 0.4; }
+  else if(m == 33){ r = 0.2; em += base*4.0*uEmitK; }
+  else if(m == 34){ met = 1.0; r = 0.3; vec2 p = vec2(cos(q.x*6.2831853), sin(q.x*6.2831853))*q.y*5.0; p.y *= 1.6; p.x += floor(p.y)*0.5;
+    float s = length(vec2(fract(p.x) - 0.5, fract(p.y)*0.9 - 0.2)); float sc = smoothstep(0.42, 0.5, s)*step(q.y, 0.8);
+    float rim = smoothstep(0.86, 0.9, q.y); c *= 0.85 + 0.2*fbm(o*120.0); c *= 1.0 - sc*0.3; h = (1.0 - sc)*0.6 + rim; bk = 0.00018; }
+  else if(m == 35){ vec2 p = vec2(o.x*260.0, o.y*300.0); p.y += floor(p.x)*0.5; vec2 f = fract(p);
+    float sc = smoothstep(0.3, 0.5, length(vec2(f.x, f.y - 0.5)));
+    c *= 0.82 + 0.3*(1.0 - sc); r = 0.16; f0 = 0.07; h = 1.0 - sc; bk = 0.00015;
+    c += vec3(0.04, 0.06, 0.09)*pow(1.0 - max(dot(n, V), 0.0), 2.0); }
+  else if(m == 36){ r = 0.28; f0 = 0.05; c *= 0.92 + 0.1*vn(o*vec3(40.0, 400.0, 40.0)); wrap = 0.3; }
+  else if(m == 37){ r = 0.18; f0 = 0.04; c *= 0.97 + 0.04*vn(o*80.0); }
+  else if(m == 38){ float f = fbm(o*90.0); float rg = 1.0 - abs(f*2.0 - 1.0); met = 0.85; r = 0.22 + 0.2*rg; h = rg; bk = 0.0012; }
+  else if(m == 39){ r = 0.6; c *= 0.85 + 0.2*vn(o*600.0); h = vn(o*900.0); bk = 0.00012; sheen = 0.15; }
+  if(bk > 0.0) n = bumped(n, h*bk);
+  float ndv = max(dot(n, V), 1e-3);
+  // the lamp: where its cone falls, and what stands in the way
+  vec3 L = -uKeyD;   // a lamp far enough off to throw parallel light; uKeyP only says where its cone comes from
+  float cone = smoothstep(uKeyCone.y, uKeyCone.x, dot(normalize(vW - uKeyP), uKeyD));
+  float ndl = dot(n, L), dl = max(ndl, 0.0);
+  float sh = shade(ndl)*cone;
+  float dw = wrap > 0.0 ? max((ndl + wrap)/(1.0 + wrap), 0.0) : dl;
+  vec3 H = normalize(L + V);
+  float rr = max(r, 0.05), a2 = rr*rr*rr*rr, ndh = max(dot(n, H), 0.0), dd = ndh*ndh*(a2 - 1.0) + 1.0;
+  float D = a2/(PI*dd*dd), kk = (rr + 1.0)*(rr + 1.0)/8.0;
+  float G = dl/(dl*(1.0 - kk) + kk)*ndv/(ndv*(1.0 - kk) + kk);
+  vec3 F0 = mix(vec3(f0), c, met);
+  vec3 F = F0 + (1.0 - F0)*pow(1.0 - max(dot(V, H), 0.0), 5.0);
+  vec3 spec = D*G*F/(4.0*dl*ndv + 1e-3)*dl;
+  vec3 dif = c*(1.0 - met);
+  vec3 col = (dif*dw + spec*PI*0.5)*uKeyC*sh;
+  if(sss > 0.0) col += dif*vec3(1.0, 0.32, 0.22)*max(dw - dl, 0.0)*uKeyC*cone*sss*0.9;
+  // the room: a soft light from all round, less of it the deeper in
+  float ao = boxAO(vW, n)*occAO(vW, n);
+  vec3 amb = mix(uGnd, uSky, n.y*0.5 + 0.5)*ao;
+  vec3 R = reflect(-V, n);
+  vec3 env = mix(uGnd, uSky*1.4, smoothstep(-0.3, 0.8, R.y)) + uKeyC*0.12*pow(max(dot(R, L), 0.0), mix(60.0, 3.0, r))*cone;
+  vec3 Fe = F0 + (max(vec3(1.0 - r), F0) - F0)*pow(1.0 - ndv, 5.0);
+  col += dif*amb + env*Fe*ao*mix(0.35, 1.0, met);
+  col += c*sheen*pow(1.0 - ndv, 3.0)*(uKeyC*cone*0.25 + amb);
+  vec3 Lr = normalize(uRimP - vW);
+  col += uRimC*pow(1.0 - ndv, 3.0)*max(dot(n, Lr), 0.0)*(1.0 - met*0.5)*ao;
+  col += em + base*vE.x*uEmitK*2.0;
+  col = pow(max(col, vec3(0.0)), vec3(1.0/2.2));
+  float depth = clamp(vD/uFar, 0.0, 1.0);
+  if(uGlass > 0.5){
+    float fr = pow(1.0 - ndv, 4.0);
+    frag = vec4(col, clamp(mix(m == 27 ? 0.55 : 0.1, 0.85, fr) + length(spec)*0.3, 0.0, 0.95)); return;
+  }
+  frag = vec4(col, depth);
+}`;
+const PK_SHADOW_VS = `#version 300 es
+layout(location=0) in vec3 aPos;
+uniform mat4 uLVP, uModel;
+void main(){ gl_Position = uLVP*uModel*vec4(aPos, 1.0); }`;
+const PK_SHADOW_FS = `#version 300 es
+precision mediump float;
+out vec4 frag;
+void main(){ frag = vec4(1.0); }`;
+// a macro lens: only a sliver of it is sharp. The depth rides in the alpha; each pixel gathers what blurs over it.
+const PK_DOF_FS = `#version 300 es
+precision highp float;
+in vec2 vUv; uniform sampler2D uSrc; uniform vec2 uTexel; uniform float uFocus; uniform float uAper; uniform float uFar;
+out vec4 frag;
+float coc(float a){ float d = max(a*uFar, 0.01); return clamp(abs(d - uFocus)/d*uAper, 0.0, 1.0); }
+void main(){
+  vec4 c0 = texture(uSrc, vUv);
+  float d0 = c0.a, k0 = coc(d0), R = 8.0;
+  if(d0 >= 0.999) k0 = 1.0;
+  vec3 acc = c0.rgb; float w = 1.0;
+  float sc = R*mix(0.45, 1.0, k0);
+  for(int i = 1; i < 28; i++){
+    float fi = float(i), r = sqrt(fi/28.0)*sc, a = fi*2.39996;
+    vec4 s = texture(uSrc, vUv + vec2(cos(a), sin(a))*r*uTexel);
+    float ks = s.a >= 0.999 ? 1.0 : coc(s.a);
+    float cover = s.a < d0 ? ks : min(ks, k0);
+    float wt = clamp(cover*R - r + 1.0, 0.0, 1.0);
+    acc += s.rgb*wt; w += wt;
+  }
+  frag = vec4(acc/w, 1.0);
+}`;
+// ───────────── what turns up in a rummage, built for the close-up (gfx/peek): THEIR things, THEIR plants and the
+// lookalikes, at their real size, lying where they lie. Every builder gets (g, gg, look, rnd): g for what's solid, gg
+// for glass (drawn last, see-through), look for whose colours a thing wears (play/stashes thingLook), rnd a seeded
+// stream. The table that names them all, PK_THINGS, is in gfx/peek-junk with the everyday things.
+const pkAt = (g, x, y, z, ry, rx, rz, fn) => g.xf(M4.joint(M4.ident(), x, y, z, rx || 0, ry || 0, rz || 0), fn);
+// THEIR colours, close up: scales and old gold; chrome and green light; rot and old newspaper
+const PK_LOOK = {
+  lizards: { base: 0x6f8c55, trim: 0xc9a043, glow: 0xc9a043 },
+  aliens: { base: 0xa9afb6, trim: 0x50ffa0, glow: 0x50ffa0 },
+  zombies: { base: 0xcfc4a2, trim: 0x5a4a2a, glow: 0x9a7a4a },
+};
+function pkCoin(g, x, y, z, r, t, col, mat, top) {
+  pkLathe(g, x, y, z, [0, 0, r * 0.94, 0, r, t * 0.3, r, t * 0.7, r * 0.94, t, 0, t], 22, col, mat);
+  if (top) pkLathe(g, x, y + t + 0.0001, z, [0, 0, r * 0.93, 0], 22, col, top); // the stamped face, painted from its middle out
+}
+// a fish lying on its side: nose to +x, back to +z, the side you see up
+function pkFish(g, len, col) {
+  const H = len * 0.13,
+    T = len * 0.055,
+    hgt = (s) => {
+      const e = (s - 0.55) / 0.45;
+      return Math.max(Math.sqrt(Math.max(0, 1 - e * e)), 0.14 * (1 - s));
+    };
+  const back = C(col || 0x3e4c52),
+    belly = C(0xd4d8dc);
+  pkGrid(
+    g,
+    30,
+    18,
+    (u, v, P) => {
+      const s = clamp(u, 0, 1),
+        a = v * TAU,
+        k = hgt(s);
+      P[0] = (s - 0.5) * len;
+      P[1] = T + Math.cos(a) * T * k;
+      P[2] = Math.sin(a) * H * k;
+    },
+    (u, v, P) => {
+      const k = clamp((P[2] / H) * 0.8 + 0.45, 0, 1),
+        c = mix3(belly, back, k * k);
+      return Math.abs(u - 0.8) < 0.012 ? mul3(c, 0.55) : c; // the gill
+    },
+    PKM.fish,
+    { out: [0, T, 0] },
+  );
+  const fin = (x0, x1, z0, z1, w) =>
+    pkGrid(
+      g,
+      8,
+      4,
+      (u, v, P) => {
+        P[0] = lerp(x0, x1, u);
+        P[1] = T * (1.02 + 0.2 * v);
+        P[2] = lerp(z0, z1, u) + (v - 0.5) * w * (0.4 + u);
+      },
+      mul3(back, 0.8),
+      PKM.fish,
+    );
+  // the tail: a fan, notched
+  pkGrid(
+    g,
+    10,
+    8,
+    (u, v, P) => {
+      const z = (v - 0.5) * 2;
+      P[0] = -len * 0.5 - u * len * 0.2 + Math.abs(z) * u * len * 0.06 - (1 - Math.abs(z)) * u * len * 0.05;
+      P[1] = T * (1 + 0.15 * u);
+      P[2] = z * H * (0.15 + u * 0.75);
+    },
+    mul3(back, 0.75),
+    PKM.fish,
+  );
+  fin(0.0, len * 0.18, H * 0.95, H * 0.7, H * 0.5); // the back fin
+  fin(len * 0.12, len * 0.22, -H * 0.2, -H * 0.55, H * 0.25); // the side fin
+  pkLathe(
+    g,
+    len * 0.36,
+    T * 1.55,
+    H * 0.25,
+    [0, 0, H * 0.22, 0.0004, H * 0.24, 0.0012, H * 0.2, 0.002, 0, 0.0024],
+    14,
+    C(0xb8b2a0),
+    PKM.steel,
+  );
+  pkLathe(
+    g,
+    len * 0.36,
+    T * 1.55 + 0.0018,
+    H * 0.25,
+    [0, 0, H * 0.12, 0.0004, 0, 0.0012],
+    12,
+    C(0x060606),
+    PKM.plastic,
+  );
+}
+// what's left when something has eaten it: the spine, the ribs, the head
+function pkBones(g, len, col) {
+  const bone = C(col || 0xe6dcc4),
+    H = len * 0.12;
+  pkTube(
+    g,
+    [-len * 0.5, 0.006, 0, -len * 0.1, 0.0065, 0.002, len * 0.2, 0.0065, -0.001, len * 0.35, 0.006, 0],
+    0.0022,
+    8,
+    bone,
+    PKM.bone,
+    { caps: true },
+  );
+  for (let k = 0; k < 14; k++) {
+    const x = -len * 0.38 + k * len * 0.05,
+      h = H * Math.sin(Math.PI * (0.15 + (k / 14) * 0.8));
+    for (const sz of [1, -1])
+      pkTube(
+        g,
+        [x, 0.006, 0, x - h * 0.15, 0.0058, sz * h * 0.55, x - h * 0.4, 0.0045, sz * h],
+        (t) => 0.0011 * (1 - t * 0.7),
+        5,
+        bone,
+        PKM.bone,
+        { caps: true },
+      );
+  }
+  pkBlob(g, len * 0.43, 0.011, 0, len * 0.09, 0.011, H * 0.55, 0.18, 3, 7, mul3(bone, 0.95), PKM.bone);
+  pkLathe(g, len * 0.44, 0.019, H * 0.18, [0, 0, H * 0.16, 0.0005, 0, 0.001], 10, C(0x2a2018), PKM.plain); // where the eye was
+  for (let k = 0; k < 7; k++) {
+    const z = (k / 6 - 0.5) * 2;
+    pkTube(
+      g,
+      [-len * 0.5, 0.006, 0, -len * 0.62, 0.0055, z * H * 0.5, -len * 0.7, 0.005, z * H * 0.9],
+      0.0008,
+      4,
+      bone,
+      PKM.bone,
+      { caps: true },
+    );
+  }
+}
+function pkTooth(g, x, y, z, ry, rx, rz, rnd, big) {
+  const c = mix3(C(0xece4cc), C(0xc8b27a), rnd() * 0.5);
+  pkAt(g, x, y, z, ry, rx, rz, () => {
+    if (big) {
+      pkRBox(g, 0, 0.004, 0, 0.0088, 0.007, 0.0092, 0.0028, c, PKM.bone);
+      for (const s of [-1, 1])
+        pkTube(
+          g,
+          [s * 0.0022, 0.002, 0, s * 0.0028, -0.005, 0.0005, s * 0.0022, -0.011, 0],
+          (t) => 0.0021 * (1 - t * 0.8),
+          6,
+          mul3(c, 0.92),
+          PKM.bone,
+          { caps: true },
+        );
+    } else {
+      pkTube(
+        g,
+        [0, 0.008, 0, 0, 0.002, 0, 0.0003, -0.008, 0],
+        (t) => (t < 0.4 ? 0.0032 : 0.0032 * (1 - (t - 0.4) * 1.4)),
+        8,
+        c,
+        PKM.bone,
+        { caps: true, flat: 0.55 },
+      );
+    }
+  });
+}
+// ── THEIR own things
+function pkSkin(g, gg, look, rnd) {
+  const col = (u, t) => mix3(C(0xd8d4b8), C(0xa8a888), pkNoise(t * 30, u * 6, 1, 4) * 0.6);
+  const path = [];
+  for (let k = 0; k <= 9; k++) {
+    const t = k / 9;
+    path.push(0.13 - t * 0.3, 0.008 + 0.004 * Math.sin(t * 9), Math.sin(t * 5.5) * 0.035 * t + (rnd() - 0.5) * 0.008);
+  }
+  pkTube(
+    g,
+    path,
+    (t) =>
+      (t < 0.08
+        ? 0.014 + t * 0.12
+        : t < 0.45
+          ? 0.024 + Math.sin(t * 7) * 0.004
+          : 0.024 * Math.pow(1 - (t - 0.45) / 0.55, 1.3) + 0.0015) *
+      (0.92 + pkNoise(t * 40, 1, 2, 9) * 0.16),
+    18,
+    col,
+    PKM.scales,
+    { caps: true, flat: 0.32, sub: 6 },
+  );
+  for (const [x, s] of [
+    [0.07, 1],
+    [0.07, -1],
+    [-0.02, 1],
+    [-0.02, -1],
+  ])
+    pkTube(
+      g,
+      [x, 0.008, s * 0.012, x + 0.012, 0.007, s * 0.035, x + 0.022, 0.006, s * 0.045],
+      (t) => 0.007 * (1 - t * 0.6),
+      8,
+      col,
+      PKM.scales,
+      { caps: true, flat: 0.35 },
+    );
+  pkLathe(g, 0.15, 0.012, 0.007, [0, 0, 0.0035, 0.0006, 0, 0.0012], 10, C(0x1a1610), PKM.plain);
+  pkLathe(g, 0.15, 0.012, -0.007, [0, 0, 0.0035, 0.0006, 0, 0.0012], 10, C(0x1a1610), PKM.plain);
+}
+function pkTokens(g, gg, look, rnd) {
+  const brass = C(0xc9a043);
+  for (let k = 0; k < 4; k++)
+    pkCoin(g, (rnd() - 0.5) * 0.002, k * 0.0026, (rnd() - 0.5) * 0.002, 0.0145, 0.0025, brass, PKM.brass, PKM.token);
+  for (let k = 0; k < 4; k++) {
+    const a = rnd() * TAU,
+      d = 0.03 + rnd() * 0.02;
+    pkAt(g, Math.cos(a) * d, 0, Math.sin(a) * d, rnd() * TAU, (rnd() - 0.5) * 0.3, 0, () =>
+      pkCoin(g, 0, 0, 0, 0.0145, 0.0025, brass, PKM.brass, PKM.token),
+    );
+  }
+}
+function pkCoolerFish(g, gg, look, rnd) {
+  const wall = C(0xe8ecee),
+    trim = C(0x2f6fa0);
+  pkRBox(g, 0, 0.004, 0, 0.24, 0.008, 0.15, 0.003, wall, PKM.plastic);
+  for (const s of [-1, 1]) {
+    pkRBox(g, s * 0.116, 0.05, 0, 0.008, 0.1, 0.15, 0.003, wall, PKM.plastic);
+    pkRBox(g, 0, 0.05, s * 0.071, 0.24, 0.1, 0.008, 0.003, wall, PKM.plastic);
+  }
+  for (const sz of [-1, 1]) {
+    pkRBox(g, 0, 0.1, sz * 0.073, 0.248, 0.012, 0.014, 0.004, trim, PKM.plastic);
+    pkRBox(g, sz * 0.118, 0.1, 0, 0.014, 0.012, 0.15, 0.004, trim, PKM.plastic);
+  }
+  pkAt(g, 0, 0.1, -0.08, 0, -1.9, 0, () => pkRBox(g, 0, 0.006, 0.078, 0.25, 0.014, 0.16, 0.005, trim, PKM.plastic)); // the lid, thrown back
+  pkAt(g, -0.01, 0.008, 0.02, 0.15, 0, 0, () => pkBones(g, 0.17));
+  pkAt(g, 0.02, 0.016, -0.03, -0.2, 0, 0, () => pkBones(g, 0.15));
+  pkSheet(g, 0.22, 0.13, 10, 8, (u, v) => 0.009 + pkNoise(u * 4, v * 4, 1, 5) * 0.004, C(0x5a5a40), PKM.flesh);
+}
+function pkLaser(g, gg, look, rnd) {
+  const steel = C(0xb4bac2),
+    dark = C(0x2a2c30),
+    green = C(0x50ffa0);
+  g.xf(M4.rotX(Math.PI / 2), () => {
+    pkAt(g, -0.03, 0, 0, 0, 0, -Math.PI / 2, () => {
+      pkLathe(
+        g,
+        0,
+        0,
+        0,
+        [
+          0, 0, 0.012, 0, 0.012, 0.004, 0.0095, 0.01, 0.0095, 0.09, 0.0125, 0.095, 0.0125, 0.112, 0.008, 0.118, 0,
+          0.118,
+        ],
+        22,
+        steel,
+        PKM.steel,
+      );
+      for (let k = 0; k < 3; k++)
+        pkLathe(
+          g,
+          0,
+          0.03 + k * 0.012,
+          0,
+          [0.0094, 0, 0.0135, 0.001, 0.0135, 0.0035, 0.0094, 0.0045],
+          22,
+          steel,
+          PKM.steel,
+        );
+      pkLathe(g, 0, 0.1, 0, [0.0127, 0, 0.0127, 0.004], 22, green, PKM.led, { emit: 1 });
+    });
+    pkRBox(g, -0.055, 0, 0, 0.065, 0.034, 0.028, 0.011, steel, PKM.steel);
+    pkRBox(g, -0.02, 0.0095, 0, 0.07, 0.003, 0.006, 0.0014, green, PKM.led, { emit: 1 }); // the light inside, through a slit
+    pkAt(g, -0.068, -0.035, 0, 0, 0, -0.32, () => pkRBox(g, 0, 0, 0, 0.026, 0.065, 0.026, 0.009, dark, PKM.leather));
+  });
+}
+function pkGadget(g, gg, look, rnd) {
+  const steel = C(0x9aa0a6),
+    green = C(0x50ffa0);
+  pkAt(g, -0.07, 0.022, 0, 0, 0, -Math.PI / 2, () => {
+    pkLathe(
+      g,
+      0,
+      0,
+      0,
+      [
+        0, 0, 0.017, 0, 0.022, 0.006, 0.022, 0.03, 0.019, 0.031, 0.019, 0.037, 0.022, 0.038, 0.022, 0.1, 0.019, 0.101,
+        0.019, 0.107, 0.022, 0.108, 0.022, 0.134, 0.017, 0.14, 0, 0.14,
+      ],
+      28,
+      steel,
+      PKM.steel,
+    );
+    for (const y of [0.031, 0.101]) pkLathe(g, 0, y, 0, [0.0196, 0, 0.0196, 0.006], 28, green, PKM.led, { emit: 1 });
+    pkLathe(g, 0, 0.14, 0, [0, 0, 0.006, 0, 0.006, 0.003, 0, 0.004], 16, green, PKM.led, { emit: 1 });
+  });
+}
+function pkChart(g, gg, look, rnd) {
+  pkSheet(g, 0.3, 0.22, 34, 30, (u, v) => 0.0005 + pkNoise(u * 5, v * 5, 2, 3) * 0.002, C(0x1c2a4c), PKM.chart, {
+    bend: (u, v, P) => {
+      if (v > 0.8) {
+        const a = ((v - 0.8) * 0.22) / 0.011;
+        P[2] = (0.8 - 0.5) * 0.22 + Math.sin(a) * 0.011;
+        P[1] += 0.011 * (1 - Math.cos(a));
+      }
+    },
+  });
+}
+function pkObit(g, gg, look, rnd) {
+  pkSheet(
+    g,
+    0.11,
+    0.15,
+    16,
+    20,
+    (u, v) => 0.0006 + pkFbm(u * 4, v * 5, 1, 8) * 0.004 + Math.max(0, 0.4 - Math.abs(u - 0.45)) * 0.004,
+    C(0xcbb68a),
+    PKM.obit,
+    { flat: true },
+  );
+}
+function pkTeeth(g, gg, look, rnd) {
+  pkLathe(
+    gg,
+    0,
+    0,
+    0,
+    [0, 0, 0.036, 0, 0.04, 0.006, 0.04, 0.084, 0.034, 0.094, 0.034, 0.101],
+    30,
+    C(0xd8e4e0),
+    PKM.glass,
+  );
+  pkLathe(g, 0, 0.098, 0, [0.035, 0, 0.037, 0.001, 0.037, 0.013, 0.033, 0.016, 0, 0.016], 30, C(0xc09a48), PKM.brass);
+  for (let k = 0; k < 24; k++) {
+    const a = rnd() * TAU,
+      d = Math.sqrt(rnd()) * 0.027,
+      y = 0.006 + Math.min(k, 18) * 0.0024 + rnd() * 0.004;
+    pkTooth(
+      g,
+      Math.cos(a) * d,
+      y,
+      Math.sin(a) * d,
+      rnd() * TAU,
+      (rnd() - 0.5) * 2.5,
+      (rnd() - 0.5) * 2.5,
+      rnd,
+      rnd() < 0.55,
+    );
+  }
+  pkSheet(g, 0.035, 0.03, 4, 4, null, C(0xe8dcc0), PKM.note, {
+    bend: (u, v, P) => {
+      const a = (u - 0.5) * 0.9;
+      P[0] = Math.sin(a) * 0.0404;
+      P[2] = Math.cos(a) * 0.0404;
+      P[1] = 0.03 + v * 0.03;
+    },
+  });
+}
+function pkFinger(g, gg, look, rnd) {
+  pkSheet(
+    g,
+    0.22,
+    0.19,
+    26,
+    22,
+    (u, v) => {
+      const e = Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)) * 2;
+      return 0.001 + e * e * 0.03 + pkFbm(u * 5, v * 5, 3, 21) * 0.012;
+    },
+    (u, v) => mix3(C(0xd2c8aa), C(0x6a3a26), clamp(0.6 - Math.hypot(u - 0.52, v - 0.48) * 4.5, 0, 0.6)),
+    PKM.news,
+    { flat: true },
+  );
+  const skin = (u, t) => mix3(C(0x8e9680), C(0x5a3434), clamp(0.12 - t, 0, 0.12) / 0.12);
+  pkTube(
+    g,
+    [-0.045, 0.012, 0.004, -0.015, 0.0128, 0.006, 0.014, 0.012, 0.004, 0.04, 0.0104, 0.001],
+    (t) =>
+      0.0094 -
+      t * 0.0016 +
+      0.0007 * Math.exp(-Math.pow((t - 0.36) / 0.05, 2)) +
+      0.0006 * Math.exp(-Math.pow((t - 0.68) / 0.05, 2)),
+    18,
+    skin,
+    PKM.skin,
+    { caps: true, flat: 0.88 },
+  );
+  pkLathe(g, -0.0505, 0.012, 0.004, [0, 0, 0.0072, 0.0001, 0, 0.0002], 14, C(0x5a1410), PKM.flesh); // the end that was cut
+  pkAt(g, 0.037, 0.0186, 0.0012, 0.1, 0.08, 0, () =>
+    pkRBox(g, 0, 0, 0, 0.012, 0.0022, 0.0105, 0.001, C(0xa6a088), PKM.nail),
+  );
+}
+function pkFishes(g, gg, look, rnd) {
+  for (let k = 0; k < 3; k++)
+    pkAt(g, (rnd() - 0.5) * 0.04, k * 0.018, (k - 1) * 0.045, (rnd() - 0.5) * 0.5 + (k % 2) * Math.PI, 0, 0, () =>
+      pkFish(g, 0.2 + rnd() * 0.04),
+    );
+}
+function pkMeat(g, gg, look, rnd, bare) {
+  if (!bare)
+    pkSheet(
+      g,
+      0.26,
+      0.2,
+      18,
+      14,
+      (u, v) => pkFbm(u * 4, v * 4, 4, 5) * 0.006,
+      (u, v) => mix3(C(0xd8cbb6), C(0xa0605a), clamp(0.5 - Math.hypot(u - 0.5, v - 0.5) * 2.2, 0, 0.5)),
+      PKM.paper,
+      { flat: true },
+    );
+  const meat = (P) =>
+    mix3(C(0x8e2a24), C(0x5e6a48), clamp((pkNoise(P[0] * 50, P[1] * 50, P[2] * 50, 3) - 0.55) * 3, 0, 0.7));
+  for (let k = 0; k < 3; k++) {
+    const x = (k - 1) * 0.07 + (rnd() - 0.5) * 0.02;
+    pkBlob(g, x, 0.022, (rnd() - 0.5) * 0.05, 0.045, 0.022, 0.035, 0.22, 2.4, 30 + k, (u, v, P) => meat(P), PKM.flesh, {
+      squash: 0.4,
+    });
+  }
+}
+// ── THEIR plants
+function pkDevice(g, gg, look, rnd) {
+  pkLathe(g, 0, 0, 0, [0, 0, 0.012, 0, 0.012, 0.003, 0.0105, 0.0045, 0, 0.0045], 26, C(0x26282c), PKM.plastic);
+  pkLathe(g, 0, 0.0045, 0, [0, 0, 0.008, 0, 0.008, 0.0004, 0, 0.0004], 26, C(0x55585e), PKM.pcb);
+  pkLathe(g, 0.0075, 0.0047, 0.004, [0, 0, 0.0012, 0.0004, 0.0008, 0.0011, 0, 0.0013], 10, C(0x60ff90), PKM.led, {
+    emit: 1,
+  });
+  pkTube(
+    g,
+    [0.011, 0.002, 0, 0.03, 0.002, 0.006, 0.045, 0.0016, -0.004, 0.058, 0.0015, 0.004],
+    0.0005,
+    5,
+    C(0x121212),
+    PKM.plastic,
+    { caps: true },
+  );
+  pkSheet(g, 0.022, 0.03, 4, 4, (u, v) => 0.0049 + Math.sin(u * Math.PI) * 0.0002, C(0xd8cc9a), PKM.tape, {
+    bend: (u, v, P) => {
+      P[0] -= 0.008;
+      if (Math.abs(v - 0.5) > 0.28) P[1] = 0.0005;
+    },
+  });
+}
+function pkTill(g, gg, look, rnd) {
+  for (let k = 0; k < 16; k++)
+    pkAt(g, (rnd() - 0.5) * 0.003, k * 0.0011, (rnd() - 0.5) * 0.003, (rnd() - 0.5) * 0.04, 0, 0, () =>
+      pkRBox(g, 0, 0.0005, 0, 0.156, 0.0009, 0.066, 0.0004, mix3(C(0x9aa88a), C(0xb0b49a), rnd()), PKM.money),
+    );
+  const L = PK_LOOK.lizards;
+  pkRBox(g, 0, 0.009, 0, 0.032, 0.0198, 0.0702, 0.0008, C(L.trim), PKM.scales, { skip: [0, 1] });
+}
+function pkMark(g, gg, look, rnd) {
+  pkRBox(g, 0, 0.0175, 0, 0.26, 0.035, 0.09, 0.004, C(0xd9d1c0), PKM.plain);
+  const cut = C(0x241a12);
+  for (let k = 0; k < 3; k++)
+    pkAt(g, -0.03 + k * 0.03, 0.035, 0, 0.12 - k * 0.1, 0, 0, () =>
+      pkRBox(g, 0, 0, 0, 0.0045, 0.003, 0.07, 0.0015, cut, PKM.wood),
+    );
+  pkRBox(g, 0, 0.035, 0.012, 0.1, 0.003, 0.004, 0.0015, cut, PKM.wood);
+  for (let k = 0; k < 9; k++)
+    pkAt(g, (rnd() - 0.5) * 0.1, 0.0355, (rnd() - 0.5) * 0.07, rnd() * TAU, 0, 0, () =>
+      pkRBox(g, 0, 0, 0, 0.006, 0.0012, 0.002, 0.0005, C(0xc4a070), PKM.wood),
+    );
+}
+// ── the lookalikes: the same in your hand as something of THEIRS would be
+function pkEnvelope(g, gg, look, rnd) {
+  pkRBox(g, 0, 0.011, 0, 0.22, 0.022, 0.11, 0.008, C(0xe9dfc6), PKM.paper);
+  for (let k = 0; k < 4; k++)
+    pkRBox(g, -0.04 + k * 0.012, 0.009 + k * 0.002, 0.07, 0.156, 0.0009, 0.04, 0.0004, C(0x9ca88a), PKM.money);
+  pkGrid(
+    g,
+    8,
+    4,
+    (u, v, P) => {
+      const a = -2.2 * v;
+      P[0] = (u - 0.5) * 0.22 * (1 - v * 0.9);
+      P[1] = 0.022 - Math.sin(a) * 0.06 * v;
+      P[2] = 0.055 + Math.cos(a) * 0.06 * v - 0.0;
+    },
+    C(0xe3d8bf),
+    PKM.paper,
+  );
+}
+function pkPills(g, gg, look, rnd, label) {
+  pkLathe(
+    gg,
+    0,
+    0,
+    0,
+    [0, 0, 0.017, 0, 0.018, 0.002, 0.018, 0.058, 0.016, 0.061, 0.016, 0.064],
+    26,
+    C(0xb86a1c),
+    PKM.glass,
+  );
+  pkLathe(
+    g,
+    0,
+    0.058,
+    0,
+    [0, 0, 0.0188, 0, 0.0192, 0.002, 0.0192, 0.014, 0.017, 0.016, 0, 0.016],
+    26,
+    C(0xf2f0ea),
+    PKM.plastic,
+  );
+  for (let k = 0; k < 20; k++)
+    pkLathe(g, 0, 0.0602 + k * 0.0007, 0, [0.0193, 0, 0.0196, 0.00035, 0.0193, 0.0007], 26, C(0xe2e0da), PKM.plastic);
+  const lab = label
+    ? C(0xf4f0e6)
+    : (u, v) => (pkHash(Math.floor(u * 90), Math.floor(v * 12), 0, 3) < 0.35 ? C(0x9a9284) : C(0xece6d6));
+  pkLathe(g, 0, 0.012, 0, [0.0183, 0, 0.0183, 0.036], 26, lab, label ? PKM.label : PKM.paper);
+  for (let k = 0; k < 16; k++) {
+    const inJar = k < 12,
+      a = rnd() * TAU,
+      d = inJar ? rnd() * 0.012 : 0.03 + rnd() * 0.025,
+      x = Math.cos(a) * d + (inJar ? 0 : 0.01),
+      z = Math.sin(a) * d,
+      y = inJar ? 0.004 + (k % 6) * 0.004 : 0.004;
+    pkAt(g, x, y, z, rnd() * TAU, inJar ? rnd() : 0, 0, () =>
+      pkTube(
+        g,
+        [-0.006, 0, 0, 0.006, 0, 0],
+        0.0033,
+        10,
+        (u, t) => (t < 0.5 ? C(0xf2efe8) : C(label ? 0xc84a28 : 0x4a7ab8)),
+        PKM.plastic,
+        { caps: true },
+      ),
+    );
+  }
+}
+function pkLetters(g, gg, look, rnd) {
+  for (let k = 0; k < 5; k++)
+    pkAt(g, (rnd() - 0.5) * 0.008, k * 0.0042, (rnd() - 0.5) * 0.008, (rnd() - 0.5) * 0.08, 0, 0, () =>
+      pkRBox(g, 0, 0.002, 0, 0.16, 0.0036, 0.1, 0.0014, mix3(C(0xeee4cc), C(0xd8c8a6), rnd()), PKM.paper),
+    );
+  const str = C(0xc4ae84),
+    H = 0.023;
+  pkTube(g, [-0.084, -0.0005, 0, 0.084, -0.0005, 0, 0.084, H, 0, -0.084, H, 0], 0.0011, 5, str, PKM.cloth, {
+    closed: true,
+    sub: 2,
+  });
+  pkTube(
+    g,
+    [0, -0.0004, -0.054, 0, -0.0004, 0.054, 0, H + 0.0006, 0.054, 0, H + 0.0006, -0.054],
+    0.0011,
+    5,
+    str,
+    PKM.cloth,
+    { closed: true, sub: 2 },
+  );
+  pkBlob(g, 0, H + 0.002, 0, 0.004, 0.0025, 0.004, 0.2, 3, 6, str, PKM.cloth);
+  pkLathe(
+    g,
+    0.045,
+    0.0205,
+    0.02,
+    [
+      0, 0, 0.0135, 0, 0.0142, 0.0012, 0.0115, 0.0024, 0.009, 0.0024, 0.0085, 0.0034, 0.004, 0.0034, 0.003, 0.0026, 0,
+      0.0026,
+    ],
+    24,
+    C(0x7a1a14),
+    PKM.plastic,
+  );
+}
+function pkMask(g, gg, look, rnd) {
+  pkSheet(
+    g,
+    0.15,
+    0.2,
+    16,
+    22,
+    (u, v) => {
+      const nose = Math.exp(-(Math.pow((u - 0.5) / 0.06, 2) + Math.pow((v - 0.47) / 0.08, 2))) * 0.012;
+      return 0.002 + nose + pkNoise(u * 6, v * 6, 2, 3) * 0.003;
+    },
+    C(0xd8b49c),
+    PKM.rubber,
+    {
+      bend: (u, v, P) => {
+        P[0] *= 0.6 + 0.4 * Math.sqrt(Math.max(0, 1 - Math.pow(v * 2 - 1, 2)));
+        if (v > 0.78) {
+          const a = ((v - 0.78) * 0.2) / 0.01;
+          P[2] = 0.056 + Math.sin(Math.min(a, Math.PI)) * 0.01;
+          P[1] += 0.01 * (1 - Math.cos(Math.min(a, Math.PI))) + 0.003;
+        }
+      },
+    },
+  );
+  pkSheet(
+    gg,
+    0.2,
+    0.25,
+    14,
+    16,
+    (u, v) => 0.016 * Math.sin(u * Math.PI) * Math.sin(v * Math.PI) + pkFbm(u * 6, v * 6, 5, 2) * 0.006,
+    C(0xdfe6ea),
+    PKM.glass,
+    { flat: true },
+  );
+}
+function pkScanner(g, gg, look, rnd) {
+  pkRBox(g, 0, 0.012, 0, 0.066, 0.024, 0.11, 0.005, C(0x1d1e21), PKM.plastic);
+  pkRBox(
+    g,
+    0,
+    0.0245,
+    0.018,
+    0.046,
+    0.0015,
+    0.05,
+    0.0006,
+    (f, s, t) => (Math.abs((((t + 1) * 9) % 1) - 0.5) < 0.2 ? C(0x0c0c0d) : C(0x3a3c40)),
+    PKM.steel,
+  );
+  pkLathe(g, 0.018, 0.0245, -0.03, [0, 0, 0.0028, 0.0006, 0.0016, 0.0016, 0, 0.0018], 10, C(0xff2a20), PKM.led, {
+    emit: 1,
+  });
+  pkLathe(
+    g,
+    -0.014,
+    0.024,
+    -0.034,
+    [0, 0, 0.0075, 0, 0.0075, 0.007, 0.0065, 0.008, 0, 0.008],
+    18,
+    C(0x2a2a2c),
+    PKM.plastic,
+  );
+  pkTube(g, [0.024, 0.02, -0.052, 0.028, 0.012, -0.11, 0.03, 0.004, -0.16], 0.0024, 8, C(0x141414), PKM.rubber, {
+    caps: true,
+  });
+}
+function pkTrout(g, gg, look, rnd) {
+  pkLathe(
+    g,
+    0,
+    0,
+    0,
+    [0, 0, 0.085, 0, 0.1, 0.13, 0.104, 0.132, 0.104, 0.136, 0.098, 0.136, 0.082, 0.006, 0, 0.006],
+    34,
+    C(0x4a7a9a),
+    PKM.plastic,
+  );
+  pkTube(
+    g,
+    [-0.103, 0.12, 0, -0.07, 0.2, 0, 0, 0.23, 0, 0.07, 0.2, 0, 0.103, 0.12, 0],
+    0.0025,
+    6,
+    C(0x8a8e92),
+    PKM.steel,
+    { caps: true },
+  );
+  pkAt(g, 0, 0.012, 0.012, 0.3, 0, 0.1, () => pkFish(g, 0.17, 0x4a5a3a));
+  pkAt(g, 0.01, 0.03, -0.02, -0.5, 0, -0.1, () => pkFish(g, 0.16, 0x50603e));
+  pkAt(g, -0.01, 0.048, 0.01, 2.6, 0, 0, () => pkBones(g, 0.15));
+}
+function pkSunlamp(g, gg, look, rnd) {
+  pkAt(g, 0, 0.065, 0, 0, Math.PI / 2 - 0.25, 0, () => {
+    pkLathe(
+      g,
+      0,
+      -0.03,
+      0,
+      [0.014, 0, 0.03, 0.012, 0.055, 0.045, 0.064, 0.07, 0.066, 0.075],
+      34,
+      C(0xc8ccd0),
+      PKM.steel,
+    );
+    pkLathe(g, 0, -0.045, 0, [0, 0, 0.012, 0, 0.014, 0.018, 0, 0.02], 16, C(0x5a5c60), PKM.steel);
+    pkLathe(
+      g,
+      0,
+      -0.02,
+      0,
+      [0, 0, 0.01, 0, 0.012, 0.01, 0.034, 0.035, 0.03, 0.058, 0, 0.066],
+      26,
+      C(0xff5a24),
+      PKM.led,
+      { emit: 1 },
+    );
+  });
+  pkTube(
+    g,
+    [0, 0.03, -0.06, 0.03, 0.004, -0.1, 0.09, 0.004, -0.12, 0.15, 0.004, -0.09],
+    0.003,
+    8,
+    C(0x161616),
+    PKM.rubber,
+    { caps: true },
+  );
+}
+function pkHamRadio(g, gg, look, rnd) {
+  pkRBox(g, 0, 0.04, 0, 0.2, 0.08, 0.13, 0.004, C(0x5a6252), PKM.steel);
+  pkRBox(g, 0, 0.04, 0.066, 0.19, 0.07, 0.004, 0.0015, C(0x26282a), PKM.plastic);
+  pkRBox(g, -0.05, 0.05, 0.069, 0.06, 0.03, 0.002, 0.001, C(0xffb040), PKM.led, { emit: 1 });
+  pkTube(g, [-0.06, 0.038, 0.071, -0.045, 0.06, 0.071], 0.0006, 4, C(0x1a1a1a), PKM.plastic);
+  for (let k = 0; k < 3; k++)
+    pkAt(g, 0.01 + k * 0.035, 0.035, 0.068, 0, Math.PI / 2, 0, () => {
+      pkLathe(g, 0, 0, 0, [0, 0, 0.011, 0, 0.011, 0.012, 0.009, 0.014, 0, 0.014], 24, C(0x141414), PKM.plastic);
+      for (let s = 0; s < 12; s++)
+        pkAt(g, Math.sin((s / 12) * TAU) * 0.011, 0.006, Math.cos((s / 12) * TAU) * 0.011, (s / 12) * TAU, 0, 0, () =>
+          pkRBox(g, 0, 0, 0, 0.002, 0.011, 0.0015, 0.0006, C(0x1c1c1c), PKM.plastic),
+        );
+    });
+  pkTube(g, [0.09, 0.08, -0.05, 0.1, 0.16, -0.07, 0.11, 0.25, -0.09], 0.0015, 6, C(0xb0b4b8), PKM.steel, {
+    caps: true,
+  });
+}
+function pkCash(g, gg, look, rnd) {
+  pkGrid(
+    g,
+    4,
+    60,
+    (u, v, P) => {
+      const a = v * TAU * 3.2,
+        r = 0.009 + v * 0.0035;
+      P[0] = (u - 0.5) * 0.066;
+      P[1] = 0.013 + Math.cos(a) * r;
+      P[2] = Math.sin(a) * r;
+    },
+    C(0x9ca88a),
+    PKM.money,
+  );
+  pkTube(g, [0, 0.0265, 0, 0, 0.013, 0.0136, 0, -0.0004, 0, 0, 0.013, -0.0136], 0.0016, 6, C(0xc9a043), PKM.brass, {
+    closed: true,
+  });
+}
+function pkLedger(g, gg, look, rnd) {
+  g.xf(M4.rotZ(Math.PI / 2), () => pkRBox(g, 0, 0, 0, 0.03, 0.26, 0.2, 0.003, C(0x2c3e2c), PKM.book));
+  pkRBox(g, 0, 0.0152, 0.02, 0.07, 0.0006, 0.05, 0.0003, C(0xe4dac0), PKM.receipt);
+}
+function pkChips(g, gg, look, rnd) {
+  pkRBox(g, 0, 0.0015, 0, 0.12, 0.003, 0.08, 0.0008, C(0x1e5a2a), PKM.pcb);
+  for (let k = 0; k < 6; k++) {
+    const x = -0.038 + (k % 3) * 0.038,
+      z = -0.018 + Math.floor(k / 3) * 0.036;
+    pkRBox(g, x, 0.0045, z, 0.022, 0.003, 0.016, 0.0006, C(0x18181a), PKM.plastic);
+    for (let p = 0; p < 6; p++)
+      for (const s of [-1, 1])
+        pkRBox(
+          g,
+          x - 0.008 + p * 0.0032,
+          0.0034,
+          z + s * 0.0088,
+          0.0012,
+          0.0008,
+          0.0025,
+          0.0003,
+          C(0xc0c0c4),
+          PKM.steel,
+        );
+    pkLathe(g, x + 0.007, 0.006, z + 0.004, [0, 0, 0.0016, 0, 0.0012, 0.0012, 0, 0.0014], 8, C(0x60ff90), PKM.led, {
+      emit: 1,
+    });
+  }
+}
+function pkButcher(g, gg, look, rnd) {
+  pkSheet(
+    g,
+    0.28,
+    0.24,
+    22,
+    20,
+    (u, v) => {
+      const e = Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)) * 2;
+      return e * e * 0.035 + pkFbm(u * 5, v * 5, 6, 7) * 0.012;
+    },
+    (u, v) => mix3(C(0xcfc6aa), C(0x7a3a30), clamp(0.45 - Math.hypot(u - 0.5, v - 0.5) * 2.4, 0, 0.45)),
+    PKM.news,
+    { flat: true },
+  );
+  pkMeat(g, gg, look, pkRng(9), true);
+}
+// ───────────── the everyday things a rummage turns up, for the close-up (gfx/peek): the junk down the back of things
+// (data/lines JUNK), what you keep (play/verbs FINDS), what's in a back-room box, the bins, a fridge's shelves, and a
+// paper with somebody's past on it. PK_THINGS names every thing the close-up can show, THEIRS included
+// (gfx/peek-things); pkKey turns what the game said you found into one of them.
+function pkCan(g, x, y, z, r, h, col) {
+  const steel = C(0xc4c6c8);
+  pkLathe(
+    g,
+    x,
+    y,
+    z,
+    [
+      0,
+      0,
+      r * 0.9,
+      0,
+      r,
+      0.003,
+      r,
+      0.006,
+      r * 0.985,
+      0.008,
+      r * 0.985,
+      h - 0.008,
+      r,
+      h - 0.006,
+      r,
+      h - 0.003,
+      r * 0.92,
+      h,
+      r * 0.85,
+      h - 0.002,
+      0,
+      h - 0.002,
+    ],
+    30,
+    steel,
+    PKM.steel,
+  );
+  pkLathe(g, x, y + 0.012, z, [r * 0.99, 0, r * 0.99, h - 0.024], 30, C(col), PKM.label);
+}
+function pkBottle(gg, g, x, y, z, col, h) {
+  pkLathe(
+    gg,
+    x,
+    y,
+    z,
+    [0, 0, 0.03, 0, 0.032, 0.006, 0.032, h * 0.6, 0.024, h * 0.72, 0.012, h * 0.82, 0.012, h * 0.97],
+    26,
+    C(col),
+    PKM.glass,
+  );
+  pkLathe(g, x, y + h * 0.15, z, [0.0322, 0, 0.0322, h * 0.32], 26, C(0xd8c890), PKM.label);
+  pkLathe(g, x, y + h * 0.96, z, [0, 0, 0.0135, 0, 0.0135, 0.008, 0, 0.009], 18, C(0xb8a048), PKM.steel);
+}
+function pkCrumple(g, w, d, seed, col, mat, amp) {
+  pkSheet(
+    g,
+    w,
+    d,
+    14,
+    14,
+    (u, v) => {
+      const e = Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)) * 2;
+      return (1 - e * e) * amp * 0.6 + (1 - Math.abs(pkFbm(u * 4, v * 4, 1, seed) * 2 - 1)) * amp;
+    },
+    col,
+    mat,
+    { flat: true },
+  );
+}
+function pkPaperBall(g, x, y, z, r, seed, col, mat) {
+  pkBlob(g, x, y + r * 0.8, z, r, r * 0.85, r * 0.95, 0.28, 2.2, seed, col, mat || PKM.paper, {
+    ridge: true,
+    flat: true,
+    nu: 14,
+    nv: 9,
+  });
+}
+// ── down the back of things
+function pkReceipt(g) {
+  pkSheet(g, 0.058, 0.15, 6, 30, null, C(0xf1efe8), PKM.receipt, {
+    bend: (u, v, P) => {
+      const a = v * 2.6;
+      P[2] = Math.sin(a) * 0.035 - 0.02;
+      P[1] = (1 - Math.cos(a)) * 0.035 + u * 0.004;
+    },
+  });
+}
+function pkSock(g) {
+  const col = (u, t) => (Math.floor(t * 14) % 3 === 0 ? C(0x8a2a2a) : t > 0.9 ? C(0x2a2a30) : C(0x3a4a6a));
+  pkTube(
+    g,
+    [-0.11, 0.012, 0.01, -0.04, 0.013, 0.004, 0.02, 0.012, -0.004, 0.05, 0.012, 0.012, 0.07, 0.011, 0.045],
+    0.024,
+    18,
+    col,
+    PKM.knit,
+    { caps: true, flat: 0.42 },
+  );
+}
+function pkWatch(g, gg) {
+  pkLathe(
+    g,
+    0,
+    0.004,
+    0,
+    [0, 0, 0.017, 0, 0.019, 0.003, 0.019, 0.007, 0.0165, 0.009, 0, 0.009],
+    30,
+    C(0xc0c4c8),
+    PKM.steel,
+  );
+  pkLathe(g, 0, 0.0132, 0, [0, 0, 0.0158, 0], 30, C(0xf0ead8), PKM.dial);
+  pkLathe(gg, 0, 0.0132, 0, [0, 0, 0.0162, 0, 0.016, 0.0012, 0, 0.0018], 30, C(0xe8f0f4), PKM.glass);
+  pkAt(g, 0.0195, 0.0085, 0, 0, 0, -Math.PI / 2, () =>
+    pkLathe(g, 0, 0, 0, [0, 0, 0.0022, 0, 0.0022, 0.003, 0, 0.003], 10, C(0xc0c4c8), PKM.steel),
+  );
+  const strap = C(0x4a2c1a);
+  pkRBox(g, 0, 0.003, 0.05, 0.016, 0.003, 0.064, 0.0012, strap, PKM.leather);
+  pkAt(g, 0.006, 0.002, -0.034, 0.5, 0, 0, () =>
+    pkRBox(g, 0, 0.001, -0.014, 0.016, 0.003, 0.03, 0.0012, strap, PKM.leather),
+  ); // snapped off short
+  pkTube(
+    g,
+    [-0.009, 0.004, 0.082, 0.009, 0.004, 0.082, 0.009, 0.004, 0.09, -0.009, 0.004, 0.09],
+    0.0012,
+    5,
+    C(0xb8b0a0),
+    PKM.steel,
+    { closed: true, sub: 2 },
+  );
+}
+function pkSpoon(g, gg, look, rnd) {
+  const steel = C(0xc8ccd0);
+  pkGrid(
+    g,
+    16,
+    12,
+    (u, v, P) => {
+      const a = (u - 0.5) * Math.PI * 0.9,
+        b = (v - 0.5) * Math.PI * 0.9;
+      P[0] = 0.035 + Math.sin(b) * 0.024;
+      P[2] = Math.sin(a) * 0.017;
+      P[1] = 0.012 - Math.cos(a) * Math.cos(b) * 0.008;
+    },
+    steel,
+    PKM.steel,
+  );
+  pkTube(
+    g,
+    [0.011, 0.0045, 0, -0.03, 0.0035, 0.001, -0.09, 0.004, 0.002],
+    (t) => 0.0035 + t * 0.003,
+    10,
+    steel,
+    PKM.steel,
+    { caps: true, flat: 0.28 },
+  );
+  for (const [x, z, c] of [
+    [-0.03, 0.035, 0x2a3a5a],
+    [0.0, 0.045, 0xe8e0d0],
+  ]) {
+    pkLathe(
+      g,
+      x,
+      0,
+      z,
+      [0, 0.0012, 0.0055, 0.0008, 0.0068, 0, 0.0074, 0.0012, 0.007, 0.0024, 0.0058, 0.0018, 0, 0.0014],
+      20,
+      C(c),
+      PKM.plastic,
+    );
+    for (const [dx, dz] of [
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ])
+      pkLathe(g, x + dx * 0.0017, 0.0015, z + dz * 0.0017, [0, 0, 0.0008, 0, 0, 0.0001], 8, C(0x0a0a0a), PKM.plain);
+  }
+}
+function pkChange(g, gg, look, rnd) {
+  const cols = [
+    [0xb87333, PKM.brass, 0.0095],
+    [0xc6c8cc, PKM.steel, 0.012],
+    [0xc6c8cc, PKM.steel, 0.0105],
+    [0xb87333, PKM.brass, 0.0095],
+    [0xc9a043, PKM.brass, 0.0115],
+  ];
+  cols.forEach(([c, m, r], k) => {
+    const a = k * 2.1 + rnd(),
+      d = 0.012 + k * 0.007;
+    pkAt(g, Math.cos(a) * d, k === 1 ? 0.0019 : 0, Math.sin(a) * d, rnd() * TAU, 0, 0, () =>
+      pkCoin(g, 0, 0, 0, r, 0.0018, C(c), m, m === PKM.brass ? PKM.token : null),
+    );
+  });
+  pkTube(
+    g,
+    [
+      -0.05, 0.0012, -0.02, -0.005, 0.0012, -0.022, -0.002, 0.0012, -0.018, -0.006, 0.0012, -0.014, -0.05, 0.0012,
+      -0.012,
+    ],
+    0.0009,
+    5,
+    C(0x2a2626),
+    PKM.steel,
+    { caps: true, flat: 0.5 },
+  );
+}
+function pkBattery(g) {
+  g.xf(M4.mul(M4.trans(-0.025, 0.007, 0), M4.rotZ(-Math.PI / 2)), () => {
+    pkLathe(
+      g,
+      0,
+      0,
+      0,
+      [0, 0, 0.0065, 0, 0.007, 0.0006, 0.007, 0.0494, 0.0065, 0.05, 0.0025, 0.05, 0.0025, 0.0515, 0, 0.0515],
+      26,
+      C(0xb8bcc0),
+      PKM.steel,
+    );
+    pkLathe(
+      g,
+      0,
+      0.003,
+      0,
+      [0.0071, 0, 0.0071, 0.044],
+      26,
+      (u, v) => (v > 0.72 ? C(0xc08a2a) : C(0x1a1a1c)),
+      PKM.plastic,
+    );
+  });
+  pkBlob(g, 0.027, 0.007, 0, 0.004, 0.0035, 0.0035, 0.4, 5, 3, C(0xd8dcc8), PKM.fuzz);
+}
+function pkLoveNote(g) {
+  pkSheet(g, 0.1, 0.14, 10, 16, (u, v) => (v < 0.5 ? 0.0006 : 0.0006 + (v - 0.5) * 0.1), C(0xf6e8e2), PKM.note, {
+    bend: (u, v, P) => {
+      if (v >= 0.5) {
+        const a = 2.4;
+        P[2] = Math.cos(a) * (v - 0.5) * 0.14;
+        P[1] = 0.0012 + Math.sin(a) * (v - 0.5) * 0.14;
+      }
+    },
+  });
+}
+function pkCrust(g) {
+  pkTube(
+    g,
+    [-0.05, 0.006, 0.02, -0.02, 0.0065, -0.005, 0.02, 0.006, -0.01, 0.05, 0.0055, 0.01],
+    (t) => 0.007 - Math.abs(t - 0.5) * 0.004,
+    12,
+    C(0xb47a44),
+    PKM.bread,
+    { caps: true, flat: 0.6 },
+  );
+}
+function pkDoorKey(g) {
+  const brass = C(0xc9a043);
+  pkTube(
+    g,
+    [-0.03, 0.0015, -0.012, -0.018, 0.0015, 0, -0.03, 0.0015, 0.012, -0.042, 0.0015, 0],
+    0.0028,
+    8,
+    brass,
+    PKM.brass,
+    { closed: true, flat: 0.5 },
+  );
+  pkRBox(g, 0.004, 0.0015, 0, 0.044, 0.0024, 0.006, 0.0008, brass, PKM.brass);
+  for (const [x, w] of [
+    [0.012, 0.004],
+    [0.019, 0.003],
+    [0.024, 0.005],
+  ])
+    pkRBox(g, x, 0.0015, 0.0045, w, 0.0024, 0.004, 0.0006, brass, PKM.brass);
+}
+function pkFuse(g, gg) {
+  g.xf(M4.mul(M4.trans(-0.016, 0.003, 0), M4.rotZ(-Math.PI / 2)), () => {
+    for (const y of [0, 0.026])
+      pkLathe(g, 0, y, 0, [0, 0, 0.0032, 0, 0.0032, 0.006, 0, 0.006], 16, C(0xc8ccd0), PKM.steel);
+    pkLathe(gg, 0, 0.005, 0, [0.0028, 0, 0.0028, 0.022], 16, C(0xe8f0f2), PKM.glass);
+    pkTube(g, [0, 0.006, 0, 0.0006, 0.016, 0, 0, 0.026, 0], 0.0002, 4, C(0x8a8a8a), PKM.steel);
+  });
+}
+function pkDice(g, gg, look, rnd) {
+  const rot = [
+    [0, 0, 0],
+    [Math.PI / 2, 0, 0],
+    [0, 0, Math.PI / 2],
+  ];
+  for (let k = 0; k < 3; k++)
+    pkAt(g, -0.03 + k * 0.024, 0.008, (rnd() - 0.5) * 0.02, rnd() * TAU, rot[k][0], rot[k][2], () =>
+      pkRBox(g, 0, 0, 0, 0.016, 0.016, 0.016, 0.0028, C(0xf0ece0), PKM.dice),
+    );
+  pkGrid(
+    g,
+    40,
+    6,
+    (u, v, P) => {
+      const a = u * TAU,
+        r = (v < 0.6 ? v / 0.6 : 1) * (0.0145 + (v >= 0.6 ? Math.abs(Math.sin(a * 10.5)) * 0.0012 : 0));
+      P[0] = 0.03 + Math.sin(a) * r;
+      P[2] = 0.03 + Math.cos(a) * r;
+      P[1] = v < 0.6 ? 0.0062 : 0.0062 - (v - 0.6) * 0.015;
+    },
+    C(0xb0202a),
+    PKM.enamel,
+    { out: [0.03, -0.01, 0.03] },
+  );
+}
+// ── what you keep (play/verbs FINDS)
+function pkFlashlight(g, gg) {
+  g.xf(M4.mul(M4.trans(-0.07, 0.016, 0), M4.rotZ(-Math.PI / 2)), () => {
+    pkLathe(
+      g,
+      0,
+      0,
+      0,
+      [0, 0, 0.013, 0, 0.014, 0.002, 0.014, 0.1, 0.019, 0.115, 0.019, 0.14, 0.017, 0.142],
+      26,
+      C(0x2a2c30),
+      PKM.steel,
+    );
+    pkLathe(g, 0, 0.142, 0, [0.017, 0, 0.0185, 0.001, 0.0185, 0.004], 26, C(0xb8bcc0), PKM.steel);
+    pkLathe(gg, 0, 0.139, 0, [0, 0.004, 0.017, 0.004], 26, C(0xe8f0f4), PKM.glass);
+    pkLathe(g, 0, 0.134, 0, [0, 0, 0.012, 0.004, 0.016, 0.007], 26, C(0xd8dce0), PKM.steel);
+  });
+  pkRBox(g, -0.02, 0.031, 0, 0.012, 0.004, 0.008, 0.0015, C(0x141414), PKM.rubber);
+}
+function pkTrap(g) {
+  const steel = C(0x6d6f72);
+  pkRBox(g, 0, 0.003, 0, 0.17, 0.006, 0.04, 0.002, steel, PKM.steel);
+  pkLathe(g, 0, 0.006, 0, [0, 0, 0.028, 0, 0.028, 0.003, 0, 0.003], 24, steel, PKM.steel);
+  for (const s of [-1, 1]) {
+    const pts = [];
+    for (let k = 0; k <= 10; k++) {
+      const a = (k / 10) * Math.PI;
+      pts.push(s * (0.02 + Math.sin(a) * 0.065), 0.006 + Math.sin(a) * 0.004, Math.cos(a) * 0.07);
+    }
+    pkTube(g, pts, 0.0028, 6, steel, PKM.steel);
+    for (let k = 1; k < 10; k++) {
+      const a = (k / 10) * Math.PI;
+      pkAt(g, s * (0.02 + Math.sin(a) * 0.065), 0.01, Math.cos(a) * 0.07, 0, 0, 0, () =>
+        pkRBox(g, 0, 0, 0, 0.003, 0.007, 0.003, 0.0008, steel, PKM.steel),
+      );
+    }
+    const sp = [];
+    for (let k = 0; k <= 60; k++)
+      sp.push(s * (0.06 + k * 0.0006), 0.012 + Math.sin(k * 0.7) * 0.007, Math.cos(k * 0.7) * 0.007);
+    pkTube(g, sp, 0.0012, 5, C(0x8a8c90), PKM.steel, { sub: 1 });
+  }
+}
+// ── a back room's shelves (play/verbs rummageResult)
+function pkToiletRoll(g) {
+  pkLathe(
+    g,
+    0,
+    0,
+    0,
+    [0.022, 0, 0.055, 0, 0.056, 0.002, 0.056, 0.098, 0.055, 0.1, 0.022, 0.1],
+    36,
+    C(0xf4f2ee),
+    PKM.paper,
+  );
+  pkLathe(g, 0, 0, 0, [0.021, 0.1, 0.021, 0], 30, C(0xb08a5a), PKM.card);
+}
+function pkTins(g) {
+  pkCan(g, -0.04, 0, 0, 0.037, 0.11, 0x2a5a8a);
+  pkCan(g, 0.04, 0, 0.01, 0.037, 0.11, 0x7a2a2a);
+  pkCan(g, 0.0, 0, -0.06, 0.037, 0.11, 0x3a6a3a);
+}
+function pkBadges(g) {
+  for (let k = 0; k < 3; k++)
+    pkAt(g, k * 0.012, k * 0.004, k * 0.01, k * 0.12, 0, 0, () => {
+      pkRBox(g, 0, 0.0015, 0, 0.09, 0.003, 0.055, 0.003, C(0xf4f4f0), PKM.plastic);
+      pkRBox(g, 0, 0.0031, -0.019, 0.086, 0.0004, 0.014, 0.0002, C(0xb8282a), PKM.plastic);
+      pkTube(g, [-0.012, 0.0035, -0.03, 0.012, 0.0035, -0.03], 0.0012, 6, C(0xc0c4c8), PKM.steel, { caps: true });
+    });
+}
+function pkBulbs(g, gg) {
+  for (const [x, z, a] of [
+    [-0.04, 0, 0.3],
+    [0.04, 0.02, -2.4],
+  ])
+    pkAt(g, x, 0.03, z, a, 0, Math.PI / 2, () => {
+      pkLathe(
+        gg,
+        0,
+        0.012,
+        0,
+        [0.013, 0, 0.012, 0.012, 0.022, 0.035, 0.03, 0.06, 0.024, 0.08, 0.01, 0.088, 0, 0.089],
+        28,
+        C(0xeef2f0),
+        PKM.glass,
+      );
+      const ridges = [0, 0];
+      for (let k = 0; k <= 8; k++) ridges.push(k % 2 ? 0.0135 : 0.0125, (k / 8) * 0.024);
+      ridges.push(0, 0.024);
+      pkLathe(g, 0, -0.012, 0, ridges, 20, C(0xb8bcc0), PKM.steel);
+      pkTube(
+        g,
+        [-0.006, 0.02, 0, -0.004, 0.045, 0, 0, 0.05, 0, 0.004, 0.045, 0, 0.006, 0.02, 0],
+        0.0005,
+        4,
+        C(0x3a3a3a),
+        PKM.steel,
+      );
+    });
+}
+// ── the bins (play/verbs digResult, binDig)
+function pkSandwich(g, gg, look, rnd, whole) {
+  const halves = whole
+    ? [
+        [-0.028, 0.6],
+        [0.028, -0.5],
+      ]
+    : [[0, 0.3]];
+  for (const [x, a] of halves)
+    pkAt(g, x, 0, 0, a, 0, 0, () => {
+      for (const y of [0, 0.022])
+        pkRBox(
+          g,
+          0,
+          y + 0.006,
+          0,
+          0.1,
+          0.012,
+          0.05,
+          0.004,
+          (f, s, t) => (f === 2 || f === 3 ? C(0xe8d8b0) : C(0xa86a34)),
+          PKM.bread,
+        );
+      pkRBox(g, 0, 0.0135, 0.001, 0.098, 0.003, 0.05, 0.001, C(0xe8c050), PKM.plain);
+      pkSheet(g, 0.104, 0.056, 14, 6, (u, v) => 0.0165 + Math.sin(u * 30) * 0.0012, C(0x6aa040), PKM.paper);
+      pkRBox(g, 0, 0.0185, 0, 0.096, 0.002, 0.048, 0.001, C(0xd08a88), PKM.flesh);
+    });
+  if (!whole) pkBlob(g, 0.07, 0, 0.03, 0.012, 0.008, 0.01, 0.3, 3, 4, C(0xb07a44), PKM.bread, { squash: 0.3 });
+}
+function pkFishBones(g, gg, look, rnd) {
+  pkCrumple(g, 0.24, 0.2, 7, C(0xc8c2b4), PKM.receipt, 0.012);
+  pkAt(g, 0, 0.012, 0, 0.2, 0, 0, () => pkBones(g, 0.2, 0xd8c89a));
+}
+function pkScorched(g, gg, look, rnd) {
+  pkSheet(
+    g,
+    0.22,
+    0.18,
+    16,
+    14,
+    (u, v) => pkNoise(u * 3, v * 3, 2, 4) * 0.008,
+    (u, v) => {
+      const d = Math.hypot(u - 0.55, v - 0.5) + pkNoise(u * 8, v * 8, 1, 2) * 0.12;
+      return d < 0.22 ? C(0x0e0e0c) : d < 0.3 ? C(0x3a2a1a) : C(0xa8845a);
+    },
+    PKM.card,
+    { flat: true },
+  );
+  pkLathe(g, 0.012, 0.004, 0, [0, 0, 0.03, 0.0005, 0, 0.001], 20, C(0x1d3a28), PKM.led, { emit: 0.25 });
+}
+function pkSkinNails(g, gg, look, rnd) {
+  pkSkin(g, gg, look, rnd);
+  for (let k = 0; k < 6; k++)
+    pkAt(g, 0.04 + rnd() * 0.08, 0.002, (rnd() - 0.5) * 0.08, rnd() * TAU, 0, 0, () =>
+      pkTube(
+        g,
+        [0, 0.001, 0, 0.006, 0.003, 0, 0.012, 0.002, 0],
+        (t) => 0.0018 * (1 - t * 0.85),
+        6,
+        C(0x3a3020),
+        PKM.bone,
+        { caps: true },
+      ),
+    );
+}
+function pkButcherPaper(g) {
+  pkCrumple(g, 0.26, 0.22, 11, C(0xe6dcc8), PKM.plastic, 0.016);
+}
+// ── a page from somebody's past (play/biography homeFact): a typed letter, or a photo in its frame
+function pkDoc(g) {
+  pkSheet(g, 0.21, 0.28, 10, 14, (u, v) => 0.0006 + pkNoise(u * 3, v * 3, 1, 9) * 0.003, C(0xf2efe6), PKM.receipt);
+  pkTube(
+    g,
+    [-0.09, 0.0015, -0.13, -0.09, 0.0015, -0.1, -0.083, 0.0015, -0.1, -0.083, 0.0015, -0.125],
+    0.0005,
+    4,
+    C(0xc8ccd0),
+    PKM.steel,
+    { closed: true, sub: 3 },
+  );
+}
+function pkPhoto(g, gg) {
+  pkRBox(g, 0, 0.006, 0, 0.15, 0.012, 0.19, 0.003, C(0x6a4428), PKM.wood);
+  pkRBox(g, 0, 0.0122, 0, 0.12, 0.0006, 0.16, 0.0002, C(0xffffff), PKM.photo);
+  pkRBox(gg, 0, 0.0132, 0, 0.122, 0.0006, 0.162, 0.0002, C(0xe8f0f4), PKM.glass);
+}
+// ── a fridge's shelves, whatever's on them (play/stashes fridgeLook). Laid out on three shelves 0.13 apart.
+function pkFridgeLoad(g, gg, k, rnd) {
+  const shelf = (s) => s * 0.13;
+  if (k === 'milk') {
+    pkRBox(
+      g,
+      -0.09,
+      shelf(1) + 0.09,
+      0,
+      0.07,
+      0.18,
+      0.07,
+      0.004,
+      (f) => (f === 4 ? C(0x3a6ab0) : C(0xf2f2ee)),
+      PKM.plastic,
+    );
+    for (let i = 0; i < 6; i++)
+      pkAt(g, 0.02 + (i % 3) * 0.045, shelf(0) + 0.025, (Math.floor(i / 3) - 0.5) * 0.05, 0, Math.PI / 2, 0, () =>
+        pkLathe(
+          g,
+          0,
+          -0.025,
+          0,
+          [0, 0, 0.017, 0.006, 0.021, 0.022, 0.017, 0.042, 0.009, 0.051, 0, 0.053],
+          18,
+          C(0xe4d2b8),
+          PKM.paper,
+        ),
+      );
+    pkGrid(
+      g,
+      20,
+      6,
+      (u, v, P) => {
+        const a = u * Math.PI,
+          r = v < 0.5 ? 0.075 * (v * 2) : 0.075;
+        P[0] = 0.08 + Math.cos(a) * r;
+        P[2] = Math.sin(a) * r - 0.02;
+        P[1] = shelf(2) + (v < 0.5 ? 0 : (v - 0.5) * 2 * 0.06);
+      },
+      (u, v) => (v > 0.9 ? C(0xf4ece0) : C(0xd8a868)),
+      PKM.bread,
+      { out: [0.08, shelf(2) + 0.03, 0.02] },
+    );
+    pkBlob(g, 0.08, shelf(2) + 0.066, 0.02, 0.012, 0.01, 0.012, 0.2, 3, 2, C(0xc8202a), PKM.flesh);
+  } else if (k === 'tubs') {
+    for (let i = 0; i < 4; i++) {
+      const x = -0.1 + (i % 2) * 0.12,
+        y = shelf(i < 2 ? 0 : 1),
+        c = [0x3a7a4a, 0xb84a3a, 0x3a5a9a, 0xd8a830][i];
+      pkRBox(gg, x, y + 0.03, 0, 0.1, 0.06, 0.08, 0.008, C(0xf0f0ec), PKM.glass);
+      pkBlob(
+        g,
+        x,
+        y + 0.018,
+        0,
+        0.042,
+        0.017,
+        0.033,
+        0.15,
+        3,
+        i,
+        C([0xc87a3a, 0xd8c8a0, 0x8a5a3a, 0xe0d0b0][i]),
+        PKM.flesh,
+        { squash: 0.3 },
+      );
+      pkRBox(g, x, y + 0.063, 0, 0.104, 0.008, 0.084, 0.003, C(c), PKM.plastic);
+    }
+    pkCan(g, 0.12, shelf(2), 0, 0.033, 0.115, 0x3a3a3a);
+  } else if (k === 'beer') {
+    for (let i = 0; i < 4; i++) pkBottle(gg, g, -0.12 + i * 0.07, shelf(1), (i % 2) * 0.02, 0x4a2a10, 0.22);
+    pkBlob(g, 0.08, shelf(0) + 0.05, 0, 0.065, 0.055, 0.06, 0.35, 2.5, 4, C(0x6a9a3a), PKM.paper, {
+      ridge: true,
+      nu: 26,
+      nv: 16,
+    });
+    pkBlob(g, 0.08, shelf(0) + 0.06, 0, 0.05, 0.05, 0.048, 0.3, 3, 9, C(0x8aba58), PKM.paper, { ridge: true });
+  } else if (k === 'cheese') {
+    pkGrid(
+      g,
+      12,
+      6,
+      (u, v, P) => {
+        const a = (u - 0.5) * 0.9,
+          r = v < 0.25 ? (v / 0.25) * 0.09 : v < 0.75 ? 0.09 : ((1 - v) / 0.25) * 0.09;
+        P[0] = -0.06 + Math.sin(a) * r;
+        P[2] = Math.cos(a) * r - 0.05;
+        P[1] = shelf(1) + (v < 0.25 ? 0 : v < 0.75 ? ((v - 0.25) / 0.5) * 0.05 : 0.05);
+      },
+      C(0xe8c860),
+      PKM.plain,
+      { out: [-0.06, shelf(1) + 0.025, 0.0] },
+    );
+    pkLathe(
+      gg,
+      0.08,
+      shelf(1),
+      0,
+      [0, 0, 0.03, 0, 0.034, 0.005, 0.034, 0.07, 0.029, 0.078, 0.029, 0.082],
+      26,
+      C(0xe0e8e4),
+      PKM.glass,
+    );
+    pkLathe(g, 0.08, shelf(1) + 0.003, 0, [0, 0, 0.032, 0, 0.033, 0.055, 0, 0.056], 26, C(0x8a1018), PKM.flesh);
+    pkLathe(
+      g,
+      0.08,
+      shelf(1) + 0.08,
+      0,
+      [0, 0, 0.032, 0, 0.042, -0.012, 0.044, -0.016],
+      26,
+      (u, v) => ((Math.floor(u * 16) + Math.floor(v * 6)) % 2 ? C(0xc8202a) : C(0xf2efe8)),
+      PKM.cloth,
+    );
+    pkBlob(g, 0.0, shelf(0) + 0.03, 0.02, 0.038, 0.03, 0.03, 0.06, 6, 3, C(0xf0d020), PKM.plain);
+  } else if (k === 'office') {
+    pkFridgeLoad(g, gg, 'tubs', rnd);
+    pkLathe(g, 0.1, shelf(0), 0.02, [0, 0, 0.028, 0, 0.034, 0.07, 0.034, 0.072, 0, 0.072], 24, C(0xf4f0e8), PKM.label);
+  } else if (k === 'fishes' || k === 'fishy') {
+    for (let s = 0; s < 3; s++)
+      for (let i = 0; i < 3; i++)
+        pkAt(
+          g,
+          (rnd() - 0.5) * 0.04,
+          shelf(s) + i * 0.016,
+          (i - 1) * 0.05,
+          (i % 2) * Math.PI + (rnd() - 0.5) * 0.4,
+          0,
+          0,
+          () => pkFish(g, 0.22 + rnd() * 0.04),
+        );
+  } else if (k === 'meat' || k === 'butcher') {
+    for (let s = 0; s < 3; s++)
+      pkAt(g, (rnd() - 0.5) * 0.04, shelf(s), 0, rnd() * 0.6, 0, 0, () => pkMeat(g, gg, null, rnd, s > 0));
+  }
+}
+// every thing the close-up can show. b: the builder · g: THEIRS, it glows faintly with THEIR light (look) · lid: it
+// lies in a fridge, so it is the shelves
+const PK_THINGS = {
+  skin: { b: pkSkin, g: 1 },
+  token: { b: pkTokens, g: 1 },
+  fish: { b: pkCoolerFish, g: 1 },
+  laser: { b: pkLaser, g: 1 },
+  gadget: { b: pkGadget, g: 1 },
+  chart: { b: pkChart, g: 1 },
+  obit: { b: pkObit, g: 1 },
+  teeth: { b: pkTeeth, g: 1 },
+  finger: { b: pkFinger, g: 1 },
+  fishes: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'fishes', r), fr: 1 },
+  meat: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'meat', r), fr: 1 },
+  device: { b: pkDevice, g: 1 },
+  till: { b: pkTill, g: 1 },
+  mark: { b: pkMark, g: 1 },
+  envelope: { b: pkEnvelope },
+  pills: { b: (g, gg, l, r) => pkPills(g, gg, l, r, false) },
+  letters: { b: pkLetters },
+  mask: { b: pkMask },
+  scanner: { b: pkScanner },
+  trout: { b: pkTrout },
+  sunlamp: { b: pkSunlamp },
+  fishy: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'fishy', r), fr: 1 },
+  radio: { b: pkHamRadio },
+  bare: { b: () => {}, fr: 1 },
+  butcher: { b: pkButcher },
+  cash: { b: pkCash, g: 1 },
+  ledger: { b: pkLedger },
+  chips: { b: pkChips, g: 1 },
+  receipt: { b: pkReceipt },
+  sock: { b: pkSock },
+  watch: { b: pkWatch },
+  spoon: { b: pkSpoon },
+  change: { b: pkChange },
+  battery: { b: pkBattery },
+  lovenote: { b: pkLoveNote },
+  crust: { b: pkCrust },
+  key: { b: pkDoorKey },
+  fuse: { b: pkFuse },
+  dice: { b: pkDice },
+  flashlight: { b: pkFlashlight },
+  trap: { b: pkTrap },
+  pillsFound: { b: (g, gg, l, r) => pkPills(g, gg, l, r, true) },
+  toilet: { b: pkToiletRoll },
+  tins: { b: pkTins },
+  badges: { b: pkBadges },
+  bulbs: { b: pkBulbs },
+  sandwich: { b: (g, gg, l, r) => pkSandwich(g, gg, l, r, false) },
+  wholeSandwich: { b: (g, gg, l, r) => pkSandwich(g, gg, l, r, true) },
+  fishBones: { b: pkFishBones },
+  scorched: { b: pkScorched },
+  skinNails: { b: pkSkinNails },
+  butcherPaper: { b: pkButcherPaper },
+  doc: { b: pkDoc },
+  photo: { b: pkPhoto },
+  milk: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'milk', r), fr: 1 },
+  tubs: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'tubs', r), fr: 1 },
+  beer: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'beer', r), fr: 1 },
+  cheese: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'cheese', r), fr: 1 },
+  office: { b: (g, gg, l, r) => pkFridgeLoad(g, gg, 'office', r), fr: 1 },
+};
+// what the game said you found, as one of PK_THINGS: a stash's own key, a FINDS key, or the words of the note
+const PK_WORDS = [
+  [/receipt/i, 'receipt'],
+  [/sock/i, 'sock'],
+  [/watch/i, 'watch'],
+  [/spoon/i, 'spoon'],
+  [/change|hairgrip/i, 'change'],
+  [/battery/i, 'battery'],
+  [/note/i, 'lovenote'],
+  [/whole sandwich/i, 'wholeSandwich'],
+  [/sandwich/i, 'sandwich'],
+  [/crust/i, 'crust'],
+  [/key/i, 'key'],
+  [/fuse/i, 'fuse'],
+  [/dice|bottle cap/i, 'dice'],
+  [/toilet/i, 'toilet'],
+  [/tins/i, 'tins'],
+  [/badge/i, 'badges'],
+  [/bulb/i, 'bulbs'],
+  [/fish bones/i, 'fishBones'],
+  [/scorched/i, 'scorched'],
+  [/shed skin/i, 'skinNails'],
+  [/butcher paper/i, 'butcherPaper'],
+  [/milk|eggs|cake/i, 'milk'],
+  [/tubs|leftovers/i, 'tubs'],
+  [/beer|lettuce/i, 'beer'],
+  [/cheese|jam|lemon/i, 'cheese'],
+];
+function pkKey(k) {
+  if (!k) return null;
+  if (PK_THINGS[k]) return k;
+  for (const [re, key] of PK_WORDS) if (re.test(k)) return key;
+  return null;
+}
+// ───────────── where you rummage, for the close-up (gfx/peek): the inside of what your hand is in. Not the world's
+// furniture: a little stage of its own, built to be seen from a few centimetres. Every set is the floor of the thing at
+// y = 0, its opening toward the lens (+z, up), and says what it needs: box (its insides, darker in the corners), spot
+// (where a hidden thing lies), pts (where the hand goes looking), cam, the lamp and the room's light, and cover (what
+// lies over the hidden thing: pulled away when it's found). Every type of thing with insides has one (PK_FAMILY).
+const PK_FAMILY = {
+  desk: 'drawer',
+  bossdesk: 'drawer',
+  pcdesk: 'drawer',
+  nightstand: 'drawer',
+  counter: 'drawer',
+  crates: 'box',
+  boxes: 'box',
+  metalshelf: 'box',
+  trashcan: 'bin',
+  dumpster: 'dumpster',
+  wardrobe: 'wardrobe',
+  bookshelf: 'books',
+  newsrack: 'news',
+  mailbox: 'mail',
+  birdcage: 'cage',
+  shelf_groc: 'shelf',
+  shelf_house: 'shelf',
+  shelf_snack: 'shelf',
+  cooler: 'cooler',
+  fridge: 'fridge',
+  fridge_office: 'fridge',
+};
+const pkFamily = (type) => PK_FAMILY[type] || 'works';
+const PK_WARM = [1.0, 0.86, 0.68],
+  PK_DAY = [1.0, 0.97, 0.9],
+  PK_COOL = [0.82, 0.92, 1.0];
+// ── the little things at the bottom of every drawer
+function pkPen(g, x, y, z, ry, col) {
+  pkAt(g, x, y, z, ry, 0, 0, () => {
+    pkTube(g, [-0.065, 0.0048, 0, 0.055, 0.0048, 0], 0.0046, 14, C(col), PKM.plastic, { caps: true });
+    pkTube(g, [-0.072, 0.0048, 0, -0.03, 0.0048, 0], 0.0052, 14, mul3(C(col), 0.6), PKM.plastic, { caps: true });
+    pkRBox(g, -0.05, 0.0105, 0, 0.034, 0.0016, 0.003, 0.0006, C(0xc8ccd0), PKM.steel);
+    pkAt(g, 0.055, 0.0048, 0, 0, 0, -Math.PI / 2, () =>
+      pkLathe(g, 0, 0, 0, [0.0044, 0, 0.0016, 0.009, 0.0006, 0.0105, 0, 0.011], 12, C(0xc0c4c8), PKM.steel),
+    );
+  });
+}
+function pkPencil(g, x, y, z, ry) {
+  pkAt(g, x, y + 0.0038, z, ry, 0, 0, () =>
+    g.xf(M4.rotZ(-Math.PI / 2), () => {
+      pkLathe(g, 0, -0.07, 0, [0, 0, 0.0038, 0, 0.0038, 0.13], 6, C(0xe0b030), PKM.plain);
+      pkLathe(g, 0, 0.06, 0, [0.0036, 0, 0.0012, 0.017, 0.0011, 0.0175], 12, C(0xd8b888), PKM.wood);
+      pkLathe(g, 0, 0.077, 0, [0.0012, 0, 0, 0.003], 8, C(0x2a2a2c), PKM.steel);
+      pkLathe(g, 0, -0.082, 0, [0, 0, 0.0039, 0, 0.0039, 0.012], 14, C(0xc8ccd0), PKM.steel);
+      pkLathe(g, 0, -0.09, 0, [0, 0, 0.0036, 0.001, 0.0036, 0.008], 14, C(0xd88a8a), PKM.rubber);
+    }),
+  );
+}
+function pkClip(g, x, y, z, ry) {
+  pkAt(g, x, y + 0.0006, z, ry, 0, 0, () =>
+    pkTube(
+      g,
+      [
+        0.012, 0, 0.003, -0.016, 0, 0.003, -0.016, 0, -0.004, 0.017, 0, -0.004, 0.017, 0, 0.0055, -0.01, 0, 0.0055,
+        -0.01, 0, 0.0,
+      ],
+      0.0005,
+      5,
+      C(0xc8ccd0),
+      PKM.steel,
+      { caps: true, sub: 3 },
+    ),
+  );
+}
+function pkBand(g, x, y, z, r, col, seed) {
+  const pts = [];
+  for (let k = 0; k < 9; k++) {
+    const a = (k / 9) * TAU,
+      rr = r * (0.75 + pkHash(k, seed, 1, 2) * 0.5);
+    pts.push(x + Math.cos(a) * rr, y + 0.0008, z + Math.sin(a) * rr * 0.8);
+  }
+  pkTube(g, pts, 0.0009, 4, C(col), PKM.rubber, { closed: true, flat: 0.5 });
+}
+function pkPad(g, x, y, z, ry, col) {
+  pkAt(g, x, y, z, ry, 0, 0, () =>
+    pkRBox(
+      g,
+      0,
+      0.007,
+      0,
+      0.076,
+      0.014,
+      0.076,
+      0.001,
+      (f, s, t) => (f === 2 ? C(col) : f === 3 ? C(col) : ((f < 2 ? s : t) * 60) % 2 > 1 ? C(col) : mul3(C(col), 0.88)),
+      PKM.paper,
+    ),
+  );
+}
+function pkStapler(g, x, y, z, ry) {
+  pkAt(g, x, y, z, ry, 0, 0, () => {
+    pkRBox(g, 0, 0.004, 0, 0.13, 0.008, 0.032, 0.003, C(0x1c1c1e), PKM.plastic);
+    pkRBox(g, 0.008, 0.02, 0, 0.118, 0.018, 0.028, 0.008, C(0x8a1c1c), PKM.plastic);
+    pkRBox(g, 0.062, 0.012, 0, 0.012, 0.01, 0.024, 0.002, C(0xc0c4c8), PKM.steel);
+  });
+}
+function pkSheetAt(g, x, y, z, ry, w, d, col, mat, seed, amp) {
+  pkAt(g, x, y, z, ry, 0, 0, () =>
+    pkSheet(g, w, d, 10, 12, (u, v) => 0.0006 + pkNoise(u * 3, v * 3, 1, seed) * (amp || 0.004), C(col), mat),
+  );
+}
+// what lies over a hidden thing: a sheet with a lump in it, or flat when nothing's under it
+// rad: how far out from its middle the thing under it reaches, as a part of the sheet's half
+function pkCoverSheet(w, d, col, mat, seed, crum) {
+  return (g, lump, rad) =>
+    pkSheet(
+      g,
+      w,
+      d,
+      26,
+      26,
+      (u, v) => {
+        const r = Math.hypot(u - 0.5, v - 0.5) * 2,
+          rr = rad || 0.3;
+        return (
+          0.001 +
+          lump * (1 - sstep(rr, Math.min(1, rr + 0.5), r)) +
+          (1 - Math.abs(pkFbm(u * 3, v * 3, 2, seed) * 2 - 1)) * crum
+        );
+      },
+      C(col),
+      mat,
+      { flat: crum > 0.004 },
+    );
+}
+// ── the sets
+function pkDrawer(g, gg, rnd, o) {
+  const night = o.type === 'nightstand',
+    wood = C(night ? 0xb88a5a : o.type === 'bossdesk' ? 0x6a4428 : 0x9a7048),
+    W = 0.42,
+    D = 0.34,
+    H = 0.1,
+    t = 0.012;
+  pkRBox(g, 0, -0.005, 0, W + 0.02, 0.01, D + 0.02, 0.002, mul3(wood, 1.1), PKM.wood);
+  for (const s of [-1, 1]) pkRBox(g, s * (W / 2 + t / 2), H / 2, 0, t, H, D + 0.02, 0.003, wood, PKM.wood);
+  pkRBox(g, 0, H / 2, -D / 2 - t / 2, W + 2 * t, H, t, 0.003, wood, PKM.wood);
+  pkRBox(g, 0, H / 2 + 0.01, D / 2 + 0.012, W + 0.05, H + 0.04, 0.022, 0.004, mul3(wood, 0.95), PKM.wood);
+  pkTube(
+    g,
+    [
+      -0.05,
+      H * 0.62,
+      D / 2 + 0.024,
+      -0.05,
+      H * 0.62,
+      D / 2 + 0.05,
+      0.05,
+      H * 0.62,
+      D / 2 + 0.05,
+      0.05,
+      H * 0.62,
+      D / 2 + 0.024,
+    ],
+    0.0045,
+    10,
+    C(0xb8a070),
+    PKM.brass,
+    { sub: 3 },
+  );
+  pkRBox(g, 0, 0.19, -0.42, 1.2, 0.03, 0.62, 0.004, mul3(wood, 0.7), PKM.wood); // the desk over it, where the drawer came out
+  const cols = [0x1a3a8a, 0x1c1c1e, 0xb8202a, 0x1a6a3a];
+  for (let k = 0; k < 3; k++)
+    pkPen(g, -0.14 + rnd() * 0.08, 0, -0.1 + k * 0.05 + rnd() * 0.02, (rnd() - 0.5) * 0.5, cols[k % 4]);
+  pkPencil(g, 0.08, 0, 0.11, 0.2 + rnd() * 0.3);
+  for (let k = 0; k < 4; k++) pkClip(g, -0.05 + rnd() * 0.18, 0.0012, -0.12 + rnd() * 0.12, rnd() * TAU);
+  pkBand(g, 0.12, 0.0012, 0.06, 0.022, 0xa86a3a, 1);
+  pkBand(g, -0.16, 0.0012, 0.1, 0.018, 0x2a5aa0, 2);
+  pkPad(g, -0.13, 0, 0.08, 0.3, 0xf0e060);
+  pkStapler(g, 0.13, 0, -0.1, -0.4);
+  pkAt(g, -0.1, 0.0, -0.1, 0.25, 0, 0, () => pkRBox(g, 0, 0.002, 0, 0.16, 0.004, 0.1, 0.0015, C(0xe4d8bc), PKM.paper)); // an envelope
+  for (let k = 0; k < 3; k++)
+    pkCoin(
+      g,
+      0.17 + rnd() * 0.02,
+      0.0005,
+      0.1 + k * 0.015,
+      0.0105,
+      0.0018,
+      C(k ? 0xc0c4c8 : 0xb87333),
+      k ? PKM.steel : PKM.brass,
+    );
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.04, 0.0, 0.01],
+    pts: [
+      [-0.08, 0.02, -0.04],
+      [0.1, 0.02, 0.03],
+      [0.0, 0.02, -0.08],
+      [-0.12, 0.02, 0.07],
+    ],
+    cam: { eye: [0.0, 0.42, 0.29], at: [0.0, 0.01, -0.03], fov: 0.62 },
+    key: { p: [-0.22, 0.72, 0.18], col: mul3(PK_WARM, 2.5), cone: [0.9, 0.55] },
+    sky: [0.2, 0.18, 0.16],
+    gnd: [0.07, 0.05, 0.04],
+    rim: { p: [0.4, 0.3, -0.5], col: [0.3, 0.26, 0.2] },
+    cover: pkCoverSheet(0.2, 0.24, 0xcdb98e, PKM.paper, 3, 0.007),
+  };
+}
+function pkBox(g, gg, rnd, o) {
+  const card = C(0xb48a5a),
+    W = 0.38,
+    D = 0.28,
+    H = 0.2,
+    t = 0.004;
+  pkRBox(g, 0, -0.002, 0, W, t, D, 0.001, mul3(card, 0.92), PKM.card);
+  for (const s of [-1, 1]) {
+    pkRBox(g, (s * W) / 2, H / 2, 0, t, H, D, 0.001, card, PKM.card);
+    pkRBox(g, 0, H / 2, (s * D) / 2, W, H, t, 0.001, card, PKM.card);
+    pkAt(g, (s * W) / 2, H, 0, 0, 0, s * -2.1, () =>
+      pkRBox(g, 0, D / 4 - 0.002, 0, t, D / 2 - 0.004, D - 0.01, 0.001, mul3(card, 1.05), PKM.card),
+    ); // the flaps, folded back
+    pkAt(g, 0, H, (s * D) / 2, 0, s * 2.0, 0, () =>
+      pkRBox(g, 0, D / 4 - 0.002, 0, W - 0.01, D / 2 - 0.004, t, 0.001, mul3(card, 1.05), PKM.card),
+    );
+  }
+  pkRBox(g, 0, H - 0.01, D / 2 + 0.0025, W * 0.98, 0.05, 0.0005, 0.0002, C(0xc8b07a), PKM.tape);
+  pkRBox(g, 0, -0.012, 0, 1.0, 0.016, 0.7, 0.003, C(0x8a8e92), PKM.steel); // the shelf it's on
+  const kraft = C(0xa8875a);
+  for (let k = 0; k < 4; k++)
+    pkAt(g, (rnd() - 0.5) * 0.24, 0.0, (rnd() - 0.5) * 0.16, rnd() * TAU, 0, 0, () =>
+      pkCrumple(g, 0.18, 0.16, 20 + k, kraft, PKM.paper, 0.018),
+    );
+  for (let k = 0; k < 4; k++)
+    pkPaperBall(
+      g,
+      (rnd() - 0.5) * 0.28,
+      0.01,
+      (rnd() - 0.5) * 0.18,
+      0.025 + rnd() * 0.015,
+      40 + k,
+      C(0xd2c8aa),
+      PKM.news,
+    );
+  pkCan(g, -0.13, 0, -0.08, 0.037, 0.11, 0x7a5a2a);
+  pkCan(g, -0.13, 0.11, -0.08, 0.037, 0.11, 0x2a5a7a);
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.05, 0.02, 0.0],
+    pts: [
+      [-0.06, 0.05, 0.02],
+      [0.1, 0.05, -0.05],
+      [0.02, 0.04, 0.06],
+      [-0.1, 0.05, -0.03],
+    ],
+    cam: { eye: [0.0, 0.54, 0.28], at: [0.0, 0.03, -0.02], fov: 0.64 },
+    key: { p: [0.1, 0.9, 0.12], col: mul3(o.out ? PK_DAY : PK_WARM, 2.3), cone: [0.92, 0.6] },
+    sky: [0.16, 0.15, 0.14],
+    gnd: [0.05, 0.04, 0.03],
+    rim: { p: [-0.5, 0.4, -0.4], col: [0.2, 0.2, 0.22] },
+    cover: pkCoverSheet(0.2, 0.2, 0xd2c8aa, PKM.news, 5, 0.012),
+  };
+}
+function pkBin(g, gg, rnd, o) {
+  const R = 0.165,
+    H = 0.3;
+  pkLathe(
+    g,
+    0,
+    0,
+    0,
+    [R + 0.008, -0.02, R + 0.012, H, R + 0.02, H + 0.006, R + 0.02, H + 0.014, R + 0.012, H + 0.016],
+    40,
+    C(0x9a9ea2),
+    PKM.steel,
+  );
+  pkGrid(
+    g,
+    40,
+    10,
+    (u, v, P) => {
+      const a = u * TAU,
+        y = v < 0.85 ? (v / 0.85) * H : H + ((v - 0.85) / 0.15) * 0.012,
+        r =
+          (v < 0.85 ? R : R + 0.012 + ((v - 0.85) / 0.15) * 0.004) +
+          pkNoise(Math.cos(a) * 4, y * 18, Math.sin(a) * 4, 3) * 0.008;
+      P[0] = Math.sin(a) * r;
+      P[1] = v >= 0.85 ? H + 0.012 - Math.pow((v - 0.85) / 0.15, 2) * 0.03 : y;
+      P[2] = Math.cos(a) * r;
+    },
+    C(0x141416),
+    PKM.bag,
+  );
+  pkLathe(g, 0, 0, 0, [0, 0, R, 0], 30, C(0x141416), PKM.bag);
+  for (let k = 0; k < 7; k++) {
+    const a = (k / 7) * TAU + rnd() * 0.5,
+      d = 0.08 + rnd() * 0.05; // round the edge: the middle is where a hand goes
+    pkPaperBall(
+      g,
+      Math.cos(a) * d,
+      0.015 + rnd() * 0.04,
+      Math.sin(a) * d,
+      0.03 + rnd() * 0.012,
+      60 + k,
+      k % 3 ? C(0xf0eee8) : C(0xd2c8aa),
+      k % 3 ? PKM.receipt : PKM.news,
+    );
+  }
+  for (let k = 0; k < 3; k++)
+    pkAt(g, (rnd() - 0.5) * 0.08, 0.05 + k * 0.012, (rnd() - 0.5) * 0.08, rnd() * TAU, 0, 0, () =>
+      pkCrumple(g, 0.16, 0.14, 90 + k, k % 2 ? C(0xe8e4dc) : C(0xb89a6a), PKM.paper, 0.01),
+    );
+  pkGrid(
+    g,
+    20,
+    8,
+    (u, v, P) => {
+      const a = u * TAU,
+        r =
+          0.033 *
+          (1 + (pkNoise(Math.cos(a) * 3, v * 4, Math.sin(a) * 3, 7) - 0.5) * 0.5) *
+          (v < 0.1 || v > 0.9 ? 0.85 : 1);
+      P[0] = -0.06 + v * 0.06;
+      P[1] = 0.08 + Math.sin(a) * r * 0.7;
+      P[2] = 0.05 + Math.cos(a) * r;
+    },
+    (u, v) => (v > 0.15 && v < 0.85 ? (u < 0.5 ? C(0xc8202a) : C(0xe8e8e8)) : C(0xb8bcc0)),
+    PKM.foil,
+    { out: [-0.03, 0.08, 0.05] },
+  );
+  for (let k = 0; k < 3; k++)
+    pkTube(
+      g,
+      [0.05, 0.09, -0.04 + k * 0.012, 0.08, 0.092, -0.03 + k * 0.02, 0.1, 0.085, -0.015 + k * 0.03],
+      (t) => 0.007 * (1 - t * 0.5),
+      8,
+      (u, t) => (pkHash(Math.floor(u * 10), Math.floor(t * 12), k, 1) < 0.2 ? C(0x4a3018) : C(0xd8b040)),
+      PKM.plain,
+      { caps: true, flat: 0.25 },
+    );
+  for (let k = 0; k < 2; k++)
+    pkAt(g, -0.05 + k * 0.03, 0.095, -0.06, k, 0, 0, () => {
+      pkRBox(g, 0, 0.002, 0, 0.05, 0.005, 0.058, 0.002, (f) => (f === 2 ? C(0x8a5a30) : C(0xc8a878)), PKM.paper);
+      pkTube(g, [0, 0.005, 0.03, 0.01, 0.006, 0.06, 0.03, 0.004, 0.08], 0.0004, 3, C(0xe8e0d0), PKM.cloth);
+    });
+  return {
+    box: [-R, 0, -R, R, H, R],
+    spot: [0.02, 0.1, 0.0],
+    pts: [
+      [-0.05, 0.13, 0.03],
+      [0.06, 0.13, -0.04],
+      [0.0, 0.12, 0.06],
+      [-0.06, 0.12, -0.05],
+    ],
+    cam: { eye: [0.0, 0.66, 0.24], at: [0.0, 0.1, -0.02], fov: 0.6 },
+    key: {
+      p: [0.15, 1.1, 0.25],
+      col: mul3(o.out ? (o.night ? [1.0, 0.62, 0.3] : PK_DAY) : PK_WARM, o.night && o.out ? 1.8 : 2.4),
+      cone: [0.94, 0.65],
+    },
+    sky: o.out && o.night ? [0.04, 0.05, 0.08] : [0.16, 0.17, 0.19],
+    gnd: [0.04, 0.035, 0.03],
+    rim: { p: [-0.5, 0.5, -0.5], col: [0.15, 0.16, 0.2] },
+    cover: pkCoverSheet(0.18, 0.18, 0xd2c8aa, PKM.news, 9, 0.014),
+  };
+}
+function pkDumpster(g, gg, rnd, o) {
+  const W = 0.6,
+    D = 0.42,
+    H = 0.4,
+    paint = (f, s, t) => (pkHash(Math.floor(s * 9), Math.floor(t * 9), f, 4) < 0.18 ? C(0x5a3a22) : C(0x2e5236));
+  pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D + 0.04, 0.004, paint, PKM.plain);
+  for (const s of [-1, 1]) {
+    pkRBox(g, s * (W / 2 + 0.01), H / 2, 0, 0.02, H, D + 0.04, 0.004, paint, PKM.plain);
+    pkRBox(g, 0, H / 2, s * (D / 2 + 0.01), W + 0.04, H, 0.02, 0.004, paint, PKM.plain);
+  }
+  for (let k = 0; k < 4; k++)
+    pkBlob(
+      g,
+      (k - 1.5) * 0.15 + (rnd() - 0.5) * 0.04,
+      0.07,
+      ((k % 2) - 0.5) * 0.16,
+      0.12,
+      0.08,
+      0.11,
+      0.18,
+      2.2,
+      70 + k,
+      C(0x141416),
+      PKM.bag,
+      { squash: 0.5 },
+    );
+  pkAt(g, 0.12, 0.13, 0.06, 0.4, 0.25, 0.1, () => pkRBox(g, 0, 0, 0, 0.3, 0.008, 0.26, 0.002, C(0xa8845a), PKM.card));
+  for (let k = 0; k < 3; k++)
+    pkPaperBall(g, (rnd() - 0.5) * 0.4, 0.12, (rnd() - 0.5) * 0.25, 0.035, 80 + k, C(0xd2c8aa), PKM.news);
+  pkBottle(gg, g, -0.15, 0.13, 0.08, 0x2a5a2a, 0.22);
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [-0.02, 0.14, 0.02],
+    pts: [
+      [-0.1, 0.18, 0.04],
+      [0.08, 0.18, -0.04],
+      [0.0, 0.17, 0.08],
+      [-0.12, 0.17, -0.06],
+    ],
+    cam: { eye: [0.0, 0.74, 0.3], at: [0.0, 0.14, -0.02], fov: 0.62 },
+    key: { p: [0.2, 1.4, 0.3], col: o.night ? [1.8, 1.1, 0.55] : mul3(PK_DAY, 2.6), cone: [0.95, 0.7] },
+    sky: o.night ? [0.035, 0.045, 0.08] : [0.2, 0.22, 0.26],
+    gnd: [0.04, 0.04, 0.035],
+    rim: { p: [-0.6, 0.6, -0.6], col: [0.15, 0.17, 0.22] },
+    cover: pkCoverSheet(0.22, 0.2, 0xa8845a, PKM.card, 11, 0.008),
+  };
+}
+function pkWardrobe(g, gg, rnd, o) {
+  const wood = C(0xc8a87a),
+    W = 0.6,
+    D = 0.4,
+    H = 0.32,
+    knits = [0x3a4a6a, 0x8a3a2a, 0xc8b89a, 0x4a6a4a, 0x6a5a7a, 0xd8d0c0];
+  pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D, 0.003, wood, PKM.wood);
+  pkRBox(g, 0, H / 2, -D / 2, W + 0.04, H + 0.04, 0.012, 0.003, mul3(wood, 0.85), PKM.wood);
+  for (const s of [-1, 1]) pkRBox(g, s * (W / 2 + 0.01), H / 2, 0, 0.02, H + 0.04, D, 0.003, wood, PKM.wood);
+  for (const [px, n] of [
+    [-0.16, 3],
+    [0.17, 2],
+  ])
+    for (let k = 0; k < n; k++)
+      pkRBox(
+        g,
+        px + (rnd() - 0.5) * 0.015,
+        0.024 + k * 0.047,
+        -0.06 + (rnd() - 0.5) * 0.015,
+        0.24,
+        0.046,
+        0.2,
+        0.016,
+        C(knits[(k + (px > 0 ? 3 : 0)) % 6]),
+        PKM.knit,
+      );
+  pkRBox(g, 0.2, 0.06, 0.12, 0.2, 0.12, 0.14, 0.003, C(0x8a6a4a), PKM.card);
+  pkRBox(g, 0.2, 0.125, 0.12, 0.205, 0.016, 0.145, 0.003, C(0x9a7a58), PKM.card);
+  for (let k = 0; k < 4; k++)
+    pkAt(g, -0.2 + k * 0.13, H + 0.02, -0.05, 0, 0, 0, () =>
+      pkSheet(g, 0.12, 0.2, 6, 10, null, C(knits[(k + 2) % 6]), PKM.cloth, {
+        bend: (u, v, P) => {
+          P[1] = -v * 0.14;
+          P[2] = (v - 0.5) * 0.02 + Math.sin(u * 7 + k) * 0.01;
+        },
+      }),
+    );
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.0, 0.0, 0.08],
+    pts: [
+      [-0.12, 0.16, -0.0],
+      [0.15, 0.11, 0.0],
+      [0.0, 0.03, 0.1],
+      [-0.08, 0.06, 0.12],
+    ],
+    cam: { eye: [0.0, 0.3, 0.48], at: [0.0, 0.06, 0.0], fov: 0.66 },
+    key: { p: [-0.25, 0.8, 0.5], col: mul3(PK_WARM, 2.2), cone: [0.9, 0.5] },
+    sky: [0.18, 0.16, 0.15],
+    gnd: [0.06, 0.05, 0.04],
+    rim: { p: [0.5, 0.4, -0.3], col: [0.22, 0.2, 0.18] },
+    cover: (gc, lump, rad) =>
+      pkSheet(
+        gc,
+        0.2,
+        0.18,
+        18,
+        16,
+        (u, v) =>
+          0.004 +
+          lump * (1 - sstep(rad || 0.3, Math.min(1, (rad || 0.3) + 0.5), Math.hypot(u - 0.5, v - 0.5) * 2)) +
+          pkFbm(u * 3, v * 3, 4, 2) * 0.012,
+        C(0xb8b0a0),
+        PKM.knit,
+      ),
+  };
+}
+function pkBooks(g, gg, rnd, o) {
+  const wood = C(0x8a6440),
+    W = 0.56,
+    D = 0.24,
+    H = 0.28,
+    pal = [0x5a2a24, 0x2a3a5a, 0x3a5a3a, 0x8a7a5a, 0x6a2a4a, 0x1e1e22, 0xa8884a, 0x4a6a7a, 0x7a3a1a];
+  pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D, 0.003, wood, PKM.wood);
+  pkRBox(g, 0, H + 0.01, 0, W + 0.04, 0.02, D, 0.003, wood, PKM.wood);
+  pkRBox(g, 0, H / 2, -D / 2, W + 0.04, H, 0.008, 0.002, mul3(wood, 0.8), PKM.wood);
+  for (const s of [-1, 1]) pkRBox(g, s * (W / 2 + 0.01), H / 2, 0, 0.02, H + 0.04, D, 0.003, wood, PKM.wood);
+  let x = -W / 2 + 0.01;
+  while (x < W / 2 - 0.04) {
+    const w = 0.018 + rnd() * 0.026,
+      h = 0.17 + rnd() * 0.07,
+      d = 0.15 + rnd() * 0.03;
+    if (x > -0.05 && x < 0.02) {
+      x += 0.05; // a gap where one's missing
+      continue;
+    }
+    const lean = x > 0.18 && x < 0.24 ? -0.18 : 0;
+    pkAt(g, x + w / 2, 0, -D / 2 + d / 2 + 0.01, 0, 0, lean, () =>
+      pkRBox(g, 0, h / 2, 0, w, h, d, 0.0022, C(pal[Math.floor(rnd() * pal.length)]), PKM.book),
+    );
+    x += w + 0.001;
+  }
+  for (let k = 0; k < 3; k++)
+    pkBlob(g, -0.2 + k * 0.17, 0.003, 0.09, 0.008, 0.003, 0.006, 0.4, 5, 90 + k, C(0x8a8478), PKM.fuzz);
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [-0.02, 0.0, 0.06],
+    pts: [
+      [-0.12, 0.12, -0.02],
+      [0.1, 0.1, -0.01],
+      [-0.02, 0.05, 0.02],
+      [0.0, 0.14, -0.04],
+    ],
+    cam: { eye: [0.0, 0.26, 0.45], at: [0.0, 0.08, -0.02], fov: 0.66 },
+    key: { p: [0.2, 0.7, 0.5], col: mul3(PK_WARM, 2.2), cone: [0.9, 0.5] },
+    sky: [0.17, 0.15, 0.14],
+    gnd: [0.06, 0.05, 0.04],
+    rim: { p: [-0.5, 0.4, -0.2], col: [0.22, 0.2, 0.18] },
+    cover: (gc, lump) =>
+      pkAt(gc, 0, 0.016 + lump * 1.6, 0, 0.25, 0, lump ? 0.08 : 0, () =>
+        gc.xf(M4.rotZ(Math.PI / 2), () => pkRBox(gc, 0, 0, 0, 0.032, 0.22, 0.16, 0.0025, C(0x5a2a24), PKM.book)),
+      ),
+  };
+}
+// newspapers in a rack, letters in a mailbox, the paper at the bottom of a birdcage
+function pkPapers(g, gg, rnd, o, kind) {
+  const W = 0.4,
+    D = 0.3,
+    H = 0.16;
+  if (kind === 'mail') {
+    const grey = C(0x4a5058);
+    pkRBox(g, 0, -0.005, 0, W, 0.01, D, 0.003, grey, PKM.steel);
+    for (const s of [-1, 1]) {
+      pkRBox(g, (s * W) / 2, H / 2, 0, 0.008, H, D, 0.002, grey, PKM.steel);
+      pkRBox(g, 0, H / 2, (s * D) / 2, W, H, 0.008, 0.002, grey, PKM.steel);
+    }
+    for (let k = 0; k < 6; k++)
+      pkAt(g, (rnd() - 0.5) * 0.14, k * 0.005, (rnd() - 0.5) * 0.1, (rnd() - 0.5) * 0.6, 0, 0, () =>
+        pkRBox(
+          g,
+          0,
+          0.002,
+          0,
+          0.16 + rnd() * 0.06,
+          0.003,
+          0.1,
+          0.0012,
+          C(k % 2 ? 0xeee4cc : 0xd8e0e8),
+          k === 3 ? PKM.note : PKM.paper,
+        ),
+      );
+    pkSheetAt(g, -0.11, 0.032, -0.06, 0.5, 0.16, 0.2, 0xd8784a, PKM.news, 3, 0.006);
+  } else if (kind === 'cage') {
+    pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D + 0.04, 0.004, C(0xc8c4b8), PKM.plastic);
+    for (let k = 0; k < 18; k++) {
+      const a = (k / 18) * TAU;
+      pkTube(
+        g,
+        [Math.sin(a) * 0.21, 0, Math.cos(a) * 0.17, Math.sin(a) * 0.2, 0.3, Math.cos(a) * 0.16],
+        0.0015,
+        5,
+        C(0xd8c898),
+        PKM.brass,
+      );
+    }
+    pkSheetAt(g, 0, 0.001, 0, 0.1, 0.36, 0.28, 0xd2c8aa, PKM.news, 2, 0.003);
+    for (let k = 0; k < 40; k++)
+      pkBlob(
+        g,
+        (rnd() - 0.5) * 0.3,
+        0.003,
+        (rnd() - 0.5) * 0.22,
+        0.003,
+        0.0015,
+        0.002,
+        0.2,
+        4,
+        k,
+        C(rnd() < 0.5 ? 0xb89a60 : 0x6a5a3a),
+        PKM.plain,
+        { nu: 6, nv: 4 },
+      );
+    pkLathe(
+      g,
+      0.12,
+      0,
+      -0.08,
+      [0, 0, 0.035, 0, 0.04, 0.022, 0.036, 0.024, 0.031, 0.004, 0, 0.004],
+      26,
+      C(0x5a8ab8),
+      PKM.plastic,
+    );
+    pkLathe(gg, 0.12, 0.004, -0.08, [0, 0.014, 0.033, 0.014], 26, C(0xd8e8f0), PKM.ice);
+    pkTube(
+      g,
+      [-0.1, 0.004, 0.08, -0.06, 0.008, 0.06, -0.02, 0.005, 0.05],
+      (t) => 0.004 * Math.sin(Math.PI * Math.min(1, t * 1.1 + 0.05)),
+      8,
+      C(0xe8e4d8),
+      PKM.fuzz,
+      { flat: 0.2 },
+    );
+  } else {
+    for (let k = 0; k < 7; k++)
+      pkTube(
+        g,
+        [-W / 2, 0.002, -D / 2 + (k / 6) * D, W / 2, 0.002, -D / 2 + (k / 6) * D],
+        0.002,
+        6,
+        C(0x9a9ea2),
+        PKM.steel,
+      );
+    for (const s of [-1, 1])
+      pkTube(
+        g,
+        [(s * W) / 2, 0.002, -D / 2, (s * W) / 2, H, -D / 2, (s * W) / 2, H, D / 2, (s * W) / 2, 0.002, D / 2],
+        0.003,
+        6,
+        C(0x9a9ea2),
+        PKM.steel,
+        { sub: 2 },
+      );
+    for (let k = 0; k < 6; k++)
+      pkAt(g, (rnd() - 0.5) * 0.02, 0.004 + k * 0.008, (rnd() - 0.5) * 0.02, (rnd() - 0.5) * 0.06, 0, 0, () =>
+        pkRBox(g, 0, 0.004, 0, 0.3, 0.008, 0.24, 0.002, (f) => (f === 2 ? C(0xd8d0bc) : C(0xc8c0aa)), PKM.news),
+      );
+  }
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.03, kind === 'news' ? 0.052 : 0.006, 0.02],
+    pts: [
+      [-0.08, 0.07, 0.02],
+      [0.08, 0.07, -0.03],
+      [0.0, 0.06, 0.06],
+      [-0.05, 0.07, -0.06],
+    ],
+    cam: { eye: [0.0, 0.48, 0.28], at: [0.0, 0.03, -0.02], fov: 0.62 },
+    key: {
+      p: [-0.2, 0.9, 0.3],
+      col: mul3(o.out ? (o.night ? [1.0, 0.65, 0.35] : PK_DAY) : PK_WARM, 2.3),
+      cone: [0.92, 0.55],
+    },
+    sky: o.out && o.night ? [0.04, 0.05, 0.08] : [0.17, 0.16, 0.16],
+    gnd: [0.05, 0.045, 0.04],
+    rim: { p: [0.5, 0.4, -0.4], col: [0.2, 0.2, 0.22] },
+    cover: pkCoverSheet(0.28, 0.22, 0xd8d0bc, PKM.news, 13, 0.004),
+  };
+}
+function pkShop(g, gg, rnd, o) {
+  const W = 0.6,
+    D = 0.34,
+    H = 0.3,
+    kind = o.type;
+  pkRBox(g, 0, -0.008, 0, W + 0.06, 0.016, D + 0.02, 0.003, C(0xd0d2d4), PKM.steel);
+  pkRBox(
+    g,
+    0,
+    H / 2,
+    -D / 2 - 0.01,
+    W + 0.06,
+    H + 0.04,
+    0.01,
+    0.002,
+    (f, s, t) =>
+      (Math.floor((s + 1) * 24) + Math.floor((t + 1) * 18)) % 2 &&
+      Math.abs((((s + 1) * 24) % 1) - 0.5) < 0.2 &&
+      Math.abs((((t + 1) * 18) % 1) - 0.5) < 0.25
+        ? C(0x2a2c2e)
+        : C(0xc8cacc),
+    PKM.plain,
+  );
+  pkRBox(g, 0, 0.012, D / 2 + 0.008, W + 0.06, 0.03, 0.006, 0.002, C(0xf4f0e0), PKM.label);
+  const cols = [0xb8282a, 0x2a5a9a, 0xd8a020, 0x3a7a3a, 0x7a3a8a, 0xe86a20];
+  for (let k = 0; k < 5; k++) {
+    const x = -0.24 + k * 0.12,
+      c = cols[k % 6];
+    if (kind === 'shelf_groc') {
+      if (k % 2) pkRBox(g, x, 0.13, -0.08, 0.1, 0.26, 0.06, 0.004, C(c), PKM.label);
+      else {
+        pkCan(g, x, 0, -0.1, 0.037, 0.11, c);
+        pkCan(g, x, 0.11, -0.1, 0.037, 0.11, c);
+        pkCan(g, x, 0, -0.02, 0.037, 0.11, c);
+      }
+    } else if (kind === 'shelf_snack') {
+      for (let j = 0; j < 2; j++)
+        pkBlob(g, x, 0.03 + j * 0.05, -0.08 + j * 0.02, 0.05, 0.028, 0.07, 0.12, 3, k * 3 + j, C(c), PKM.foil, {
+          squash: 0.7,
+        });
+      pkRBox(g, x, 0.008, 0.02, 0.09, 0.015, 0.03, 0.003, C(cols[(k + 2) % 6]), PKM.foil);
+    } else {
+      pkLathe(
+        g,
+        x,
+        0,
+        -0.09,
+        [0, 0, 0.035, 0, 0.04, 0.01, 0.04, 0.16, 0.03, 0.19, 0.012, 0.2, 0.012, 0.22, 0, 0.22],
+        24,
+        C(c),
+        PKM.plastic,
+      );
+      pkLathe(g, x, 0.05, -0.09, [0.0405, 0, 0.0405, 0.08], 24, C(0xf2f0ea), PKM.label);
+      pkRBox(g, x, 0.015, 0.03, 0.08, 0.03, 0.05, 0.008, (f) => (f === 2 ? C(0x2a7a3a) : C(0xe8d040)), PKM.fuzz);
+    }
+  }
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.02, 0.0, 0.08],
+    pts: [
+      [-0.1, 0.08, 0.04],
+      [0.12, 0.08, 0.03],
+      [0.0, 0.05, 0.1],
+      [0.06, 0.1, -0.02],
+    ],
+    cam: { eye: [0.0, 0.3, 0.44], at: [0.0, 0.07, 0.0], fov: 0.66 },
+    key: { p: [0.0, 0.9, 0.3], col: mul3(PK_COOL, 2.4), cone: [0.92, 0.5] },
+    sky: [0.2, 0.21, 0.22],
+    gnd: [0.06, 0.06, 0.06],
+    rim: { p: [0.5, 0.5, -0.4], col: [0.2, 0.22, 0.24] },
+    cover: (gc, lump) => pkRBox(gc, 0, 0.07, 0.035, 0.11, 0.14, 0.05, 0.004, C(0x8a5a2a), PKM.label),
+  };
+}
+function pkCooler(g, gg, rnd, o) {
+  const W = 0.46,
+    D = 0.3,
+    H = 0.22,
+    wall = C(0xe8ecee);
+  pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D + 0.04, 0.006, wall, PKM.plastic);
+  for (const s of [-1, 1]) {
+    pkRBox(g, s * (W / 2 + 0.01), H / 2, 0, 0.02, H, D + 0.04, 0.006, wall, PKM.plastic);
+    pkRBox(g, 0, H / 2, s * (D / 2 + 0.01), W + 0.04, H, 0.02, 0.006, wall, PKM.plastic);
+  }
+  const cols = [0xb8282a, 0x2a5a9a, 0xd8a020, 0x3a7a3a];
+  for (let k = 0; k < 6; k++)
+    pkAt(
+      g,
+      -0.16 + (k % 3) * 0.14 + (rnd() - 0.5) * 0.03,
+      0.02,
+      -0.06 + Math.floor(k / 3) * 0.1,
+      0,
+      (rnd() - 0.5) * 0.4,
+      (rnd() - 0.5) * 0.4,
+      () => pkCan(g, 0, 0, 0, 0.033, 0.115, cols[k % 4]),
+    );
+  for (let k = 0; k < 40; k++)
+    pkAt(gg, (rnd() - 0.5) * 0.42, 0.04 + rnd() * 0.06, (rnd() - 0.5) * 0.26, rnd() * TAU, rnd(), rnd(), () =>
+      pkRBox(gg, 0, 0, 0, 0.026, 0.024, 0.026, 0.006, C(0xe4eef4), PKM.ice),
+    );
+  pkRBox(gg, 0, 0.05, 0, W, 0.002, D, 0.001, C(0xc8dce4), PKM.ice);
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.03, 0.07, 0.03],
+    pts: [
+      [-0.1, 0.1, 0.03],
+      [0.1, 0.1, -0.04],
+      [0.0, 0.09, 0.07],
+      [-0.06, 0.1, -0.07],
+    ],
+    cam: { eye: [0.0, 0.54, 0.28], at: [0.0, 0.06, -0.02], fov: 0.62 },
+    key: { p: [0.1, 0.9, 0.2], col: mul3(PK_COOL, 2.3), cone: [0.92, 0.6] },
+    sky: [0.2, 0.22, 0.24],
+    gnd: [0.06, 0.07, 0.08],
+    rim: { p: [-0.5, 0.4, -0.4], col: [0.2, 0.24, 0.28] },
+    cover: (gc, lump) => {
+      for (let k = 0; k < 5; k++)
+        pkAt(gc, (k - 2) * 0.022, 0.012 + lump + (k % 2) * 0.01, ((k % 3) - 1) * 0.02, k, 0.4 * k, 0, () =>
+          pkRBox(gc, 0, 0, 0, 0.026, 0.024, 0.026, 0.006, C(0xe4eef4), PKM.plastic),
+        );
+    },
+  };
+}
+function pkFridge(g, gg, rnd, o) {
+  const W = 0.52,
+    D = 0.36,
+    H = 0.44,
+    white = C(0xf0f2f0);
+  pkRBox(g, 0, -0.01, 0, W + 0.04, 0.02, D, 0.012, white, PKM.enamel);
+  pkRBox(g, 0, H + 0.01, 0, W + 0.04, 0.02, D, 0.012, white, PKM.enamel);
+  pkRBox(g, 0, H / 2, -D / 2, W + 0.04, H + 0.04, 0.02, 0.012, mul3(white, 0.96), PKM.enamel);
+  for (const s of [-1, 1]) {
+    pkRBox(g, s * (W / 2 + 0.01), H / 2, 0, 0.02, H + 0.04, D, 0.012, white, PKM.enamel);
+    pkRBox(g, s * (W / 2 + 0.035), H / 2, 0.05, 0.03, H + 0.12, D + 0.12, 0.012, C(0xe0e2e0), PKM.enamel);
+  }
+  for (const y of [0.13, 0.26]) pkRBox(gg, 0, y - 0.003, 0, W - 0.01, 0.006, D - 0.02, 0.002, C(0xd8e8ec), PKM.glass);
+  for (const y of [0.13, 0.26])
+    pkRBox(g, 0, y - 0.003, D / 2 - 0.012, W - 0.01, 0.008, 0.014, 0.003, C(0xc8ccd0), PKM.plastic);
+  pkRBox(g, 0, H - 0.008, -0.06, 0.08, 0.012, 0.04, 0.004, C(0xfff8e8), PKM.led, { emit: 0.6 });
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.04, 0.0, 0.04],
+    pts: [
+      [-0.08, 0.06, 0.04],
+      [0.1, 0.18, 0.02],
+    ],
+    cam: { eye: [0.05, 0.3, 0.62], at: [0.05, 0.17, -0.02], fov: 0.8 },
+    key: { p: [0.0, H - 0.03, 0.1], col: mul3(PK_COOL, 1.5), cone: [0.6, -0.3] },
+    sky: [0.3, 0.32, 0.34],
+    gnd: [0.18, 0.19, 0.2],
+    rim: { p: [-0.3, 0.6, 0.9], col: [0.5, 0.42, 0.32] },
+    door: true,
+    cover: () => {},
+  };
+}
+// a machine with its back off: the board, the wires, a fur of dust
+function pkWorks(g, gg, rnd, o) {
+  const W = 0.36,
+    D = 0.26,
+    H = 0.14,
+    steel = C(0x7a7e82);
+  pkRBox(g, 0, -0.005, 0, W, 0.01, D, 0.002, steel, PKM.steel);
+  for (const s of [-1, 1]) pkRBox(g, (s * W) / 2, H / 2, 0, 0.006, H, D, 0.002, steel, PKM.steel);
+  pkRBox(g, 0, H / 2, -D / 2, W, H, 0.006, 0.002, steel, PKM.steel);
+  pkRBox(g, 0, 0.012, D / 2, W, 0.024, 0.006, 0.002, steel, PKM.steel); // the side that came off, down to its lip
+  pkRBox(g, -0.04, 0.006, -0.03, 0.22, 0.003, 0.15, 0.001, C(0x1e5a2a), PKM.pcb);
+  for (let k = 0; k < 4; k++)
+    pkRBox(g, -0.11 + k * 0.05, 0.01, -0.06, 0.02, 0.004, 0.014, 0.0006, C(0x18181a), PKM.plastic);
+  for (let k = 0; k < 4; k++) {
+    const x = -0.1 + k * 0.035;
+    pkLathe(
+      g,
+      x,
+      0.0075,
+      0.01,
+      [0, 0, 0.006, 0, 0.006, 0.018, 0.0055, 0.019, 0, 0.019],
+      16,
+      C(k % 2 ? 0x1a2a6a : 0x1a1a1a),
+      PKM.plastic,
+    );
+    pkLathe(g, x, 0.0265, 0.01, [0, 0, 0.0052, 0, 0, 0.0004], 16, C(0xc0c4c8), PKM.steel);
+  }
+  pkRBox(g, 0.12, 0.03, -0.06, 0.06, 0.05, 0.05, 0.003, C(0x2a2c2e), PKM.steel);
+  pkLathe(g, 0.12, 0.012, -0.06, [0.027, 0, 0.027, 0.036], 20, C(0xb06a30), PKM.brass);
+  const wire = (pts, c) => pkTube(g, pts, 0.0018, 6, C(c), PKM.plastic, { caps: true });
+  wire([-0.17, 0.05, -0.1, -0.08, 0.02, -0.02, 0.05, 0.03, 0.02, 0.17, 0.06, 0.08], 0xb8202a);
+  wire([-0.17, 0.055, -0.095, -0.07, 0.025, -0.015, 0.06, 0.035, 0.025, 0.17, 0.065, 0.085], 0x1a1a1a);
+  wire([0.12, 0.055, -0.06, 0.05, 0.04, 0.05, -0.05, 0.02, 0.09, -0.17, 0.04, 0.1], 0xd8b020);
+  wire([0.13, 0.055, -0.055, 0.07, 0.045, 0.05, -0.04, 0.025, 0.1, -0.17, 0.045, 0.11], 0x2a5ab8);
+  for (let k = 0; k < 5; k++)
+    pkBlob(
+      g,
+      (rnd() - 0.5) * 0.3,
+      0.004,
+      (rnd() - 0.5) * 0.2,
+      0.016 + rnd() * 0.01,
+      0.006,
+      0.012,
+      0.45,
+      4,
+      100 + k,
+      C(0x8a8478),
+      PKM.fuzz,
+    );
+  for (let k = 0; k < 4; k++)
+    pkLathe(
+      g,
+      ((k % 2) - 0.5) * 0.3,
+      0,
+      (k < 2 ? -1 : 1) * 0.1,
+      [0, 0.004, 0.004, 0.004, 0.004, 0.0028, 0.0018, 0.0028, 0.0018, 0, 0, 0],
+      12,
+      C(0xc0c4c8),
+      PKM.steel,
+    );
+  return {
+    box: [-W / 2, 0, -D / 2, W / 2, H, D / 2],
+    spot: [0.04, 0.0, 0.06],
+    pts: [
+      [-0.08, 0.04, 0.02],
+      [0.08, 0.05, -0.02],
+      [0.0, 0.03, 0.07],
+      [-0.1, 0.04, -0.06],
+    ],
+    cam: { eye: [0.0, 0.42, 0.27], at: [0.0, 0.02, -0.02], fov: 0.62 },
+    key: { p: [0.2, 0.7, 0.3], col: mul3(PK_WARM, 2.3), cone: [0.9, 0.55] },
+    sky: [0.16, 0.16, 0.17],
+    gnd: [0.05, 0.05, 0.05],
+    rim: { p: [-0.5, 0.4, -0.4], col: [0.2, 0.2, 0.22] },
+    cover: (gc, lump) =>
+      pkAt(gc, 0, 0.004 + lump * 1.5, 0, 0.3, lump ? 0.1 : 0, 0, () =>
+        pkRBox(gc, 0, 0, 0, 0.16, 0.003, 0.11, 0.001, C(0x9a9ea2), PKM.steel),
+      ),
+  };
+}
+const PK_SETS = {
+  drawer: pkDrawer,
+  box: pkBox,
+  bin: pkBin,
+  dumpster: pkDumpster,
+  wardrobe: pkWardrobe,
+  books: pkBooks,
+  news: (g, gg, r, o) => pkPapers(g, gg, r, o, 'news'),
+  mail: (g, gg, r, o) => pkPapers(g, gg, r, o, 'mail'),
+  cage: (g, gg, r, o) => pkPapers(g, gg, r, o, 'cage'),
+  shelf: pkShop,
+  cooler: pkCooler,
+  fridge: pkFridge,
+  works: pkWorks,
+};
+// the fridge's door, hinged on the left: swung open when there's something to see
+function pkFridgeDoor(g) {
+  const white = C(0xf0f2f0);
+  pkRBox(g, 0.28, 0.22, 0, 0.56, 0.52, 0.05, 0.014, white, PKM.enamel);
+  pkRBox(g, 0.44, 0.25, 0.04, 0.02, 0.16, 0.025, 0.008, C(0xc8ccd0), PKM.steel);
+  for (const y of [0.18, 0.32]) pkRBox(g, 0.44, y, 0.031, 0.03, 0.012, 0.012, 0.004, C(0xb0b4b8), PKM.steel);
+  pkRBox(g, 0.2, 0.34, 0.027, 0.1, 0.13, 0.002, 0.0006, C(0xf6f2e8), PKM.note);
+  pkLathe(g, 0.2, 0.39, 0.027, [0, 0, 0.008, 0, 0.008, 0.004, 0, 0.005], 14, C(0xb8202a), PKM.plastic, {});
+}
+// ── your hand: the right one, palm down, fingers along +z from the wrist, thumb toward −x. Each finger joint its own
+// mesh, so gfx/peek bends them. Lengths and where each finger sits are kept for it.
+const PK_FINGERS = [
+  { x: -0.029, z: 0.094, len: [0.043, 0.026, 0.021], r: 0.0088 },
+  { x: -0.0095, z: 0.099, len: [0.047, 0.029, 0.022], r: 0.009 },
+  { x: 0.0098, z: 0.096, len: [0.044, 0.027, 0.021], r: 0.0085 },
+  { x: 0.0275, z: 0.088, len: [0.034, 0.021, 0.019], r: 0.0075 },
+  { x: -0.031, z: 0.03, len: [0.042, 0.032, 0.028], r: 0.0108, thumb: 1 },
+];
+function pkHandMeshes(skinHex, sleeveHex) {
+  const skin = mul3(C(skinHex), 0.86),
+    knuck = mix3(skin, C(0xb06a5a), 0.25),
+    segCol = (u, t) => mix3(skin, knuck, Math.max(0, 1 - Math.min(t, 1 - t) * 8) * 0.6),
+    H = { palm: null, sleeve: null, fingers: [] };
+  let g = new Geo();
+  pkRBox(g, 0, 0, 0.055, 0.084, 0.026, 0.09, 0.012, skin, PKM.skin);
+  for (const f of PK_FINGERS)
+    if (!f.thumb)
+      pkBlob(g, f.x, 0.008, f.z - 0.006, f.r * 1.05, f.r * 0.75, f.r * 0.9, 0.05, 2, 1, knuck, PKM.skin, {
+        nu: 12,
+        nv: 8,
+      });
+  pkBlob(g, -0.024, -0.004, 0.03, 0.02, 0.013, 0.03, 0.05, 2, 2, skin, PKM.skin);
+  pkTube(g, [0, 0, 0.03, 0, 0, -0.01, 0, 0.002, -0.07], (t) => 0.028 + t * 0.004, 18, skin, PKM.skin, { flat: 0.62 });
+  H.palm = pkMesh(g);
+  g = new Geo();
+  pkTube(g, [0, 0.003, -0.05, 0, 0.01, -0.25, 0, 0.026, -0.5], (t) => 0.036 + t * 0.016, 22, C(sleeveHex), PKM.cloth, {
+    flat: 0.82,
+  });
+  pkTube(g, [0, 0.003, -0.068, 0, 0.003, -0.044], 0.039, 22, mul3(C(sleeveHex), 0.85), PKM.cloth, { flat: 0.82 });
+  H.sleeve = pkMesh(g);
+  for (const f of PK_FINGERS) {
+    const segs = [];
+    for (let s = 0; s < 3; s++) {
+      g = new Geo();
+      const len = f.len[s],
+        r0 = f.r * (1 - s * 0.1),
+        r1 = f.r * (0.92 - s * 0.1);
+      pkTube(g, [0, 0, 0, 0, 0, len], (t) => lerp(r0, r1, t), 14, segCol, PKM.skin, { caps: true, flat: 0.86 });
+      if (s === 2)
+        pkRBox(
+          g,
+          0,
+          r1 * 0.72,
+          len * 0.66,
+          r1 * 1.45,
+          0.0016,
+          len * 0.62,
+          0.0007,
+          mix3(skin, C(0xf0d8d0), 0.5),
+          PKM.nail,
+        );
+      segs.push(pkMesh(g));
+    }
+    H.fingers.push(segs);
+  }
+  return H;
+}
+// ───────────── the rummage close-up. Your hands go into something and a square comes up beside you, the way the photo's
+// does: a few seconds somewhere else, very close. Not the town drawn again: a little stage of its own (gfx/peek-sets)
+// with what's really in there (gfx/peek-things, gfx/peek-junk) and your own hand going through it, under one lamp, with
+// a lens so close that only a sliver is sharp (gfx/peek-shader). Your fingers go looking; then, as the game decides
+// it (play/stashes, play/verbs), they find nothing, or something wedged in under the rest, or they pull the cover off
+// THEIR thing, or they bring out something to keep. Render only: what you find is still the rummage's business, and
+// nothing here touches the simulation or its random numbers.
+const PK = {
+  S: 512, // the square's pixels
+  on: false,
+  o: null,
+  how: 'rummage', // or 'pry': taking it apart
+  set: null, // the stage, with its meshes (gfx/peek-sets)
+  thing: null, // { mesh, glass, key, def, M } what's in there, hidden or found
+  cover: null, // what lies over it
+  door: null, // a fridge's
+  t0: 0, // R.time it came up
+  res: null, // what came of it: { kind: nothing | feel | reveal | take, key, what }
+  resAt: 0, // R.time the outcome starts to play
+  played: false,
+  endAt: 0,
+  track: null, // the hand's keys (pkTrackAt)
+  hold: null, // what the hand carries: 'cover' | 'thing'
+  holdM: new Float32Array(16), // where it is in the hand now
+  holdA: new Float32Array(16), // where it was in the hand when the fingers closed
+  holdB: new Float32Array(16), // where it settles: in the palm, the right way up once the palm turns up
+  lamp: 1,
+  expo: 0.6, // the stage's lamps are a set's numbers; this is the film they're shot on
+  focus: 0.4,
+  el: null,
+  cache: {},
+  hand: null,
+  handKey: '',
+};
+const PK_MIN = { rummage: 1.1, pry: 1.5 }; // real seconds of rooting about before anything turns up
+const PK_YAW = Math.PI + 0.52; // your right arm comes in from the bottom right, the fingers toward the far left corner
+const PK_EYE = [0, 0, 0],
+  PK_AT = [0, 0, 0],
+  PK_UP = [0, 1, 0],
+  PK_ZN = [0, 0, -1],
+  PK_HS = new Float32Array(10), // the hand now: t, x, y, z, yaw, pitch, roll, curl, spread, wiggle
+  PK_I = M4.ident(),
+  PK_W = new Float32Array(16),
+  PK_FM = [],
+  PK_V = new Float32Array(16),
+  PK_P = new Float32Array(16),
+  PK_VP = new Float32Array(16),
+  PK_LV = new Float32Array(16),
+  PK_LP = new Float32Array(16),
+  PK_LVP = new Float32Array(16),
+  PK_TM = new Float32Array(16),
+  PK_OCC = new Float32Array(24),
+  PK_KD = [0, 0, 0],
+  PK_KC = [0, 0, 0],
+  PK_ONE = [1, 1, 1],
+  PK_DIM = [0.5, 0.5, 0.5];
+for (let k = 0; k < 15; k++) PK_FM.push(new Float32Array(16));
+// ── matrices into arrays made once (gfx: no allocation per frame)
+function pkLookAtInto(m, e, t, up) {
+  let zx = e[0] - t[0],
+    zy = e[1] - t[1],
+    zz = e[2] - t[2],
+    l = Math.hypot(zx, zy, zz) || 1;
+  zx /= l;
+  zy /= l;
+  zz /= l;
+  let xx = up[1] * zz - up[2] * zy,
+    xy = up[2] * zx - up[0] * zz,
+    xz = up[0] * zy - up[1] * zx;
+  l = Math.hypot(xx, xy, xz) || 1;
+  xx /= l;
+  xy /= l;
+  xz /= l;
+  const yx = zy * xz - zz * xy,
+    yy = zz * xx - zx * xz,
+    yz = zx * xy - zy * xx;
+  m.fill(0);
+  m[0] = xx;
+  m[1] = yx;
+  m[2] = zx;
+  m[4] = xy;
+  m[5] = yy;
+  m[6] = zy;
+  m[8] = xz;
+  m[9] = yz;
+  m[10] = zz;
+  m[12] = -(xx * e[0] + xy * e[1] + xz * e[2]);
+  m[13] = -(yx * e[0] + yy * e[1] + yz * e[2]);
+  m[14] = -(zx * e[0] + zy * e[1] + zz * e[2]);
+  m[15] = 1;
+  return m;
+}
+function pkPerspInto(m, fov, n, f) {
+  const k = 1 / Math.tan(fov / 2);
+  m.fill(0);
+  m[0] = k;
+  m[5] = k;
+  m[10] = (f + n) / (n - f);
+  m[11] = -1;
+  m[14] = (2 * f * n) / (n - f);
+  return m;
+}
+function pkOrthoInto(m, h, n, f) {
+  m.fill(0);
+  m[0] = 1 / h;
+  m[5] = 1 / h;
+  m[10] = -2 / (f - n);
+  m[14] = -(f + n) / (f - n);
+  m[15] = 1;
+  return m;
+}
+// the turning part of a matrix made square again (after blending two of them)
+function pkOrtho(m) {
+  let l = Math.hypot(m[0], m[1], m[2]) || 1;
+  m[0] /= l;
+  m[1] /= l;
+  m[2] /= l;
+  const d = m[4] * m[0] + m[5] * m[1] + m[6] * m[2];
+  m[4] -= d * m[0];
+  m[5] -= d * m[1];
+  m[6] -= d * m[2];
+  l = Math.hypot(m[4], m[5], m[6]) || 1;
+  m[4] /= l;
+  m[5] /= l;
+  m[6] /= l;
+  m[8] = m[1] * m[6] - m[2] * m[5];
+  m[9] = m[2] * m[4] - m[0] * m[6];
+  m[10] = m[0] * m[5] - m[1] * m[4];
+}
+// a thing in your palm: its middle just off the palm, its top toward the palm's side (up, once the palm turns up)
+function pkHeld(o, th) {
+  const b = th.T.bb,
+    hh = (b[4] - b[1]) / 2;
+  o.set(M4.mul(M4.mul(M4.trans(0, -0.022 - hh, 0.075), M4.rotZ(Math.PI)), M4.trans(-th.lc[0], -th.lc[1], -th.lc[2])));
+}
+// a rigid transform's inverse (rotation and translation only)
+function pkRigidInv(o, m) {
+  o.fill(0);
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) o[i * 4 + j] = m[j * 4 + i];
+  for (let i = 0; i < 3; i++) o[12 + i] = -(o[i] * m[12] + o[4 + i] * m[13] + o[8 + i] * m[14]);
+  o[15] = 1;
+  return o;
+}
+// ── the stage's GPU side, made on the first rummage
+function pkInit() {
+  if (PK.prog) return true;
+  try {
+    PK.prog = compileProgram(PK_VS, PK_FS);
+    PK.shProg = compileProgram(PK_SHADOW_VS, PK_SHADOW_FS);
+    PK.dofProg = compileProgram(QVS, PK_DOF_FS);
+  } catch (e) {
+    console.error(e);
+    PK.prog = null;
+    return false;
+  }
+  const S = PK.S,
+    samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES) || 0),
+    fb = gl.createFramebuffer(),
+    cr = gl.createRenderbuffer(),
+    dr = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, cr);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, R.hdr ? gl.RGBA16F : gl.RGBA8, S, S);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, dr);
+  gl.renderbufferStorageMultisample(gl.RENDERBUFFER, samples, gl.DEPTH_COMPONENT24, S, S);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, cr);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dr);
+  PK.ms = fb;
+  PK.scene = makeTarget(S, S, R.hdr);
+  PK.dof = makeTarget(S, S, R.hdr);
+  PK.blm = [];
+  for (let k = 1; k <= 4; k++) PK.blm.push(makeTarget(S >> k, S >> k, R.hdr));
+  PK.out = makeTarget(S, S, false);
+  const SM = 1024,
+    st = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, st);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, SM, SM, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+  const sf = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, sf);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, st, 0);
+  gl.drawBuffers([gl.NONE]);
+  gl.readBuffer(gl.NONE);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  PK.shTex = st;
+  PK.shFb = sf;
+  PK.SM = SM;
+  return true;
+}
+// ── building what's on the stage (at the open and when the outcome comes: events, never per frame)
+function pkBuild(key, fn) {
+  if (PK.cache[key]) return PK.cache[key];
+  const g = new Geo(),
+    gg = new Geo(),
+    info = fn(g, gg) || {};
+  info.mesh = g.i.length ? pkMesh(g) : null;
+  info.glass = gg.i.length ? pkMesh(gg, true) : null;
+  const bb = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+  for (const P of [g.p, gg.p])
+    for (let k = 0; k < P.length; k++) {
+      bb[k % 3] = Math.min(bb[k % 3], P[k]);
+      bb[3 + (k % 3)] = Math.max(bb[3 + (k % 3)], P[k]);
+    }
+  info.bb = isFinite(bb[0]) ? bb : [-0.02, 0, -0.02, 0.02, 0.04, 0.02];
+  PK.cache[key] = info;
+  return info;
+}
+function pkThingFor(key, look) {
+  const def = PK_THINGS[key];
+  if (!def) return null;
+  const T = pkBuild('thing:' + key + ':' + (look || ''), (g, gg) => {
+    def.b(g, gg, look || G.faction, pkRng(key.length * 31 + 7));
+  });
+  const b = T.bb,
+    w = Math.max(b[3] - b[0], b[5] - b[2]),
+    lie = !def.fr && b[4] - b[1] > 0.07 && w < 0.11; // a jar, a bottle: on its side, wedged in
+  return {
+    key,
+    def,
+    T,
+    lie,
+    lc: [(b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2], // the middle of it, in its own space
+    h: lie ? b[3] - b[0] : b[4] - b[1], // how tall it lies
+    r: (lie ? Math.max(b[4] - b[1], b[5] - b[2]) : w) / 2, // how far it reaches from its middle, across
+    M: new Float32Array(16),
+    on: true,
+  };
+}
+// where the thing lies: on the set's spot, settled on the floor (a fridge's shelves are the whole fridge)
+function pkPlaceThing(th) {
+  const S = PK.set,
+    b = th.T.bb;
+  if (th.def.fr) return th.M.set(PK_I);
+  const R0 = th.lie ? M4.rotZ(Math.PI / 2) : M4.ident(),
+    c = th.lie ? [-(b[1] + b[4]) / 2, b[0], (b[2] + b[5]) / 2] : [(b[0] + b[3]) / 2, b[1], (b[2] + b[5]) / 2];
+  th.M.set(
+    M4.mul(M4.mul(M4.mul(M4.trans(S.spot[0], S.spot[1], S.spot[2]), M4.rotY(0.35)), M4.trans(-c[0], -c[1], -c[2])), R0),
+  );
+}
+// the middle of the thing, wherever it is now
+const PK_TC = [0, 0, 0];
+function pkThingAt(th) {
+  const M = th.M,
+    x = th.lc[0],
+    y = th.lc[1],
+    z = th.lc[2];
+  PK_TC[0] = M[0] * x + M[4] * y + M[8] * z + M[12];
+  PK_TC[1] = M[1] * x + M[5] * y + M[9] * z + M[13];
+  PK_TC[2] = M[2] * x + M[6] * y + M[10] * z + M[14];
+  return PK_TC;
+}
+// the hand, dressed as you are
+function pkHand() {
+  const L = PLAYER && PLAYER.look,
+    key = L ? L.skin + ':' + L.top : '';
+  if (PK.hand && PK.handKey === key) return PK.hand;
+  PK.hand = pkHandMeshes(L ? L.skin : 0xd8b399, L ? L.top : 0x8a6e36);
+  PK.handKey = key;
+  return PK.hand;
+}
+// ── where the hand goes. A key: [t, x, y, z, yaw, pitch, roll, curl, spread, wiggle]; the wrist goes through them on a
+// smooth path and eases into each one, the way a hand slows over what it's feeling for.
+const PK_REACH = [0, 0, 0];
+// the wrist for the fingers to be at p: the reach v (in the hand's frame) turned by yaw and pitch, taken off p
+function pkReach(p, yaw, pitch, vy, vz) {
+  const cp = Math.cos(pitch),
+    sp = Math.sin(pitch),
+    y = vy * cp - vz * sp,
+    z = vy * sp + vz * cp,
+    cy = Math.cos(yaw),
+    sy = Math.sin(yaw);
+  PK_REACH[0] = p[0] - sy * z;
+  PK_REACH[1] = p[1] - y;
+  PK_REACH[2] = p[2] - cy * z;
+  return PK_REACH;
+}
+function pkKeyAt(t, p, yaw, pitch, roll, curl, spread, wig, vy, vz) {
+  const w = pkReach(p, yaw, pitch, vy == null ? -0.02 : vy, vz == null ? 0.15 : vz);
+  return [t, w[0], w[1], w[2], yaw, pitch, roll, curl, spread, wig];
+}
+function pkTrackAt(tr, t, S) {
+  const n = tr.length;
+  let k = 0;
+  while (k < n - 2 && tr[k + 1][0] <= t) k++;
+  const A = tr[k],
+    B = tr[Math.min(n - 1, k + 1)],
+    P0 = tr[Math.max(0, k - 1)],
+    P3 = tr[Math.min(n - 1, k + 2)],
+    s = B[0] > A[0] ? sstep(A[0], B[0], t) : 1;
+  for (let i = 1; i < 4; i++) {
+    const p0 = P0[i],
+      p1 = A[i],
+      p2 = B[i],
+      p3 = P3[i],
+      s2 = s * s,
+      s3 = s2 * s;
+    S[i] = 0.5 * (2 * p1 + (-p0 + p2) * s + (2 * p0 - 5 * p1 + 4 * p2 - p3) * s2 + (-p0 + 3 * p1 - 3 * p2 + p3) * s3);
+  }
+  S[4] = A[4] + angDiff(A[4], B[4]) * s;
+  for (let i = 5; i < 10; i++) S[i] = lerp(A[i], B[i], s);
+  S[0] = t;
+  return S;
+}
+// the way in: from down by the lens, bottom right, where your arm is
+function pkEntry() {
+  const c = PK.set.cam;
+  return [lerp(c.at[0], c.eye[0], 0.6) + 0.2, lerp(c.at[1], c.eye[1], 0.6) - 0.12, lerp(c.at[2], c.eye[2], 0.6)];
+}
+function pkSearchTrack() {
+  const S = PK.set,
+    pry = PK.how === 'pry',
+    rnd = pkRng((PK.o ? PK.o.idx : 1) * 13 + (pry ? 5 : 0)),
+    tr = [],
+    e = pkEntry();
+  tr.push([0, e[0], e[1], e[2], PK_YAW, 0.1, 0.1, 0.1, 0.4, 0]);
+  if (S.door) {
+    // a fridge: the hand goes to the handle and waits on what you'll see
+    const h = [0.16, 0.25, 0.27];
+    tr.push(pkKeyAt(0.45, h, Math.PI, 0.05, -1.45, 0.78, 0.2, 0, -0.01, 0.1));
+    tr.push(pkKeyAt(9, h, Math.PI, 0.05, -1.45, 0.82, 0.2, 0.05, -0.01, 0.1));
+    return tr;
+  }
+  const P = S.pts,
+    dt = pry ? 0.26 : 0.34;
+  let t = 0.45;
+  const a0 = P[0];
+  tr.push(pkKeyAt(0.32, [a0[0], a0[1] + 0.07, a0[2]], PK_YAW, 0.25, 0, 0.2, 0.5, 0.2));
+  for (let k = 0; k < 30; k++) {
+    const p = P[k % P.length],
+      j = [p[0] + (rnd() - 0.5) * 0.05, p[1] + (k % 2 ? 0.012 : -0.006), p[2] + (rnd() - 0.5) * 0.04];
+    tr.push(
+      pkKeyAt(
+        t,
+        j,
+        PK_YAW + (rnd() - 0.5) * (pry ? 0.7 : 0.45),
+        0.3 + rnd() * 0.2,
+        (rnd() - 0.5) * 0.4,
+        0.14 + rnd() * 0.22,
+        0.5 + rnd() * 0.5,
+        pry ? 1.4 : 1,
+      ),
+    );
+    t += dt * (0.8 + rnd() * 0.5);
+  }
+  return tr;
+}
+// the outcome, from wherever the hand is now
+function pkOutcomeTrack() {
+  const S = PK.set,
+    T = R.time - PK.t0,
+    h = PK_HS,
+    cur = [T, h[1], h[2], h[3], h[4], h[5], h[6], h[7], h[8], h[9]],
+    tr = [cur],
+    e = pkEntry(),
+    kind = PK.res.kind,
+    th = PK.thing,
+    tc = th && pkThingAt(th),
+    top = th ? [tc[0], S.spot[1] + th.h + 0.004, tc[2]] : [S.spot[0], S.spot[1] + 0.02, S.spot[2]];
+  if (S.door) {
+    tr.push([T + 0.32, h[1] - 0.18, h[2], h[3] + 0.12, Math.PI, 0.05, -1.4, 0.8, 0.2, 0]);
+    tr.push([T + 0.75, e[0] - 0.4, e[1], e[2] + 0.1, Math.PI, 0.2, -1.0, 0.3, 0.3, 0]);
+    PK.endAt = T + (kind === 'nothing' ? 2.4 : 3.3);
+    return tr;
+  }
+  if (kind === 'nothing' || !th) {
+    tr.push([T + 0.35, h[1], h[2] + 0.08, h[3] + 0.02, PK_YAW, 0.2, 0.2, 0.2, 0.5, 0.3]);
+    tr.push([T + 0.85, e[0], e[1], e[2], PK_YAW, 0.1, 0.3, 0.1, 0.6, 0]);
+    PK.endAt = T + 1.7;
+  } else if (kind === 'feel') {
+    const lump = [top[0], top[1] + 0.006, top[2]];
+    tr.push(pkKeyAt(T + 0.3, [lump[0], lump[1] + 0.04, lump[2]], PK_YAW, 0.4, 0, 0.25, 0.5, 0.2));
+    tr.push(pkKeyAt(T + 0.55, lump, PK_YAW, 0.45, 0, 0.42, 0.6, 0.6));
+    tr.push(pkKeyAt(T + 0.8, [lump[0], lump[1] + 0.012, lump[2]], PK_YAW, 0.42, 0.1, 0.3, 0.5, 0.3));
+    tr.push(pkKeyAt(T + 1.05, [lump[0], lump[1] - 0.003, lump[2]], PK_YAW, 0.48, -0.05, 0.55, 0.7, 0.7));
+    tr.push(pkKeyAt(T + 2.0, [lump[0], lump[1] - 0.001, lump[2]], PK_YAW, 0.48, -0.05, 0.5, 0.7, 0.4));
+    PK.endAt = T + 2.2;
+  } else if (kind === 'reveal') {
+    const c = [top[0], top[1] + 0.004, top[2]];
+    tr.push(pkKeyAt(T + 0.25, [c[0], c[1] + 0.05, c[2]], PK_YAW, 0.4, 0, 0.3, 0.6, 0));
+    tr.push(pkKeyAt(T + 0.45, c, PK_YAW, 0.45, 0, 0.8, 0.3, 0, -0.035, 0.115));
+    tr.push(
+      pkKeyAt(T + 0.8, [c[0] + 0.14, c[1] + 0.12, c[2] + 0.03], PK_YAW + 0.25, 0.2, 0.5, 0.8, 0.3, 0, -0.035, 0.115),
+    );
+    tr.push(
+      pkKeyAt(T + 1.25, [c[0] + 0.5, c[1] + 0.22, c[2] - 0.02], PK_YAW + 0.5, 0.1, 0.6, 0.8, 0.3, 0, -0.035, 0.115),
+    ); // out of the picture, to the right
+    PK.grabAt = T + 0.45;
+    PK.endAt = T + 3.6;
+  } else {
+    const c = PK.set.cam,
+      show = [
+        lerp(c.at[0], c.eye[0], 0.22) - 0.02,
+        lerp(c.at[1], c.eye[1], 0.22) + 0.03,
+        lerp(c.at[2], c.eye[2], 0.22),
+      ];
+    // it comes up out of there and the hand turns it over to you, palm up
+    tr.push(pkKeyAt(T + 0.25, [top[0], top[1] + 0.05, top[2]], PK_YAW, 0.4, 0, 0.3, 0.6, 0));
+    tr.push(pkKeyAt(T + 0.5, top, PK_YAW, 0.45, 0, 0.72, 0.3, 0, -0.035, 0.115));
+    tr.push(
+      pkKeyAt(T + 0.85, [top[0] + 0.01, top[1] + 0.08, top[2] + 0.03], PK_YAW, 0.3, -0.6, 0.68, 0.3, 0, -0.035, 0.115),
+    );
+    const flat = th && th.T.bb[4] - th.T.bb[1] < 0.03, // a paper, a photo: its face to you
+      roll = flat ? -2.7 : -2.0,
+      pitch = flat ? 0.35 : -0.15;
+    tr.push(pkKeyAt(T + 1.25, show, PK_YAW + 0.15, pitch, roll, flat ? 0.45 : 0.6, 0.3, 0, -0.035, 0.115));
+    tr.push(
+      pkKeyAt(
+        T + 2.7,
+        [show[0] + 0.008, show[1] + 0.005, show[2]],
+        PK_YAW + 0.05,
+        pitch - 0.05,
+        roll - 0.1,
+        flat ? 0.45 : 0.6,
+        0.3,
+        0,
+        -0.035,
+        0.115,
+      ),
+    );
+    PK.grabAt = T + 0.5;
+    PK.endAt = T + 2.9;
+  }
+  return tr;
+}
+// ── the API the rummage calls (play/stashes, play/verbs)
+// your hands go in. hide: what's really in there, if anything ({ k, look }), so it can lie under the rest
+function peekOpen(o, how, hide) {
+  if (!R.ready || !o || !pkEl() || !pkInit()) return;
+  if (VF.mode) vfClose(true);
+  const fam = pkFamily(o.type),
+    r = roomAt(o.cx, o.cz),
+    night = clamp(1 - (SKY[0] * 0.3 + SKY[1] * 0.59 + SKY[2] * 0.11) / 0.35, 0, 1) > 0.5,
+    ctx = { type: o.type, out: !r, night },
+    v = o.idx % 3;
+  PK.o = o;
+  PK.how = how || 'rummage';
+  const sk = o.type + ':' + v + ':' + (ctx.out ? 1 : 0) + (night ? 1 : 0);
+  PK.set = pkBuild('set:' + sk, (g, gg) => {
+    const s = PK_SETS[fam](g, gg, pkRng(o.idx * 7 + v), ctx);
+    if (o.type === 'fridge_office') pkFridgeLoad(g, gg, 'office', pkRng(3));
+    s.id = sk;
+    return s;
+  });
+  PK.door = PK.set.door ? pkBuild('door', (g) => pkFridgeDoor(g)) : null;
+  if (PK.door) PK.door.M = PK.door.M || new Float32Array(16);
+  PK.thing = hide && pkKey(hide.k) ? pkThingFor(pkKey(hide.k), hide.look) : null;
+  if (PK.thing) pkPlaceThing(PK.thing);
+  pkCover();
+  PK.on = true;
+  PK.t0 = R.time;
+  PK.res = null;
+  PK.played = false;
+  PK.hold = null;
+  PK.grabAt = 0;
+  PK.endAt = 0;
+  PK.lamp = PK.set.door ? 0.05 : 1;
+  PK.doorK = 0;
+  PK.closing = 0;
+  PK.track = pkSearchTrack();
+  pkTrackAt(PK.track, 0, PK_HS);
+  PK.focus = Math.hypot(
+    PK.set.cam.eye[0] - PK.set.cam.at[0],
+    PK.set.cam.eye[1] - PK.set.cam.at[1],
+    PK.set.cam.eye[2] - PK.set.cam.at[2],
+  );
+  pkHand();
+  const el = PK.el;
+  el.className = '';
+  pkCap(o.name || '');
+  el.hidden = false;
+}
+// the cover over the spot: a lump in it if something's under there
+// a big thing gets a bigger cover, and a tall one a tent of it: never a jar's lid poking through the paper
+function pkCover() {
+  const S = PK.set,
+    th = PK.thing && !PK.thing.def.fr ? PK.thing : null,
+    sc = th ? clamp((2.3 * th.r) / 0.2, 1, 1.4) : 1,
+    rad = th ? clamp(th.r / (0.1 * sc), 0.15, 0.8) : 0.3,
+    lump = th ? clamp(th.h * 1.05 + 0.003, 0.004, 0.065) : 0;
+  PK.cover = pkBuild('cover:' + S.id + ':' + Math.round(lump * 400) + ':' + Math.round(rad * 20), (g) =>
+    S.cover(g, lump, rad),
+  );
+  const M = (PK.cover.M = PK.cover.M || new Float32Array(16));
+  M4.jointInto(M, PK_I, S.spot[0], S.spot[1], S.spot[2], 0, 0.35, 0);
+  for (const i of [0, 1, 2, 8, 9, 10]) M[i] *= sc;
+}
+// what came of it. kind: 'nothing' · 'feel' (something in there, not out yet) · 'reveal' (the cover comes off it) ·
+// 'take' (your hand brings it out). key: a stash's k, a FINDS key or the note's words (gfx/peek-junk pkKey)
+function peekShow(kind, key, what, look) {
+  if (!PK.on || PK.res) return;
+  const k = pkKey(key);
+  if ((kind === 'reveal' || kind === 'take') && k && (!PK.thing || PK.thing.key !== k)) {
+    PK.thing = pkThingFor(k, look);
+    if (PK.thing) pkPlaceThing(PK.thing);
+    pkCover();
+  }
+  if ((kind === 'reveal' || kind === 'take') && !PK.thing) kind = 'nothing';
+  PK.res = { kind, key: k, what: what || '' };
+  PK.resAt = Math.max(R.time, PK.t0 + (PK_MIN[PK.how] || 1.1));
+}
+// the rummage stopped before anything came of it
+function peekStop() {
+  if (PK.on && !PK.res) PK.closing = R.time;
+}
+function peekClose() {
+  PK.on = false;
+  PK.res = null;
+  PK.hold = null;
+  if (PK.el) PK.el.hidden = true;
+  vfUnclip();
+}
+function pkEl() {
+  if (PK.el) return PK.el;
+  const el = $('#peek');
+  if (!el) return null;
+  PK.el = el;
+  PK.win = el.querySelector('.pk-win');
+  PK.capEl = el.querySelector('.pk-cap');
+  return el;
+}
+function pkCap(s) {
+  if (PK.capEl) PK.capEl.textContent = s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+}
+// ── every frame, after the photo's square (gfx/frame renderFrame)
+function peekFrame() {
+  if (!PK.on) return;
+  const P = PLAYER;
+  if (!G.started || G.over || UI.caseOpen || UI.scene || CAP.on || !P || !P.onMap || VF.mode) return peekClose();
+  const now = R.time,
+    t = now - PK.t0;
+  if (PK.closing) {
+    if (now - PK.closing > 0.3) return peekClose();
+    if (!PK.el.classList.contains('out')) PK.el.classList.add('out');
+  } else if (!PK.res && t > 9) PK.closing = now; // nothing ever came of it
+  if (PK.res && !PK.played && now >= PK.resAt) pkPlay();
+  if (PK.played && t > PK.endAt) {
+    if (!PK.el.classList.contains('out')) PK.el.classList.add('out');
+    if (t > PK.endAt + 0.45) return peekClose();
+  }
+  pkTrackAt(PK.track, t, PK_HS);
+  pkAnimate(t);
+  pkRender(t);
+  squareBlit(PK.win, PK.out, PK.S);
+}
+// the outcome starts playing: the hand's new path, and the words under the square
+function pkPlay() {
+  PK.played = true;
+  const r = PK.res;
+  PK.track = pkOutcomeTrack();
+  if (r.kind === 'feel') pkCap('Something in there');
+  else if (r.kind === 'nothing') pkCap(r.what || 'Nothing');
+  else pkCap(r.what || '');
+  if (r.kind === 'reveal' || r.kind === 'take') PK.el.classList.add('found');
+  if (PK.thing && PK.thing.def.g && (r.kind === 'reveal' || r.kind === 'take')) PK.el.classList.add('theirs');
+}
+// the hand's bones, what it holds, a fridge's door, the lamp
+function pkAnimate(t) {
+  const S = PK_HS,
+    played = PK.played,
+    rk = played && PK.res.kind;
+  M4.jointInto(PK_W, PK_I, S[1], S[2], S[3], S[5], S[4], S[6]);
+  for (let f = 0; f < 5; f++) {
+    const F = PK_FINGERS[f],
+      m0 = PK_FM[f * 3],
+      m1 = PK_FM[f * 3 + 1],
+      m2 = PK_FM[f * 3 + 2],
+      c = clamp(S[7] + S[9] * 0.2 * Math.sin(t * 8.5 + f * 1.9) * (F.thumb ? 0.5 : 1), -0.15, 1.1);
+    if (F.thumb) {
+      M4.jointInto(m0, PK_W, F.x, -0.006, F.z, 0.3 + c * 0.45, -0.85 + S[8] * 0.25, 0.85 - c * 0.35);
+      M4.jointInto(m1, m0, 0, 0, F.len[0], 0.12 + c * 0.45, 0, 0);
+      M4.jointInto(m2, m1, 0, 0, F.len[1], 0.1 + c * 0.6, 0, 0);
+    } else {
+      M4.jointInto(m0, PK_W, F.x, 0, F.z, 0.05 + c * 1.0, (f - 1.5) * 0.07 * (0.3 + S[8]), 0);
+      M4.jointInto(m1, m0, 0, 0, F.len[0], 0.06 + c * 1.25, 0, 0);
+      M4.jointInto(m2, m1, 0, 0, F.len[1], 0.04 + c * 0.85, 0, 0);
+    }
+  }
+  // the grip: from then on it goes where the hand goes
+  if (played && PK.grabAt && !PK.hold && t >= PK.grabAt) {
+    const held = rk === 'reveal' ? PK.cover : PK.thing;
+    if (held && held.M) {
+      PK.hold = rk === 'reveal' ? 'cover' : 'thing';
+      pkRigidInv(PK_TM, PK_W);
+      M4.mulInto(PK.holdA, PK_TM, held.M);
+      if (PK.hold === 'thing') pkHeld(PK.holdB, PK.thing);
+      else PK.holdB.set(PK.holdA);
+    }
+  }
+  if (PK.hold) {
+    const k = PK.hold === 'thing' ? sstep(PK.grabAt + 0.1, PK.grabAt + 0.75, t) : 0,
+      A = PK.holdA,
+      B = PK.holdB,
+      H = PK.holdM;
+    for (let i = 0; i < 16; i++) H[i] = A[i] + (B[i] - A[i]) * k;
+    pkOrtho(H);
+    M4.mulInto((PK.hold === 'cover' ? PK.cover : PK.thing).M, PK_W, H);
+  }
+  if (PK.door) {
+    const T = played ? t - (PK.resAt - PK.t0) : -1,
+      k = T < 0 ? 0 : sstep(0, 0.75, T);
+    PK.doorK = k;
+    M4.jointInto(PK.door.M, PK_I, -0.28, 0, 0.215, 0, -k * 1.95, 0);
+    // the light inside comes on with a stutter as the door swings
+    PK.lamp = T < 0.12 ? 0.05 : T < 0.2 ? 0.6 : T < 0.26 ? 0.2 : 1;
+  }
+}
+// ── drawing it
+function pkDrawAt(m, M, U, tint) {
+  if (!m) return;
+  gl.uniformMatrix4fv(U.uModel, false, M);
+  if (U.uTint) gl.uniform3fv(U.uTint, tint || PK_ONE);
+  gl.bindVertexArray(m.vao);
+  gl.drawElements(gl.TRIANGLES, m.count, gl.UNSIGNED_INT, 0);
+}
+// everything solid: the set, the cover, the thing, a door, your hand. glass: the see-through parts after
+function pkDrawAll(U, glass) {
+  const S = PK.set,
+    th = PK.thing,
+    hand = PK.hand,
+    showHand = !glass;
+  if (glass) {
+    if (S.glass) pkDrawAt(S.glass, PK_I, U);
+    if (th && th.T.glass) pkDrawAt(th.T.glass, th.M, U);
+    return;
+  }
+  if (S.mesh) pkDrawAt(S.mesh, PK_I, U);
+  if (PK.cover && PK.cover.mesh) pkDrawAt(PK.cover.mesh, PK.cover.M, U);
+  if (th && th.T.mesh) pkDrawAt(th.T.mesh, th.M, U, !PK.played && th.def.g ? PK_DIM : null);
+  if (PK.door && PK.door.mesh) pkDrawAt(PK.door.mesh, PK.door.M, U);
+  if (showHand && hand) {
+    pkDrawAt(hand.palm, PK_W, U);
+    pkDrawAt(hand.sleeve, PK_W, U);
+    for (let f = 0; f < 5; f++) for (let s = 0; s < 3; s++) pkDrawAt(hand.fingers[f][s], PK_FM[f * 3 + s], U);
+  }
+}
+function pkCamera(t) {
+  const c = PK.set.cam,
+    th = PK.thing,
+    played = PK.played,
+    kind = played ? PK.res.kind : null,
+    T = played ? t - (PK.resAt - PK.t0) : 0,
+    show = kind === 'reveal' || kind === 'take',
+    room =
+      th && !th.def.fr
+        ? clamp(1 - (th.r * 3.4) / Math.hypot(c.eye[0] - c.at[0], c.eye[1] - c.at[1], c.eye[2] - c.at[2]), 0, 1)
+        : 1, // a big thing keeps the lens back
+    push =
+      Math.min(0.12, t * 0.03) +
+      (show
+        ? sstep(0.4, 2.4, T) * Math.min(PK.set.door ? 0.22 : 0.32, room)
+        : kind === 'feel'
+          ? sstep(0.2, 1.6, T) * 0.15
+          : 0);
+  let fx = c.at[0],
+    fy = c.at[1],
+    fz = c.at[2];
+  if (show && th && !th.def.fr) {
+    const k = sstep(0.3, 1.6, T),
+      tc = pkThingAt(th),
+      tx = tc[0],
+      ty = tc[1],
+      tz = tc[2];
+    fx = lerp(fx, tx, k);
+    fy = lerp(fy, ty, k);
+    fz = lerp(fz, tz, k);
+  }
+  for (let i = 0; i < 3; i++) {
+    const at = i === 0 ? fx : i === 1 ? fy : fz;
+    PK_AT[i] = at;
+    PK_EYE[i] = at + (c.eye[i] - c.at[i]) * (1 - push);
+  }
+  PK_EYE[0] += Math.sin(t * 0.9) * 0.004 + Math.sin(t * 2.3) * 0.0015;
+  PK_EYE[1] += Math.sin(t * 1.3 + 1) * 0.003;
+  // the focus: on the hand while it looks, then on what it found
+  const palmX = PK_W[12] + PK_W[8] * 0.09,
+    palmY = PK_W[13] + PK_W[9] * 0.09,
+    palmZ = PK_W[14] + PK_W[10] * 0.09;
+  let tx = palmX,
+    ty = palmY,
+    tz = palmZ;
+  if (PK.set.door && (!played || T < 0.5)) {
+    tx = 0.16;
+    ty = 0.25;
+    tz = 0.26;
+  } else if (PK.set.door) {
+    tx = fx;
+    ty = fy;
+    tz = fz;
+  } else if (played && (show || kind === 'feel') && th && T > 0.5) {
+    const tc = pkThingAt(th);
+    tx = tc[0];
+    ty = tc[1];
+    tz = tc[2];
+  }
+  const d = Math.hypot(tx - PK_EYE[0], ty - PK_EYE[1], tz - PK_EYE[2]);
+  PK.focus += (d - PK.focus) * 0.12;
+  pkLookAtInto(PK_V, PK_EYE, PK_AT, PK_UP);
+  pkPerspInto(PK_P, c.fov * (1 - push * 0.25), 0.01, 4);
+  M4.mulInto(PK_VP, PK_P, PK_V);
+}
+function pkDofSet(u) {
+  bindTex(0, PK.scene.tex, u.uSrc);
+  gl.uniform2f(u.uTexel, 1 / PK.S, 1 / PK.S);
+  gl.uniform1f(u.uFocus, PK.focus);
+  gl.uniform1f(u.uAper, 2.4);
+  gl.uniform1f(u.uFar, 3);
+}
+function pkOcc(n, x, y, z, r) {
+  if (n >= 6) return n;
+  PK_OCC[n * 4] = x;
+  PK_OCC[n * 4 + 1] = y;
+  PK_OCC[n * 4 + 2] = z;
+  PK_OCC[n * 4 + 3] = r;
+  return n + 1;
+}
+function pkRender(t) {
+  const S = PK.set,
+    played = PK.played,
+    kind = played ? PK.res.kind : null,
+    T = played ? t - (PK.resAt - PK.t0) : 0,
+    th = PK.thing,
+    theirs = th && th.def.g && (kind === 'reveal' || kind === 'take');
+  pkCamera(t);
+  // the lamp: parallel light from where it hangs onto the middle of the set
+  const kp = S.key.p,
+    at = S.cam.at;
+  let dx = at[0] - kp[0],
+    dy = at[1] - kp[1],
+    dz = at[2] - kp[2];
+  const dl = Math.hypot(dx, dy, dz) || 1;
+  PK_KD[0] = dx / dl;
+  PK_KD[1] = dy / dl;
+  PK_KD[2] = dz / dl;
+  const flick = theirs ? 1 + 0.06 * Math.sin(t * 23) * Math.sin(t * 7.1) : 1;
+  for (let i = 0; i < 3; i++) PK_KC[i] = S.key.col[i] * PK.lamp * flick * PK.expo;
+  pkLookAtInto(PK_LV, kp, at, Math.abs(PK_KD[1]) > 0.95 ? PK_ZN : PK_UP);
+  pkOrthoInto(PK_LP, 0.5, 0.01, dl + 1.2);
+  M4.mulInto(PK_LVP, PK_LP, PK_LV);
+  // the soft dark under the things in there: your palm, your fingers, what's hidden
+  let n = pkOcc(0, PK_W[12] + PK_W[8] * 0.06, PK_W[13] + PK_W[9] * 0.06 - 0.01, PK_W[14] + PK_W[10] * 0.06, 0.045);
+  n = pkOcc(n, PK_W[12] + PK_W[8] * 0.13, PK_W[13] + PK_W[9] * 0.13 - 0.01, PK_W[14] + PK_W[10] * 0.13, 0.03);
+  if (th && !th.def.fr) {
+    const tc = pkThingAt(th);
+    n = pkOcc(n, tc[0], tc[1], tc[2], Math.min(th.r * 0.8, 0.08));
+  }
+  gl.disable(gl.BLEND);
+  gl.disable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthMask(true);
+  // the shadow
+  gl.bindFramebuffer(gl.FRAMEBUFFER, PK.shFb);
+  gl.viewport(0, 0, PK.SM, PK.SM);
+  gl.clear(gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.POLYGON_OFFSET_FILL);
+  gl.polygonOffset(1.5, 3);
+  const SH = PK.shProg;
+  gl.useProgram(SH.p);
+  gl.uniformMatrix4fv(SH.U.uLVP, false, PK_LVP);
+  pkDrawAll(SH.U, false);
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+  // the picture
+  gl.bindFramebuffer(gl.FRAMEBUFFER, PK.ms);
+  gl.viewport(0, 0, PK.S, PK.S);
+  gl.clearColor(0.012, 0.01, 0.009, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  const M = PK.prog,
+    U = M.U;
+  gl.useProgram(M.p);
+  gl.activeTexture(gl.TEXTURE4);
+  gl.bindTexture(gl.TEXTURE_2D, PK.shTex);
+  gl.uniform1i(U.uShadow, 4);
+  gl.uniform2f(U.uShTexel, 1 / PK.SM, 1 / PK.SM);
+  gl.uniformMatrix4fv(U.uVP, false, PK_VP);
+  gl.uniformMatrix4fv(U.uLVP, false, PK_LVP);
+  gl.uniform3fv(U.uEye, PK_EYE);
+  gl.uniform1f(U.uTime, R.time);
+  gl.uniform1f(U.uFar, 3);
+  gl.uniform3fv(U.uKeyP, kp);
+  gl.uniform3fv(U.uKeyD, PK_KD);
+  gl.uniform3fv(U.uKeyC, PK_KC);
+  gl.uniform2f(U.uKeyCone, S.key.cone[0], S.key.cone[1]);
+  const amb = (PK.set.door ? 0.7 + 0.3 * PK.lamp : 1) * PK.expo;
+  gl.uniform3f(U.uSky, S.sky[0] * amb, S.sky[1] * amb, S.sky[2] * amb);
+  gl.uniform3f(U.uGnd, S.gnd[0] * PK.expo, S.gnd[1] * PK.expo, S.gnd[2] * PK.expo);
+  gl.uniform3fv(U.uRimP, S.rim.p);
+  gl.uniform3f(U.uRimC, S.rim.col[0] * PK.expo, S.rim.col[1] * PK.expo, S.rim.col[2] * PK.expo);
+  gl.uniform3f(U.uBoxA, S.box[0], S.box[1], S.box[2]);
+  gl.uniform3f(U.uBoxB, S.box[3], S.box[4], S.box[5]);
+  gl.uniform1f(U.uBoxK, S.door ? 0.5 * PK.doorK : 1);
+  gl.uniform4fv(U.uOcc, PK_OCC);
+  gl.uniform1i(U.uOccN, n);
+  gl.uniform1f(U.uEmitK, theirs ? 0.85 + 0.35 * Math.sin(t * 3.1) * sstep(0, 1, T) : th && th.def.g ? 0.35 : 1);
+  gl.uniform1f(U.uGlass, 0);
+  pkDrawAll(U, false);
+  gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
+  gl.depthMask(false);
+  gl.uniform1f(U.uGlass, 1);
+  pkDrawAll(U, true);
+  gl.depthMask(true);
+  gl.disable(gl.BLEND);
+  gl.activeTexture(gl.TEXTURE4);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, PK.ms);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, PK.scene.fb);
+  gl.blitFramebuffer(0, 0, PK.S, PK.S, 0, 0, PK.S, PK.S, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+  // the lens: only a sliver is sharp
+  gl.disable(gl.DEPTH_TEST);
+  pass(PK.dofProg, PK.dof, pkDofSet);
+  bloomPasses(PK.dof, PK.blm);
+  composite(PK.dof.tex, PK.blm[0].tex, PK.out, true);
+  gl.bindVertexArray(null);
 }
 // ───────────────────────── simulation core ─────────────────────────
 const PLAN_MAX = 8;
@@ -26593,6 +30658,7 @@ function rummageAct(o) {
         addSus(v, 4);
         ui.say(v, 'Staff only.', 2.5);
       }
+      peekOpen(o, 'rummage', peekHid(o, trash)); // the close-up of your hands in it (gfx/peek)
     },
     onTick: (c, a) => {
       tamperSeen(o, a, 1);
@@ -26623,16 +30689,22 @@ function rummageAct(o) {
         ]),
         'onto',
       );
+      peekShow('feel');
     },
     onEnd: (c, a, ok) => {
+      if (!ok && !a.hit) peekStop();
       if (!ok || a.hit) return;
       if (o.type === 'fridge') return fridgeLook(o);
       o.data.rattle = -1;
       o.data.shakenUntil = G.t + CTRL.shakeHold;
       if (trash) return o.id === 'breakBin' ? binDig() : digResult(o);
       if (RUMMAGE_FIND.has(o.type)) return rummageResult(o);
-      if (homeFact(o)) return searchedHome(o); // a document, a photo: a fact for their page
+      if (homeFact(o)) {
+        peekShow('take', o.idx % 2 ? 'photo' : 'doc', o.idx % 2 ? 'A photo' : 'A letter');
+        return searchedHome(o); // a document, a photo: a fact for their page
+      }
       ui.note('search', 'Nothing. Just a ' + o.name.toLowerCase() + '.', '');
+      peekShow('nothing');
       searchedHome(o);
     },
   });
@@ -26646,6 +30718,7 @@ function fridgeLook(o) {
     S = st && stashDef(st);
   const what = S ? S.desc : n && n.isThem && G.faction === 'aliens' ? 'empty, and spotless' : pick(FRIDGE_PLAIN);
   ui.note('fridge', (n ? n.short + '’s fridge: ' : 'The fridge: ') + what, S ? 'onto' : '');
+  peekShow('reveal', S ? st.k : what === 'empty, and spotless' ? 'bare' : what, S ? S.what : what, st && thingLook(st));
   if (n) noteOnce(n, 'Their fridge: ' + what + '.', { by: 'you' });
   if (st && !S.empty) openUp(o, true);
 }
@@ -26658,6 +30731,7 @@ function pryAct(o) {
     anim: 'dig',
     long: true,
     check: () => (o.data.openUntil > G.t ? 'Already open' : null),
+    onStart: () => peekOpen(o, 'pry', peekHid(o, RUMMAGE_TRASH.has(o.type))),
     onTick: (c, a, dt) => {
       a.st = (a.st || 0) + dt;
       if (a.st >= 0.5) {
@@ -26667,8 +30741,16 @@ function pryAct(o) {
     },
     onEnd: (c, a, ok) => {
       if (ok) openUp(o);
+      else peekStop();
     },
   });
+}
+// what the close-up (gfx/peek) lays under the rest while your hands look: what's really in there, if anything
+function peekHid(o, trash) {
+  const st = stashIn(o);
+  if (st && (!st.out || o.type === 'fridge')) return { k: st.k, look: thingLook(st) };
+  const j = !trash && o.type !== 'fridge' && junkIn(o);
+  return j ? { k: j } : null;
 }
 function openUp(o, quiet) {
   const f = frontOf(o),
@@ -26708,12 +30790,13 @@ function openUp(o, quiet) {
       at: G.t,
     });
     if (!quiet) ui.note('box', (RUMMAGE_TRASH.has(o.type) ? 'In the rubbish: ' : 'Inside: ') + S.desc + '.', 'onto');
+    peekShow('reveal', st.k, S.what, thingLook(st));
     if (!st.innocent) psyMark('sign');
     audio.sting('whisper');
   } else {
     const j = junkIn(o);
     searchedHome(o);
-    homeFact(o);
+    const fact = homeFact(o);
     ui.note(
       'box',
       j
@@ -26723,6 +30806,8 @@ function openUp(o, quiet) {
           : 'Nothing inside. Wires and dust.',
       '',
     );
+    if (fact) peekShow('take', o.idx % 2 ? 'photo' : 'doc', o.idx % 2 ? 'A photo' : 'A letter');
+    else peekShow(j ? 'reveal' : 'nothing', j, j || 'Nothing inside');
   }
 }
 // put it all back the way it was: nobody needs to know you looked
@@ -28163,14 +32248,21 @@ function findSomething(p) {
   const f = wpick(opts);
   f.give();
   ui.note(f.icon, f.text, 'good');
+  peekShow('take', f.k === 'pills' ? 'pillsFound' : f.k, f.text);
   audio.blip('cash');
   return true;
 }
 function rummageResult(o) {
   const d = o.data;
-  if (d.rumDay === dayNo()) return ui.note('box', 'Nothing new', '');
+  if (d.rumDay === dayNo()) {
+    peekShow('nothing', null, 'Nothing new');
+    return ui.note('box', 'Nothing new', '');
+  }
   d.rumDay = dayNo();
-  if (!findSomething(0.55)) ui.note('box', pick(['Toilet roll', 'Warm tins', 'Blank name badges', 'Old bulbs']), '');
+  if (findSomething(0.55)) return;
+  const s = pick(['Toilet roll', 'Warm tins', 'Blank name badges', 'Old bulbs']);
+  ui.note('box', s, '');
+  peekShow('take', s, s);
 }
 // pills from the back of a shelf: the edge comes off for a while, and so does the energy
 function pillsAct() {
@@ -28249,29 +32341,43 @@ function tvAct(dur) {
 // the break room bin: a whole sandwich, not a bite out of it. Who did you see at lunch?
 function binDig() {
   const food = G.binFood.filter((f) => G.t - f.t < 8 * 60);
-  if (!food.length) return ui.note('trash', pick(['Crusts. Tea bags.', 'Yogurt pots.', 'Just wrappers']), '');
+  if (!food.length) {
+    const s = pick(['Crusts. Tea bags.', 'Yogurt pots.', 'Just wrappers']);
+    peekShow('nothing', null, s);
+    return ui.note('trash', s, '');
+  }
   G.binFood = [];
   ui.note('trash', 'A whole sandwich. Not one bite.', 'onto');
+  peekShow('take', 'wholeSandwich', 'A whole sandwich. Not one bite.');
   G.leads.push('Whole lunches in the break-room bin. Whose?');
   if (G.leads.length > 6) G.leads.shift();
 }
 function digResult(o) {
   const r = Math.random();
   if (r < 0.25) {
-    if (!findSomething(0.6)) ui.note('trash', 'Just rubbish', '');
+    if (!findSomething(0.6)) {
+      ui.note('trash', 'Just rubbish', '');
+      peekShow('nothing', null, 'Just rubbish');
+    }
   } else if (r < 0.45) {
     bump('hunger', 12);
     ui.note('snack', 'Half a sandwich', '');
+    peekShow('take', 'sandwich', 'Half a sandwich');
   } else if (r < 0.55 && clueFaction() === 'lizards') {
     ui.note('trash', 'Fish bones. Picked clean. In office paper.', 'onto');
     G.leads.push('Fish bones in the bins · office paper');
+    peekShow('reveal', 'fishBones', 'Fish bones. Picked clean.');
   } else if (r < 0.6 && o.type === 'dumpster') {
     const t = { aliens: 'Scorched cardboard', lizards: 'Shed skin, with nails', zombies: 'Licked-clean butcher paper' }[
       clueFaction()
     ];
     G.leads.push(t);
     ui.note('trash', t, 'onto');
-  } else ui.note('trash', 'Just rubbish', '');
+    peekShow('reveal', t, t);
+  } else {
+    ui.note('trash', 'Just rubbish', '');
+    peekShow('nothing', null, 'Just rubbish');
+  }
 }
 
 // ── people

@@ -34,6 +34,12 @@ gfx/viewfinder.js                # The camera's square: the town through your ey
 gfx/vf-glass.js                  # Through the glass: a photo taken through a window, the pane put back in the square
 gfx/vf-sky.js                    # Over your head in a photo: ceilings, the sky, the city past the edge of town
 gfx/vf-stage.js                  # The staged shot: the camera goes where evidence shows best, the subject poses for it
+gfx/peek-geo.js                  # The rummage close-up's shapes: rounded boxes, lathes, tubes, sheets, lumps; its materials
+gfx/peek-shader.js               # The rummage close-up's light: its own shader, the lamp's shadow, the depth of field
+gfx/peek-things.js               # What a rummage turns up, close: THEIR things, THEIR plants, the lookalikes
+gfx/peek-junk.js                 # What a rummage turns up, close: junk, finds, food, papers; every thing by name
+gfx/peek-sets.js                 # Where you rummage, close: drawer, box, bins, wardrobe, books, papers, shelves, fridge, insides; your hand
+gfx/peek.js                      # The rummage close-up: a few seconds somewhere else, your hand in it, what it finds
 sim/core.js                      # Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 sim/characters.js                # Character records
 sim/body-motion.js               # The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses

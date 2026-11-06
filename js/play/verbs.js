@@ -1,6 +1,6 @@
 //@ play/verbs — What you can do: snooping, eating, Lenny, chat
 //@ Defines: DESK_OWNER, chain, nextAlarm, sleepAct, cookChain, snackAct, eatHereAct, vendAct, coffeeAct, toiletAct, showerAct, peeAct, warmAct, EAT_SEATS, nearSeat, seatedEat, …
-//@ Uses:    sim/core, ui/interface, sim/actions, core/util, world/objects, town/suspicion, player/needs, data/tuning, world/grid, audio/sound, …
+//@ Uses:    sim/core, ui/interface, sim/actions, core/util, gfx/peek, world/objects, town/suspicion, player/needs, data/tuning, world/grid, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── what you can do ─────────────────────────
 const DESK_OWNER = {
@@ -278,14 +278,21 @@ function findSomething(p) {
   const f = wpick(opts);
   f.give();
   ui.note(f.icon, f.text, 'good');
+  peekShow('take', f.k === 'pills' ? 'pillsFound' : f.k, f.text);
   audio.blip('cash');
   return true;
 }
 function rummageResult(o) {
   const d = o.data;
-  if (d.rumDay === dayNo()) return ui.note('box', 'Nothing new', '');
+  if (d.rumDay === dayNo()) {
+    peekShow('nothing', null, 'Nothing new');
+    return ui.note('box', 'Nothing new', '');
+  }
   d.rumDay = dayNo();
-  if (!findSomething(0.55)) ui.note('box', pick(['Toilet roll', 'Warm tins', 'Blank name badges', 'Old bulbs']), '');
+  if (findSomething(0.55)) return;
+  const s = pick(['Toilet roll', 'Warm tins', 'Blank name badges', 'Old bulbs']);
+  ui.note('box', s, '');
+  peekShow('take', s, s);
 }
 // pills from the back of a shelf: the edge comes off for a while, and so does the energy
 function pillsAct() {
@@ -364,29 +371,43 @@ function tvAct(dur) {
 // the break room bin: a whole sandwich, not a bite out of it. Who did you see at lunch?
 function binDig() {
   const food = G.binFood.filter((f) => G.t - f.t < 8 * 60);
-  if (!food.length) return ui.note('trash', pick(['Crusts. Tea bags.', 'Yogurt pots.', 'Just wrappers']), '');
+  if (!food.length) {
+    const s = pick(['Crusts. Tea bags.', 'Yogurt pots.', 'Just wrappers']);
+    peekShow('nothing', null, s);
+    return ui.note('trash', s, '');
+  }
   G.binFood = [];
   ui.note('trash', 'A whole sandwich. Not one bite.', 'onto');
+  peekShow('take', 'wholeSandwich', 'A whole sandwich. Not one bite.');
   G.leads.push('Whole lunches in the break-room bin. Whose?');
   if (G.leads.length > 6) G.leads.shift();
 }
 function digResult(o) {
   const r = Math.random();
   if (r < 0.25) {
-    if (!findSomething(0.6)) ui.note('trash', 'Just rubbish', '');
+    if (!findSomething(0.6)) {
+      ui.note('trash', 'Just rubbish', '');
+      peekShow('nothing', null, 'Just rubbish');
+    }
   } else if (r < 0.45) {
     bump('hunger', 12);
     ui.note('snack', 'Half a sandwich', '');
+    peekShow('take', 'sandwich', 'Half a sandwich');
   } else if (r < 0.55 && clueFaction() === 'lizards') {
     ui.note('trash', 'Fish bones. Picked clean. In office paper.', 'onto');
     G.leads.push('Fish bones in the bins · office paper');
+    peekShow('reveal', 'fishBones', 'Fish bones. Picked clean.');
   } else if (r < 0.6 && o.type === 'dumpster') {
     const t = { aliens: 'Scorched cardboard', lizards: 'Shed skin, with nails', zombies: 'Licked-clean butcher paper' }[
       clueFaction()
     ];
     G.leads.push(t);
     ui.note('trash', t, 'onto');
-  } else ui.note('trash', 'Just rubbish', '');
+    peekShow('reveal', t, t);
+  } else {
+    ui.note('trash', 'Just rubbish', '');
+    peekShow('nothing', null, 'Just rubbish');
+  }
 }
 
 // ── people
