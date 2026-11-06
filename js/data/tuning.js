@@ -122,6 +122,8 @@ const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeS
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };
+// starving (hunger at 0, awake): energy drains `energy` an hour instead of the usual 4, and its bar shows `arrows` down
+const STARVE = { energy: -12, arrows: 3 };
 const BED = { energy: 13.5, stress: -5 };   // a night in your own bed, per game hour (play/verbs sleepAct)
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)

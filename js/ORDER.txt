@@ -33,6 +33,7 @@ gfx/portraits.js                 # Portraits and evidence snapshots rendered off
 gfx/viewfinder.js                # The camera's square: the town through your eyes, the flash, the print
 gfx/vf-glass.js                  # Through the glass: a photo taken through a window, the pane put back in the square
 gfx/vf-sky.js                    # Over your head in a photo: ceilings, the sky, the city past the edge of town
+gfx/vf-stage.js                  # The staged shot: the camera goes where evidence shows best, the subject poses for it
 sim/core.js                      # Shared state (G, PLAYER, NPC, CHARS), the calendar, sky colours
 sim/characters.js                # Character records
 sim/body-motion.js               # The body in motion: gaits, punches and grabs, leg IK, sitting and lying poses

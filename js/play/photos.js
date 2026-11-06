@@ -1,5 +1,5 @@
 //@ play/photos — Photos: reading what is in frame
-//@ Defines: OBJ_ICON, placeName, shotTarget, PHOTO_SHUTTER, PHOTO_DUR, photoAct, inPhotoCone, photoInterest, photoAim, photoCone, playerPhoto, addPrint, takePhoto, photoItem, PHOTO_FACE, photoSeen, …
+//@ Defines: OBJ_ICON, placeName, shotTarget, PHOTO_SHUTTER, PHOTO_DUR, photoAct, photoShutter, photoStakes, inPhotoCone, photoInterest, photoAim, photoCone, playerPhoto, addPrint, takePhoto, photoItem, …
 //@ Uses:    sim/core, ui/interface, data/tuning, town/suspicion, gfx/viewfinder, them/tells, sim/actions, core/util, world/grid, world/vision, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── photos: anything in sight within 11 tiles. The game reads every print.
@@ -93,15 +93,58 @@ function photoAct(tg) {
     onStart: (c, a) => {
       const [x, z] = pos();
       c.tdir = Math.atan2(x - c.x, z - c.z);
-      vfOpen(a, tg);
+      vfOpen(a, tg, photoStakes(tg));
     },
     onTick: (c, a) => {
-      if (!a.shot && a.t >= PHOTO_SHUTTER) {
-        a.shot = true;
-        takePhoto(tg);
-      }
+      if (photoShutter(a)) takePhoto(tg);
     },
   });
+}
+// the shutter goes at PHOTO_SHUTTER; a staged shot (gfx/vf-stage) holds it, the camera at the eye, until it has
+// lined up, and then it goes at once
+function photoShutter(a) {
+  if (a.shot) return false;
+  const st = vfStaging(a);
+  if (st === 'wait') {
+    a.t = Math.min(a.t, PHOTO_SHUTTER * 0.98);
+    return false;
+  }
+  if (st !== 'go' && a.t < PHOTO_SHUTTER) return false;
+  a.t = Math.max(a.t, PHOTO_SHUTTER);
+  a.shot = true;
+  return true;
+}
+// what a shot at this is worth before it's taken, as takePhoto will read it: 'card' when it files evidence (a tell,
+// the tenth part up close, one of THEM at THEIR business), 'odd' for anything else worth a look; and which shot it is,
+// so the camera knows where to stand and what to look at (gfx/vf-stage). Nothing here is filed.
+function photoStakes(tg) {
+  if (!tg) return null;
+  if (tg.item) return tg.item.by ? { tier: 'odd', kind: 'item' } : null;
+  const n = tg.look ? tg : tg.char;
+  if (!n || n.isPlayer) return null;
+  if (n === SHADE.c) return { tier: 'odd', kind: 'vis' };
+  const tl = n.tell;
+  if (n.isThem && !n.surrendered && tl && !tl.unmask && tl.type !== 'glare' && !tl.photo) {
+    if (tl.ritual) return tl.ringShot ? null : { tier: 'odd', kind: 'ring' };
+    if (tl.type === 'true' && tl.t >= TF_CHANGE + 0.2) return { tier: 'odd', kind: 'true' };
+    if (tl.type === 'half')
+      return { tier: 'card', kind: 'half:' + (HALF_SHOT[(tl.parts || [])[0]] || 'face'), side: tl.side || 1 };
+    return { tier: 'card', kind: tl.type };
+  }
+  const tr = n.trace;
+  if (
+    tr &&
+    !tr.photo &&
+    tr.k >= 0.6 &&
+    (n.isThem || oddityIn(n, 'body')) &&
+    !n.exposed &&
+    !n.surrendered &&
+    Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) <= 4.5 &&
+    !(G.traceShot && G.traceShot[n.id + ':' + dayNo()])
+  )
+    return { tier: 'card', kind: 'trace:' + tr.kind };
+  if (n.odd && !n.odd.photo && G.t <= n.odd.until) return { tier: n.isThem ? 'card' : 'odd', kind: 'odd' };
+  return photoWorth(n) || oddWalk(n) ? { tier: 'odd', kind: 'look' } : null;
 }
 // F: the photo, straight away. The camera takes in a wide wedge in front of you, as far as you can see clearly; no aiming.
 function inPhotoCone(x, z, half = CTRL.photoHalf) {
@@ -191,13 +234,10 @@ function playerPhoto() {
         closeMenu();
         const tg = photoAim(); // turn to it: the frame the game reads follows you
         if (tg) c.tdir = Math.atan2(tg.x - c.x, tg.z - c.z);
-        vfOpen(a, tg);
+        vfOpen(a, tg, photoStakes(tg));
       },
       onTick: (c, a) => {
-        if (!a.shot && a.t >= PHOTO_SHUTTER) {
-          a.shot = true;
-          takePhoto(photoCone());
-        }
+        if (photoShutter(a)) takePhoto(photoCone());
       },
     }),
   ); // up to the eye, a look through it, then the shutter

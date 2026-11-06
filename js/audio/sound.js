@@ -647,6 +647,25 @@ const audio = (() => {
         // a wet click: the mask, slipping
         tone('sine', 1500, 0.002, 0.08, 0.07, 260);
         noise(0.002, 0.06, 0.09, 3200, 4);
+      } else if (kind === 'riser') {
+        // a staged photo lining up (gfx/vf-stage): a low drone climbing, a breath of air, the heart going faster
+        tone('sawtooth', 49, 1.3, 0.045, 0.45, 98);
+        tone('sawtooth', 49.6, 1.3, 0.035, 0.45, 104);
+        tone('sine', 98, 1.2, 0.05, 0.5, 196);
+        noise(1.1, 0.05, 0.5, 520, 0.9);
+        for (const at of [0, 0.5, 0.88, 1.17, 1.38]) {
+          setTimeout(() => ctx && tone('sine', 62, 0.004, 0.32, 0.16, 36), at * 1000);
+          setTimeout(() => ctx && tone('sine', 54, 0.004, 0.2, 0.14, 34), at * 1000 + 130);
+        }
+      } else if (kind === 'scream') {
+        // the screamer: it turns on the lens. A shriek tearing upward, a burst of hiss, a hit you feel in the chest
+        tone('sawtooth', 1150, 0.004, 0.13, 0.75, 2500);
+        tone('sawtooth', 1190, 0.004, 0.1, 0.7, 2330);
+        tone('square', 760, 0.004, 0.07, 0.6, 1680);
+        noise(0.002, 0.42, 0.85, 2300, 0.6);
+        noise(0.002, 0.3, 0.5, 700, 0.8);
+        tone('sine', 52, 0.002, 0.65, 0.7, 28);
+        setTimeout(() => ctx && noise(0.01, 0.12, 1.4, 3800, 5), 420); // and the ringing after
       }
     },
     // the horror layer's sounds: all synthesised, all for the ears only

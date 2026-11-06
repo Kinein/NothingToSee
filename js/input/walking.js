@@ -1,6 +1,6 @@
 //@ input/walking — WASD walking relative to the camera
 //@ Defines: moveInput, SOLID_INSET, SLIM, FIT_BOX, fittedBox, SLIM_AT, slimAt, VAULT, VAULT_AT, vaultAt, SOLID, solidReset, solidCells, bodyPush, freeSpot, settle, …
-//@ Uses:    world/grid, gfx/world-geometry, sim/core, data/tuning, input/camera, world/objects, gfx/renderer, ui/interface, core/util, sim/actions, …
+//@ Uses:    world/grid, gfx/world-geometry, data/tuning, sim/core, input/camera, world/objects, gfx/renderer, ui/interface, core/util, sim/actions, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── walking: WASD relative to the camera. W is into the scene, S toward you; A and D are screen left and right.
 function moveInput() {
@@ -508,10 +508,7 @@ function driveTick(dt) {
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
-  const slow =
-      (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) *
-      huntSlow() *
-      (cuffedNow() ? RESIST.cuffed : 1),
+  const slow = (G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow() * (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = speed * dt;

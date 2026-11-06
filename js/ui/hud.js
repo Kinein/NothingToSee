@@ -1,6 +1,6 @@
 //@ ui/hud — The corner HUD: bars, days, clock, THEIR eye, evidence
 //@ Defines: PSY_PATH, PSY_GROOVES, BARS, EYE_STATES, buildHud, initTips, toggleWalls, setBar, TREND_DRIFT, barTrend, updateHud
-//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, audio/sound, data/tuning, player/work, …
+//@ Uses:    ui/interface, sim/core, them/plan, gfx/renderer, ui/hud-images, core/util, player/needs, data/tuning, audio/sound, player/work, …
 //@ (header made by tools/map.js; stripped by build.py)
 // the rows down the left: your body, then your job, then your head. The fill is what you have left: full is good, for all of them.
 // (Psychic is the stress dial turned round: 100 − stress. Inside, the game still counts stress.)
@@ -204,7 +204,9 @@ function setBar(k, v, tip) {
 // The arrows beside a bar. Something that just happened to you (a scare, a meal, a blow, the bonus for sitting down at
 // your desk) jolts it: arrows for a moment, more of them the bigger it was. A steady climb or slide that's clearly faster
 // than the day's own drift (eating, sleeping, the job draining while you're away from your desk) shows one or two for as
-// long as it keeps up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't fake it.
+// long as it keeps up, and no longer: the last 0.4 s must still show it, so the arrows go the moment it stops instead of
+// when the average catches up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't
+// fake it.
 const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -10, stress: 1, work: 0 }; // points per game hour, left alone
 function barTrend(k, v) {
   const B = UI.bars[k];
@@ -229,23 +231,32 @@ function barTrend(k, v) {
   let dir = 0,
     n = 0,
     jolt = false;
-  if (now - T.evAt < 2.4 && Math.abs(T.ev) >= 1.6) {
+  if (now - T.evAt < 1 && Math.abs(T.ev) >= 1.6) {
     const a = Math.abs(T.ev);
     dir = Math.sign(T.ev);
     n = a >= 22 ? 3 : a >= 8 ? 2 : 1;
     jolt = true;
   } else {
+    let j = T.hist.length - 1;
+    while (j > 0 && now - T.hist[j - 1][0] <= 0.4) j--;
     const [, g0, v0] = T.hist[0],
-      span = gt - g0;
-    if (span >= 0.3) {
+      [, g1, v1] = T.hist[j],
+      span = gt - g0,
+      span1 = gt - g1;
+    if (span >= 0.3 && span1 >= 0.15) {
       const r = ((v - v0) / span) * 60 - drift,
+        r1 = ((v - v1) / span1) * 60 - drift, // the same, just now: is it still going?
         a = Math.abs(r); // how much faster than its own drift, per game hour
       const atEdge = (r > 0 && v >= 99.5) || (r < 0 && v <= 0.5);
-      if (a >= 4 && !atEdge) {
+      if (a >= 4 && !atEdge && Math.sign(r1) === Math.sign(r) && Math.abs(r1) >= 4) {
         dir = Math.sign(r);
         n = a >= 160 ? 3 : a >= 45 ? 2 : 1;
       }
     }
+  }
+  if (k === 'energy' && !jolt && starved() && !G.sleeping && v > 0.5) {
+    dir = -1; // starving: energy goes fast, and the bar says so
+    n = STARVE.arrows;
   }
   const key = dir ? (dir > 0 ? 'up' : 'dn') + n + (jolt ? 'j' + Math.round(T.evAt * 10) : '') : '';
   if (B.trK === key) return;

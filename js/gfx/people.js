@@ -1,6 +1,6 @@
 //@ gfx/people — Drawing a person: body, face, hair, clothes and the small details
 //@ Defines: WHITE_SHIRT, MARK_GOLD, MARK_GOLD_E, MARK_GOLD_D, MARK_STALK, MARK_BEAD, MARK_FLY, pallor, HEAD_C, HEAD_S, FACE_T, faceZ, dressDetail, drawChar, drawPerson
-//@ Uses:    gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, gfx/creatures, sim/core, player/needs, gfx/body-parts, …
+//@ Uses:    gfx/renderer, core/util, gfx/gl, horror/tenth-forms, town/cast, horror/half-forms, player/needs, gfx/creatures, sim/core, gfx/body-parts, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── people
 // Long and thin, a little stooped, the head carried forward. Faces are mostly socket. Nobody in Wexley has slept well in years.
@@ -348,6 +348,15 @@ function drawPerson(c) {
         eg,
       );
       drawSpec = 0;
+    } else if (fx.scream > 0.3) {
+      // turned on the camera (gfx/vf-stage): the lids gone, the whites all round, the pupils pinpricks that catch
+      // the flash red, the way any eye does too close to a flash
+      const ez = faceZ(s * 0.0295, 0.12),
+        k = fx.scream;
+      part(Hd, s * 0.0295, 0.121, ez + 0.003, 0.029 + 0.008 * k, 0.017 + 0.011 * k, 0.018, 'sph', [0.86, 0.84, 0.78]);
+      drawSpec = 2.4;
+      part(Hd, s * 0.0285, 0.121, ez + 0.012, 0.007, 0.007, 0.006, 'sph', [0.9, 0.1, 0.05], [1.4 * k, 0.12 * k, 0.05 * k]);
+      drawSpec = 0;
     } else if (c.shut) {
       // shut: the lid all the way down, and the line of the lashes
       const ez = faceZ(s * 0.0295, 0.12);
@@ -402,7 +411,7 @@ function drawPerson(c) {
       partR(
         Hd,
         s * 0.034,
-        0.1415,
+        0.1415 + 0.012 * (fx.scream || 0), // a scream lifts the brows
         faceZ(s * 0.034, 0.141) + 0.002,
         0.15,
         0,
@@ -426,18 +435,13 @@ function drawPerson(c) {
       'sph',
       mix3([0.2, 0.09, 0.09], [0.12, 0.075, 0.11], wan),
     );
-  if (fx.gape)
-    part(
-      Hd,
-      0,
-      0.048 - fx.gape * 0.022,
-      0.078,
-      0.05 + fx.gape * 0.016,
-      0.012 + fx.gape * 0.055,
-      0.024,
-      'sph',
-      [0.03, 0.008, 0.008],
-    );
+  if (fx.gape) {
+    const sk = fx.scream || 0, // a scream: wider, the jaw hanging, the teeth showing
+      my = 0.048 - fx.gape * (0.022 + 0.02 * sk),
+      mh = 0.012 + fx.gape * (0.055 + 0.04 * sk);
+    part(Hd, 0, my, 0.078, 0.05 + fx.gape * (0.016 + 0.018 * sk), mh, 0.024, 'sph', [0.03, 0.008, 0.008]);
+    if (sk > 0.3) part(Hd, 0, my + mh * 0.38, 0.086, 0.046, 0.008, 0.01, 'box', [0.78, 0.74, 0.64]);
+  }
   else if (fx.grin) {
     part(Hd, 0, 0.05, 0.08, 0.11, 0.013, 0.018, 'box', [0.05, 0.02, 0.02]);
     for (const s of [1, -1])
@@ -582,6 +586,14 @@ function drawPerson(c) {
       grip ? 'handG' : 'hand',
       bskin,
     );
+    const pt = fx.point;
+    if (pt && pt.s === s && pt.k > 0.02 && !grip) {
+      // one finger held out straight for the camera; far too long when the fingers are what's wrong (gfx/vf-stage)
+      const y0 = -0.29 * h - 0.06 - 0.013 * fl,
+        L = (0.075 + 0.08 * fl) * pt.k;
+      part(Fa, s * 0.012, y0 - L / 2, 0.02, 0.024, L + 0.02, 0.026, 'limb2', bskin);
+      part(Fa, s * 0.012, y0 - L, 0.02, 0.022, 0.022, 0.022, 'sph', bskin);
+    }
     if (grip && s < 0) {
       const pp = fx.prop;
       if (pp === 'plate') part(Fa, 0, -0.33 * h, 0.08, 0.24, 0.025, 0.24, 'cyl', [0.85, 0.83, 0.78]);

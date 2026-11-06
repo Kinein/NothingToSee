@@ -137,7 +137,7 @@ function simStep(dtReal, spdOver) {
   }
   for (const c of CHARS)
     if (c.onMap) {
-      if (spd > 0) animate(c, dtReal, dtg * BODY);
+      if (spd > 0) animate(c, c === VF_ST.c && vfSlow() < 1 ? dtReal / vfSlow() : dtReal, dtg * BODY); // the one posing for a photo moves in real time
       updateShown(c, dtReal);
     }
   for (const d of DOORS) {
@@ -309,10 +309,11 @@ function frame(now) {
       if (G.over) capFinish();
       else if (!UI.caseOpen) capUpdate(dtReal);
     } else if (!G.over && !UI.caseOpen && !UI.scene) {
-      carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
+      const held = vfSlow(); // a photo lining up: the world holds its breath (gfx/vf-stage)
+      carLoud = updateCars(dtReal * held * (G.speed ? 1 : 0), G.speed > 0);
       const stop = R.hitStop > 0; // a blow landing: the world all but stops for a beat
       R.hitStop = Math.max(0, R.hitStop - dtReal);
-      simStep(stop ? dtReal * 0.04 : dtReal);
+      simStep((stop ? dtReal * 0.04 : dtReal) * held);
     }
     if (UI.cf) cfTick(dtReal);
     cfLight(dtReal);

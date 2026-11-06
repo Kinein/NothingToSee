@@ -77,7 +77,7 @@ function needsTick(dt) {
   if (!sleeping) {
     if (dark && (h >= 21 || h < 6)) base.stress += PSY.dark; // the dark at night: a slow drift
     if (room && room.home && !dark) base.stress -= 2; // a lit home
-    if (N.hunger < 12) base.energy -= 3; // starving
+    if (starved()) base.energy = STARVE.energy;
     if (G.inv.foilOn) base.stress -= 2.5;
   }
   for (const k in base) if (k in N) setNeed(k, N[k] + (base[k] * dt) / 60);
@@ -94,6 +94,8 @@ function needsTick(dt) {
     if (low) ui.bubble(P, low.icon, 'thought', 3.5);
   }
 }
+// hunger all the way down: energy goes fast (STARVE)
+const starved = () => PLAYER.needs.hunger <= 0;
 const hunted = () => HUNT.on || CHARS.some((c) => c.trueForm && c.trueForm.mode === 'attack' && c.onMap);
 // near IT, Psychic drains: fast by a true form you can see or something wrong going on (a rite, one of THEM changing),
 // slowly by THEIR things. Seeing them is a step too: a true form drops you to 50, THEIR thing or a sign to 70.

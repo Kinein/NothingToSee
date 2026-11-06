@@ -40,7 +40,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `awayT` | `0` | player/work | play/verbs |
 | `workWarned` | `false` | player/work | — |
 | `sickDay` | `false` | player/work, combat/hits, taken/taken, taken/back-up | sim/core, ui/hud |
-| `smelly` | `false` | player/needs, play/stashes, play/verbs | them/tells, town/approach, ui/hud |
+| `smelly` | `false` | player/needs, play/stashes, play/verbs | them/tells, town/approach, play/advice, ui/hud |
 | `sleepFrom` | `0` | play/verbs | — |
 | `visionOff` | `0` | them/moves, them/true-form, combat/hits, taken/back-up | horror/visions, horror/ears |
 | `whisperCd` | `30` | horror/visions | — |
@@ -111,7 +111,7 @@ All live state sits in a handful of shared globals (every module can reach them)
 | `events` | `[]` | — | town/talk, town/echoes, play/confront |
 | `heard` | `[]` | — | town/echoes, ui/case-board |
 | `headline` | `null` | town/echoes | ui/menus |
-| `faction` | `pick(['aliens', 'lizards', 'zombies'])` | — | gfx/props, gfx/people, gfx/creatures, gfx/portraits, sim/pose, town/routines, town/quirks, them/plan, … |
+| `faction` | `pick(['aliens', 'lizards', 'zombies'])` | — | gfx/props, gfx/people, gfx/creatures, gfx/portraits, gfx/vf-stage, sim/pose, town/routines, town/quirks, … |
 | `them` | `[]` | game/state | town/cast, town/npc-update, game/endings |
 | `exposed` | `[]` | — | them/true-form, horror/visions, play/confront |
 | `factionKnown` | `false` | them/tells | them/plan, them/true-form, play/stashes, horror/visions, play/confront, play/photos, ui/menus, ui/hud, … |

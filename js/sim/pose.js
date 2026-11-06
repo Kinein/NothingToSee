@@ -714,6 +714,7 @@ function animate(c, dtReal, dtGame) {
       c.poseFn = null;
     }
   }
+  vfPoseFx(c, T, dtReal); // posing for a staged photo (gfx/vf-stage)
   blendJoints(c, T, dtReal);
   if (!(c.tell && c.tell.type === 'true')) doorReach(c, dtReal);
   turnBody(c, dtReal, dtGame);

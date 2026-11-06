@@ -127,6 +127,7 @@ function showerAct(o) {
   return useP(o, 'Shower', 'shower', {
     dur: 14,
     anim: 'shower',
+    shower: true,
     fx: { stress: -17 },
     onEnd: (c, a, ok) => {
       if (ok && G.smelly) {

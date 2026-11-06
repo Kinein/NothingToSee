@@ -247,7 +247,7 @@ function playerMelee(n) {
   if (!P.onMap || R.time < (UI.swingCd || 0) || P.queue.some((a) => a.swing)) return;
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
-  enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
+  enqueue(P, swingAct(n, CTRL.windup));
 }
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {

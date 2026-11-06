@@ -1,6 +1,6 @@
 //@ play/advice — Needs to the right thing to do, here; inventory hooks
 //@ Defines: playerWhere, pathLen, nearestObj, needTarget, doNeed, autonomy, currentGoal, computeGoal, goalAct
-//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, ui/interface, player/needs, world/grid, data/tuning, town/cast, town/talk, …
+//@ Uses:    sim/core, sim/actions, play/verbs, world/objects, ui/interface, player/needs, world/grid, town/cast, data/tuning, town/talk, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── needs → the right thing to do, here
 function playerWhere() {
@@ -251,7 +251,12 @@ function computeGoal() {
     const g = needG(worst);
     if (g) return g;
   }
-  // 5. bed after 22:30
+  // 5. you smell (an accident, something you took): the shower washes it off
+  if (G.smelly && !busy((a) => a.shower)) {
+    const s = objOfType('shower');
+    if (s) return { obj: s, icon: 'shower', shower: true };
+  }
+  // 6. bed after 22:30
   if ((m >= 22 * 60 + 30 || m < 5 * 60) && !busy((a) => a.sleep))
     return { obj: OBJ_BY_ID.homeBed, icon: 'moon', sleep: true };
   return null; // nothing says when a case is enough: that's yours to decide
@@ -265,6 +270,7 @@ function goalAct(g) {
   if (g.work) return () => enqueue(PLAYER, deskWork(false));
   if (g.need) return () => doNeed(g.need);
   if (g.sleep) return () => enqueue(PLAYER, sleepAct(OBJ_BY_ID.homeBed));
+  if (g.shower) return () => enqueue(PLAYER, showerAct(g.obj));
   if (g.lenny) return () => enqueue(PLAYER, talkAct(NPC.lenny, 'lenny'));
   return null;
 }

@@ -1,6 +1,6 @@
 //@ sim/movement — Following paths and moving characters
 //@ Defines: smoothPath, setPath, followPath
-//@ Uses:    data/tuning, sim/core, world/paths, sim/actions
+//@ Uses:    data/tuning, world/paths, sim/core, sim/actions
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────────────────── paths & motion
 function smoothPath(c, path) {
@@ -53,7 +53,7 @@ function followPath(c, dt) {
     return true;
   }
   let slow = 1;
-  if (c.isPlayer && (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0))) slow = 0.8;
+  if (c.isPlayer && G.t < (G.shakenUntil || 0)) slow = 0.8;
   const pace = c.isPlayer
     ? CTRL.walk * (c.run ? CTRL.sprint : 1)
     : (c.spd || 1) * (c.run ? CTRL.npcRun : c.trueForm ? 1 : CTRL.npcPace);

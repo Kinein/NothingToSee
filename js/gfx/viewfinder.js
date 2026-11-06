@@ -1,6 +1,6 @@
 //@ gfx/viewfinder — The camera's square: the town through your eyes, the flash, the print
 //@ Defines: VF, VF_HOLD, VF_WIDE, VF_TIGHT, vfEl, vfOpen, vfShoot, vfHold, vfPrint, vfClose, vfLabel, VF_SUBJ, vfSubjAt, vfLens, vfInWayAt, VF_PAST, …
-//@ Uses:    gfx/gl, gfx/renderer, sim/core, core/util, world/grid, ui/interface, world/light-map, gfx/vf-glass, gfx/world-geometry, gfx/post, …
+//@ Uses:    gfx/gl, gfx/renderer, sim/core, core/util, world/grid, ui/interface, gfx/vf-glass, gfx/vf-stage, world/light-map, gfx/world-geometry, …
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the viewfinder. F lifts the camera and a square comes up on the right: the town through your own eyes,
 // live. With evidence in front of you (play/photos photoAim) the lens swings onto it, zooms in until it fills the frame,
@@ -50,8 +50,9 @@ function vfEl() {
   };
   return el;
 }
-// F (or a click photo) lifts the camera: the square comes up, live
-function vfOpen(act, aim) {
+// F (or a click photo) lifts the camera: the square comes up, live. stake: what the shot is worth (play/photos
+// photoStakes), for the staged shot (gfx/vf-stage)
+function vfOpen(act, aim, stake) {
   const el = R.ready && vfEl();
   if (!el) return;
   if (VF.mode) vfClose(true);
@@ -76,6 +77,7 @@ function vfOpen(act, aim) {
   el.querySelector('.stamp').textContent = '';
   el.querySelector('.vf-cap').textContent = '';
   el.hidden = false;
+  vfStageBegin(stake);
 }
 // the shutter: white in the square, a glint in the town. False when the square isn't up (then the old full flash).
 function vfShoot() {
@@ -112,6 +114,7 @@ function vfClose(flush) {
   VF.act = null;
   VF.cards.length = VF.prints.length = 0;
   if (VF.el) VF.el.hidden = true;
+  vfStageEnd();
   vfUnclip();
   if (flush) for (const o of cards) ui.card(o);
 }
@@ -142,6 +145,7 @@ function vfSubjAt(tg) {
   return S;
 }
 function vfLens(k) {
+  if (vfStageLens()) return; // a shot worth staging has its own camera (gfx/vf-stage)
   const P = PLAYER,
     tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? VF.aim : null,
     eyeY = (P.y || 0) + 1.52 * (P.look.h || 1);
@@ -172,7 +176,7 @@ function vfInWayAt(x, z, r, wide) {
     tz = C.tz - ez,
     d = Math.hypot(tx, tz) || 1,
     t = ((x - ex) * tx + (z - ez) * tz) / d;
-  if (t < 0.15 || t > d - (wide ? 0.15 : 0.45)) return false;
+  if (t < 0.15 || t > d - (wide ? 0.15 : 0.45) || (C.near && t > 0.6)) return false; // near: only what's on the lens
   return Math.abs((x - ex) * tz - (z - ez) * tx) / d < r + (wide ? 0.2 + t * Math.tan(VF.fov / 2) * 0.9 : 0.35);
 }
 // no subject, but a window in front of you: the shot is through it, at what's on the other side
@@ -231,7 +235,7 @@ function vfTargets() {
 // the clear colour under the backdrop (gfx/vf-sky), which draws the real sky and ceilings over it
 const VF_ROOF = [0.025, 0.022, 0.024];
 function vfSky() {
-  if (roomAt(PLAYER.x, PLAYER.z)) return VF_ROOF;
+  if (roomAt(VF.eye[0], VF.eye[2])) return VF_ROOF;
   const f = LOOK.fog;
   return [f[0] * 0.9 + SKY[0] * 0.25, f[1] * 0.9 + SKY[1] * 0.25, f[2] * 0.9 + SKY[2] * 0.3];
 }
@@ -242,14 +246,15 @@ function vfRender(still) {
     S = VF.S;
   let yaw = VF.yaw,
     pitch = VF.pitch;
-  if (!still) {
+  const eye = [P.x + Math.sin(yaw) * 0.14, (P.y || 0) + 1.52 * (P.look.h || 1), P.z + Math.cos(yaw) * 0.14],
+    off = vfStageEye(eye); // a staged shot: the camera is out of your hands, where the thing shows best
+  if (!still && !off) {
     yaw += Math.sin(R.time * 1.7) * 0.006; // held in two hands, not on a tripod
     pitch += Math.sin(R.time * 2.3) * 0.005;
   }
   const fx = Math.sin(yaw),
     fz = Math.cos(yaw),
-    cp = Math.cos(pitch),
-    eye = [P.x + fx * 0.14, (P.y || 0) + 1.52 * (P.look.h || 1), P.z + fz * 0.14];
+    cp = Math.cos(pitch);
   const view = M4.lookAt(eye, [eye[0] + fx * cp, eye[1] + Math.sin(pitch), eye[2] + fz * cp], [0, 1, 0]);
   const keep = [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown];
   cam.VP = M4.mul(M4.persp(VF.fov, 1, 0.08, 70), view);
@@ -260,6 +265,7 @@ function vfRender(still) {
   cam.eye = eye;
   cam.wallsDown = 0;
   VF.eye = eye;
+  if (!still) vfAf(cam.VP); // the focus brackets, on the thing
   // a subject: the walls between you and it come down (the shader's own cut, aimed at a point just past it; nothing
   // else is cut), and vfInWay leaves out what stands on the line
   const tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? vfSubjAt(VF.aim) : vfWindow(eye, fx, fz);
@@ -272,9 +278,11 @@ function vfRender(still) {
       tz: tg.z,
       at: [tg.x + (dx / d) * 0.3, 1, tg.z + (dz / d) * 0.3],
       back: [eye[0] - fx * 60, 1, eye[2] - fz * 60],
-      r: clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
+      r: off ? 0.05 : clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
+      near: off, // out of your hands, with a clear line to it: nothing is cut, only what's right on the lens is left out
     };
-    vfPane(eye, tg.x, tg.z); // a window on the line: the shot is through the glass (gfx/vf-glass)
+    if (off) VF_PANE.on = false;
+    else vfPane(eye, tg.x, tg.z); // a window on the line: the shot is through the glass (gfx/vf-glass)
   } else VF_PANE.on = false;
   R.cut = VF.cut;
   const fk = VF_PANE.on ? 0.5 : 1, // through glass most of the flash comes back off it
@@ -283,9 +291,18 @@ function vfRender(still) {
       : null;
   if (flash) HX.lights.unshift(flash);
   VF.flash = flash; // on the ceiling too (gfx/vf-sky)
+  // out of your hands the camera sees what you can't from where you stand: the room it's in, as it is
+  if (off) {
+    gl.useProgram(R.main.p);
+    gl.uniform1f(R.main.U.uVisMin, 0.8);
+  }
   try {
     drawScene(VF.ms, S, S, still ? 'still' : 'live');
   } finally {
+    if (off) {
+      gl.useProgram(R.main.p);
+      gl.uniform1f(R.main.U.uVisMin, 0);
+    }
     [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown] = keep;
     VF.cut = R.cut = VF.flash = null;
     if (flash) HX.lights.splice(HX.lights.indexOf(flash), 1);
@@ -357,6 +374,7 @@ function vfFrame() {
   if (!VF.mode) return;
   const P = PLAYER,
     gone = !G.started || G.over || UI.caseOpen || UI.scene || CAP.on || !P.onMap;
+  vfStageTick();
   if (VF.mode === 'live') {
     if (gone || P.queue[0] !== VF.act) return vfClose(false); // put down before the shutter
     vfLens(0.12);

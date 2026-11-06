@@ -1,6 +1,6 @@
 //@ gfx/look — The look: a cartoon town, and how far it has turned into the horror right now (render only)
 //@ Defines: LOOK, FILL_NIGHT, FILL_WARM, FILL_DREAD_DAY, FILL_DREAD_NIGHT, FOG_TOON, FOG_NOIR_NIGHT, FOG_NOIR_DAY, DOOR_RED, lookTarget, lookStep, lookDoors
-//@ Uses:    core/util, horror/layer, sim/core, world/light-map, gfx/renderer, taken/taken, game/last-day, them/plan, gfx/world-geometry
+//@ Uses:    core/util, horror/layer, sim/core, world/light-map, gfx/renderer, gfx/vf-stage, taken/taken, game/last-day, them/plan, gfx/world-geometry
 //@ (header made by tools/map.js; stripped by build.py)
 // ───────────── the look: a bright, cartoon town by day and by night, until something mad happens
 // LOOK.h is how far the picture has turned. 0 is the toy town: a soft warm fill light everywhere, clean walls, colour.
@@ -43,6 +43,7 @@ function lookTarget() {
     HX.sel * 0.75,
     sstep(0.15, 0.95, STY.k) * 0.85,
   );
+  h = Math.max(h, vfDread() * 0.85); // evidence lined up in the camera's square (gfx/vf-stage)
   if (CAP.on) h = Math.max(h, 0.75);
   if (looseOn()) h = Math.max(h, 1);
   const day = theirDay();

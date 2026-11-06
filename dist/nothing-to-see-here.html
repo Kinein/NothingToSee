@@ -197,7 +197,8 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 @keyframes cin{from{transform:rotate(var(--tilt,0deg)) translateX(60px) scale(.9)}to{transform:rotate(var(--tilt,0deg))}}
 /* the camera's square (gfx/viewfinder): live, WebGL draws the town into the hole the border leaves (so no background
    here); then the flash, then the print */
-#vf{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));top:calc(124px + env(safe-area-inset-top,0px));width:min(320px,40vw);border:9px solid #141313;border-radius:5px;box-shadow:0 16px 40px rgba(0,0,0,.65),inset 0 0 0 1px rgba(255,255,255,.05);pointer-events:none;z-index:4;animation:vfin .22s cubic-bezier(.2,1.2,.4,1);transition:border-color .7s,border-bottom-width .5s cubic-bezier(.2,1.3,.4,1),transform .6s cubic-bezier(.2,1.3,.4,1),border-radius .5s}
+#vf{position:absolute;right:calc(20px + env(safe-area-inset-right,0px));top:calc(124px + env(safe-area-inset-top,0px));width:min(320px,40vw);border:9px solid #141313;border-radius:5px;box-shadow:0 16px 40px rgba(0,0,0,.65),inset 0 0 0 1px rgba(255,255,255,.05);pointer-events:none;z-index:4;animation:vfin .22s cubic-bezier(.2,1.2,.4,1);transition:border-color .7s,border-bottom-width .5s cubic-bezier(.2,1.3,.4,1),transform .6s cubic-bezier(.2,1.3,.4,1),border-radius .5s,width .4s cubic-bezier(.2,1.1,.4,1)}
+#vf.big{width:min(460px,48vw)}
 #vf[hidden]{display:none}
 #vf .vf-win{position:relative;aspect-ratio:1;overflow:hidden;background:transparent}
 #vf .vf-win::before{content:"";position:absolute;inset:10px;z-index:2;pointer-events:none;
@@ -208,6 +209,24 @@ svg .grv{fill:none;stroke:#141519;stroke-width:1.25;stroke-linecap:round}
 #vf .vf-win::after{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;z-index:2;border:1.5px solid rgba(242,234,214,.6);border-radius:50%;transition:opacity .2s}
 #vf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 #vf .vf-fl{position:absolute;inset:0;z-index:3;background:#fffdf6;opacity:0;pointer-events:none}
+#vf .vf-af{position:absolute;left:50%;top:50%;width:40%;height:40%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;opacity:0;--afc:#f2ead6;
+  background:linear-gradient(var(--afc),var(--afc)) left top/14px 2px,linear-gradient(var(--afc),var(--afc)) left top/2px 14px,
+  linear-gradient(var(--afc),var(--afc)) right top/14px 2px,linear-gradient(var(--afc),var(--afc)) right top/2px 14px,
+  linear-gradient(var(--afc),var(--afc)) left bottom/14px 2px,linear-gradient(var(--afc),var(--afc)) left bottom/2px 14px,
+  linear-gradient(var(--afc),var(--afc)) right bottom/14px 2px,linear-gradient(var(--afc),var(--afc)) right bottom/2px 14px;background-repeat:no-repeat}
+#vf .vf-af.hunt{opacity:.85;animation:vfhunt .5s ease-in-out infinite alternate}
+#vf .vf-af.lock{opacity:1;--afc:#ffb340;animation:vflock .22s cubic-bezier(.3,1.6,.5,1)}
+#vf .vf-dip{position:absolute;inset:0;z-index:2;background:#070606;opacity:0;pointer-events:none}
+#vf.dip .vf-dip{animation:vfdip .3s ease-out}
+#vf.flick .vf-dip{animation:vfflick .34s steps(1,end)}
+#vf.scream{animation:vfscream .5s linear;border-color:#3a0705}
+#vf.scream .vf-win{box-shadow:inset 0 0 70px rgba(190,10,0,.65)}
+@keyframes vfflick{0%{opacity:.75}18%{opacity:0}34%{opacity:.9}46%{opacity:.15}62%{opacity:.6}78%{opacity:0}100%{opacity:0}}
+@keyframes vfscream{0%{transform:translate(0,0) scale(1.04)}10%{transform:translate(-9px,6px) rotate(-1.5deg) scale(1.08)}20%{transform:translate(8px,-7px) rotate(1.2deg) scale(1.06)}30%{transform:translate(-7px,-5px) rotate(-1deg)}45%{transform:translate(5px,5px) rotate(.8deg)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}100%{transform:none}}
+#vf.shot .vf-af,#vf.print .vf-af{opacity:0;animation:none}
+@keyframes vfhunt{from{opacity:.45}to{opacity:.9}}
+@keyframes vflock{from{transform:translate(-50%,-50%) scale(1.35)}to{transform:translate(-50%,-50%)}}
+@keyframes vfdip{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
 #vf .stamp{position:absolute;left:12px;bottom:14px;z-index:4;padding:3px 9px 0;border:2px solid var(--stamp);color:var(--stamp);font:19px/1.4 var(--f-type);letter-spacing:.12em;transform:rotate(-8deg);background:rgba(231,224,204,.14);opacity:0}
 #vf .vf-cap{position:absolute;left:3px;right:3px;bottom:-34px;font:17px/1.2 var(--f-type);color:#3a342c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .5s .3s}
 #vf.shot .vf-fl{opacity:1}
@@ -780,7 +799,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
     <button id="boardBtn" data-tip="Evidence · Tab" aria-label="Open the evidence board"><img alt=""><span class="slots"><i></i><i></i><i></i></span></button>
   </div>
   <div id="cards"></div>
-  <div id="vf" hidden><div class="vf-win"><img alt="" hidden><i class="vf-fl"></i><span class="stamp"></span></div><b class="vf-cap"></b></div>
+  <div id="vf" hidden><div class="vf-win"><img alt="" hidden><i class="vf-af"></i><i class="vf-dip"></i><i class="vf-fl"></i><span class="stamp"></span></div><b class="vf-cap"></b></div>
   <div id="reveal" hidden></div>
   <div id="daycard" hidden><b></b><span></span></div>
   <div id="almost" hidden><svg class="skull" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.2C7.1 2.2 3.6 5.7 3.6 10.3c0 2.5 1 4.4 2.8 5.6v2.6c0 .9.7 1.6 1.6 1.6h.8v-2.2h1.7v2.2h3v-2.2h1.7v2.2h.8c.9 0 1.6-.7 1.6-1.6v-2.6c1.8-1.2 2.8-3.1 2.8-5.6 0-4.6-3.5-8.1-8.4-8.1zM8.7 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM15.3 9.4c-1.2 0-2.1.9-2.1 2s.9 2.1 2.1 2.1 2.1-.9 2.1-2.1-.9-2-2.1-2zM12 13.9l-1.2 2.1h2.4z"/></svg><b>THEY ALMOST WIN</b><span>Either fight the last ones or run away from the city.</span><div class="ways"><i class="wf"></i><em>or</em><i class="wr"></i></div></div>
@@ -808,7 +827,7 @@ body.cf-on #hud{opacity:.22;transition:opacity .4s}
       <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg>THEY need five days</span>
     </div>
   </div>
-  <p id="version">v1.33 · updated Nov 5, 2026</p>
+  <p id="version">v1.35 · updated Nov 6, 2026</p>
 </div>
 
 <div id="board" class="overlay" hidden>
@@ -1256,6 +1275,8 @@ const BLADDER = { asleep: -2, coffee: 15, smell: 1.5, pee: 1.5, peeSus: 12, peeS
 // passed out (player/needs passOut): time goes by as fast as in your sleep, and the screen is black. You come round at
 // `wake` energy; it rests you `rest` × as well as a night in bed. Every `blink` game minutes your eyes come open a crack.
 const OUT = { wake: 50, rest: 0.67, blink: 170 };
+// starving (hunger at 0, awake): energy drains `energy` an hour instead of the usual 4, and its bar shows `arrows` down
+const STARVE = { energy: -12, arrows: 3 };
 const BED = { energy: 13.5, stress: -5 };   // a night in your own bed, per game hour (play/verbs sleepAct)
 
 // ── THEIR week: tips, attacks, horror, awareness (them/plan, them/night-attacks, horror/director, them/awareness)
@@ -8895,6 +8916,7 @@ function lookTarget() {
     HX.sel * 0.75,
     sstep(0.15, 0.95, STY.k) * 0.85,
   );
+  h = Math.max(h, vfDread() * 0.85); // evidence lined up in the camera's square (gfx/vf-stage)
   if (CAP.on) h = Math.max(h, 0.75);
   if (looseOn()) h = Math.max(h, 1);
   const day = theirDay();
@@ -9308,6 +9330,15 @@ function drawPerson(c) {
         eg,
       );
       drawSpec = 0;
+    } else if (fx.scream > 0.3) {
+      // turned on the camera (gfx/vf-stage): the lids gone, the whites all round, the pupils pinpricks that catch
+      // the flash red, the way any eye does too close to a flash
+      const ez = faceZ(s * 0.0295, 0.12),
+        k = fx.scream;
+      part(Hd, s * 0.0295, 0.121, ez + 0.003, 0.029 + 0.008 * k, 0.017 + 0.011 * k, 0.018, 'sph', [0.86, 0.84, 0.78]);
+      drawSpec = 2.4;
+      part(Hd, s * 0.0285, 0.121, ez + 0.012, 0.007, 0.007, 0.006, 'sph', [0.9, 0.1, 0.05], [1.4 * k, 0.12 * k, 0.05 * k]);
+      drawSpec = 0;
     } else if (c.shut) {
       // shut: the lid all the way down, and the line of the lashes
       const ez = faceZ(s * 0.0295, 0.12);
@@ -9362,7 +9393,7 @@ function drawPerson(c) {
       partR(
         Hd,
         s * 0.034,
-        0.1415,
+        0.1415 + 0.012 * (fx.scream || 0), // a scream lifts the brows
         faceZ(s * 0.034, 0.141) + 0.002,
         0.15,
         0,
@@ -9386,18 +9417,13 @@ function drawPerson(c) {
       'sph',
       mix3([0.2, 0.09, 0.09], [0.12, 0.075, 0.11], wan),
     );
-  if (fx.gape)
-    part(
-      Hd,
-      0,
-      0.048 - fx.gape * 0.022,
-      0.078,
-      0.05 + fx.gape * 0.016,
-      0.012 + fx.gape * 0.055,
-      0.024,
-      'sph',
-      [0.03, 0.008, 0.008],
-    );
+  if (fx.gape) {
+    const sk = fx.scream || 0, // a scream: wider, the jaw hanging, the teeth showing
+      my = 0.048 - fx.gape * (0.022 + 0.02 * sk),
+      mh = 0.012 + fx.gape * (0.055 + 0.04 * sk);
+    part(Hd, 0, my, 0.078, 0.05 + fx.gape * (0.016 + 0.018 * sk), mh, 0.024, 'sph', [0.03, 0.008, 0.008]);
+    if (sk > 0.3) part(Hd, 0, my + mh * 0.38, 0.086, 0.046, 0.008, 0.01, 'box', [0.78, 0.74, 0.64]);
+  }
   else if (fx.grin) {
     part(Hd, 0, 0.05, 0.08, 0.11, 0.013, 0.018, 'box', [0.05, 0.02, 0.02]);
     for (const s of [1, -1])
@@ -9542,6 +9568,14 @@ function drawPerson(c) {
       grip ? 'handG' : 'hand',
       bskin,
     );
+    const pt = fx.point;
+    if (pt && pt.s === s && pt.k > 0.02 && !grip) {
+      // one finger held out straight for the camera; far too long when the fingers are what's wrong (gfx/vf-stage)
+      const y0 = -0.29 * h - 0.06 - 0.013 * fl,
+        L = (0.075 + 0.08 * fl) * pt.k;
+      part(Fa, s * 0.012, y0 - L / 2, 0.02, 0.024, L + 0.02, 0.026, 'limb2', bskin);
+      part(Fa, s * 0.012, y0 - L, 0.02, 0.022, 0.022, 0.022, 'sph', bskin);
+    }
     if (grip && s < 0) {
       const pp = fx.prop;
       if (pp === 'plate') part(Fa, 0, -0.33 * h, 0.08, 0.24, 0.025, 0.24, 'cyl', [0.85, 0.83, 0.78]);
@@ -11449,8 +11483,9 @@ function vfEl() {
   };
   return el;
 }
-// F (or a click photo) lifts the camera: the square comes up, live
-function vfOpen(act, aim) {
+// F (or a click photo) lifts the camera: the square comes up, live. stake: what the shot is worth (play/photos
+// photoStakes), for the staged shot (gfx/vf-stage)
+function vfOpen(act, aim, stake) {
   const el = R.ready && vfEl();
   if (!el) return;
   if (VF.mode) vfClose(true);
@@ -11475,6 +11510,7 @@ function vfOpen(act, aim) {
   el.querySelector('.stamp').textContent = '';
   el.querySelector('.vf-cap').textContent = '';
   el.hidden = false;
+  vfStageBegin(stake);
 }
 // the shutter: white in the square, a glint in the town. False when the square isn't up (then the old full flash).
 function vfShoot() {
@@ -11511,6 +11547,7 @@ function vfClose(flush) {
   VF.act = null;
   VF.cards.length = VF.prints.length = 0;
   if (VF.el) VF.el.hidden = true;
+  vfStageEnd();
   vfUnclip();
   if (flush) for (const o of cards) ui.card(o);
 }
@@ -11541,6 +11578,7 @@ function vfSubjAt(tg) {
   return S;
 }
 function vfLens(k) {
+  if (vfStageLens()) return; // a shot worth staging has its own camera (gfx/vf-stage)
   const P = PLAYER,
     tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? VF.aim : null,
     eyeY = (P.y || 0) + 1.52 * (P.look.h || 1);
@@ -11571,7 +11609,7 @@ function vfInWayAt(x, z, r, wide) {
     tz = C.tz - ez,
     d = Math.hypot(tx, tz) || 1,
     t = ((x - ex) * tx + (z - ez) * tz) / d;
-  if (t < 0.15 || t > d - (wide ? 0.15 : 0.45)) return false;
+  if (t < 0.15 || t > d - (wide ? 0.15 : 0.45) || (C.near && t > 0.6)) return false; // near: only what's on the lens
   return Math.abs((x - ex) * tz - (z - ez) * tx) / d < r + (wide ? 0.2 + t * Math.tan(VF.fov / 2) * 0.9 : 0.35);
 }
 // no subject, but a window in front of you: the shot is through it, at what's on the other side
@@ -11630,7 +11668,7 @@ function vfTargets() {
 // the clear colour under the backdrop (gfx/vf-sky), which draws the real sky and ceilings over it
 const VF_ROOF = [0.025, 0.022, 0.024];
 function vfSky() {
-  if (roomAt(PLAYER.x, PLAYER.z)) return VF_ROOF;
+  if (roomAt(VF.eye[0], VF.eye[2])) return VF_ROOF;
   const f = LOOK.fog;
   return [f[0] * 0.9 + SKY[0] * 0.25, f[1] * 0.9 + SKY[1] * 0.25, f[2] * 0.9 + SKY[2] * 0.3];
 }
@@ -11641,14 +11679,15 @@ function vfRender(still) {
     S = VF.S;
   let yaw = VF.yaw,
     pitch = VF.pitch;
-  if (!still) {
+  const eye = [P.x + Math.sin(yaw) * 0.14, (P.y || 0) + 1.52 * (P.look.h || 1), P.z + Math.cos(yaw) * 0.14],
+    off = vfStageEye(eye); // a staged shot: the camera is out of your hands, where the thing shows best
+  if (!still && !off) {
     yaw += Math.sin(R.time * 1.7) * 0.006; // held in two hands, not on a tripod
     pitch += Math.sin(R.time * 2.3) * 0.005;
   }
   const fx = Math.sin(yaw),
     fz = Math.cos(yaw),
-    cp = Math.cos(pitch),
-    eye = [P.x + fx * 0.14, (P.y || 0) + 1.52 * (P.look.h || 1), P.z + fz * 0.14];
+    cp = Math.cos(pitch);
   const view = M4.lookAt(eye, [eye[0] + fx * cp, eye[1] + Math.sin(pitch), eye[2] + fz * cp], [0, 1, 0]);
   const keep = [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown];
   cam.VP = M4.mul(M4.persp(VF.fov, 1, 0.08, 70), view);
@@ -11659,6 +11698,7 @@ function vfRender(still) {
   cam.eye = eye;
   cam.wallsDown = 0;
   VF.eye = eye;
+  if (!still) vfAf(cam.VP); // the focus brackets, on the thing
   // a subject: the walls between you and it come down (the shader's own cut, aimed at a point just past it; nothing
   // else is cut), and vfInWay leaves out what stands on the line
   const tg = VF.aim && (!VF.aim.look || VF.aim.onMap !== false) ? vfSubjAt(VF.aim) : vfWindow(eye, fx, fz);
@@ -11671,9 +11711,11 @@ function vfRender(still) {
       tz: tg.z,
       at: [tg.x + (dx / d) * 0.3, 1, tg.z + (dz / d) * 0.3],
       back: [eye[0] - fx * 60, 1, eye[2] - fz * 60],
-      r: clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
+      r: off ? 0.05 : clamp(d * Math.tan(VF.fov / 2) + 1.4, 1.8, 4), // wide enough that no wall in frame is half cut
+      near: off, // out of your hands, with a clear line to it: nothing is cut, only what's right on the lens is left out
     };
-    vfPane(eye, tg.x, tg.z); // a window on the line: the shot is through the glass (gfx/vf-glass)
+    if (off) VF_PANE.on = false;
+    else vfPane(eye, tg.x, tg.z); // a window on the line: the shot is through the glass (gfx/vf-glass)
   } else VF_PANE.on = false;
   R.cut = VF.cut;
   const fk = VF_PANE.on ? 0.5 : 1, // through glass most of the flash comes back off it
@@ -11682,9 +11724,18 @@ function vfRender(still) {
       : null;
   if (flash) HX.lights.unshift(flash);
   VF.flash = flash; // on the ceiling too (gfx/vf-sky)
+  // out of your hands the camera sees what you can't from where you stand: the room it's in, as it is
+  if (off) {
+    gl.useProgram(R.main.p);
+    gl.uniform1f(R.main.U.uVisMin, 0.8);
+  }
   try {
     drawScene(VF.ms, S, S, still ? 'still' : 'live');
   } finally {
+    if (off) {
+      gl.useProgram(R.main.p);
+      gl.uniform1f(R.main.U.uVisMin, 0);
+    }
     [cam.VP, cam.view, cam.right, cam.up, cam.fwd, cam.eye, cam.wallsDown] = keep;
     VF.cut = R.cut = VF.flash = null;
     if (flash) HX.lights.splice(HX.lights.indexOf(flash), 1);
@@ -11756,6 +11807,7 @@ function vfFrame() {
   if (!VF.mode) return;
   const P = PLAYER,
     gone = !G.started || G.over || UI.caseOpen || UI.scene || CAP.on || !P.onMap;
+  vfStageTick();
   if (VF.mode === 'live') {
     if (gone || P.queue[0] !== VF.act) return vfClose(false); // put down before the shutter
     vfLens(0.12);
@@ -12473,6 +12525,586 @@ function vfBackdrop() {
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.depthFunc(gl.LESS);
   gl.activeTexture(gl.TEXTURE0);
+}
+// ───────────── the staged shot. A photo worth having isn't left to where you happen to stand.
+// Something odd (play/photos photoStakes: 'odd'): the lens whips onto it, overshoots a hair, and pushes in slow while
+// the focus brackets hunt for it. Evidence ('card'): the camera leaves your hands and goes where the thing shows best
+// (round to the front of them, beside the face, down at the hand), and the one in the frame gives it to the lens: a
+// hand lifted and one long finger held out, the tongue all the way out, the changed face turned in to the flash. It
+// only goes where nothing solid stands between it and the thing (vfSpotOk); when the way round is blocked it cuts
+// there instead of flying through a wall, and when there's nowhere to stand it stays at your eye and only the pose is
+// there. While the shot lines up the world holds its breath (vfSlow, game/loop), and the shutter waits for it
+// (vfStaging, play/photos). Evidence is never calm about it: the picture turns to the horror (vfDread, gfx/look), a
+// drone climbs under a heart going faster, the lens creeps in on a dolly-zoom and the lights stutter before the
+// flash. And now and then, with a lens there to do it to, the thing turns on the camera: the head snaps round, the
+// mouth opens, it comes at you, the square shakes and screams, and that is the picture you get (the screamer). Render only: what the shot files is still takePhoto's, and the pose is drawn and forgotten.
+const VF_ST = {
+  on: false,
+  tier: '', // 'card' | 'odd'
+  kind: '', // which shot (VF_SHOT)
+  who: null, // the person the lens is on, if it's a person
+  c: null, // the one posing (evidence only): vfPoseFx
+  spec: null,
+  t0: 0, // R.time it began
+  side: 1, // the side of them the thing is on: the camera goes round that way
+  off: false, // the camera has somewhere better to be than your eye
+  show: false, // it hasn't, and they have their back to you: the pose is turned so your eye can see it
+  cut: false, // and gets there by a cut, the way round being blocked
+  dip: false,
+  ready: false,
+  w: 0, // how far into the pose
+  slow: 1,
+  eye: [0, 0, 0],
+  f: [0, 0, 0], // the focus, smoothed
+  fill0: 2, // how wide the frame was when it began, in metres at the subject
+  yaw0: 0,
+  pitch0: 0,
+  a0: 0, // the move round the subject: from (angle, radius, height) at your eye
+  r0: 0,
+  y0: 0,
+  a1: 0, // to the spot
+  r1: 0,
+  y1: 0,
+  point: { s: 1, k: 0 }, // the finger held out (gfx/people)
+  dread: 0, // how far the picture has turned for it (gfx/look lookTarget)
+  scream: false, // this one turns on the lens
+  screamed: false,
+  lastScream: -1e9, // R.time of the last one: never two close together
+  forceScream: null, // true/false: every shot does / none does (dev tools); null: chance
+  gaped: false, // the mouth was opened for it
+  flick: false,
+  af: null,
+};
+// real seconds into the shot: the move, the cut (when the way round is blocked), the shutter
+const VF_T = { move0: 0.28, move1: 1.45, cut: 0.62, card: 1.72, eye: 1.5, odd: 1.18, scream: 1.4, screamShot: 0.24 };
+// the screamer: how likely, by day and by night; and not again within this many real seconds
+const VF_SCREAM = { day: 0.2, night: 0.45, gap: 40 };
+const VF_SLOW = { card: 0.07, odd: 0.28 }; // the world meanwhile, × its speed
+// where each kind of evidence shows best. focus: what the lens looks at; ang: where the camera stands, round the
+// subject from straight in front (0) toward the side the thing is on (radians; past 1.6 is behind them); d: how far
+// off; up: camera height over the focus; fill: metres across the frame when it's there
+const VF_SHOT = {
+  hum: { focus: 'body', ang: 0.4, d: 2.5, up: -0.75, fill: 2.4 }, // from below: the feet off the floor
+  speak: { focus: 'face', ang: 1.25, d: 1.5, up: 0.05, fill: 0.8 }, // side on, the wall and the face
+  flicker: { focus: 'face', ang: 0.35, d: 1.25, up: 0.03, fill: 0.55 },
+  tongue: { focus: 'tongue', ang: 1.15, d: 1.35, up: 0.04, fill: 0.95 }, // nearly in profile: how far it comes out
+  shed: { focus: 'hands', ang: 0.5, d: 1.6, up: 0.3, fill: 1 },
+  bask: { focus: 'chest', ang: 1.35, d: 1.8, up: 0.35, fill: 1.3 },
+  feed: { focus: 'mouth', ang: 0.65, d: 1.35, up: 0.05, fill: 0.75 },
+  limb: { focus: 'chest', ang: 0.7, d: 2.3, up: 0.45, fill: 1.9 },
+  stare: { focus: 'head', ang: 2.1, d: 1.7, up: 0.2, fill: 1.1 }, // over the shoulder: the corner, and the face in it
+  true: { focus: 'body', ang: 0.3, d: 3.1, up: -0.6, fill: 3 },
+  odd: { focus: 'chest', ang: 0.6, d: 2, up: 0.15, fill: 1.5 },
+  'half:face': { focus: 'face', ang: 0.45, d: 1.2, up: 0.03, fill: 0.55 },
+  'half:head': { focus: 'head', ang: 0.9, d: 1.3, up: 0.1, fill: 0.7 },
+  'half:hand': { focus: 'handface', ang: 0.5, d: 1.25, up: 0.02, fill: 0.7 },
+  'half:ribs': { focus: 'chest', ang: 0.7, d: 1.5, up: 0.1, fill: 0.9 },
+  'half:tail': { focus: 'tail', ang: 2.4, d: 1.7, up: 0.1, fill: 1.2 }, // the one thing you see from behind
+  'trace:fingers': { focus: 'handface', ang: 0.45, d: 1.2, up: 0.02, fill: 0.62 }, // the finger, and the face looking at it
+  'trace:blue': { focus: 'hands', ang: 0.3, d: 1.2, up: 0.12, fill: 0.72 },
+  'trace:long': { focus: 'head', ang: 1.35, d: 1.2, up: 0.08, fill: 0.62 },
+  'trace:neck': { focus: 'neck', ang: 1.45, d: 1.35, up: 0, fill: 0.8 },
+  'trace:shine': { focus: 'face', ang: 0.12, d: 1.05, up: 0.02, fill: 0.42 },
+  'trace:grey': { focus: 'face', ang: 0.35, d: 1.2, up: 0.03, fill: 0.55 },
+  'trace:cold': { focus: 'face', ang: 0.35, d: 1.2, up: 0.03, fill: 0.55 },
+  'trace:pallor': { focus: 'face', ang: 0.35, d: 1.2, up: 0.03, fill: 0.55 },
+};
+// a half-change's part (horror/half-forms HALF_PARTS) → its shot
+const HALF_SHOT = {
+  eye: 'face',
+  snout: 'face',
+  jaw: 'face',
+  face: 'face',
+  veins: 'face',
+  skull: 'head',
+  frill: 'head',
+  hand: 'hand',
+  arm: 'hand',
+  ribs: 'ribs',
+  tail: 'tail',
+};
+// the lens never stands in one of these, or looks through one: walls, windows, closed doors, the void
+function vfSolid(x, z) {
+  const ix = Math.floor(x),
+    iz = Math.floor(z);
+  if (!inb(ix, iz)) return true;
+  const ch = tiles[I(ix, iz)];
+  return ch === '#' || ch === 'W' || VOIDISH.has(ch) || ((ch === 'D' || ch === 'L') && doorClosed(ix, iz));
+}
+const VF_CLEAR = [0.3, 0, -0.3, 0, 0, 0.3, 0, -0.3, 0.22, 0.22, -0.22, 0.22, 0.22, -0.22, -0.22, -0.22];
+// somewhere the camera can be, seeing (tx, tz): out of the walls with a little room round it, and a clear line to the
+// thing, past nothing tall (a wardrobe, a shelf). strict: on the floor of the subject's own room, not in the furniture
+function vfSpotOk(x, z, tx, tz, room, strict) {
+  const ix = Math.floor(x),
+    iz = Math.floor(z);
+  if (vfSolid(x, z)) return false;
+  if (strict && (blockAt[I(ix, iz)] || roomAt(x, z) !== room)) return false;
+  for (let i = 0; i < VF_CLEAR.length; i += 2) if (vfSolid(x + VF_CLEAR[i], z + VF_CLEAR[i + 1])) return false;
+  const dx = tx - x,
+    dz = tz - z,
+    n = Math.ceil(Math.hypot(dx, dz) / 0.1),
+    sx = Math.floor(tx),
+    sz = Math.floor(tz);
+  for (let i = 1; i < n; i++) {
+    const px = x + (dx * i) / n,
+      pz = z + (dz * i) / n,
+      qx = Math.floor(px),
+      qz = Math.floor(pz);
+    if (vfSolid(px, pz)) return false;
+    if ((qx !== ix || qz !== iz) && (qx !== sx || qz !== sz) && blocksSight(qx, qz)) return false;
+  }
+  return true;
+}
+// a point on somebody, from their own frame (x to their left, z ahead of them) into the world
+function vfLocal(c, lx, ly, lz) {
+  const s = Math.sin(c.dir),
+    co = Math.cos(c.dir);
+  return [drawX(c) + co * lx + s * lz, (c.y || 0) + ly, drawZ(c) - s * lx + co * lz];
+}
+// what the lens looks at, on them, as drawn right now
+function vfFocus(c, f, s) {
+  if (f === 'hand') return handPt(c, s);
+  if (f === 'handface') {
+    const a = handPt(c, s),
+      b = bodyPt(c, 'face');
+    return [a[0] * 0.65 + b[0] * 0.35, a[1] * 0.65 + b[1] * 0.35, a[2] * 0.65 + b[2] * 0.35];
+  }
+  if (f === 'hands') {
+    const a = handPt(c, 1),
+      b = handPt(c, -1);
+    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+  }
+  if (f === 'body') {
+    const J = c.J || {},
+      big = c.trueForm || (c.tell && c.tell.type === 'true');
+    return [drawX(c), (c.y || 0) + (J.rootY || 0) + (J.float || 0) + (big ? 1.15 : 0.92) * c.look.h, drawZ(c)];
+  }
+  if (f === 'tongue') {
+    const q = bodyPt(c, 'mouth');
+    q[0] += Math.sin(c.dir) * 0.22;
+    q[2] += Math.cos(c.dir) * 0.22;
+    return q;
+  }
+  if (f === 'tail') {
+    const q = bodyPt(c, 'waist');
+    q[1] -= 0.25;
+    return q;
+  }
+  return bodyPt(c, f === 'ribs' ? 'chest' : f);
+}
+function vfEyeAt(out) {
+  const P = PLAYER;
+  out[0] = P.x + Math.sin(P.dir) * 0.14;
+  out[1] = (P.y || 0) + 1.52 * (P.look.h || 1);
+  out[2] = P.z + Math.cos(P.dir) * 0.14;
+  return out;
+}
+// the move round the subject: in close along the line you already see them on, then round to the spot
+function vfPathAt(S, cx, cz, m, out) {
+  const a = S.a0 + angDiff(S.a0, S.a1) * sstep(0.18, 1, m),
+    r = lerp(S.r0, S.r1, sstep(0, 0.72, m));
+  out[0] = cx + Math.sin(a) * r;
+  out[1] = lerp(S.y0, S.y1, sstep(0.1, 0.9, m));
+  out[2] = cz + Math.cos(a) * r;
+  return out;
+}
+function vfPathOk(S, cx, cz, f) {
+  const q = [0, 0, 0];
+  for (let i = 1; i < 14; i++) {
+    vfPathAt(S, cx, cz, i / 14, q);
+    if (!vfSpotOk(q[0], q[2], f[0], f[2], null, false)) return false;
+  }
+  return true;
+}
+// where the camera goes: the shot's own spot first, then a little nearer, a little more to the front, the other side
+function vfPlan(S) {
+  const c = S.who,
+    sp = S.spec,
+    cx = drawX(c),
+    cz = drawZ(c),
+    room = roomAt(c.x, c.z),
+    f = vfFocus(c, sp.focus, S.side),
+    e = vfEyeAt([0, 0, 0]);
+  S.a0 = Math.atan2(e[0] - cx, e[2] - cz);
+  S.r0 = Math.hypot(e[0] - cx, e[2] - cz);
+  S.y0 = e[1];
+  // nearer the front before further round: the point is to see it from where they can't hide it
+  const A = sp.ang * S.side,
+    F = Math.max(0, sp.ang - 0.5) * S.side,
+    tries = [A, 1, A, 0.8, F, 0.9, A * 0.5, 1, -A, 1, -A, 0.8, -F, 0.9, 0, 0.8, A, 0.62, -A, 0.62];
+  for (let i = 0; i < tries.length; i += 2) {
+    const a = c.dir + tries[i],
+      r = sp.d * tries[i + 1],
+      x = cx + Math.sin(a) * r,
+      z = cz + Math.cos(a) * r;
+    if (!vfSpotOk(x, z, f[0], f[2], room, true)) continue;
+    S.a1 = a;
+    S.r1 = r;
+    S.y1 = clamp(f[1] + sp.up, 0.3, 2.35);
+    S.off = true;
+    S.cut = !vfPathOk(S, cx, cz, f);
+    return;
+  }
+}
+// vfOpen: what kind of shot this is (play/photos photoStakes)
+function vfStageBegin(stake) {
+  const S = VF_ST;
+  vfStageEnd();
+  S.c = null;
+  S.w = 0;
+  if (!stake || !VF.el || fightOn()) return;
+  const tg = VF.aim,
+    who = tg && tg.look ? tg : null;
+  S.on = true;
+  S.tier = stake.tier;
+  S.kind = stake.kind;
+  S.who = who;
+  S.spec = (who && (VF_SHOT[stake.kind] || VF_SHOT.odd)) || null;
+  S.t0 = R.time;
+  S.ready = S.off = S.cut = S.dip = false;
+  S.slow = 1;
+  const P = PLAYER;
+  S.yaw0 = P.dir; // from the way you face: the lens finds it (vfOpen has already snapped onto it)
+  S.pitch0 = -0.13;
+  VF.yaw = S.yaw0;
+  VF.pitch = S.pitch0;
+  S.side =
+    stake.side || (who ? Math.sign(angDiff(who.dir, Math.atan2(P.x - who.x, P.z - who.z))) || 1 : 1);
+  if (S.kind === 'trace:fingers' && who && who.fx && who.fx.prop) S.side = 1; // the other hand's holding something
+  if (stake.tier === 'card' && who && rigKind(who) === 'human') {
+    S.c = who;
+    vfPlan(S);
+  }
+  S.show =
+    !S.off && !!S.c && Math.abs(angDiff(who.dir, Math.atan2(P.x - who.x, P.z - who.z))) > 1.75;
+  S.dread = 0;
+  S.screamed = S.flick = false;
+  // only with a lens there to turn on: from your own eye it would be turning on you, and it hasn't seen you
+  S.scream =
+    !!S.c &&
+    S.off &&
+    (S.forceScream != null
+      ? S.forceScream
+      : R.time - S.lastScream > VF_SCREAM.gap && filmRand() < lerp(VF_SCREAM.day, VF_SCREAM.night, HX.night || 0));
+  if (S.tier === 'card') audio.sting('riser');
+  const f = who ? vfFocus(who, S.spec.focus, S.side) : [tg.x, tg.item ? 0.15 : 0.7, tg.z];
+  S.f[0] = f[0];
+  S.f[1] = f[1];
+  S.f[2] = f[2];
+  vfEyeAt(S.eye);
+  S.fill0 = 2 * Math.hypot(f[0] - S.eye[0], f[1] - S.eye[1], f[2] - S.eye[2]) * Math.tan(VF_WIDE / 2);
+  VF.el.classList.toggle('big', S.tier === 'card');
+  if (!S.af) S.af = VF.el.querySelector('.vf-af');
+  if (S.af) S.af.className = 'vf-af hunt';
+}
+function vfStageEnd() {
+  const S = VF_ST;
+  S.on = false;
+  S.ready = false;
+  if (VF.el) VF.el.classList.remove('dip', 'flick', 'scream');
+  if (S.af) S.af.className = 'vf-af';
+}
+// gfx/look: how far the picture turns while evidence is lined up
+const vfDread = () => (VF_ST.on && VF_ST.tier === 'card' ? VF_ST.dread : 0);
+// the camera for this frame, instead of vfLens's: true when it's done
+function vfStageLens() {
+  const S = VF_ST;
+  if (!S.on || (S.who && S.who.onMap === false)) return false;
+  const t = R.time - S.t0,
+    c = S.who,
+    tg = VF.aim,
+    sp = S.spec;
+  const sc = S.scream && t >= VF_T.scream, // it has turned on the lens: it's all face now
+    f = c ? vfFocus(c, sc ? 'face' : sp.focus, S.side) : [tg.x, tg.item ? 0.15 : 0.7, tg.z];
+  for (let i = 0; i < 3; i++) S.f[i] += (f[i] - S.f[i]) * (sc ? 0.6 : 0.35);
+  if (S.tier === 'card') S.dread = sc ? 1 : sstep(0.05, 1.3, t) * 0.82;
+  if (S.off) S.y1 += (clamp(S.f[1] + sp.up, 0.3, 2.35) - S.y1) * 0.2; // the camera rises with what it's on
+  const e = S.eye;
+  if (S.off && c) {
+    const cx = drawX(c),
+      cz = drawZ(c);
+    if (!S.cut) vfPathAt(S, cx, cz, sstep(VF_T.move0, VF_T.move1, t), e);
+    else if (t >= VF_T.cut) {
+      // the way round is blocked: a cut to the spot, a touch further off, settling in
+      const k = sstep(VF_T.cut, VF_T.move1 + 0.1, t),
+        r = S.r1 * lerp(1.3, 1, k);
+      e[0] = cx + Math.sin(S.a1) * r;
+      e[1] = S.y1 + (1 - k) * 0.1;
+      e[2] = cz + Math.cos(S.a1) * r;
+    } else vfEyeAt(e);
+    if (S.cut && !S.dip && t >= VF_T.cut - 0.12) {
+      S.dip = true;
+      VF.el.classList.add('dip');
+    }
+    if (sc) {
+      // it comes at the lens: the camera jerks in on the face, close enough to feel the breath
+      const k = sstep(VF_T.scream, VF_T.scream + 0.12, t);
+      for (let i = 0; i < 3; i++) e[i] += (S.f[i] - e[i]) * 0.45 * k;
+      if (!S.screamed) {
+        S.screamed = true;
+        S.lastScream = R.time;
+        audio.sting('scream');
+        HX.shake = Math.max(HX.shake || 0, 0.6);
+        R.pulse = 1;
+        VF.el.classList.add('scream');
+      }
+    } else if (S.tier === 'card') {
+      // the last of it: the lens creeps in while the frame holds, and the room stretches behind (a dolly-zoom)
+      const k = sstep(VF_T.move1 - 0.1, VF_T.card, t) * 0.24;
+      for (let i = 0; i < 3; i++) e[i] += (S.f[i] - e[i]) * k;
+    }
+  } else vfEyeAt(e);
+  // the lights stutter, just before the flash
+  if (S.tier === 'card' && !S.scream && !S.flick && t >= (S.off ? VF_T.card : VF_T.eye) - 0.34) {
+    S.flick = true;
+    VF.el.classList.add('flick');
+  }
+  const dx = S.f[0] - e[0],
+    dy = S.f[1] - e[1],
+    dz = S.f[2] - e[2],
+    d = Math.max(0.2, Math.hypot(dx, dz)),
+    dist = Math.hypot(d, dy),
+    yaw = Math.atan2(dx, dz),
+    pitch = clamp(Math.atan2(dy, d), -0.8, 0.5);
+  let fill, look;
+  if (S.off) {
+    // the lens stays on the thing all the way round; the frame closes in on it as it goes
+    look = sstep(0.04, 0.42, t);
+    fill = lerp(S.fill0, sp.fill, sstep(VF_T.move0, VF_T.move1 + 0.05, t));
+    if (sc) fill = lerp(fill, 0.42, sstep(VF_T.scream, VF_T.scream + 0.1, t));
+  } else {
+    // from your eye: a whip onto it, a hair past and back, then a slow push in
+    const k = sstep(0.16, 0.58, t),
+      c1 = 1.9;
+    look = k >= 1 ? 1 : 1 + (c1 + 1) * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2);
+    const tight = sp ? sp.fill * (S.show ? 1.75 : S.tier === 'card' ? 1.15 : 1.5) : tg.item ? 0.9 : 1.6, // turned for your eye: wider, the head and the hand both in
+      mid = Math.min(S.fill0, tight * 2.4);
+    fill = lerp(lerp(S.fill0, mid, sstep(0.16, 0.6, t)), tight, sstep(0.62, S.tier === 'card' ? VF_T.eye : VF_T.odd, t));
+  }
+  const sh = sc ? bell(t, VF_T.scream, VF_T.scream + 0.7, 0.05) * (1 - sstep(VF_T.scream, VF_T.scream + 0.7, t) * 0.6) : 0;
+  VF.yaw = S.yaw0 + angDiff(S.yaw0, yaw) * look + Math.sin(R.time * 0.9) * 0.003 * look + Math.sin(R.time * 71) * 0.045 * sh;
+  VF.pitch = S.pitch0 + (pitch - S.pitch0) * Math.min(1, look) + Math.cos(R.time * 59) * 0.035 * sh;
+  VF.fov = clamp(2 * Math.atan((fill * 0.5) / dist), 0.1, sc ? 1.35 : VF_WIDE);
+  const at = S.tier !== 'card' ? VF_T.odd : S.scream ? VF_T.scream + VF_T.screamShot : S.off ? VF_T.card : VF_T.eye;
+  if (!S.ready && t >= at) {
+    S.ready = true;
+    if (S.af) S.af.className = 'vf-af lock';
+    if (S.tier === 'odd' && S.who) audio.sting('whisper'); // something odd, and the brackets have it
+  }
+  return true;
+}
+// every frame from vfFrame: how far into the pose, how slow the world, a half-change held out for the lens
+function vfStageTick() {
+  const S = VF_ST;
+  if (!S.on) return;
+  if (S.who && S.who.onMap === false) return vfStageEnd();
+  if (VF.mode === 'live') {
+    S.w = sstep(0.3, 1.2, R.time - S.t0);
+    S.slow += ((VF_SLOW[S.tier] || 1) - S.slow) * 0.22;
+  } else if (VF.mode === 'shot') {
+    S.w = 1;
+    S.slow = 1;
+  } else {
+    S.slow = 1;
+    S.w = 1 - clamp((R.time - VF.t0 - 0.35) / 0.6, 0, 1);
+    if (S.w <= 0) return vfStageEnd();
+  }
+  const tl = S.c && S.c.tell;
+  if (tl && tl.type === 'half' && tl.t0r != null && VF.mode !== 'print') {
+    tl.t0r = Math.max(tl.t0r, R.time - 0.4 * (tl.dur || 1)); // it stays out until the flash has it
+  }
+}
+// the world's speed meanwhile (game/loop)
+const vfSlow = () => (VF_ST.on && VF.mode === 'live' ? VF_ST.slow : 1);
+// the shutter (play/photos): 'wait' while the shot lines up, 'go' once it has, null for any other shot
+function vfStaging(a) {
+  const S = VF_ST;
+  if (!S.on || VF.act !== a || VF.mode !== 'live') return null;
+  return S.ready || R.time - S.t0 > 4 ? 'go' : 'wait';
+}
+// the camera's own frame: the eye it shoots from, the line it leaves things out on, how much of the dark it sees
+function vfStageEye(eye) {
+  const S = VF_ST;
+  if (!S.on || !S.off) return false;
+  eye[0] = S.eye[0];
+  eye[1] = S.eye[1];
+  eye[2] = S.eye[2];
+  return true;
+}
+// the focus brackets in the square, on the thing
+function vfAf(VP) {
+  const S = VF_ST,
+    el = S.af;
+  if (!S.on || !el) return;
+  const f = S.f,
+    x = VP[0] * f[0] + VP[4] * f[1] + VP[8] * f[2] + VP[12],
+    y = VP[1] * f[0] + VP[5] * f[1] + VP[9] * f[2] + VP[13],
+    w = VP[3] * f[0] + VP[7] * f[1] + VP[11] * f[2] + VP[15];
+  if (w <= 0.05) return;
+  const t = R.time - S.t0,
+    sz = S.ready ? 30 : lerp(62, 36, sstep(0.2, 1.1, t));
+  el.style.left = clamp((x / w) * 50 + 50, 8, 92).toFixed(1) + '%';
+  el.style.top = clamp(50 - (y / w) * 50, 8, 92).toFixed(1) + '%';
+  el.style.width = el.style.height = sz.toFixed(1) + '%';
+}
+// ── the pose: the one in the frame gives it to the lens. Weighted in and out (VF_ST.w); on top of whatever they're doing
+const VF_POSE = {
+  'trace:fingers': (c, T, w, S) => {
+    // the hand comes up in front of the face, and one finger, far too long, held out straight; they look at it
+    const s = S.side,
+      h = c.look.h;
+    armIK(c, T, s, vfHandUp(c, S), w); // up beside the face, not over it
+    lookAt(c, T, handPt(c, s), 0.75 * w);
+    S.point.s = s;
+    S.point.k = sstep(0.45, 0.95, w);
+    c.fx.point = S.point;
+  },
+  'trace:blue': (c, T, w, S) => {
+    const h = c.look.h,
+      o = S.show ? 0.45 : 0.15, // with their back to you, held out to the sides where you can see them
+      y = (S.show ? 1.3 : 1.12) * h,
+      z = S.show ? 0.08 : 0.3;
+    armIK(c, T, 1, vfLocal(c, o, y, z), w);
+    armIK(c, T, -1, vfLocal(c, -o, y, z), w);
+    lookAt(c, T, handPt(c, S.side), 0.7 * w);
+  },
+  'trace:shine': (c, T, w, S) => S.off && lookAt(c, T, S.eye, w), // straight into the lens, and the flash in the eyes
+  'trace:long': (c, T, w) => (T.hp -= 0.12 * w),
+  'trace:neck': (c, T, w) => (T.hp -= 0.42 * w),
+  'trace:grey': (c, T, w, S) => vfGlance(c, T, w, S, 0.45),
+  'trace:cold': (c, T, w, S) => vfGlance(c, T, w, S, 0.45),
+  'trace:pallor': (c, T, w, S) => vfGlance(c, T, w, S, 0.45),
+  hum: (c, T, w) => {
+    T.aoL = lerp(T.aoL, 0.85, w);
+    T.aoR = lerp(T.aoR, 0.85, w);
+    T.uaL = lerp(T.uaL, -0.35, w);
+    T.uaR = lerp(T.uaR, -0.35, w);
+    T.hp -= 0.25 * w;
+    T.float = (T.float || 0) + 0.12 * w;
+  },
+  speak: (c, T, w, S) => {
+    const s = -S.side; // the hand on the wall, on the far side from the lens
+    armIK(c, T, s, vfLocal(c, s * 0.2, 1.48 * c.look.h, 0.45), 0.9 * w);
+    T.hr += 0.2 * w;
+  },
+  flicker: (c, T, w, S) => {
+    const F = FACTIONS[(c.tell && c.tell.fac) || G.faction];
+    c.fx.skin = mix3(c.look.skinC, F.skin, w);
+    c.fx.eye = F.eye;
+    T.hr = lerp(T.hr, 0.28 * S.side, w);
+    vfGlance(c, T, w, S, 0.5);
+  },
+  tongue: (c, T, w) => {
+    c.fx.tongue = Math.max(c.fx.tongue || 0, w);
+    T.hp -= 0.18 * w;
+  },
+  shed: (c, T, w) => {
+    const s = 1;
+    armIK(c, T, s, bodyPtFwd(c, 0.3), 0.6 * w);
+    lookAt(c, T, handPt(c, s), 0.6 * w);
+  },
+  bask: (c, T, w) => (T.hr += 0.25 * w),
+  feed: (c, T, w, S) => {
+    const m = bodyPt(c, 'mouth'),
+      s = Math.sin(c.dir),
+      co = Math.cos(c.dir);
+    armIK(c, T, -1, [m[0] + s * 0.08, m[1] - 0.03, m[2] + co * 0.08], w); // the meat at the mouth
+    vfGlance(c, T, w, S, 0.4); // caught mid-bite, eyes on the lens
+  },
+  limb: (c, T, w) => {
+    if (w > 0.4) c.fx.armOff = true;
+    T.torso = lerp(T.torso, 0.5, w);
+    lookAt(c, T, vfLocal(c, 0.2, 0.1, 0.55), 0.6 * w);
+  },
+  stare: (c, T, w, S) => vfGlance(c, T, sstep(0.5, 1, w), S, 0.55), // the head comes round from the corner
+  true: (c, T, w) => {
+    T.aoL = lerp(T.aoL, 0.6, w);
+    T.aoR = lerp(T.aoR, 0.6, w);
+    T.hp -= 0.2 * w;
+  },
+  'half:face': (c, T, w, S) => vfGlance(c, T, w, S, 0.6), // the changed face, turned in to the flash
+  'half:head': (c, T, w, S) => vfGlance(c, T, w, S, 0.35),
+  'half:hand': (c, T, w, S) => {
+    const s = S.side;
+    armIK(c, T, s, vfHandUp(c, S), w);
+    lookAt(c, T, handPt(c, s), 0.7 * w);
+  },
+  'half:ribs': (c, T, w) => (T.torso += 0.08 * w),
+};
+// where a hand held up for the camera goes: beside the face, in front; with their back to your eye, out to the side and
+// up past the shoulder, where you can see it round them
+function vfHandUp(c, S) {
+  const s = S.side,
+    h = c.look.h;
+  return S.show ? vfLocal(c, s * 0.44, 1.62 * h, -0.02) : vfLocal(c, s * 0.24, 1.36 * h, 0.3);
+}
+// what's on the face: with their back to your eye the head turns side on, so it shows in profile (not round to you)
+const VF_FACE = new Set([
+  'trace:shine',
+  'trace:grey',
+  'trace:cold',
+  'trace:pallor',
+  'trace:long',
+  'trace:neck',
+  'flicker',
+  'tongue',
+  'feed',
+  'stare',
+  'half:face',
+  'half:head',
+]);
+// a look into the lens, only when there's a lens there to look into (from your own eye they'd be looking at you)
+function vfGlance(c, T, w, S, k) {
+  if (S.off) lookAt(c, T, S.eye, k * w);
+}
+function bodyPtFwd(c, d) {
+  const q = bodyPt(c, 'chest');
+  q[0] += Math.sin(c.dir) * d;
+  q[2] += Math.cos(c.dir) * d;
+  return q;
+}
+// sim/pose animate: after everything else, before the blend
+function vfPoseFx(c, T, dt) {
+  if (c.fx && c.fx.point) c.fx.point = null;
+  const S = VF_ST;
+  if (S.c !== c || !c.fx) return;
+  if (!S.on) {
+    S.w -= dt * 1.8;
+    if (S.w <= 0) {
+      S.w = 0;
+      S.c = null;
+      if (S.gaped) c.fx.gape = c.fx.scream = 0;
+      S.gaped = false;
+      return;
+    }
+  }
+  const w = sstep(0, 1, S.w),
+    fn = VF_POSE[S.kind];
+  if (w <= 0.001) return;
+  if (fn) fn(c, T, w, S);
+  if (S.show && VF_FACE.has(S.kind)) T.hy = lerp(T.hy, S.side * 1.05, w);
+  const t = R.time - S.t0;
+  if (S.scream && t >= VF_T.scream) {
+    // the screamer: the head snaps round to the lens, the mouth wide, the hands up and coming at it
+    const k = sstep(VF_T.scream, VF_T.scream + 0.09, t) * w;
+    c.fx.sharp = true;
+    lookAt(c, T, S.eye, k);
+    T.torso = lerp(T.torso, 0.42, k);
+    T.hp = lerp(T.hp, -0.12, k);
+    T.uaL = lerp(T.uaL, -1.45, k);
+    T.uaR = lerp(T.uaR, -1.45, k);
+    T.aoL = lerp(T.aoL, 0.55, k);
+    T.aoR = lerp(T.aoR, 0.55, k);
+    T.faL = lerp(T.faL, -0.7, k);
+    T.faR = lerp(T.faR, -0.7, k);
+    c.fx.gape = Math.max(c.fx.gape || 0, k);
+    c.fx.scream = k;
+    S.gaped = true;
+  } else if (S.gaped) {
+    c.fx.gape = c.fx.scream = 0;
+    S.gaped = false;
+  }
+  if (c.fx.half) c.fx.half.k = Math.max(c.fx.half.k, w); // held out, no stutter, while the lens is on it
 }
 // ───────────────────────── simulation core ─────────────────────────
 const PLAN_MAX = 8;
@@ -14214,6 +14846,7 @@ function animate(c, dtReal, dtGame) {
       c.poseFn = null;
     }
   }
+  vfPoseFx(c, T, dtReal); // posing for a staged photo (gfx/vf-stage)
   blendJoints(c, T, dtReal);
   if (!(c.tell && c.tell.type === 'true')) doorReach(c, dtReal);
   turnBody(c, dtReal, dtGame);
@@ -14278,7 +14911,7 @@ function followPath(c, dt) {
     return true;
   }
   let slow = 1;
-  if (c.isPlayer && (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0))) slow = 0.8;
+  if (c.isPlayer && G.t < (G.shakenUntil || 0)) slow = 0.8;
   const pace = c.isPlayer
     ? CTRL.walk * (c.run ? CTRL.sprint : 1)
     : (c.spd || 1) * (c.run ? CTRL.npcRun : c.trueForm ? 1 : CTRL.npcPace);
@@ -15041,7 +15674,7 @@ function needsTick(dt) {
   if (!sleeping) {
     if (dark && (h >= 21 || h < 6)) base.stress += PSY.dark; // the dark at night: a slow drift
     if (room && room.home && !dark) base.stress -= 2; // a lit home
-    if (N.hunger < 12) base.energy -= 3; // starving
+    if (starved()) base.energy = STARVE.energy;
     if (G.inv.foilOn) base.stress -= 2.5;
   }
   for (const k in base) if (k in N) setNeed(k, N[k] + (base[k] * dt) / 60);
@@ -15058,6 +15691,8 @@ function needsTick(dt) {
     if (low) ui.bubble(P, low.icon, 'thought', 3.5);
   }
 }
+// hunger all the way down: energy goes fast (STARVE)
+const starved = () => PLAYER.needs.hunger <= 0;
 const hunted = () => HUNT.on || CHARS.some((c) => c.trueForm && c.trueForm.mode === 'attack' && c.onMap);
 // near IT, Psychic drains: fast by a true form you can see or something wrong going on (a rite, one of THEM changing),
 // slowly by THEIR things. Seeing them is a step too: a true form drops you to 50, THEIR thing or a sign to 70.
@@ -20906,7 +21541,7 @@ function playerMelee(n) {
   if (!P.onMap || R.time < (UI.swingCd || 0) || P.queue.some((a) => a.swing)) return;
   UI.swingCd = R.time + CTRL.swingCd;
   cancelAll(P);
-  enqueue(P, swingAct(n, CTRL.windup * (P.needs.energy < 30 ? 1.3 : 1))); // worn out, it comes round slower
+  enqueue(P, swingAct(n, CTRL.windup));
 }
 // Space: swing. At whoever's there to be hit, a little further than your arm (you turn to them); at the air if nobody.
 function attackKey() {
@@ -27377,6 +28012,7 @@ function showerAct(o) {
   return useP(o, 'Shower', 'shower', {
     dur: 14,
     anim: 'shower',
+    shower: true,
     fx: { stress: -17 },
     onEnd: (c, a, ok) => {
       if (ok && G.smelly) {
@@ -28164,15 +28800,58 @@ function photoAct(tg) {
     onStart: (c, a) => {
       const [x, z] = pos();
       c.tdir = Math.atan2(x - c.x, z - c.z);
-      vfOpen(a, tg);
+      vfOpen(a, tg, photoStakes(tg));
     },
     onTick: (c, a) => {
-      if (!a.shot && a.t >= PHOTO_SHUTTER) {
-        a.shot = true;
-        takePhoto(tg);
-      }
+      if (photoShutter(a)) takePhoto(tg);
     },
   });
+}
+// the shutter goes at PHOTO_SHUTTER; a staged shot (gfx/vf-stage) holds it, the camera at the eye, until it has
+// lined up, and then it goes at once
+function photoShutter(a) {
+  if (a.shot) return false;
+  const st = vfStaging(a);
+  if (st === 'wait') {
+    a.t = Math.min(a.t, PHOTO_SHUTTER * 0.98);
+    return false;
+  }
+  if (st !== 'go' && a.t < PHOTO_SHUTTER) return false;
+  a.t = Math.max(a.t, PHOTO_SHUTTER);
+  a.shot = true;
+  return true;
+}
+// what a shot at this is worth before it's taken, as takePhoto will read it: 'card' when it files evidence (a tell,
+// the tenth part up close, one of THEM at THEIR business), 'odd' for anything else worth a look; and which shot it is,
+// so the camera knows where to stand and what to look at (gfx/vf-stage). Nothing here is filed.
+function photoStakes(tg) {
+  if (!tg) return null;
+  if (tg.item) return tg.item.by ? { tier: 'odd', kind: 'item' } : null;
+  const n = tg.look ? tg : tg.char;
+  if (!n || n.isPlayer) return null;
+  if (n === SHADE.c) return { tier: 'odd', kind: 'vis' };
+  const tl = n.tell;
+  if (n.isThem && !n.surrendered && tl && !tl.unmask && tl.type !== 'glare' && !tl.photo) {
+    if (tl.ritual) return tl.ringShot ? null : { tier: 'odd', kind: 'ring' };
+    if (tl.type === 'true' && tl.t >= TF_CHANGE + 0.2) return { tier: 'odd', kind: 'true' };
+    if (tl.type === 'half')
+      return { tier: 'card', kind: 'half:' + (HALF_SHOT[(tl.parts || [])[0]] || 'face'), side: tl.side || 1 };
+    return { tier: 'card', kind: tl.type };
+  }
+  const tr = n.trace;
+  if (
+    tr &&
+    !tr.photo &&
+    tr.k >= 0.6 &&
+    (n.isThem || oddityIn(n, 'body')) &&
+    !n.exposed &&
+    !n.surrendered &&
+    Math.hypot(n.x - PLAYER.x, n.z - PLAYER.z) <= 4.5 &&
+    !(G.traceShot && G.traceShot[n.id + ':' + dayNo()])
+  )
+    return { tier: 'card', kind: 'trace:' + tr.kind };
+  if (n.odd && !n.odd.photo && G.t <= n.odd.until) return { tier: n.isThem ? 'card' : 'odd', kind: 'odd' };
+  return photoWorth(n) || oddWalk(n) ? { tier: 'odd', kind: 'look' } : null;
 }
 // F: the photo, straight away. The camera takes in a wide wedge in front of you, as far as you can see clearly; no aiming.
 function inPhotoCone(x, z, half = CTRL.photoHalf) {
@@ -28262,13 +28941,10 @@ function playerPhoto() {
         closeMenu();
         const tg = photoAim(); // turn to it: the frame the game reads follows you
         if (tg) c.tdir = Math.atan2(tg.x - c.x, tg.z - c.z);
-        vfOpen(a, tg);
+        vfOpen(a, tg, photoStakes(tg));
       },
       onTick: (c, a) => {
-        if (!a.shot && a.t >= PHOTO_SHUTTER) {
-          a.shot = true;
-          takePhoto(photoCone());
-        }
+        if (photoShutter(a)) takePhoto(photoCone());
       },
     }),
   ); // up to the eye, a look through it, then the shutter
@@ -29717,7 +30393,12 @@ function computeGoal() {
     const g = needG(worst);
     if (g) return g;
   }
-  // 5. bed after 22:30
+  // 5. you smell (an accident, something you took): the shower washes it off
+  if (G.smelly && !busy((a) => a.shower)) {
+    const s = objOfType('shower');
+    if (s) return { obj: s, icon: 'shower', shower: true };
+  }
+  // 6. bed after 22:30
   if ((m >= 22 * 60 + 30 || m < 5 * 60) && !busy((a) => a.sleep))
     return { obj: OBJ_BY_ID.homeBed, icon: 'moon', sleep: true };
   return null; // nothing says when a case is enough: that's yours to decide
@@ -29731,6 +30412,7 @@ function goalAct(g) {
   if (g.work) return () => enqueue(PLAYER, deskWork(false));
   if (g.need) return () => doNeed(g.need);
   if (g.sleep) return () => enqueue(PLAYER, sleepAct(OBJ_BY_ID.homeBed));
+  if (g.shower) return () => enqueue(PLAYER, showerAct(g.obj));
   if (g.lenny) return () => enqueue(PLAYER, talkAct(NPC.lenny, 'lenny'));
   return null;
 }
@@ -30595,7 +31277,9 @@ function setBar(k, v, tip) {
 // The arrows beside a bar. Something that just happened to you (a scare, a meal, a blow, the bonus for sitting down at
 // your desk) jolts it: arrows for a moment, more of them the bigger it was. A steady climb or slide that's clearly faster
 // than the day's own drift (eating, sleeping, the job draining while you're away from your desk) shows one or two for as
-// long as it keeps up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't fake it.
+// long as it keeps up, and no longer: the last 0.4 s must still show it, so the arrows go the moment it stops instead of
+// when the average catches up. Up is good and down is bad, on every bar. Measured in game time, so fast-forward doesn't
+// fake it.
 const TREND_DRIFT = { health: 0, hunger: -5.6, energy: -4, bladder: -10, stress: 1, work: 0 }; // points per game hour, left alone
 function barTrend(k, v) {
   const B = UI.bars[k];
@@ -30620,23 +31304,32 @@ function barTrend(k, v) {
   let dir = 0,
     n = 0,
     jolt = false;
-  if (now - T.evAt < 2.4 && Math.abs(T.ev) >= 1.6) {
+  if (now - T.evAt < 1 && Math.abs(T.ev) >= 1.6) {
     const a = Math.abs(T.ev);
     dir = Math.sign(T.ev);
     n = a >= 22 ? 3 : a >= 8 ? 2 : 1;
     jolt = true;
   } else {
+    let j = T.hist.length - 1;
+    while (j > 0 && now - T.hist[j - 1][0] <= 0.4) j--;
     const [, g0, v0] = T.hist[0],
-      span = gt - g0;
-    if (span >= 0.3) {
+      [, g1, v1] = T.hist[j],
+      span = gt - g0,
+      span1 = gt - g1;
+    if (span >= 0.3 && span1 >= 0.15) {
       const r = ((v - v0) / span) * 60 - drift,
+        r1 = ((v - v1) / span1) * 60 - drift, // the same, just now: is it still going?
         a = Math.abs(r); // how much faster than its own drift, per game hour
       const atEdge = (r > 0 && v >= 99.5) || (r < 0 && v <= 0.5);
-      if (a >= 4 && !atEdge) {
+      if (a >= 4 && !atEdge && Math.sign(r1) === Math.sign(r) && Math.abs(r1) >= 4) {
         dir = Math.sign(r);
         n = a >= 160 ? 3 : a >= 45 ? 2 : 1;
       }
     }
+  }
+  if (k === 'energy' && !jolt && starved() && !G.sleeping && v > 0.5) {
+    dir = -1; // starving: energy goes fast, and the bar says so
+    n = STARVE.arrows;
   }
   const key = dir ? (dir > 0 ? 'up' : 'dn') + n + (jolt ? 'j' + Math.round(T.evAt * 10) : '') : '';
   if (B.trK === key) return;
@@ -32065,10 +32758,7 @@ function driveTick(dt) {
     if (!P.queue.every((a) => a.cancel)) cancelAll(P); // anything else: walking away is how you stop
     return; // let it finish getting up
   }
-  const slow =
-      (PLAYER.needs.energy < 15 || G.t < (G.shakenUntil || 0) ? 0.8 : 1) *
-      huntSlow() *
-      (cuffedNow() ? RESIST.cuffed : 1),
+  const slow = (G.t < (G.shakenUntil || 0) ? 0.8 : 1) * huntSlow() * (cuffedNow() ? RESIST.cuffed : 1),
     run = !!keys.Shift;
   const speed = WALK * CTRL.walk * (run ? CTRL.sprint : 1) * slow,
     sp = speed * dt;
@@ -33096,6 +33786,25 @@ const audio = (() => {
         // a wet click: the mask, slipping
         tone('sine', 1500, 0.002, 0.08, 0.07, 260);
         noise(0.002, 0.06, 0.09, 3200, 4);
+      } else if (kind === 'riser') {
+        // a staged photo lining up (gfx/vf-stage): a low drone climbing, a breath of air, the heart going faster
+        tone('sawtooth', 49, 1.3, 0.045, 0.45, 98);
+        tone('sawtooth', 49.6, 1.3, 0.035, 0.45, 104);
+        tone('sine', 98, 1.2, 0.05, 0.5, 196);
+        noise(1.1, 0.05, 0.5, 520, 0.9);
+        for (const at of [0, 0.5, 0.88, 1.17, 1.38]) {
+          setTimeout(() => ctx && tone('sine', 62, 0.004, 0.32, 0.16, 36), at * 1000);
+          setTimeout(() => ctx && tone('sine', 54, 0.004, 0.2, 0.14, 34), at * 1000 + 130);
+        }
+      } else if (kind === 'scream') {
+        // the screamer: it turns on the lens. A shriek tearing upward, a burst of hiss, a hit you feel in the chest
+        tone('sawtooth', 1150, 0.004, 0.13, 0.75, 2500);
+        tone('sawtooth', 1190, 0.004, 0.1, 0.7, 2330);
+        tone('square', 760, 0.004, 0.07, 0.6, 1680);
+        noise(0.002, 0.42, 0.85, 2300, 0.6);
+        noise(0.002, 0.3, 0.5, 700, 0.8);
+        tone('sine', 52, 0.002, 0.65, 0.7, 28);
+        setTimeout(() => ctx && noise(0.01, 0.12, 1.4, 3800, 5), 420); // and the ringing after
       }
     },
     // the horror layer's sounds: all synthesised, all for the ears only
@@ -47118,7 +47827,7 @@ function simStep(dtReal, spdOver) {
   }
   for (const c of CHARS)
     if (c.onMap) {
-      if (spd > 0) animate(c, dtReal, dtg * BODY);
+      if (spd > 0) animate(c, c === VF_ST.c && vfSlow() < 1 ? dtReal / vfSlow() : dtReal, dtg * BODY); // the one posing for a photo moves in real time
       updateShown(c, dtReal);
     }
   for (const d of DOORS) {
@@ -47290,10 +47999,11 @@ function frame(now) {
       if (G.over) capFinish();
       else if (!UI.caseOpen) capUpdate(dtReal);
     } else if (!G.over && !UI.caseOpen && !UI.scene) {
-      carLoud = updateCars(dtReal * (G.speed ? 1 : 0), G.speed > 0);
+      const held = vfSlow(); // a photo lining up: the world holds its breath (gfx/vf-stage)
+      carLoud = updateCars(dtReal * held * (G.speed ? 1 : 0), G.speed > 0);
       const stop = R.hitStop > 0; // a blow landing: the world all but stops for a beat
       R.hitStop = Math.max(0, R.hitStop - dtReal);
-      simStep(stop ? dtReal * 0.04 : dtReal);
+      simStep((stop ? dtReal * 0.04 : dtReal) * held);
     }
     if (UI.cf) cfTick(dtReal);
     cfLight(dtReal);
